@@ -1,0 +1,13 @@
+{ // Custom Globals
+    "globals": {
+        "$": true,
+        "toastr": true,
+        "Flatted": true,
+        "require": true,
+        "window": true,
+        "pako": true,
+        "module": true,
+        "console": true
+    },
+    "node": true
+}

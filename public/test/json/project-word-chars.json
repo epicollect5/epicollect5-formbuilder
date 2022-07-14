@@ -1,0 +1,165 @@
+{
+  "data": {
+    "id": "ec1d093782ba4a1aa9e94e8eecab258b",
+    "type": "project",
+    "project": {
+      "ref": "ec1d093782ba4a1aa9e94e8eecab258b",
+      "name": "Word chars test",
+      "slug": "word-chars-test",
+      "forms": [
+        {
+          "ref": "ec1d093782ba4a1aa9e94e8eecab258b_5a5f59a798e3b",
+          "name": "Form",
+          "slug": "form",
+          "type": "hierarchy",
+          "inputs": [
+            {
+              "max": null,
+              "min": null,
+              "ref": "ec1d093782ba4a1aa9e94e8eecab258b_5a5f59a798e3b_5a5f59adab533",
+              "type": "text",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": true,
+              "question": "Q1 \u2018 \u2019 \u201A \uFFFD",
+              "uniqueness": "none",
+              "is_required": false,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "ec1d093782ba4a1aa9e94e8eecab258b_5a5f59a798e3b_5a5f59f4ab534",
+              "type": "branch",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [
+                {
+                  "max": null,
+                  "min": null,
+                  "ref": "ec1d093782ba4a1aa9e94e8eecab258b_5a5f59a798e3b_5a5f59f4ab534_5a5f59f9ab535",
+                  "type": "text",
+                  "group": [],
+                  "jumps": [],
+                  "regex": null,
+                  "branch": [],
+                  "verify": false,
+                  "default": null,
+                  "is_title": false,
+                  "question": "Branch Q1 \u201C fsdfs \u201D dklasda \u201E ",
+                  "uniqueness": "none",
+                  "is_required": false,
+                  "datetime_format": null,
+                  "possible_answers": [],
+                  "set_to_current_datetime": false
+                },
+                {
+                  "max": null,
+                  "min": null,
+                  "ref": "ec1d093782ba4a1aa9e94e8eecab258b_5a5f59a798e3b_5a5f59f4ab534_5a5f5a03ab536",
+                  "type": "group",
+                  "group": [
+                    {
+                      "max": null,
+                      "min": null,
+                      "ref": "ec1d093782ba4a1aa9e94e8eecab258b_5a5f59a798e3b_5a5f59f4ab534_5a5f5a03ab536_5a5f5a0bab538",
+                      "type": "text",
+                      "group": [],
+                      "jumps": [],
+                      "regex": null,
+                      "branch": [],
+                      "verify": false,
+                      "default": null,
+                      "is_title": false,
+                      "question": "Nested group Q1 \u02C6 \u02C6 \u02C6 kkf =-098 \u2039 dssd  \u203A rgtret \u02DC rt \u00A0",
+                      "uniqueness": "none",
+                      "is_required": false,
+                      "datetime_format": null,
+                      "possible_answers": [],
+                      "set_to_current_datetime": false
+                    }
+                  ],
+                  "jumps": [],
+                  "regex": null,
+                  "branch": [],
+                  "verify": false,
+                  "default": null,
+                  "is_title": false,
+                  "question": "A nested group",
+                  "uniqueness": "none",
+                  "is_required": false,
+                  "datetime_format": null,
+                  "possible_answers": [],
+                  "set_to_current_datetime": false
+                }
+              ],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "A branch",
+              "uniqueness": "none",
+              "is_required": false,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "ec1d093782ba4a1aa9e94e8eecab258b_5a5f59a798e3b_5a5f5a16ab539",
+              "type": "group",
+              "group": [
+                {
+                  "max": null,
+                  "min": null,
+                  "ref": "ec1d093782ba4a1aa9e94e8eecab258b_5a5f59a798e3b_5a5f5a16ab539_5a5f5a1cab53a",
+                  "type": "text",
+                  "group": [],
+                  "jumps": [],
+                  "regex": null,
+                  "branch": [],
+                  "verify": false,
+                  "default": null,
+                  "is_title": false,
+                  "question": "Group Q1",
+                  "uniqueness": "none",
+                  "is_required": false,
+                  "datetime_format": null,
+                  "possible_answers": [],
+                  "set_to_current_datetime": false
+                }
+              ],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "A group \u2026 sdfsd 1234 \u2013 u2013 \u2014",
+              "uniqueness": "none",
+              "is_required": false,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            }
+          ]
+        }
+      ],
+      "access": "public",
+      "status": "active",
+      "category": "general",
+      "logo_url": "",
+      "visibility": "hidden",
+      "description": "",
+      "entries_limits": [],
+      "small_description": "fggfhfhfghfghfhfgh dsfjksdfksbdf sf sdkf"
+    }
+  }
+}

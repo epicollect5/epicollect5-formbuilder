@@ -1,0 +1,20 @@
+/* Theme*/
+$light-green: #D0E9DC;
+$solid-green: #87C7A6;
+$light-purple: #A386BD;
+$deep-purple: #673C90;
+$hot-pink: #C159B3;
+$success: #4F8A10;
+$green-success: green;
+$warning: #ff9800;
+$dark-grey: #333333;
+$red-error: #a94442;
+
+//removed the Roboto Font for the time being
+$font-family-sans-serif: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+//override with epicollect5 brancd color
+$brand-primary: $deep-purple !default;
+$brand-danger: $red-error !default;
+$navbar-height: 50px !default;
+//** Global text color on `<body>`.
+$text-color: $dark-grey !default;

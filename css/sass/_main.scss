@@ -1,0 +1,56 @@
+/*************************************************************************/
+/*height of middle and right panels, too fill the height of the viewport*/
+.main {
+  /* check this, as it keeps the page from scrolling*/
+  padding: 20px 20px 0 20px;
+  margin-bottom: 0 !important;
+  height: 100%;
+  .page-header {
+    margin-top: 0 !important;
+  }
+  .main__tabs {
+    //margin-left: 15px;
+    margin-bottom: 10px;
+
+    i.form-state.fa-check {
+      color: $green-success !important;
+    }
+
+    i.form-state.fa-exclamation-triangle {
+      color: $yellow-warning !important;
+    }
+
+    //save project button
+    .main__tabs__save-project-btn {
+      .project-state.fa-warning {
+        color: $yellow-warning;
+      }
+      .project-state.fa-check {
+        color: $green-success;
+      }
+    }
+  }
+  .main__tabs-btns {
+    margin-right: 15px;
+    .btn-group {
+      margin-top:10px;
+      .btn {
+        padding: 6px 8px;
+      }
+    }
+  }
+
+  .main__tabs__form-btn {
+    a {
+      padding:10px;
+    }
+  }
+
+  .main__tabs-content {
+    height: 90%;
+    overflow: hidden;
+    .main__tabs-content-tabpanel {
+      height: 100%;
+    }
+  }
+}

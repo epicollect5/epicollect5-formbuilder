@@ -1,0 +1,240 @@
+.input-properties {
+  height: 100%;
+  .panel {
+    height: 100%;
+    overflow: auto;
+    .panel-body {
+      height: 90%;
+      overflow-y: scroll;
+      cursor: default;
+    }
+  }
+}
+
+.input-properties__buttons {
+  margin-top:4px;
+  display: none;
+}
+
+.input-properties__no-input-selected, .input-properties__form__jumps__no-jumps-message {
+  @include intro-messages;
+}
+
+.input-properties__form__error, .input-properties__form__error--branch-error, .input-properties__form__error--group-error {
+  color: $red-error;
+  display: block;
+  padding: 2px;
+}
+
+.input-properties__form__possible-answers {
+  overflow: visible !important;
+  .panel-heading {
+    overflow: visible;
+    .btn {
+      margin-top: 5px;
+      &.input-properties__form__possible-answers__add-answer {
+        // margin-right: 10px;
+      }
+      &.input-properties__form__possible-answers__more {
+        //  margin-right: 5px;
+      }
+    }
+
+
+  }
+
+  .input-properties__form__possible-answers__list {
+    .list-group-item {
+      padding-left:5px;
+    }
+  }
+
+  .input-properties__form__possible-answers__list__drag-answer {
+    box-shadow: none;
+    color:$dark-grey;
+    margin-right:5px!important;
+  }
+  .possible-answers-drop-placeholder {
+    list-style: none;
+    border-radius: 2px;
+    //background-color: $light-purple;
+    background-color: $light-grey;
+
+    height: $possible-answer-height;
+  }
+
+  .dropdown-header {
+    color: darkorange;
+  }
+
+  .pager {
+    margin: 0;
+    padding: 15px;
+    li {
+      a {
+        border-radius: 0;
+      }
+    }
+    .possible-answers__list_pager__current, .possible-answers__list_pager__total {
+      display: inline;
+    }
+  }
+}
+
+.input-properties__form__possible-answers__list__custom-id-error {
+  color: $red-error;
+  width: auto;
+}
+
+.input-properties__form__possible-answers__list__answer-id-error {
+  position: relative;
+  i {
+    color: $red-error;
+    top: -40px;
+  }
+  span {
+    width: 90% !important;
+    float: left;
+  }
+}
+
+.input-properties__form__advanced-properties-custom-id-error {
+  color: $red-error;
+  display: block;
+  margin-top: 10px;
+}
+
+.input-properties__form__possible-answers .panel-heading {
+  line-height: 2.2;
+}
+
+.input-properties__form__possible-answers__list__custom-identifier {
+  position: relative;
+  overflow: hidden;
+}
+
+.input-properties__form__possible-answers__list__custom-identifier {
+  span {
+    width: 100px;
+  }
+  > div {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
+
+.input-properties__form__basic-properties {
+  position: relative;
+  label.checkbox-inline {
+    padding-left: 0;
+  }
+}
+
+.input-properties__form__advanced-properties {
+  display: none;
+  overflow: hidden;
+  i.form-control-feedback {
+    top: 38px !important;
+  }
+}
+
+.input-properties__form__jumps {
+  display: none;
+}
+
+.input-properties__form .active {
+  background-color: #fff !important;
+}
+
+.input-properties__form__question i.form-control-feedback {
+  top: 38px !important;
+}
+
+.input-properties__form__jumps {
+  /*display: none;*/
+}
+
+.input-properties__form__jumps__list {
+  .form-control {
+    width: 50%;
+    display: inline-block;
+    margin-left: 10px;
+  }
+  label {
+    min-width: 10%;
+  }
+  .input-properties__form__jumps__list-item {
+    margin-bottom: 10px;
+  }
+}
+
+.input-properties__form__possible-answers .panel-body {
+  max-height: 325px;
+  overflow-y: scroll;
+  border-bottom: 1px solid $light-grey;
+}
+
+.input-properties .panel-heading {
+  // background-color: rgba(155, 80, 136, 0.30);
+  background-color: $light-green;
+}
+
+.input-properties__tabs {
+  a {
+    color: $deep-purple;
+  }
+  .tab-content {
+    padding: 10px 0;
+  }
+  .fa-exclamation {
+    color: $red-error;
+  }
+  .nav > li > a {
+    padding: 5px 5px 5px 15px;
+  }
+}
+
+.input-properties__form__jumps__add-jump {
+  margin-bottom: 10px;
+}
+
+.disabled-tab, .disabled-control {
+  pointer-events: none;
+  text-decoration: line-through;
+}
+
+.disabled-checkbox {
+  //pointer-events: none!important;
+  cursor: not-allowed !important;
+}
+
+.input-properties__form__advanced-properties__uniqueness {
+  .uniqueness-current-form-name, .uniqueness-parent-form-name, .uniqueness-current-branch-header {
+    font-style: italic;
+    font-weight: 700;
+  }
+  label {
+    display: block;
+  }
+}
+
+//import possible answers csv modal
+#csv-import-possible_answers {
+  .possible-answers-column-picker {
+    .btn {
+      width: 250px;
+      text-align: center;
+    }
+    .dropdown-menu {
+      max-height: 210px;
+      width: 250px;
+      overflow-y: scroll;
+    }
+  }
+
+}
+.input-properties__form__possible-answers__list__possible_answer_item {
+  .input-properties__form__error {
+    margin-left:30px;
+  }
+}

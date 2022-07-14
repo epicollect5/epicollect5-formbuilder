@@ -1,0 +1,71 @@
+@media (min-width: 768px) {
+  .inputs-tools {
+    position: fixed;
+    top: 51px;
+    bottom: 0;
+    left: 0;
+    /*z-index: 1000;*/
+    display: block;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    background-color: $light-grey;
+    border-right: 1px solid #eee;
+  }
+  .inputs-collection, .input-properties {
+    font-size:1.5rem!important;
+  }
+
+}
+
+@media screen and (min-width: 0px) and (max-width: 1023px) {
+  .inputs-tools, .main, .navbar-exit-button {
+    display: none!important;
+  }
+  .screen-resolution {
+    display:block!important;
+  }
+}
+
+@media screen and (min-width: 1024px) and (max-width: 1224px) {
+  .main__tabs__undo-btn {
+    span {
+      display: none;
+    }
+  }
+  .main__tabs__save-project-btn {
+    span {
+      display: none;
+    }
+  }
+}
+
+
+/* ----------- Non-Retina Screens ----------- */
+@media screen and (min-width: 960px) and (max-width: 1280px) {
+
+  .inputs-tools {
+    .input-inner {
+      //text-align: center;
+    }
+    .question-preview {
+      //display: none
+    }
+  }
+  .inputs-collection {
+    .input {
+      //min-height: 50px;
+    }
+  }
+}
+
+//old screens
+@media screen and (max-width: 959px) {
+
+}
+
+@media screen {
+  .print-preview-wrapper {
+    display:none;
+  }
+}

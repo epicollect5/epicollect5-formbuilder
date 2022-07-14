@@ -1,0 +1,62 @@
+{
+  "name": "jquery-ui-form-builder",
+  "version": "1.0.0",
+  "description": "Form builder created with jQuery & jQuery UI",
+  "main": "js/app.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "dependencies": {
+    "bootstrap": "^3.3.4",
+    "font-awesome": "^4.3.0",
+    "jshint": "^2.13.4",
+    "modernizr": "^3.0.0-alpha.3",
+    "node-sass": "^6.0.1"
+  },
+  "devDependencies": {
+    "bootstrap-toggle": "^2.0.0",
+    "browserify": "^9.0.8",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "chai-jquery": "^2.0.0",
+    "expect.js": "^0.3.1",
+    "gulp": "^4.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-concat-css": "^2.3.0",
+    "gulp-header": "^1.8.12",
+    "gulp-minify-css": "^1.2.4",
+    "gulp-mocha": "^2.2.0",
+    "gulp-notify": "^2.2.0",
+    "gulp-order": "^1.2.0",
+    "gulp-sass": "^5.0.0",
+    "gulp-sourcemaps": "^1.12.1",
+    "gulp-strip-debug": "^1.1.0",
+    "gulp-uglify": "^1.5.4",
+    "gulp-util": "^3.0.8",
+    "gutil": "^1.6.4",
+    "lodash": "^3.6.0",
+    "lodash.assign": "^3.2.0",
+    "mocha": "^2.5.3",
+    "sass": "^1.38.0",
+    "use-import": "^0.1.2",
+    "vinyl": "^2.2.1",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0",
+    "watchify": "^3.11.1"
+  },
+  "scripts": {
+    "test": "mocha",
+    "build": "gulp",
+    "watch-js": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mirko77/jquery-ui-form-builder.git"
+  },
+  "author": "Epicollect5 Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mirko77/jquery-ui-form-builder/issues"
+  },
+  "homepage": "https://github.com/mirko77/jquery-ui-form-builder"
+}

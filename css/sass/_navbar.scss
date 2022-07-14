@@ -1,0 +1,76 @@
+/*
+ * Top navigation navbar
+ * Hide default border to remove 1px line.
+ */
+.navbar-fixed-top.formbuilder-navbar {
+  border: 0;
+  height: 60px !important;
+}
+
+nav.navbar.navbar-inverse.navbar-fixed-top.formbuilder-navbar {
+  background-color: $deep-purple;
+}
+
+.navbar-inverse.formbuilder-navbar .navbar-brand {
+  color: #FFFFFF;
+}
+
+.navbar.formbuilder-navbar .nav.navbar-nav.navbar-right {
+  padding-right: 15px;
+}
+
+.navbar.formbuilder-navbar .nav.navbar-nav.navbar-right .fa {
+  vertical-align: initial;
+}
+
+.formbuilder-navbar {
+  .container-fluid {
+    padding: 0 15px;
+  }
+  .navbar-brand {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    text-align: center;
+    margin: auto;
+  }
+
+  .navbar-nav > li > a {
+    padding-top: 20px !important;
+    font-size: 16px;
+  }
+
+  .navbar-nav > li .fa {
+    margin-top: -2px;
+  }
+
+  .navbar-project-name {
+    height: 60px;
+    padding-top: 18px;
+    img {
+      display: inline;
+      margin-top: -8px;
+      border-radius: 50%;
+      border:2px solid #fff;
+    }
+  }
+
+  .navbar-nav > li {
+    a {
+      border-bottom: 2px solid $deep-purple;
+      &:hover {
+        background-color: $deep-purple;
+        border-bottom: 2px solid white;
+      }
+    }
+  }
+}
+
+.navbar-inverse.formbuilder-navbar .navbar-nav > .active > a, .navbar-inverse .navbar-nav > .active > a:focus, .navbar-inverse .navbar-nav > .active > a:hover {
+  color: $dark-grey;
+  background-color: $light-green;
+}
+
+.navbar-inverse.formbuilder-navbar .navbar-nav > li > a, .navbar-inverse .navbar-text {
+  color: #FFF;
+}

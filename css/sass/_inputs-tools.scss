@@ -1,0 +1,32 @@
+/* Sidebar navigation */
+.nav-sidebar {
+  /*margin-right: -21px; *//* 20px padding + 1px border */
+  /*margin-bottom: 20px;*/
+  /*margin-left: -20px;*/
+}
+
+.nav-sidebar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+  color: #fff;
+  background-color: $deep-purple;
+}
+
+ul#inputs-tools-list li div.input {
+  cursor: move;
+  border-radius: 5px;
+  .input-inner {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+.dragging-disabled {
+  opacity: .5;
+  pointer-events: none;
+}

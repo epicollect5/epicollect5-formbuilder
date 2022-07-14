@@ -1,0 +1,24 @@
+{
+  "data": {
+    "type": "project",
+    "project": {
+      "name": "Test search inputs",
+      "small_description": "just a test project",
+      "access": "public",
+      "slug": "test-search-inputs",
+      "ref": "0b3c3c34200243e3b5b68a3b87345c95",
+      "status": "active",
+      "visibility": "listed",
+      "logo_url": "ec5.jpg",
+      "forms": [
+        {
+          "name": "First",
+          "slug": "first",
+          "type": "hierarchy",
+          "ref": "0b3c3c34200243e3b5b68a3b87345c95_56e6e4c64176f",
+          "inputs": []
+        }
+      ]
+    }
+  }
+}

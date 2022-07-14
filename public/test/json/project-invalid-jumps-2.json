@@ -1,0 +1,550 @@
+{
+  "data": {
+    "id": "022a818f7d714f31b1b83f2cb8a178bf",
+    "type": "project",
+    "project": {
+      "ref": "022a818f7d714f31b1b83f2cb8a178bf",
+      "name": "CRONUS_SEPT17",
+      "slug": "cronus-sept17",
+      "forms": [
+        {
+          "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6",
+          "name": "GESTION DE COBRANZA INFONAVIT",
+          "slug": "gestion-de-cobranza-infonavit",
+          "type": "hierarchy",
+          "inputs": [
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be11288fbb",
+              "type": "dropdown",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": "",
+              "is_title": false,
+              "question": "PLAZA",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": null,
+              "possible_answers": [
+                {
+                  "answer": "02 | BAJA CALIFORNIA",
+                  "answer_ref": "594be11288fbc"
+                },
+                {
+                  "answer": "08 | CHIHUAHUA",
+                  "answer_ref": "594be12c88fbd"
+                },
+                {
+                  "answer": "09 | METROPOLITANA",
+                  "answer_ref": "594be14788fbe"
+                },
+                {
+                  "answer": "14 | JALISCO",
+                  "answer_ref": "594be15088fbf"
+                },
+                {
+                  "answer": "19 | NUEVO LEON",
+                  "answer_ref": "594be15688fc0"
+                },
+                {
+                  "answer": "24 | SAN LUIS POTOSI",
+                  "answer_ref": "594be15d88fc1"
+                },
+                {
+                  "answer": "25 | SINALOA",
+                  "answer_ref": "594be16788fc2"
+                }
+              ],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": "",
+              "min": "",
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be1c888fc4",
+              "type": "decimal",
+              "group": [],
+              "jumps": [],
+              "regex": "",
+              "branch": [],
+              "verify": false,
+              "default": "",
+              "is_title": true,
+              "question": "NO. CREDITO INFONAVIT",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be20c88fc5",
+              "type": "date",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "FECHA DE VISITA",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": "dd\/MM\/YYYY",
+              "possible_answers": [],
+              "set_to_current_datetime": true
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be23e88fc6",
+              "type": "time",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "HORA DE VISITA",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": "HH:mm:ss",
+              "possible_answers": [],
+              "set_to_current_datetime": true
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be75949f3a",
+              "type": "photo",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "FOTO DE LA VIVIENDA",
+              "uniqueness": "none",
+              "is_required": false,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be25788fc7",
+              "type": "dropdown",
+              "group": [],
+              "jumps": [
+                {
+                  "to": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be6c649f2d",
+                  "when": "IS",
+                  "answer_ref": "594be26f88fc9"
+                },
+                {
+                  "to": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be71149f32",
+                  "when": "IS",
+                  "answer_ref": "594be2a288fcc"
+                },
+                {
+                  "to": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be72149f35",
+                  "when": "IS",
+                  "answer_ref": "594be27d88fca"
+                },
+                {
+                  "to": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be72149f35",
+                  "when": "IS",
+                  "answer_ref": "594be29088fcb"
+                },
+                {
+                  "to": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be72149f35",
+                  "when": "IS",
+                  "answer_ref": "594be2b288fcd"
+                }
+              ],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": "",
+              "is_title": false,
+              "question": "RESULTADO DE LA GESTION",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": null,
+              "possible_answers": [
+                {
+                  "answer": "01 | REPORTA PAGO",
+                  "answer_ref": "594be25788fc8"
+                },
+                {
+                  "answer": "02 | REPROMESA DE PAGO",
+                  "answer_ref": "594be26f88fc9"
+                },
+                {
+                  "answer": "03 | RECADO CON FAMILIAR O TERCERO",
+                  "answer_ref": "594be27d88fca"
+                },
+                {
+                  "answer": "04 | AVISO EN BUZON o PUERTA",
+                  "answer_ref": "594be29088fcb"
+                },
+                {
+                  "answer": "05 | VIVIENDA IRREGULAR",
+                  "answer_ref": "594be2a288fcc"
+                },
+                {
+                  "answer": "06 | NEGATIVA DE PAGO",
+                  "answer_ref": "594be2b288fcd"
+                }
+              ],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be6c449f2c",
+              "type": "date",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "FECHA DE PAGO",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": "dd\/MM\/YYYY",
+              "possible_answers": [],
+              "set_to_current_datetime": true
+            },
+            {
+              "max": "",
+              "min": "0",
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be6cb49f2e",
+              "type": "decimal",
+              "group": [],
+              "jumps": [],
+              "regex": "",
+              "branch": [],
+              "verify": false,
+              "default": "",
+              "is_title": false,
+              "question": "MONTO PAGADO",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be6db49f30",
+              "type": "photo",
+              "group": [],
+              "jumps": [
+                {
+                  "to": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be72149f35",
+                  "when": "ALL",
+                  "answer_ref": null
+                }
+              ],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "FOTO: COMPROBANTE DE PAGO",
+              "uniqueness": "none",
+              "is_required": false,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be6c649f2d",
+              "type": "date",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "FECHA DE PROMESA",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": "dd\/MM\/YYYY",
+              "possible_answers": [],
+              "set_to_current_datetime": true
+            },
+            {
+              "max": "",
+              "min": "",
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be6d549f2f",
+              "type": "decimal",
+              "group": [],
+              "jumps": [
+                {
+                  "to": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be72149f35",
+                  "when": "ALL",
+                  "answer_ref": null
+                }
+              ],
+              "regex": "",
+              "branch": [],
+              "verify": false,
+              "default": "0",
+              "is_title": false,
+              "question": "MONTO A PAGAR",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be71149f32",
+              "type": "dropdown",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": "",
+              "is_title": false,
+              "question": "DIAGNOSTICO DE VIVIENDA",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": null,
+              "possible_answers": [
+                {
+                  "answer": "01 | DESHABITADA",
+                  "answer_ref": "594be71149f33"
+                },
+                {
+                  "answer": "02 | ABANDONADA",
+                  "answer_ref": "594be80549f3f"
+                },
+                {
+                  "answer": "03 | VANDALIZADA o DESTRUIDA",
+                  "answer_ref": "594be81349f40"
+                },
+                {
+                  "answer": "04 | RENTADA",
+                  "answer_ref": "594be81949f41"
+                },
+                {
+                  "answer": "05 | INVADIDA",
+                  "answer_ref": "594be82a49f42"
+                },
+                {
+                  "answer": "06 | SIN ACCESO A LA PRIVADA",
+                  "answer_ref": "594be83549f43"
+                },
+                {
+                  "answer": "07 | NO LOCALIZADA",
+                  "answer_ref": "594be84549f44"
+                }
+              ],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be71549f34",
+              "type": "photo",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "FOTO: EVIDENCIA DE DIAGNOSTICO",
+              "uniqueness": "none",
+              "is_required": false,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be72149f35",
+              "type": "dropdown",
+              "group": [],
+              "jumps": [
+                {
+                  "to": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be78d49f3e",
+                  "when": "IS",
+                  "answer_ref": "594be87449f45"
+                }
+              ],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": "",
+              "is_title": false,
+              "question": "ACTUALIZAR DATOS DE CONTACTO",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": null,
+              "possible_answers": [
+                {
+                  "answer": "SI",
+                  "answer_ref": "594be72149f36"
+                },
+                {
+                  "answer": "NO",
+                  "answer_ref": "594be87449f45"
+                }
+              ],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be72f49f37",
+              "type": "phone",
+              "group": [],
+              "jumps": [],
+              "regex": "\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b",
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "NUMERO TELEFONICO (10 DIGITOS)",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be74b49f38",
+              "type": "dropdown",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": "",
+              "is_title": false,
+              "question": "TIPO DE TELEFONO",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": null,
+              "possible_answers": [
+                {
+                  "answer": "CELULAR",
+                  "answer_ref": "594be74b49f39"
+                },
+                {
+                  "answer": "FIJO - CASA - OFICINA",
+                  "answer_ref": "594be8d249f46"
+                }
+              ],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be78d49f3e",
+              "type": "location",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "GPS DE LA VIVIENDA",
+              "uniqueness": "none",
+              "is_required": false,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be77b49f3c",
+              "type": "dropdown",
+              "group": [],
+              "jumps": [
+                {
+                  "to": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be78d49f3e",
+                  "when": "IS",
+                  "answer_ref": "594be91f49f47"
+                }
+              ],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": "",
+              "is_title": false,
+              "question": "\u00bfCOLOC\u00d3 ENGOMADO?",
+              "uniqueness": "none",
+              "is_required": true,
+              "datetime_format": null,
+              "possible_answers": [
+                {
+                  "answer": "SI",
+                  "answer_ref": "594be77b49f3d"
+                },
+                {
+                  "answer": "NO",
+                  "answer_ref": "594be91f49f47"
+                }
+              ],
+              "set_to_current_datetime": false
+            },
+            {
+              "max": null,
+              "min": null,
+              "ref": "022a818f7d714f31b1b83f2cb8a178bf_594bdfee34ea6_594be75c49f3b",
+              "type": "photo",
+              "group": [],
+              "jumps": [],
+              "regex": null,
+              "branch": [],
+              "verify": false,
+              "default": null,
+              "is_title": false,
+              "question": "FOTO: VIVIENDA C\/ ENGOMADO",
+              "uniqueness": "none",
+              "is_required": false,
+              "datetime_format": null,
+              "possible_answers": [],
+              "set_to_current_datetime": false
+            }
+          ]
+        }
+      ],
+      "access": "private",
+      "status": "locked",
+      "category": "economics",
+      "logo_url": "022a818f7d714f31b1b83f2cb8a178bf",
+      "visibility": "hidden",
+      "description": "APP - GESTI\u00d3N MOVIL CRONUS",
+      "entries_limits": [],
+      "small_description": "GESTION MOVIL by BAGON"
+    }
+  }
+}

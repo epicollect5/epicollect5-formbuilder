@@ -1,0 +1,241 @@
+@import 'variables';
+@import 'mixins';
+@import 'navbar';
+@import 'main';
+@import 'input-properties';
+@import 'inputs-collection';
+@import 'inputs-tools';
+@import 'media-queries';
+@import 'loader';
+@import 'buttons';
+@import 'print';
+
+/*
+ * Base structure
+ */
+
+html, body, .container-fluid {
+  height:100%;
+  font-family: $font-family-sans-serif;
+}
+
+.container-fluid {
+  .row {
+    height:100%;
+  }
+}
+
+/* Move down content because we have a fixed navbar that is 60px tall */
+body {
+  padding-top: 60px;
+  font-size: 16px !important;
+  //font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color:$deep-purple;
+}
+
+.tooltip {
+  position: fixed;
+}
+
+/************************************************************************/
+
+.checkbox, .radio {
+  padding-left: 5px;
+}
+
+
+/*
+ * Global add-ons
+ */
+
+.sub-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: $hot-pink;
+  border-color: $hot-pink;
+}
+
+/*
+ * Placeholder dashboard ideas
+ */
+
+.placeholders {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.placeholders h4 {
+  margin-bottom: 0;
+}
+
+.placeholder {
+  margin-bottom: 20px;
+}
+
+.placeholder img {
+  display: inline-block;
+  border-radius: 50%;
+}
+
+/* Custom css*/
+.panel-heading {
+  overflow: hidden;
+  padding: 5px 10px;
+min-height: $panel-heading-min-height;
+}
+
+.panel-heading .input-properties__header, .panel-heading .inputs-collection__header {
+  float: left;
+  margin-left:5px;
+}
+
+.panel-heading h3 {
+  line-height: 2.6;
+}
+
+.input {
+  position: relative;
+  background-color: #fff;
+  display: block;
+  padding: 5px 10px;
+  margin: 5px;
+  height: 40px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  @include disable-text-selection;
+}
+
+span.input_id {
+  font-style: italic;
+}
+
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-primary, .bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-primary {
+  color: #fff;
+  background: $dark-teal;
+}
+
+.bootstrap-switch.bootstrap-switch-focused {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Align icon with text*/
+.fa, .fa-2x {
+  vertical-align: middle;
+}
+
+.validation-error {
+  color:$red-error!important;
+}
+
+.main__tabs_add-form {
+  //outline: 0!important;
+}
+.wait-overlay {
+  @include overlay;
+}
+/*Override toastr style*/
+#toast-container > div {
+  @include toastr;
+  .toast-message {
+    text-align:center;
+    line-height: 40px;
+    font-weight: 700;
+  }
+}
+
+.fa-question-circle {
+  &:hover {
+    cursor: pointer;
+  }
+}
+.warning-well {
+  background-color: $light-warning;
+  padding: 15px;
+  border-radius: 2px;
+  text-align: center;
+}
+.screen-resolution {
+  display:none;
+}
+.tab-content {
+  padding:0;
+}
+
+select {
+  font-size: 14px !important;
+}
+
+.fa-2x {
+  font-size: 1.5em;
+}
+
+.navbar-text {
+  margin-top: 11px;
+}
+
+.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+  border: 1px solid $light-grey;
+}
+
+.input-properties__form__possible-answers {
+  input.form-control {
+    font-size: 14px !important;
+  }
+}
+
+ul#inputs-tools-list li div.input, .inputs-collection div.panel div.panel-body div.input {
+  border-radius: 2px !important;
+}
+.btn-action {
+  background-color: $solid-green;
+  color: #fff;
+}
+
+.btn-action-inverse {
+  background-color: $light-purple;
+  color: #fff;
+}
+
+.btn-action-inverse-bright {
+  background-color: $hot-pink;
+  color: #fff;
+}
+#info-regex {
+  .bg-warning {
+    padding:15px;
+  }
+}
+
+.text-underline {
+  text-decoration: underline;
+}
+.modal-title {
+  color: #673C90;
+}
+#info-import-form {
+  p.lead {
+    text-align: justify;
+  }
+  p.lead.text-center {
+    text-align: center;
+  }
+}
+
+.shown {
+  display:block;
+}
+.spacer {
+  height: 325px!important;
+}
+
+.text-branding {
+  color:$deep-purple;
+}
+
