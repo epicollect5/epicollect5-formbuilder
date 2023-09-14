@@ -18,7 +18,8 @@ var consts = {
     API_PRODUCTION_PATH: 'api/internal/formbuilder/',
     API_MEDIA_PATH: 'api/internal/media/',
     API_PROJECT_LOGO_QUERY_STRING: '?type=photo&name=logo.jpg&format=project_mobile_logo',
-    API_DEVELOPMENT_SERVER: 'http://localhost/dev/epicollect5-vps-ant-new/',//to be changed accordingly
+    API_DEVELOPMENT_SERVER: 'http://localhost/~mmenegazzo/epicollect5-server/public',//to be changed accordingly
+    FORMBUIlDER_ROOT_FOLDER: 'epicollect5-formbuilder',
 
     PROJECT_NAME_MAX_LENGHT: 100,
     FORM_NAME_MAX_LENGHT: 50,

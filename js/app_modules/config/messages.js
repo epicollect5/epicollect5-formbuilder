@@ -33,6 +33,7 @@ var messages = {
         POSSILE_ANSWERS_CUSTOM_ID_CANNOT_SWITCH_BACK: 'Cannot switch back to basic mode',
         QUESTION_TEXT_EMPTY: 'This field cannot be empty',
         POSSIBLE_ANSWER_EMPTY: 'Answer text cannot be empty',
+        POSSIBLE_ANSWER_DUPLICATED_IDENTIFIER: 'Duplicated identifier, please remove',
         VALUE_MUST_BE_INTEGER: 'Value must be an integer',
         MIN_MUST_BE_SMALLER_THAN_MAX: 'Min value must be smaller than Max',
         INITIAL_ANSWER_OUT_OF_RANGE: 'Value is out of range',

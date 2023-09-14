@@ -10,8 +10,7 @@
     "bootstrap": "^3.3.4",
     "font-awesome": "^4.3.0",
     "jshint": "^2.13.4",
-    "modernizr": "^3.0.0-alpha.3",
-    "node-sass": "^6.0.1"
+    "modernizr": "^3.0.0-alpha.3"
   },
   "devDependencies": {
     "bootstrap-toggle": "^2.0.0",
@@ -37,7 +36,7 @@
     "lodash": "^3.6.0",
     "lodash.assign": "^3.2.0",
     "mocha": "^2.5.3",
-    "sass": "^1.38.0",
+    "sass": "^1.67.0",
     "use-import": "^0.1.2",
     "vinyl": "^2.2.1",
     "vinyl-buffer": "^1.0.1",

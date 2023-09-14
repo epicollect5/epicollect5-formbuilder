@@ -741,8 +741,8 @@ var utils = {
 
         //check for wannaBe overlapping props
         if (!Object.keys(wannaBe).every(function (key) {
-                return validSource.hasOwnProperty(key);
-            })) {
+            return validSource.hasOwnProperty(key);
+        })) {
             // console.log('wannaBe has extra keys')
             return false;
         }
