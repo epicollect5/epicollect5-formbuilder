@@ -493,10 +493,10 @@ var isValidInput = function () {
             //build possible answers to the limit
             for (var i = 0; i < consts.LIMITS.possible_answers_max_search; i++) {
                 input.possible_answers[i] =
-                    {
-                        answer: i + ' option',
-                        answer_ref: utils.generateUniqID()
-                    }
+                {
+                    answer: i + ' option',
+                    answer_ref: utils.generateUniqID()
+                }
             }
 
             expect(import_form_validation.isValidInput(form_ref, input, is_branch, is_group)).to.be.true;
@@ -531,10 +531,10 @@ var isValidInput = function () {
             //build possible answers to the limit
             for (var i = 0; i < consts.LIMITS.possible_answers_max_search; i++) {
                 input.possible_answers[i] =
-                    {
-                        answer: i + ' option',
-                        answer_ref: utils.generateUniqID()
-                    }
+                {
+                    answer: i + ' option',
+                    answer_ref: utils.generateUniqID()
+                }
             }
 
             expect(import_form_validation.isValidInput(form_ref, input, is_branch, is_group)).to.be.true;
@@ -2378,18 +2378,185 @@ var isValidInput = function () {
             };
 
             //build possible answers to the limit
-            for (var i = 0; i < consts.LIMITS.possible_answers_max_search+ 3; i++) {
+            for (var i = 0; i < consts.LIMITS.possible_answers_max_search + 3; i++) {
                 input.possible_answers[i] =
-                    {
-                        answer: i + ' option',
-                        answer_ref: utils.generateUniqID()
-                    }
+                {
+                    answer: i + ' option',
+                    answer_ref: utils.generateUniqID()
+                }
             }
 
             expect(import_form_validation.isValidInput(form_ref, input, is_branch, is_group)).to.be.false;
         });
 
         it('should catch invalid input searchmultiple', function () {
+
+            var form_ref = '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd';
+            var is_branch = false;
+            var is_group = false;
+
+            var input = {
+                ref: '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd_589202653055b',
+                type: 'searchmultiple',
+                question: 'Search multiple',
+                is_title: false,
+                is_required: true,
+                uniqueness: 'none',
+                regex: null,
+                default: '',
+                verify: false,
+                max: null,
+                min: null,
+                datetime_format: null,
+                set_to_current_datetime: false,
+                possible_answers: [],
+                jumps: [],
+                branch: [],
+                group: []
+            };
+
+            //build possible answers to the limit
+            for (var i = 0; i < consts.LIMITS.possible_answers_max_search + 7; i++) {
+                input.possible_answers[i] =
+                {
+                    answer: i + ' option',
+                    answer_ref: utils.generateUniqID()
+                }
+            }
+
+            expect(import_form_validation.isValidInput(form_ref, input, is_branch, is_group)).to.be.false;
+        });
+
+        it('should catch duplicated answer_ref radio', function () {
+
+            var form_ref = '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd';
+            var is_branch = false;
+            var is_group = false;
+
+            var input = {
+                ref: '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd_589202653055b',
+                type: 'radio',
+                question: 'Radio',
+                is_title: false,
+                is_required: true,
+                uniqueness: 'none',
+                regex: null,
+                default: '',
+                verify: false,
+                max: null,
+                min: null,
+                datetime_format: null,
+                set_to_current_datetime: false,
+                possible_answers: [],
+                jumps: [],
+                branch: [],
+                group: []
+            };
+
+            input.possible_answers = [
+                {
+                    answer: '1',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '2',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '3',
+                    answer_ref: '5a18590f17197'
+                }
+            ];
+            expect(import_form_validation.isValidInput(form_ref, input, is_branch, is_group)).to.be.false;
+        });
+
+        it('should catch duplicated answer_ref dropdown', function () {
+
+            var form_ref = '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd';
+            var is_branch = false;
+            var is_group = false;
+
+            var input = {
+                ref: '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd_589202653055b',
+                type: 'dropdown',
+                question: 'Dropdown',
+                is_title: false,
+                is_required: true,
+                uniqueness: 'none',
+                regex: null,
+                default: '',
+                verify: false,
+                max: null,
+                min: null,
+                datetime_format: null,
+                set_to_current_datetime: false,
+                possible_answers: [],
+                jumps: [],
+                branch: [],
+                group: []
+            };
+
+            input.possible_answers = [
+                {
+                    answer: '1',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '2',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '3',
+                    answer_ref: '5a18590f17197'
+                }
+            ];
+            expect(import_form_validation.isValidInput(form_ref, input, is_branch, is_group)).to.be.false;
+        });
+
+        it('should catch duplicated answer_ref checkbox', function () {
+
+            var form_ref = '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd';
+            var is_branch = false;
+            var is_group = false;
+
+            var input = {
+                ref: '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd_589202653055b',
+                type: 'dropdown',
+                question: 'Dropdown',
+                is_title: false,
+                is_required: true,
+                uniqueness: 'none',
+                regex: null,
+                default: '',
+                verify: false,
+                max: null,
+                min: null,
+                datetime_format: null,
+                set_to_current_datetime: false,
+                possible_answers: [],
+                jumps: [],
+                branch: [],
+                group: []
+            };
+
+            input.possible_answers = [
+                {
+                    answer: '1',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '2',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '3',
+                    answer_ref: '5a18590f17197'
+                }
+            ];
+            expect(import_form_validation.isValidInput(form_ref, input, is_branch, is_group)).to.be.false;
+        });
+
+        it('should catch duplicated answer_ref searchsingle', function () {
 
             var form_ref = '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd';
             var is_branch = false;
@@ -2415,15 +2582,63 @@ var isValidInput = function () {
                 group: []
             };
 
-            //build possible answers to the limit
-            for (var i = 0; i < consts.LIMITS.possible_answers_max_search + 7; i++) {
-                input.possible_answers[i] =
-                    {
-                        answer: i + ' option',
-                        answer_ref: utils.generateUniqID()
-                    }
-            }
+            input.possible_answers = [
+                {
+                    answer: '1',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '2',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '3',
+                    answer_ref: '5a18590f17197'
+                }
+            ];
+            expect(import_form_validation.isValidInput(form_ref, input, is_branch, is_group)).to.be.false;
+        });
 
+        it('should catch duplicated answer_ref searchmultiple', function () {
+
+            var form_ref = '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd';
+            var is_branch = false;
+            var is_group = false;
+
+            var input = {
+                ref: '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd_589202653055b',
+                type: 'searchmultiple',
+                question: 'Search multiple',
+                is_title: false,
+                is_required: true,
+                uniqueness: 'none',
+                regex: null,
+                default: '',
+                verify: false,
+                max: null,
+                min: null,
+                datetime_format: null,
+                set_to_current_datetime: false,
+                possible_answers: [],
+                jumps: [],
+                branch: [],
+                group: []
+            };
+
+            input.possible_answers = [
+                {
+                    answer: '1',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '2',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '3',
+                    answer_ref: '5a18590f17197'
+                }
+            ];
             expect(import_form_validation.isValidInput(form_ref, input, is_branch, is_group)).to.be.false;
         });
 

@@ -15,10 +15,10 @@ var utils = require('helpers/utils');
  * with only properties needed for the validation
  */
 var arePossibleAnswersValid = function () {
-    
+
 
     describe('Test arePossibleAnswersValid()', function () {
-        
+
         it('should have valid possible answers', function () {
 
             var possible_answers = [
@@ -37,6 +37,26 @@ var arePossibleAnswersValid = function () {
             ];
 
             expect(import_form_validation.arePossibleAnswersValid(possible_answers)).to.be.true;
+        });
+
+        it('should catch duplicated answer_ref in possible answers', function () {
+
+            var possible_answers = [
+                {
+                    answer: '1',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '2',
+                    answer_ref: '5a18590517195'
+                },
+                {
+                    answer: '3',
+                    answer_ref: '5a18590f17197'
+                }
+            ];
+
+            expect(import_form_validation.arePossibleAnswersValid(possible_answers)).to.be.false;
         });
 
 
@@ -115,7 +135,7 @@ var arePossibleAnswersValid = function () {
 
             var possible_answers = [
                 {
-                    extra:'',
+                    extra: '',
                     answer: 'One',
                     answer_ref: 'aa18590517195'
                 }
@@ -129,7 +149,7 @@ var arePossibleAnswersValid = function () {
 
             var possible_answers = [
                 {
-                    extra:'',
+                    extra: '',
                     id: 'aa18590517195'
                 }
             ];

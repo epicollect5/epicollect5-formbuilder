@@ -266,10 +266,14 @@ var import_form_validation = {
                 //var hasDuplicateAnswerRef = answer_refs.some(function (ref, index) {
                 //    return answer_refs.indexOf(ref) !== index;
                 //});
-
-                var seen = {};
+                var seen = {}; // Create an object to keep track of encountered answer_refs
                 var hasDuplicateAnswerRef = possible_answers.some(function (possible_answer) {
-                    return seen.hasOwnProperty(possible_answer.answer_ref) || (seen[possible_answer.answer_ref] === false);
+                    if (seen[possible_answer.answer_ref]) {
+                        return true; // If it's already in 'seen', we have a duplicate
+                    } else {
+                        seen[possible_answer.answer_ref] = true; // Mark it as seen
+                        return false;
+                    }
                 });
 
                 if (hasDuplicateAnswerRef) {
