@@ -472,7 +472,7 @@ var import_form_validation = {
             }
 
             //multiple answers type?
-            if ($.inArray(input.type, consts.MULTIPLE_ANSWER_TYPES) > 0) {
+            if ($.inArray(input.type, consts.MULTIPLE_ANSWER_TYPES) > -1) {
                 //check that the default answer (if set) is one of the possible answers
                 var found = false;
                 $(input.possible_answers).each(function (key, possible_answer) {
@@ -599,7 +599,7 @@ var import_form_validation = {
         /**
          * Validate possible answers
          */
-        if ($.inArray(input.type, consts.MULTIPLE_ANSWER_TYPES) > 0) {
+        if ($.inArray(input.type, consts.MULTIPLE_ANSWER_TYPES) > -1) {
             if (!self.arePossibleAnswersValid(input.possible_answers, input.type)) {
                 return false;
             }
