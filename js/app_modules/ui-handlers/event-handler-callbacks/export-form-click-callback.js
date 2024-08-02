@@ -25,7 +25,7 @@ var callback = function (e) {
         }
     };
     //create a deep copy of the project object properties
-    var project_definition_json = CircularJSON.parse(CircularJSON.stringify(formbuilder.project_definition));
+    var project_definition_json = window.CircularJSON.parse(window.CircularJSON.stringify(formbuilder.project_definition));
     var is_valid_form = true;
     var project_slug = project_definition_json.data.project.slug;
     var form = project_definition_json.data.project.forms[index];
@@ -108,13 +108,13 @@ var callback = function (e) {
             console.log(error);
 
             //Microsoft browsers?
-           if(navigator.msSaveBlob) {
-               return navigator.msSaveBlob(new Blob([JSON.stringify(formToExport)], { type: 'text/plain:charset=utf-8'  }), filename);
-           }
-           else {
-               //browser not supported yet
-               toast.showError(messages.error.BROWSER_NOT_SUPPORTED);
-           }
+            if (navigator.msSaveBlob) {
+                return navigator.msSaveBlob(new Blob([JSON.stringify(formToExport)], { type: 'text/plain:charset=utf-8' }), filename);
+            }
+            else {
+                //browser not supported yet
+                toast.showError(messages.error.BROWSER_NOT_SUPPORTED);
+            }
         }
 
     }

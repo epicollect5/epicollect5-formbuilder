@@ -49,14 +49,14 @@ var branch_sortable = function () {
                     validation.performValidation(utils.getBranchInputObjectByRef(previous_branch_input_ref), false);
                 }
 
-              //  console.log('branch sortable receive');
+                //  console.log('branch sortable receive');
 
                 formbuilder.branch.collection_is_being_sorted = false;
 
                 //generate input object based on type and set index incrementally
                 branch_input = input_factory.createInput(branch_input_type, branch_input_ref);
                 //formbuilder.current_input_ref = input.ref;
-             //   console.log(branch_input);
+                //   console.log(branch_input);
 
                 //disable current active element
                 current_element = formbuilder.dom.inputs_collection_sortable.find('.active');
@@ -103,7 +103,7 @@ var branch_sortable = function () {
             else {
 
                 //count search inputs
-                if(input_type === consts.SEARCH_SINGLE_TYPE && !formbuilder.branch.collection_is_being_sorted) {
+                if (input_type === consts.SEARCH_SINGLE_TYPE && !formbuilder.branch.collection_is_being_sorted) {
                     //if the limit is reached, hide search from input tools
                     if (utils.getSearchInputsTotal() >= consts.LIMITS.search_inputs_max) {
                         ui.input_tools.hideSearchInput();
@@ -114,7 +114,7 @@ var branch_sortable = function () {
                     }
                 }
 
-            //    console.log('sortable stop');
+                //    console.log('sortable stop');
                 jquery_ui.item.removeAttr('style'); // undo styling set by jqueryUI (http://goo.gl/EKz8tC)
 
                 //get the index where the input was dropped (skip when list is empty)

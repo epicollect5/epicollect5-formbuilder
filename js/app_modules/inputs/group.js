@@ -145,7 +145,12 @@ GroupInput.prototype.enterGroupSortable = function (is_nested) {
      *
      * */
     if (formbuilder.render_action === consts.RENDER_ACTION_DO) {
-        formbuilder.dom.inputs_collection_sortable.sortable('destroy');
+        try {
+            formbuilder.dom.inputs_collection_sortable.sortable('destroy');
+        }
+        catch (error) {
+            console.log('Sortable destroy error thrown and caught (THIS IS NEEDED!)')
+        }
     }
     /******** END NEEDED BUG *********/
 

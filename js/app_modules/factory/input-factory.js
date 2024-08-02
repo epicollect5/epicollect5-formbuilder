@@ -37,7 +37,6 @@ var input_factory = {
 
     //create input based on type, set also index unique to each input
     createInput: function (the_type, the_input_ref) {
-
         var type = the_type;
         var input_ref = the_input_ref;
 
@@ -85,6 +84,7 @@ var input_factory = {
                 this.type = TextInput;
                 break;
             case consts.TEXTAREA_TYPE:
+
                 this.type = TextareaInput;
                 break;
             case consts.README_TYPE:
@@ -178,7 +178,7 @@ var input_factory = {
 
         if (branch_input.type === consts.SEARCH_SINGLE_TYPE || branch_input.type === consts.SEARCH_MULTIPLE_TYPE) {
             //update search inputs total
-            if (utils.getSearchInputsTotal() <= (consts.LIMITS.search_inputs_max -1)) {
+            if (utils.getSearchInputsTotal() <= (consts.LIMITS.search_inputs_max - 1)) {
                 ui.input_tools.showSearchInput();
             }
         }
@@ -223,7 +223,7 @@ var input_factory = {
         formbuilder.group.current_input_ref = undefined;
 
         if (group_input.type === consts.SEARCH_SINGLE_TYPE || group_input.type === consts.SEARCH_MULTIPLE_TYPE) {
-            if (utils.getSearchInputsTotal() <= (consts.LIMITS.search_inputs_max -1)) {
+            if (utils.getSearchInputsTotal() <= (consts.LIMITS.search_inputs_max - 1)) {
                 ui.input_tools.showSearchInput();
             }
         }
@@ -272,7 +272,7 @@ var input_factory = {
         formbuilder.group.current_input_ref = undefined;
 
         if (nested_group_input.type === consts.SEARCH_SINGLE_TYPE || nested_group_input.type === consts.SEARCH_MULTIPLE_TYPE) {
-            if (utils.getSearchInputsTotal() <= (consts.LIMITS.search_inputs_max -1)) {
+            if (utils.getSearchInputsTotal() <= (consts.LIMITS.search_inputs_max - 1)) {
                 ui.input_tools.showSearchInput();
             }
         }

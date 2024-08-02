@@ -32,7 +32,7 @@ var initFormbuilder = function () {
     //re-enable group input tool in left sidebar
     formbuilder.dom.inputs_tools_draggable.filter('.input-group').show();
 
-    if(utils.getSearchInputsTotal() >= consts.LIMITS.search_inputs_max) {
+    if (utils.getSearchInputsTotal() >= consts.LIMITS.search_inputs_max) {
         ui.input_tools.hideSearchInput();
     }
     else {
@@ -154,7 +154,7 @@ var initFormbuilder = function () {
 
             /* do this as we might have had an active branch when clicking undo ***************/
             //enable form tab buttons
-            ui.forms_tabs.toggleFormTabsButtons({enable: true});
+            ui.forms_tabs.toggleFormTabsButtons({ enable: true });
             //set draggable to work with main sortable
             formbuilder.dom.inputs_tools_draggable.draggable('option', 'connectToSortable', '.sortable');
             /**********************************************************************************/

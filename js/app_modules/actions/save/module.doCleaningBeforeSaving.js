@@ -1,7 +1,5 @@
 /* global $*/
 'use strict';
-var consts = require('config/consts');
-var formbuilder = require('config/formbuilder');
 var utils = require('helpers/utils');
 
 

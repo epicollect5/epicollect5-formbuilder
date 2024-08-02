@@ -1,4 +1,3 @@
-/* global CircularJSON*/
 'use strict';
 var formbuilder = require('config/formbuilder');
 var utils = require('helpers/utils');
@@ -9,7 +8,6 @@ var input_factory = require('factory/input-factory');
 var copy = {
 
     pushInput: function (input) {
-
         var branch_inputs;
         var group_inputs;
 
@@ -18,7 +16,6 @@ var copy = {
 
         //also, do not copy the title, set it as false (as we might go over the 3 title limits)
         input.is_title = false;
-
         //add input to collection as the last one
         if (formbuilder.is_editing_branch && formbuilder.is_editing_group) {
 
@@ -54,7 +51,6 @@ var copy = {
     },
 
     appendInputToDom: function (input) {
-
         var self = this;
         var input_html = self.createInputHTML(input);
         var active_branch_sortable;
@@ -131,12 +127,26 @@ var copy = {
         //if it is a group, loop all the group inputs (there must be at least a group input)
         if (input.type === consts.GROUP_TYPE) {
 
-            var group_inputs_html = parse.getGroupInputsHTML(input, inputs.length - 1, null);
+            var branch_index = null;
+            var group_inputs_html = '';
+
+            //is this a nested group (inside a branch)
+            if (formbuilder.is_editing_branch) {
+                console.log('This is a nested group in a branch')
+                branch_index = utils.getInputCurrentIndexByRef(formbuilder.branch.active_branch_ref);
+                var form_index = formbuilder.current_form_index;
+                var branch_inputs = formbuilder.project_definition.data.project.forms[form_index].inputs[branch_index].branch;
+
+                //we insert the new nested group as the last question in the current branch
+                var group_inputs_html = parse.getGroupInputsHTML(input, branch_index, branch_inputs.length - 1);
+            }
+            else {
+                group_inputs_html = parse.getGroupInputsHTML(input, inputs.length - 1, branch_index);
+            }
             input_collection_html = input_collection_html.replace('{{group-content}}', group_inputs_html.collection);
             //todo check where the string replacement happens
             input_properties_panel_html += group_inputs_html.panels;
         }
-
 
         //create properties panel for current input
         properties_panel_html = template.getInputPropertiesPanelHTML(input);
@@ -172,7 +182,7 @@ var copy = {
         var self = this;
         var input_copied_ref = utils.generateInputCopyRef();
         var input_copied = input_factory.createInput(input.type, input_copied_ref);
-        var ref_map =[];
+        var ref_map = [];
 
         //set input copy properties to original input properties
         // (only the one saved in the project definition, leave the others intact,
@@ -188,13 +198,31 @@ var copy = {
                  * */
                 switch (property) {
                     case consts.BRANCH_TYPE:
-                        input_copied.branch = CircularJSON.parse(CircularJSON.stringify(input.branch));
+                        input_copied.branch = window.CircularJSON.parse(window.CircularJSON.stringify(input.branch));
+                        // Copy the prototype per each branch input (not done by CircularJSON)
+                        input_copied.branch.forEach(function (copiedBranchInput, copiedIndex) {
+                            input.branch.forEach(function (sourceBranchInput, sourceIndex) {
+                                if (sourceIndex === copiedIndex) {
+                                    Object.setPrototypeOf(copiedBranchInput, Object.getPrototypeOf(sourceBranchInput));
+                                }
+                            });
+                        });
                         break;
                     case consts.GROUP_TYPE:
-                        input_copied.group = CircularJSON.parse(CircularJSON.stringify(input.group));
+                        //copy object
+                        input_copied.group = window.CircularJSON.parse(window.CircularJSON.stringify(input.group));
+                        // Copy the prototype per each group input (not done by CircularJSON)
+                        input_copied.group.forEach(function (copiedGroupInput, copiedIndex) {
+                            input.group.forEach(function (sourceGroupInput, sourceIndex) {
+                                if (sourceIndex === copiedIndex) {
+                                    Object.setPrototypeOf(copiedGroupInput, Object.getPrototypeOf(sourceGroupInput));
+                                }
+                            });
+                        });
                         break;
                     default:
                         input_copied[property] = input[property];
+
                 }
             }
         }
@@ -202,8 +230,8 @@ var copy = {
         //branch
         ref_map = self.createBranchCopy(input_copied.ref, input_copied.branch, input);
 
-        //a top level group:
-        self.createGroupCopy(input_copied.ref, input_copied.group, input);
+        //group:
+        self.overrideGroupCopyRefs(input_copied.ref, input_copied.group, input);
 
         //override possible answers "answer_ref" on copied top level input (on multiple answers type only)
         if ($.inArray(input_copied.type, consts.MULTIPLE_ANSWER_TYPES) !== -1) {
@@ -217,7 +245,7 @@ var copy = {
         }
 
         //clear jumps for top level input (when not a branch!)
-        if(input_copied.type === consts.BRANCH_TYPE) {
+        if (input_copied.type === consts.BRANCH_TYPE) {
             //update jumps for all the branch inputs
             self.updateBranchJumps(input_copied.branch, ref_map);
         }
@@ -225,22 +253,24 @@ var copy = {
             input_copied.jumps = [];
         }
 
+        //copy prototype
+        Object.setPrototypeOf(input_copied, Object.getPrototypeOf(input));
+
         return input_copied;
     },
 
-    updateBranchJumps: function(branch, ref_map) {
-
+    updateBranchJumps: function (branch, ref_map) {
         //to store the new jumps
         var updated_jumps;
         var self = this;
 
         $(branch).each(function (branch_index, branch_input) {
 
-            updated_jumps =[];
+            updated_jumps = [];
 
-            if(branch_input.jumps.length > 0) {
+            if (branch_input.jumps.length > 0) {
 
-                $(branch_input.jumps).each(function(ji, jump){
+                $(branch_input.jumps).each(function (ji, jump) {
 
                     if ($.inArray(branch_input.type, consts.MULTIPLE_ANSWER_TYPES) !== -1) {
                         //update the jump references
@@ -265,23 +295,20 @@ var copy = {
         });
     },
 
-    createGroupCopy: function (ref, group, input){
+    overrideGroupCopyRefs: function (copiedInputRef, copiedGroup, originalInput) {
 
-        var group_copy =[];
+        $(copiedGroup).each(function (copiedGroupInputIndex, copiedGroupInput) {
 
-        $(group).each(function (group_input_index, group_input) {
+            var group_answer_ref_map = {};
 
-            var  group_answer_ref_map = {};
-
-            group_copy[group_input_index] = group_input;
-            group_copy[group_input_index].ref = utils.generateBranchGroupInputRef(ref);
+            copiedGroupInput.ref = utils.generateNestedGroupInputRef(copiedInputRef);
 
             //override any "answer_ref"
-            if ($.inArray(group_input.type, consts.MULTIPLE_ANSWER_TYPES) !== -1) {
+            if ($.inArray(copiedGroupInput.type, consts.MULTIPLE_ANSWER_TYPES) !== -1) {
 
                 var group_input_possible_answers_copy = [];
 
-                $.each(group_input.possible_answers, function (index, possible_answer) {
+                $.each(copiedGroupInput.possible_answers, function (index, possible_answer) {
 
                     var new_answer_ref = utils.generateUniqID();
 
@@ -292,14 +319,14 @@ var copy = {
                     group_answer_ref_map[possible_answer.answer_ref] = new_answer_ref;
                 });
 
-                //override possible answers for this branch input
-                group_input.possible_answers = group_input_possible_answers_copy;
+                //override possible answers for this group input
+                copiedGroupInput.possible_answers = group_input_possible_answers_copy;
 
                 //remap default value to new answer_ref
-                if (!(group_input.default === '' || group_input.default === null)) {
+                if (!(copiedGroupInput.default === '' || copiedGroupInput.default === null)) {
                     //there is a default value to remap!
-                    if ($.inArray(group_input.type, consts.MULTIPLE_ANSWER_TYPES) !== -1) {
-                        group_input.default = group_answer_ref_map[input.group[group_input_index].default];
+                    if ($.inArray(copiedGroupInput.type, consts.MULTIPLE_ANSWER_TYPES) !== -1) {
+                        copiedGroupInput.default = group_answer_ref_map[originalInput.group[copiedGroupInputIndex].default];
                     }
                     else {
                         //do nothing
@@ -309,9 +336,9 @@ var copy = {
         });
     },
 
-    createBranchCopy: function(ref, branch, input){
+    createBranchCopy: function (ref, branch, input) {
 
-        var branch_copy =[];
+        var branch_copy = [];
         var branch_input_possible_answers_copy;
         var ref_map = [];
         var branch_input_jumps_copy;
@@ -378,7 +405,7 @@ var copy = {
 
             $(branch_input.group).each(function (nested_group_input_index, nested_group_input) {
 
-                var  group_input_answer_ref_map = {};
+                var group_input_answer_ref_map = {};
 
                 nested_group_copy[nested_group_input_index] = nested_group_input;
                 nested_group_copy[nested_group_input_index].ref = utils.generateBranchGroupInputRef(branch[branch_index].ref);
@@ -430,12 +457,12 @@ var copy = {
 
     },
 
-    getJumpToValueFromRefMap: function(ref_map, to){
+    getJumpToValueFromRefMap: function (ref_map, to) {
 
         var jump_to = null;
 
         //if to id "END", just return it
-        if(to === consts.JUMP_TO_END_OF_FORM_REF) {
+        if (to === consts.JUMP_TO_END_OF_FORM_REF) {
             jump_to = consts.JUMP_TO_END_OF_FORM_REF;
         }
         else {
@@ -449,6 +476,28 @@ var copy = {
         }
 
         return jump_to
+    },
+
+    deepCloneWithPrototypeMap: function (obj) {
+
+        var self = this;
+
+        if (obj === null || typeof obj !== 'object') {
+            return obj;
+        }
+
+        // Create a new instance of the same prototype
+        var copy = Object.create(Object.getPrototypeOf(obj));
+
+        // Copy properties
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                var value = obj[key];
+                copy[key] = (typeof value === 'object') ? self.deepCloneWithPrototypeMap(value) : value;
+            }
+        }
+
+        return copy;
     }
 };
 

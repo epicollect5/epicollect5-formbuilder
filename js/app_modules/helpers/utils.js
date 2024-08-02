@@ -208,6 +208,9 @@ var utils = {
     generateBranchGroupInputRef: function (input_ref) {
         return input_ref + '_' + this.generateUniqID();
     },
+    generateNestedGroupInputRef: function (group_ref) {
+        return group_ref + '_' + this.generateUniqID();
+    },
     //generate PHP type uniqid to be appended to form, inputs, branch and groups
     generateUniqID: function (prefix, more_entropy) {
         if (typeof prefix === 'undefined') {
@@ -326,18 +329,27 @@ var utils = {
                 return inputs[i];
             }
         }
-
     },
 
     getBranchInputObjectByRef: function (the_ref) {
 
         var inputs = formbuilder.project_definition.data.project.forms[formbuilder.current_form_index].inputs;
         var owner_input_index = utils.getInputCurrentIndexByRef(formbuilder.current_input_ref);
+        /** imp:
+         * After a branch input is copied when editing a branch, we check the formbuilder current ref
+         * If the formbuilder.current_input_ref is not referencing the branch
+         * buth the inner branch input we reset it to reference the active branch
+         */
+        //HACK: 
+        if (owner_input_index === undefined) {
+            owner_input_index = utils.getInputCurrentIndexByRef(formbuilder.branch.active_branch_ref);
+            formbuilder.current_input_ref = formbuilder.branch.active_branch_ref
+        }
+        //end HACK:
         var branch_inputs = inputs[owner_input_index].branch;
         var found;
 
         if (the_ref !== undefined) {
-
             $(branch_inputs).each(function (index, input) {
                 if (input.ref === the_ref) {
                     found = input;

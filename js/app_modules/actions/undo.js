@@ -23,7 +23,7 @@ var undo = {
                 formbuilder.state.pop();
             }
 
-            formbuilder.previous_state = CircularJSON.parse(CircularJSON.stringify(formbuilder.state[formbuilder.state.length - 1]));
+            formbuilder.previous_state = window.CircularJSON.parse(window.CircularJSON.stringify(formbuilder.state[formbuilder.state.length - 1]));
 
             //remove all child tab-panel
             formbuilder.dom.forms_tabs_content.find('.main__tabs-content-tabpanel').not(':first').remove();
@@ -43,7 +43,7 @@ var undo = {
             $.when(parse.renderProject(formbuilder.project_definition)).then(function () {
 
                 //always switch tabs to form of index 0
-                    //todo
+                //todo
 
                 //hide overlay with a bit of delay
                 window.setTimeout(function () {
@@ -84,8 +84,8 @@ var undo = {
                 formbuilder.state.shift();
             }
 
-             state.project_definition = Flatted.parse(Flatted.stringify(formbuilder.project_definition));
-           // state.project_definition = formbuilder.project_definition;
+            state.project_definition = Flatted.parse(Flatted.stringify(formbuilder.project_definition));
+            // state.project_definition = formbuilder.project_definition;
             state.active_input_ref = formbuilder.current_input_ref;
             state.active_form_index = formbuilder.current_form_index;
             state.active_form_ref = formbuilder.current_form_ref;

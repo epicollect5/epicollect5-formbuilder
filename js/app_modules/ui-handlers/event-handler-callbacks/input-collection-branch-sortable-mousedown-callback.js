@@ -15,7 +15,11 @@ var callback = function (e) {
 
     console.log('called branch-sortable-mousedown');
 
+
     var self = $(this);
+    console.log('formbuilder current input ref ->', JSON.stringify(formbuilder.current_input_ref));
+    console.log('formbuilder active branch ref ->', JSON.stringify(formbuilder.branch.active_branch_ref));
+
     var ref = self.attr('data-input-ref');
     var branch_input = utils.getBranchInputObjectByRef(ref);
     var previous_branch_input = utils.getBranchInputObjectByRef(formbuilder.branch.current_input_ref);

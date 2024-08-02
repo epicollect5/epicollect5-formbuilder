@@ -215,13 +215,13 @@ var callback = function (e) {
 
         //if we reached the max number of questions for this form, bail out
         if (utils.getInputsTotal(inputs) >= consts.INPUTS_MAX_ALLOWED) {
-            toast.showError(messages.error.MAX_QUESTIONS_LIMIT_REACHED + ' ('+ consts.INPUTS_MAX_ALLOWED+')');
+            toast.showError(messages.error.MAX_QUESTIONS_LIMIT_REACHED + ' (' + consts.INPUTS_MAX_ALLOWED + ')');
             ui.input_tools.disable();
             return;
         }
 
         //if the input is of type search and we reached the limit already, bail out
-        if(input.type === consts.SEARCH_SINGLE_TYPE || input.type === consts.SEARCH_MULTIPLE_TYPE) {
+        if (input.type === consts.SEARCH_SINGLE_TYPE || input.type === consts.SEARCH_MULTIPLE_TYPE) {
 
             //warn the user if limit was reached
             if (search_inputs_total === consts.LIMITS.search_inputs_max) {
@@ -241,11 +241,32 @@ var callback = function (e) {
         //get copy if original input
         input_copied = input_duplicator.createInputCopy(input);
 
+        console.log('original input', window.CircularJSON.stringify(input));
+
+        console.log('input_copied', window.CircularJSON.stringify(input_copied));
+
         //add copied input to project definition
         input_duplicator.pushInput(input_copied);
 
         //append the copied input markup
         input_duplicator.appendInputToDom(input_copied);
+
+        /** imp:
+         * After the input is copied when editing a branch, we check the formbuilder current ref
+         * If the formbuilder.current_input_ref is not referencing the branch
+         * buth the inner branch input we reset it to reference the active branch
+         */
+        //HACK:
+        if (formbuilder.is_editing_branch) {
+            var owner_input_index = utils.getInputCurrentIndexByRef(formbuilder.current_input_ref);
+            if (owner_input_index === undefined) {
+                owner_input_index = utils.getInputCurrentIndexByRef(formbuilder.branch.active_branch_ref);
+                formbuilder.current_input_ref = formbuilder.branch.active_branch_ref
+            }
+        }
+        //end HACK:
+
+
 
         //hide overlay (with delay)
         window.setTimeout(function () {
@@ -338,6 +359,7 @@ var callback = function (e) {
      **************************************************************/
     if (target.hasClass('input-properties__form__edit-branch')) {
         target.attr('disabled', true);
+
         input.enterBranchSortable();
     }
     if (target.hasClass('input-properties__form__exit-branch-editing')) {

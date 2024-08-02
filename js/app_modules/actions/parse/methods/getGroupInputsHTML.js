@@ -4,7 +4,7 @@ var formbuilder = require('config/formbuilder');
 var template = require('template');
 var consts = require('config/consts');
 
-var getGroupsInputsHTML = function (the_input, the_index, the_branch_index) {
+var getGroupInputsHTML = function (the_input, the_index, the_branch_index) {
 
     var input_factory = require('factory/input-factory');
     var input = the_input;
@@ -51,7 +51,7 @@ var getGroupsInputsHTML = function (the_input, the_index, the_branch_index) {
             formbuilder.project_definition.data.project
                 .forms[formbuilder.current_form_index]
                 .inputs[index]
-                .branch[branch_index]
+                .branch[the_branch_index]
                 .group[group_index] = group_input;
         }
 
@@ -74,4 +74,4 @@ var getGroupsInputsHTML = function (the_input, the_index, the_branch_index) {
     };
 };
 
-module.exports = getGroupsInputsHTML;
+module.exports = getGroupInputsHTML;

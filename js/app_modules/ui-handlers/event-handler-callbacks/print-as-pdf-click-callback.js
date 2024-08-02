@@ -35,7 +35,7 @@ var callback = function (e) {
                 html += '<tr><td></td></td></tr>';
                 html += '</table>';
             }
-            else{
+            else {
                 html += '<hr/>';
             }
         }
@@ -86,7 +86,7 @@ var callback = function (e) {
     var index = formbuilder.current_form_index;
 
     //create a deep copy of the project object properties
-    var project_definition_json = CircularJSON.parse(CircularJSON.stringify(formbuilder.project_definition));
+    var project_definition_json = window.CircularJSON.parse(window.CircularJSON.stringify(formbuilder.project_definition));
     var is_valid_form = true;
     var project_slug = project_definition_json.data.project.slug;
     var form = project_definition_json.data.project.forms[index];
@@ -152,7 +152,7 @@ var callback = function (e) {
                         _renderPossibleAnswers(branch_input);
                     }
                     else {
-                       _renderQuestion(branch_input);
+                        _renderQuestion(branch_input);
                     }
 
                     $(branch_input.group).each(function (index, group_input) {
@@ -200,7 +200,7 @@ var callback = function (e) {
                         _renderPossibleAnswers(group_input);
                     }
                     else {
-                       _renderQuestion(group_input);
+                        _renderQuestion(group_input);
                     }
                 });
 

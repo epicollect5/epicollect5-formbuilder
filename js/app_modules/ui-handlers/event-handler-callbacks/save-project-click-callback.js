@@ -29,8 +29,6 @@ var callback = function (e) {
         validation.performValidation(utils.getCurrentlySelectedInput(), false);
     }
 
-
-
     //create a deep copy of the project object properties
     var project_definition_json = Flatted.parse(Flatted.stringify(formbuilder.project_definition));
     //clean up forms from extra properties
@@ -38,7 +36,6 @@ var callback = function (e) {
     var cleanedForms = save.doCleaningBeforeSaving(project_definition_json.data.project.forms);
 
     if (cleanedForms.all_jumps_valid && cleanedForms.invalid_jumps_question === '') {
-
         //*****************************************************************************************************
         //after cleaning, do extra validation, the same one that runs when importing a form -------------------------
         var result = {
@@ -74,6 +71,7 @@ var callback = function (e) {
         //for local testing only
         if (window.location.href.indexOf('localhost/') !== -1 && window.location.href.indexOf('epicollect5-formbuilder/') !== -1) {
             consts.PROJECT_URL = url;
+            console.log('Saved project definition ->', window.CircularJSON.stringify(project_definition_json));
         }
 
         $.ajax({

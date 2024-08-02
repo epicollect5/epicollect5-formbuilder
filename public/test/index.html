@@ -1,24 +1,33 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>EC5 Mocha Tests</title>
-    <link rel="stylesheet" href="../../node_modules/mocha/mocha.css">
-    <link href="mocha.png" rel="icon" type="image/x-icon" />
+    <link rel="stylesheet"
+          href="../../node_modules/mocha/mocha.css">
+    <link href="mocha.png"
+          rel="icon"
+          type="image/x-icon" />
 </head>
+
 <body>
-<div id="mocha"></div>
-<script   src="https://code.jquery.com/jquery-2.2.3.min.js"   integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script>
-<script src="../../node_modules/mocha/mocha.js"></script>
-<script src="../../node_modules/chai/chai.js"></script>
-<script src="../js/vendor-formbuilder.js" defer></script>
-<script>
-    mocha.setup('bdd');
-    mocha.checkLeaks();
-    mocha.globals(['jQuery', '$', 'Papa', 'CircularJSON', 'saveAs', 'toastr', 'pako', 'Flatted']);
-</script>
-<script src="test-bundle.js"></script>
-<script>
-    mocha.run();
-</script>
+    <div id="mocha"></div>
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js"
+            integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
+            crossorigin="anonymous"></script>
+    <script src="../js/vendor-formbuilder.js"></script>
+    <script src="../../node_modules/mocha/mocha.js"></script>
+    <script src="../../node_modules/chai/chai.js"></script>
+
+    <script>
+        mocha.setup('bdd');
+        mocha.checkLeaks();
+        mocha.globals(['jQuery', '$', 'Papa', 'CircularJSON', 'saveAs', 'toastr', 'pako', 'Flatted']);
+    </script>
+    <script src="test-bundle.js"></script>
+    <script>
+        mocha.run();
+    </script>
 </body>
+
 </html>

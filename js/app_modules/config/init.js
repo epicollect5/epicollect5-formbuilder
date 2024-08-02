@@ -48,7 +48,7 @@ var init = function () {
 
     //on Safari 9, JSON.stringify() causes a bug, so we override it with a MDN polyfill
     if (utils.isSafari) {
-        CircularJSON = utils.JSONPolyfill;
+        window.CircularJSON = utils.JSONPolyfill;
     }
 
     //set back button
