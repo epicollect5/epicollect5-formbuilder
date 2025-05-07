@@ -35,7 +35,7 @@ var callback = function (e) {
 
     function _getInput() {
 
-        //check whether we are validatin a nested input i.e. BOTH branch AND group edit flags are true
+        //check whether we are validating a nested input i.e. BOTH branch AND group edit flags are true
         if (formbuilder.is_editing_branch && formbuilder.is_editing_group) {
             //get nested group input
             owner_branch = utils.getInputObjectByRef(formbuilder.branch.active_branch_ref);
@@ -110,89 +110,102 @@ var callback = function (e) {
      **************************************************************/
     if (target.hasClass('input-properties__buttons--remove-input')) {
 
-        //re-nable draggable if needed
-        if ($('ul#inputs-tools-list li div.input').hasClass('dragging-disabled')) {
-            ui.input_tools.enable();
-        }
+        var deleteQuestion  = function() {
+            //re-enable draggable if needed
+            if ($('ul#inputs-tools-list li div.input').hasClass('dragging-disabled')) {
+                ui.input_tools.enable();
+            }
 
-        //enable save project button
-        ui.navbar.toggleSaveProjectBtn(consts.BTN_ENABLED);
+            //enable save project button
+            ui.navbar.toggleSaveProjectBtn(consts.BTN_ENABLED);
 
-        //check whether we are validatin a nested input i.e. BOTH branch AND group edit flags are true
-        if (formbuilder.is_editing_branch && formbuilder.is_editing_group) {
-
-            //remove nested group
-            input_factory.removeNestedGroupInput(formbuilder.branch.active_branch_ref, formbuilder.group.current_input_ref);
-            toastr.warning(messages.warning.INPUT_DELETED);
-            _validateForm();
-            //push state to enable undoing the action (deleting input)
-            undo.pushState();
-            return;
-        }
-        else {
-
-            //nested group?
+            //check whether we are validating a nested input i.e. BOTH branch AND group edit flags are true
             if (formbuilder.is_editing_branch && formbuilder.is_editing_group) {
-                //to handle nested group
-            }
-            else {
 
-                if (formbuilder.is_editing_branch) {
-                    input_factory.removeBranchInput(input.ref, formbuilder.branch.current_input_ref);
-                    toastr.warning(messages.warning.INPUT_DELETED);
+                //remove nested group
+                input_factory.removeNestedGroupInput(formbuilder.branch.active_branch_ref, formbuilder.group.current_input_ref);
+                toastr.warning(messages.warning.INPUT_DELETED);
+                _validateForm();
+                //push state to enable undoing the action (deleting input)
+                undo.pushState();
+                return false;
+            } else {
 
-                    //run validation as I might have deleted the only invalid input for the branch
-                    //since there is not a previous one, so it uses the first input of the top parent form (if any) just to trigger the validation
-                    _validateBranch();
+                //nested group?
+                if (formbuilder.is_editing_branch && formbuilder.is_editing_group) {
+                    //to handle nested group
+                } else {
 
-                    //push state to enable undoing the action (deleting input)
-                    undo.pushState();
-                    return;
+                    if (formbuilder.is_editing_branch) {
+                        input_factory.removeBranchInput(input.ref, formbuilder.branch.current_input_ref);
+                        toastr.warning(messages.warning.INPUT_DELETED);
+
+                        //run validation as I might have deleted the only invalid input for the branch
+                        //since there is not a previous one, so it uses the first input of the top parent form (if any) just to trigger the validation
+                        _validateBranch();
+
+                        //push state to enable undoing the action (deleting input)
+                        undo.pushState();
+                        return;
+                    }
+
+                    if (formbuilder.is_editing_group) {
+                        input_factory.removeGroupInput(input.ref, formbuilder.group.current_input_ref);
+                        toastr.warning(messages.warning.INPUT_DELETED);
+                        //push state to enable undoing the action (deleting input)
+                        undo.pushState();
+                        return;
+                    }
                 }
 
-                if (formbuilder.is_editing_group) {
-                    input_factory.removeGroupInput(input.ref, formbuilder.group.current_input_ref);
-                    toastr.warning(messages.warning.INPUT_DELETED);
-                    //push state to enable undoing the action (deleting input)
-                    undo.pushState();
-                    return;
+                //remove input from input collection (also remove its properties)
+                input_factory.removeInput(input.ref);
+                toastr.warning(messages.warning.INPUT_DELETED);
+
+                //todo I need to do the same for branches, groups and nested groups
+                //run validation as I might have deleted the only invalid input
+                //there is not a previous one, so it uses the first input of the top parent form (if any)
+                _validateForm();
+                //push state to enable undoing the action (deleting input)
+                undo.pushState();
+
+                //show message and import button when no inputs left
+
+                //remove no questions message and upload button, as now we have at least 1 input
+                //todo avoid to to this all the time?
+                if (inputs.length === 0) {
+                    formbuilder.dom.inputs_collection
+                        .find('.input-properties__no-questions-message')
+                        .hide()
+                        .removeClass('hidden')
+                        .fadeIn();
+
+                    //hide title warning message, passing a count > 1
+                    ui.inputs_collection.toggleTitleWarning(1, false);
+
+                    //disable download form button
+                    formbuilder.dom.inputs_collection
+                        .find('.inputs-collection__export-form').addClass('disabled');
+
+                    //disable print as pdf form button
+                    formbuilder.dom.inputs_collection
+                        .find('.inputs-collection__print-as-pdf').addClass('disabled');
                 }
+                return false;
             }
+        };
 
-            //remove input from input collection (also remove its properties)
-            input_factory.removeInput(input.ref);
-            toastr.warning(messages.warning.INPUT_DELETED);
-
-            //todo I need to do the same for branches, groups and nested groups
-            //run validation as I might have deleted the only invalid input
-            //there is not a previous one, so it uses the first input of the top parent form (if any)
-            _validateForm();
-            //push state to enable undoing the action (deleting input)
-            undo.pushState();
-
-            //show message and import button when no inputs left
-
-            //remove no questions message and upload button, as now we have at least 1 input
-            //todo avoid to to this all the time?
-            if (inputs.length === 0) {
-                formbuilder.dom.inputs_collection
-                    .find('.input-properties__no-questions-message')
-                    .hide()
-                    .removeClass('hidden')
-                    .fadeIn();
-
-                //hide title warning message, passing a count > 1
-                ui.inputs_collection.toggleTitleWarning(1, false);
-
-                //disable download form button
-                formbuilder.dom.inputs_collection
-                    .find('.inputs-collection__export-form').addClass('disabled');
-
-                //disable print as pdf form button
-                formbuilder.dom.inputs_collection
-                    .find('.inputs-collection__print-as-pdf').addClass('disabled');
-            }
-            return;
+        // Show the warning modal
+        var totalEntries = parseInt($('.total-entries').data('total-entries'), 10) || 0;
+        if(totalEntries > 0) {
+            $('#warning-delete-question').modal('show');
+            $('.btn-confirm-delete-question').off('click').on('click', function () {
+                $('#warning-delete-question').modal('hide');
+                deleteQuestion();
+            });
+        }
+        else{
+            deleteQuestion();
         }
     }
 
@@ -254,14 +267,14 @@ var callback = function (e) {
         /** imp:
          * After the input is copied when editing a branch, we check the formbuilder current ref
          * If the formbuilder.current_input_ref is not referencing the branch
-         * buth the inner branch input we reset it to reference the active branch
+         * but the inner branch input we reset it to reference the active branch
          */
         //HACK:
         if (formbuilder.is_editing_branch) {
             var owner_input_index = utils.getInputCurrentIndexByRef(formbuilder.current_input_ref);
             if (owner_input_index === undefined) {
                 owner_input_index = utils.getInputCurrentIndexByRef(formbuilder.branch.active_branch_ref);
-                formbuilder.current_input_ref = formbuilder.branch.active_branch_ref
+                formbuilder.current_input_ref = formbuilder.branch.active_branch_ref;
             }
         }
         //end HACK:
@@ -429,8 +442,8 @@ var callback = function (e) {
                 }
                 catch (error) {
                     //Microsoft browsers?
-                    if (navigator.msSaveBlob) {
-                        return navigator.msSaveBlob(new Blob([csv.data], { type: 'text/plain:charset=utf-8' }), csv.filename);
+                    if (window.navigator.msSaveBlob) {
+                        return window.navigator.msSaveBlob(new window.Blob([csv.data], { type: 'text/plain:charset=utf-8' }), csv.filename);
                     }
                     else {
                         //browser not supported yet
@@ -463,7 +476,7 @@ var callback = function (e) {
             target.find('.possible_answers__import-csv-input-file').trigger('click');
         }
 
-        //to avoid a infinte loop (since we are triggering the click event)
+        //to avoid a infinite loop (since we are triggering the click event)
         //we remove the flag later, to be able to upload another file
         //even if the user tapped on "cancel"
         window.setTimeout(function () {

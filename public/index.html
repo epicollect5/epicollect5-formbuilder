@@ -9,7 +9,6 @@
     <title>Formbuilder</title>
     <meta id="formbuilder-version"
           data-version="1234567890">
-    </meta>
     <meta name="description"
           content="">
     <meta name="viewport"
@@ -21,10 +20,10 @@
 
     <!--Remove when embedding formbuilder to Epicollect5 on laravel----->
     <!--[if IE]>
-    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="shortcut icon" href="favicons/favicon.ico">
     <![endif]-->
     <link rel="icon"
-          href="favicon.png">
+          href="favicons/favicon.svg">
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://code.jquery.com/jquery-2.2.1.min.js"
             integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
@@ -52,7 +51,7 @@
 <div class="wait-overlay"></div>
 
 <!--[if lt IE 9]>
-<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade
     your browser</a> to use this app.</p>
 <![endif]-->
 
@@ -61,7 +60,17 @@
     <!--navbar content goes here-->
 </nav>
 
-<div class="warning-well screen-resolution">The formbuilder does not support the current screen resolution</div>
+<div class="total-entries hidden" data-total-entries="1"></div>
+
+<div class="warning-well screen-resolution">
+    <p>The formbuilder does not support the current screen resolution</p>
+    <p>Please use a screen with a resolution of at least 1024x768</p>
+    <p>
+        <a href="https://docs.epicollect.net/formbuilder/build-your-questionnaire">
+            More info on our User Guide
+        </a>
+    </p>
+</div>
 
 <div class="container-fluid hidden">
     <div class="row">
@@ -129,7 +138,7 @@
 
                     <div id="form-ref-inputs-collection"
                          class="inputs-collection col-sm-6 col-md-6">
-                        <!-- Inputs collection (sortable) container will load here dinamically-->
+                        <!-- Inputs collection (sortable) container will load here dynamically-->
                     </div>
 
                     <!-- Input Properties panel-->
@@ -374,6 +383,37 @@
                     <button type="button"
                             class="btn btn-default btn-action possible_answers-perform-import"
                             disabled>Import</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="warning-delete-question"
+         class="modal fade"
+         tabindex="-1"
+         role="dialog">
+        <div class="modal-dialog"
+             role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title text-center">Warning</h4>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Are you sure you want to delete this question?</p>
+                    <p class="warning-well">This action cannot be undone!</p>
+                    <p class="text-danger"><strong>All data associated with this question will also be permanently deleted.</strong></p>
+                    <a href="https://docs.epicollect.net/formbuilder/edit-inputs#delete-questions"
+                       target="_blank"
+                    >
+                        <strong>Learn More</strong></a>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-default btn-danger btn-confirm-delete-question">Confirm</button>
                 </div>
             </div>
         </div>
