@@ -306,13 +306,7 @@
                   "ref": "77ceaef2b5634ee3b20765d25e0047d1_5a252849399f6_5a252a65d889c_5a252aced88aa",
                   "type": "integer",
                   "group": [],
-                  "jumps": [
-                    {
-                      "to": "END",
-                      "when": "ALL",
-                      "answer_ref": null
-                    }
-                  ],
+                  "jumps": [],
                   "regex": "",
                   "branch": [],
                   "verify": false,

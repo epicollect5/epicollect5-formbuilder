@@ -158,9 +158,7 @@ var getJumpAvailableDestinationsAsKeys = function () {
             /**
              *
              */
-            expect(utils.getJumpAvailableDestinationsAsKeys(index, inputs[index], inputs)).to.have.all.keys(
-                consts.JUMP_TO_END_OF_FORM_REF
-            );
+            expect(utils.getJumpAvailableDestinationsAsKeys(index, inputs[index], inputs)).to.be.empty;
             expect(utils.getJumpAvailableDestinationsAsKeys(index, inputs[index], inputs)).to.not.have.any.keys(
                 '286e7847ba844919838bef2c0fbff382_5a1858f6d6898_5a1858fb17192',
                 '286e7847ba844919838bef2c0fbff382_5a1858f6d6898_5a18590017193',
@@ -168,11 +166,11 @@ var getJumpAvailableDestinationsAsKeys = function () {
                 '286e7847ba844919838bef2c0fbff382_5a1858f6d6898_5a18591917199',
                 '286e7847ba844919838bef2c0fbff382_5a1858f6d6898_5a18591f1719a',
                 '286e7847ba844919838bef2c0fbff382_5a1858f6d6898_5a1859241719b',
-                '286e7847ba844919838bef2c0fbff382_5a1858f6d6898_5a1859291719c'
+                '286e7847ba844919838bef2c0fbff382_5a1858f6d6898_5a1859291719c',
+                consts.JUMP_TO_END_OF_FORM_REF
             );
         });
     });
 };
 
 module.export = getJumpAvailableDestinationsAsKeys();
-

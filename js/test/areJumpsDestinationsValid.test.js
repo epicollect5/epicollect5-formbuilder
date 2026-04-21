@@ -99,6 +99,30 @@ var areJumpsDestinationsValid = function () {
                 expect(import_form_validation.areJumpsDestinationsValid(form.inputs)).to.be.false;
             });
         });
+
+        it('should fail when the last question jumps to END', function () {
+
+            var inputs = [
+                {
+                    ref: 'form_ref_question_1',
+                    jumps: [],
+                    branch: []
+                },
+                {
+                    ref: 'form_ref_question_2',
+                    jumps: [
+                        {
+                            to: consts.JUMP_TO_END_OF_FORM_REF,
+                            when: 'ALL',
+                            answer_ref: null
+                        }
+                    ],
+                    branch: []
+                }
+            ];
+
+            expect(import_form_validation.areJumpsDestinationsValid(inputs)).to.be.false;
+        });
     });
 };
 

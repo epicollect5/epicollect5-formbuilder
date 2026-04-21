@@ -313,13 +313,7 @@
               "datetime_format": null,
               "set_to_current_datetime": false,
               "possible_answers": [],
-              "jumps": [
-                {
-                  "to": "END",
-                  "when": "ALL",
-                  "answer_ref": null
-                }
-              ],
+              "jumps": [],
               "branch": [],
               "group": []
             }

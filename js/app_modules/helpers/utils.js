@@ -621,19 +621,23 @@ var utils = {
     getJumpAvailableDestinations: function (input, inputs) {
 
         var current_input_index;
-        var owner_input_index;
         var destinations = [];
         var available_inputs;
+        var has_next_input;
 
-        if (formbuilder.is_editing_branch) {
-            owner_input_index = utils.getInputCurrentIndexByRef(formbuilder.branch.active_branch_ref);
-            current_input_index = utils.getBranchInputCurrentIndexByRef(owner_input_index, input.ref);
-        }
-        else {
+        $(inputs).each(function (index, available_input) {
+            if (available_input.ref === input.ref) {
+                current_input_index = index;
+                return false;
+            }
+        });
+
+        if (current_input_index === undefined) {
             current_input_index = utils.getInputCurrentIndexByRef(input.ref);
         }
 
         available_inputs = inputs.slice(current_input_index + 2);
+        has_next_input = current_input_index < inputs.length - 1;
 
         $(available_inputs).each(function (index, input) {
             destinations.push({
@@ -643,12 +647,14 @@ var utils = {
             });
         });
 
-        //add "End of form" as an available destination
-        destinations.push({
-            ref: consts.JUMP_TO_END_OF_FORM_REF,
-            question: consts.JUMP_TO_END_OF_FORM_LABEL,
-            type: null
-        });
+        // "End of form" is valid only if at least one question would be skipped.
+        if (has_next_input) {
+            destinations.push({
+                ref: consts.JUMP_TO_END_OF_FORM_REF,
+                question: consts.JUMP_TO_END_OF_FORM_LABEL,
+                type: null
+            });
+        }
 
 
         return destinations;
@@ -659,15 +665,19 @@ var utils = {
 
         var destinations = {};
         var available_inputs;
+        var has_next_input;
 
         available_inputs = inputs.slice(current_input_index + 2);
+        has_next_input = current_input_index < inputs.length - 1;
 
         //fill with available inputs refs as keys
         $(available_inputs).each(function (index, input) {
             destinations[input.ref] = 1;
         });
-        //add "End of form" as an available destination
-        destinations[consts.JUMP_TO_END_OF_FORM_REF] = 1;
+        // "End of form" is valid only if at least one question would be skipped.
+        if (has_next_input) {
+            destinations[consts.JUMP_TO_END_OF_FORM_REF] = 1;
+        }
 
         return destinations;
     },

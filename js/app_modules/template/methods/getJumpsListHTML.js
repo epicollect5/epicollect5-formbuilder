@@ -79,7 +79,12 @@ var getJumpsListHTML = function (input) {
          */
         var selected_goto_html = '';
         if (jump.to === 'END') {
-            selected_goto_html = _getSelectedJumpDestinationHTML({ ref: 'END', question: 'End of form' });
+            $(jump_destinations).each(function (index, jump_destination) {
+                if (jump_destination.ref === jump.to) {
+                    selected_goto_html = _getSelectedJumpDestinationHTML(jump_destination);
+                    return false;
+                }
+            });
         }
         else {
             $(jump_destinations).each(function (index, jump_destination) {
