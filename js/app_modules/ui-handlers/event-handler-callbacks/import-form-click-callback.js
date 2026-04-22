@@ -92,6 +92,8 @@ var callback = function (files) {
 
         //grab inputs
         inputs = form.data.form.inputs;
+        import_form_validation.sanitizeLegacyInvalidEndJumps(inputs);
+        json_text = JSON.stringify(form);
 
         //are there any inputs?
         if (inputs.length === 0) {

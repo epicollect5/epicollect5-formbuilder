@@ -633,7 +633,7 @@ var utils = {
         });
 
         if (current_input_index === undefined) {
-            current_input_index = utils.getInputCurrentIndexByRef(input.ref);
+            return destinations;
         }
 
         available_inputs = inputs.slice(current_input_index + 2);
@@ -666,6 +666,10 @@ var utils = {
         var destinations = {};
         var available_inputs;
         var has_next_input;
+
+        if (current_input_index === undefined || current_input_index < 0) {
+            return destinations;
+        }
 
         available_inputs = inputs.slice(current_input_index + 2);
         has_next_input = current_input_index < inputs.length - 1;

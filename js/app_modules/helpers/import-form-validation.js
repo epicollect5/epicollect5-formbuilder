@@ -185,6 +185,39 @@ var import_form_validation = {
         return all_jumps_valid;
     },
 
+    sanitizeLegacyInvalidEndJumps: function (inputs) {
+
+        var last_input;
+
+        if (!$.isArray(inputs) || inputs.length === 0) {
+            return inputs;
+        }
+
+        last_input = inputs[inputs.length - 1];
+        if ($.isArray(last_input.jumps)) {
+            last_input.jumps = $.grep(last_input.jumps, function (jump) {
+                return jump.to !== consts.JUMP_TO_END_OF_FORM_REF;
+            });
+        }
+
+        $(inputs).each(function (index, input) {
+            var last_branch_input;
+
+            if (!$.isArray(input.branch) || input.branch.length === 0) {
+                return;
+            }
+
+            last_branch_input = input.branch[input.branch.length - 1];
+            if ($.isArray(last_branch_input.jumps)) {
+                last_branch_input.jumps = $.grep(last_branch_input.jumps, function (jump) {
+                    return jump.to !== consts.JUMP_TO_END_OF_FORM_REF;
+                });
+            }
+        });
+
+        return inputs;
+    },
+
     arePossibleAnswersValid: function (possible_answers, input_type) {
 
         var answer_ref_regex = new RegExp(consts.REGEX.possible_answer_ref);

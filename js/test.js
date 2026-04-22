@@ -16,6 +16,7 @@ var hasValidFormStructure = require('hasValidFormStructure.test');
 var areJumpsValid = require('areJumpsValid.test');
 var hasSameProps = require('hasSameProps.test');
 var areJumpsDestinationsValid = require('areJumpsDestinationsValid.test');
+var sanitizeLegacyInvalidEndJumps = require('sanitizeLegacyInvalidEndJumps.test');
 var getJumpAvailableDestinationsAsKeys = require('getJumpAvailableDestinationsAsKeys.test');
 var arePossibleAnswersValid = require('arePossibleAnswersValid.test');
 var isValidInput = require('isValidInput.test');

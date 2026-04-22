@@ -78,21 +78,17 @@ var getJumpsListHTML = function (input) {
          *  set selected `goto`
          */
         var selected_goto_html = '';
-        if (jump.to === 'END') {
-            $(jump_destinations).each(function (index, jump_destination) {
-                if (jump_destination.ref === jump.to) {
-                    selected_goto_html = _getSelectedJumpDestinationHTML(jump_destination);
-                    return false;
-                }
-            });
-        }
-        else {
-            $(jump_destinations).each(function (index, jump_destination) {
-                if (jump_destination.ref === jump.to) {
-                    selected_goto_html = _getSelectedJumpDestinationHTML(jump_destination);
-                    return false;
-                }
-            });
+        $(jump_destinations).each(function (index, jump_destination) {
+            if (jump_destination.ref === jump.to) {
+                selected_goto_html = _getSelectedJumpDestinationHTML(jump_destination);
+                return false;
+            }
+        });
+
+        if (!selected_goto_html && jump.to === consts.JUMP_TO_END_OF_FORM_REF) {
+            selected_goto_html = '<option value="' + consts.JUMP_TO_END_OF_FORM_REF +
+                '" selected="selected" disabled="disabled">' +
+                consts.JUMP_TO_END_OF_FORM_LABEL + '</option>';
         }
 
         html = html.replace('{{logic-goto-saved-option}}', selected_goto_html);
