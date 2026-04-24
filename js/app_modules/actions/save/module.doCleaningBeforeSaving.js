@@ -14,6 +14,11 @@ var doCleaningBeforeSaving = function (forms) {
             //remove Word Unicode chars from question (if any)
             form.inputs[inputIndex].question = utils.replaceWordChars(input.question);
 
+            //Clear group[] when input is branch (legacy bug)
+            if (input.type === 'branch') {
+                input.group = [];
+            }
+
             //get valid jump destinations
             var jump_destinations = utils.getJumpAvailableDestinationsAsKeys(inputIndex, input, form.inputs, false);
 

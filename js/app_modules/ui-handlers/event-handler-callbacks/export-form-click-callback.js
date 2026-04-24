@@ -37,6 +37,10 @@ var callback = function (e) {
     }
 
     $(form.inputs).each(function (inputIndex, input) {
+    //Clear group[] when input is branch (legacy bug)
+        if (input.type === consts.BRANCH_TYPE) {
+            input.group = [];
+        }
 
         //get valid jump destinations
         var jump_destinations = utils.getJumpAvailableDestinationsAsKeys(inputIndex, input, form.inputs, false);
