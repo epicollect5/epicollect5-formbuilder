@@ -348,8 +348,41 @@ var doCleaningBeforeSaving = function () {
                 }
             });
         });
+
+        it('should clear group on branch inputs before saving', function () {
+
+            var forms = [getFormStructure()];
+            var branchInput = forms[0].inputs[3];
+
+            branchInput.group = [
+                {
+                    ref: 'legacy_group_input',
+                    type: 'text',
+                    question: 'Legacy nested group input',
+                    is_title: false,
+                    is_required: false,
+                    uniqueness: 'none',
+                    regex: null,
+                    default: null,
+                    verify: false,
+                    max: null,
+                    min: null,
+                    datetime_format: null,
+                    set_to_current_datetime: false,
+                    possible_answers: [],
+                    jumps: [],
+                    branch: [],
+                    group: []
+                }
+            ];
+
+            expect(branchInput.group).to.have.length(1);
+
+            save.doCleaningBeforeSaving(forms);
+
+            expect(branchInput.group).to.deep.equal([]);
+        });
     });
 };
 
 module.exports = doCleaningBeforeSaving();
-
