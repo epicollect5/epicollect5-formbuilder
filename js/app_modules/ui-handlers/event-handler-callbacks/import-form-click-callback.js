@@ -76,7 +76,7 @@ var callback = function (files) {
             //hide overlay
             formbuilder.dom.overlay.fadeOut(consts.ANIMATION_FAST);
             //it means the json is in invalid format
-            toastr.error(messages.error.FORM_FILE_INVALID);
+            toastr.error(messages.error.FORM_FILE_INVALID + '<br/>' + error.message.toString());
             return;
         }
 
@@ -93,6 +93,7 @@ var callback = function (files) {
         //grab inputs
         inputs = form.data.form.inputs;
         import_form_validation.sanitizeLegacyInvalidEndJumps(inputs);
+
         json_text = JSON.stringify(form);
 
         //are there any inputs?

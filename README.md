@@ -4,6 +4,11 @@ Drag & Drop Formbuilder using jQuery UI
 ###
 Started with Yeoman HTML5 Boilerplate generator https://github.com/h5bp/generator-h5bp
 
+###
+watch → 'gulp watch' → {root}/public/index.html
+build → `gulp' → {root}/public/index.html
+test → 'gulp test'→ {root}/public/test/index.html
+
 ## Forking
 
 We provide this software as is, under MIT license, for the benefit and use of the community, however we are unable to
