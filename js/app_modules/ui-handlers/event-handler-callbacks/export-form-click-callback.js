@@ -29,7 +29,7 @@ var callback = function (e) {
     var is_valid_form = true;
     var project_slug = project_definition_json.data.project.slug;
     var form = project_definition_json.data.project.forms[index];
-    var filename = project_slug + '__' + form.slug + '__form.json';
+    var filename = project_slug + '__' + form.slug + '.form.epicollect.json';
 
     if (form.inputs.length === 0) {
         toast.showError(messages.error.FORM_IS_INVALID);

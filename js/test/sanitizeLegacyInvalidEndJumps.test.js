@@ -67,4 +67,4 @@ var sanitizeLegacyInvalidEndJumps = function () {
     });
 };
 
-module.export = sanitizeLegacyInvalidEndJumps();
+module.exports = sanitizeLegacyInvalidEndJumps();
