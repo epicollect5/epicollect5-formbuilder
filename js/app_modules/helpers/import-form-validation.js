@@ -195,9 +195,7 @@ var import_form_validation = {
 
         last_input = inputs[inputs.length - 1];
         if ($.isArray(last_input.jumps)) {
-            last_input.jumps = $.grep(last_input.jumps, function (jump) {
-                return jump.to !== consts.JUMP_TO_END_OF_FORM_REF;
-            });
+            last_input.jumps = [];
         }
 
         $(inputs).each(function (index, input) {
@@ -209,9 +207,7 @@ var import_form_validation = {
 
             last_branch_input = input.branch[input.branch.length - 1];
             if ($.isArray(last_branch_input.jumps)) {
-                last_branch_input.jumps = $.grep(last_branch_input.jumps, function (jump) {
-                    return jump.to !== consts.JUMP_TO_END_OF_FORM_REF;
-                });
+                last_branch_input.jumps = [];
             }
         });
 

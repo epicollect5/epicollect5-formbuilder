@@ -9,7 +9,7 @@ var sanitizeLegacyInvalidEndJumps = function () {
 
     describe('Test sanitizeLegacyInvalidEndJumps()', function () {
 
-        it('should remove END jumps from the last form and branch inputs only', function () {
+        it('should remove all jumps from the last form and branch inputs only', function () {
 
             var inputs = [
                 {
@@ -26,6 +26,11 @@ var sanitizeLegacyInvalidEndJumps = function () {
                 {
                     ref: 'form_ref_question_2',
                     jumps: [
+                        {
+                            to: 'form_ref_question_1',
+                            when: 'ALL',
+                            answer_ref: null
+                        },
                         {
                             to: consts.JUMP_TO_END_OF_FORM_REF,
                             when: 'ALL',
@@ -46,6 +51,11 @@ var sanitizeLegacyInvalidEndJumps = function () {
                         {
                             ref: 'form_ref_question_2_branch_2',
                             jumps: [
+                                {
+                                    to: 'form_ref_question_2_branch_1',
+                                    when: 'ALL',
+                                    answer_ref: null
+                                },
                                 {
                                     to: consts.JUMP_TO_END_OF_FORM_REF,
                                     when: 'ALL',
