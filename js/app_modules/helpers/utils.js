@@ -164,6 +164,9 @@ var utils = {
         path = consts.API_MEDIA_PATH;
         consts.PROJECT_LOGO_URL = domain + path + slug + consts.API_PROJECT_LOGO_QUERY_STRING;
 
+        //add project definition version for caching
+        var projectDefinitionVersion = $('.project-definition-version').data('project-definition-version') || 1;
+        consts.PROJECT_LOGO_URL += '&v=' + projectDefinitionVersion;
 
         console.log(consts.PROJECT_LOGO_URL);
     },
@@ -340,7 +343,7 @@ var utils = {
          * If the formbuilder.current_input_ref is not referencing the branch
          * buth the inner branch input we reset it to reference the active branch
          */
-        //HACK: 
+        //HACK:
         if (owner_input_index === undefined) {
             owner_input_index = utils.getInputCurrentIndexByRef(formbuilder.branch.active_branch_ref);
             formbuilder.current_input_ref = formbuilder.branch.active_branch_ref
