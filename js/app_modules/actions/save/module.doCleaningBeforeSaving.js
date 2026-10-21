@@ -41,6 +41,12 @@ var doCleaningBeforeSaving = function (forms) {
                     when: jump.when,
                     answer_ref: jump.answer_ref
                 };
+
+                //"no answer given" and "always" conditions do not reference a specific answer,
+                //so the answer_ref must not be set (it would be meaningless)
+                if (jump.when === 'ALL' || jump.when === 'NO_ANSWER_GIVEN') {
+                    input.jumps[jumpIndex].answer_ref = null;
+                }
             });
 
             $(input.branch).each(function (branchInputIndex, branch_input) {
@@ -71,6 +77,12 @@ var doCleaningBeforeSaving = function (forms) {
                         when: branchJump.when,
                         answer_ref: branchJump.answer_ref
                     };
+
+                    //"no answer given" and "always" conditions do not reference a specific answer,
+                    //so the answer_ref must not be set (it would be meaningless)
+                    if (branchJump.when === 'ALL' || branchJump.when === 'NO_ANSWER_GIVEN') {
+                        branch_input.jumps[branchJumpIndex].answer_ref = null;
+                    }
                 });
 
                 $(branch_input.group).each(function (index, group_input) {

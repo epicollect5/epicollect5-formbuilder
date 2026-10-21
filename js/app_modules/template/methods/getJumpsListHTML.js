@@ -30,7 +30,6 @@ var getJumpsListHTML = function (input) {
     var html = '';
     var inputs = [];
     var selected_condition_html;
-    var selected_possible_answer_html;
 
     //get input list (hierarchy or branch)
     var parts = input.ref.split('_');
@@ -65,12 +64,20 @@ var getJumpsListHTML = function (input) {
             /****************************************************************************************************
              *  set selected `answer`
              */
+            //reset it for every jump, otherwise a jump with no matching possible answer
+            //(i.e. "no answer given" / "always", where answer_ref is null)
+            //would inherit the answer selected by the previous jump
+            var selected_possible_answer_html = '';
             $(input.possible_answers).each(function (index, possible_answer) {
                 if (possible_answer.answer_ref === jump.answer_ref) {
                     selected_possible_answer_html = _getSelectedJumpAnswerHTML(possible_answer);
                 }
             });
             html = html.replace('{{logic-answer-saved-option}}', selected_possible_answer_html);
+
+            //the "answer" select must be locked when the condition does not reference a specific answer
+            var answer_disabled = (jump.when === 'ALL' || jump.when === 'NO_ANSWER_GIVEN') ? ' disabled' : '';
+            html = html.replace('{{logic-answer-disabled}}', answer_disabled);
             /***************************************************************************************************/
 
         }

@@ -33,6 +33,12 @@ var saveJumps = function (input) {
             jump_properties.to = $(this).find('.input-properties__form__jumps__logic--goto select option:selected').val();
             jump_properties.answer_ref = $(this).find('.input-properties__form__jumps__logic--answer select option:selected').val();
 
+            //"no answer given" and "always" conditions do not reference a specific answer,
+            //so the answer_ref must not be set (it would be meaningless)
+            if (jump_properties.when === 'ALL' || jump_properties.when === 'NO_ANSWER_GIVEN') {
+                jump_properties.answer_ref = null;
+            }
+
             //validate jump properties
             jump_properties.are_valid = input.isJumpValid(jump_properties);
 

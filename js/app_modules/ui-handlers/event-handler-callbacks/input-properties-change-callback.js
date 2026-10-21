@@ -3,6 +3,7 @@
 var formbuilder = require('config/formbuilder');
 var ui = require('helpers/ui');
 var utils = require('helpers/utils');
+var jumps = require('actions/jumps');
 
 var callback = function () {
 
@@ -29,7 +30,10 @@ var callback = function () {
     }
 
     if ($(this).attr('data-jump-logic')) {
-        console.log('it is a jump');
+        //the condition changed, so the "answer" select must be locked/unlocked accordingly
+        if ($(this).attr('data-jump-logic') === 'when') {
+            jumps.toggleJumpAnswerSelect($(this), input);
+        }
     }
 
     if ($(this).attr('data-initial-answer')) {

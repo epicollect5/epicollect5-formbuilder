@@ -382,6 +382,50 @@ var doCleaningBeforeSaving = function () {
 
             expect(branchInput.group).to.deep.equal([]);
         });
+
+        it('should reset the answer_ref of jumps not referencing an answer', function () {
+
+            var forms = [getFormStructure()];
+            var dropdown_input = forms[0].inputs[1];
+
+            dropdown_input.jumps = [
+                {
+                    to: 'form_ref_question_4',
+                    when: 'NO_ANSWER_GIVEN',
+                    answer_ref: '5a252a07d8894'
+                },
+                {
+                    to: 'END',
+                    when: 'ALL',
+                    answer_ref: '5a252a07d8894'
+                },
+                {
+                    to: 'END',
+                    when: 'IS',
+                    answer_ref: '5a252a07d8894'
+                }
+            ];
+
+            //branch input jumps are cleaned as well
+            var branch_input = forms[0].inputs[3].branch[3];
+            branch_input.jumps = [
+                {
+                    to: 'END',
+                    when: 'NO_ANSWER_GIVEN',
+                    answer_ref: '5a252a94d88a1'
+                }
+            ];
+
+            save.doCleaningBeforeSaving(forms);
+
+            //the conditions do not use an answer, so the answer_ref must be gone
+            expect(dropdown_input.jumps[0].answer_ref).to.be.null;
+            expect(dropdown_input.jumps[1].answer_ref).to.be.null;
+            expect(branch_input.jumps[0].answer_ref).to.be.null;
+
+            //"answer is" does use an answer, so the answer_ref must be kept
+            expect(dropdown_input.jumps[2].answer_ref).to.equal('5a252a07d8894');
+        });
     });
 };
 

@@ -43,6 +43,8 @@ var jumps = {
         html = html.replace(/{{input-ref-logic-when}}/g, jump_index + '-' + input.ref + '-logic-when');
         html = html.replace(/{{input-ref-logic-answer}}/g, jump_index + '-' + input.ref + '-logic-answer');
         html = html.replace(/{{input-ref-logic-goto}}/g, jump_index + '-' + input.ref + '-logic-goto');
+        //a brand new jump has no condition yet, so the "answer" select is not locked
+        html = html.replace(/{{logic-answer-disabled}}/g, '');
 
         jumps_list_wrapper.append(html);
 
@@ -87,6 +89,8 @@ var jumps = {
         var focused_select = the_select;
         var input = the_input;
         var html = '';
+        //keep the current selection, otherwise it would be reset to the first possible answer
+        var current_answer_ref = focused_select.val();
 
         //trigger a save in case the user typed in a possibile answer and switched directly to the jump tab
         input.savePossibleAnswers();
@@ -94,7 +98,11 @@ var jumps = {
         focused_select.empty();
         $(input.possible_answers).each(function (index, possible_answer) {
             html += '<option value="';
-            html += possible_answer.answer_ref + '">';
+            html += possible_answer.answer_ref + '"';
+            if (possible_answer.answer_ref === current_answer_ref) {
+                html += ' selected="selected"';
+            }
+            html += '>';
             html += possible_answer.answer.trunc(50);
             html += '</option>';
         });
@@ -107,16 +115,50 @@ var jumps = {
         var focused_select = the_select;
         var possible_conditions = consts.JUMP_CONDITIONS;
         var html = '';
+        //keep the current selection, otherwise it would be reset to the first condition
+        var current_condition = focused_select.val();
 
         focused_select.empty();
         $(possible_conditions).each(function (i) {
 
             html += '<option value="';
-            html += this.key + '">';
+            html += this.key + '"';
+            if (this.key === current_condition) {
+                html += ' selected="selected"';
+            }
+            html += '>';
             html += this.text;
             html += '</option>';
         });
         focused_select.append(html);
+    },
+
+    //lock the "answer" select when the jump condition does not reference a specific answer
+    toggleJumpAnswerSelect: function (the_when_select, the_input) {
+
+        var when_select = the_when_select;
+        var input = the_input;
+        var answer_select = when_select
+            .closest('.input-properties__form__jumps__list-item')
+            .find('.input-properties__form__jumps__logic--answer select');
+
+        //input types without possible answers do not have an "answer" select at all
+        if (answer_select.length === 0) {
+            return;
+        }
+
+        if (when_select.val() === 'ALL' || when_select.val() === 'NO_ANSWER_GIVEN') {
+            //the condition does not use an answer, so remove it and lock the select
+            answer_select.empty();
+            answer_select.prop('disabled', true);
+        }
+        else {
+            answer_select.prop('disabled', false);
+            //repopulate it only if empty, it gets emptied when the condition does not use an answer
+            if (answer_select.find('option').length === 0) {
+                jumps.listJumpPossibleAnswers(answer_select, input);
+            }
+        }
     },
 
     //dynamically show a list of possible destination for a jump

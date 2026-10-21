@@ -11,7 +11,7 @@
     </button>
     <div class="input-properties__form__jumps__logic--answer form-group ">
         <label for="{{input-ref-logic-answer}}">Answer</label>
-        <select id="{{input-ref-logic-answer}}" class="form-control input-sm" data-jump-logic="value">
+        <select id="{{input-ref-logic-answer}}" class="form-control input-sm" data-jump-logic="value"{{logic-answer-disabled}}>
             {{logic-answer-saved-option}}
         </select>
         <span class="input-properties__form__error hidden">(error)</span>

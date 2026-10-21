@@ -170,6 +170,67 @@ var areJumpsValid = function () {
         });
     });
 
+    describe('Test areJumpsValid() -> conditions not referencing an answer', function () {
+
+        //"no answer given" and "always" do not reference a specific possible answer,
+        //so their answer_ref is meaningless and can be empty or dangling
+        var possible_answers = [
+            {
+                answer: 'Yes',
+                answer_ref: '589202653055c'
+            },
+            {
+                answer: 'No',
+                answer_ref: '5892027b3055d'
+            }
+        ];
+
+        var getStructure = function (the_when, the_answer_ref) {
+            return {
+                ref: '9e37766df6664e909f74a8e1a37251ed_5891fb5fb20fd_589202653055b',
+                type: 'radio',
+                possible_answers: possible_answers,
+                jumps: [
+                    {
+                        to: 'END',
+                        when: the_when,
+                        answer_ref: the_answer_ref
+                    }
+                ]
+            };
+        };
+
+        it('should accept "no answer given" with any answer_ref', function () {
+
+            //no answer at all
+            expect(import_form_validation.areJumpsValid(getStructure('NO_ANSWER_GIVEN', null))).to.be.true;
+
+            //dangling answer_ref, it is not checked as the condition does not use it
+            expect(import_form_validation.areJumpsValid(getStructure('NO_ANSWER_GIVEN', '5892028a3055f'))).to.be.true;
+
+            //a valid answer_ref, it is ignored
+            expect(import_form_validation.areJumpsValid(getStructure('NO_ANSWER_GIVEN', '589202653055c'))).to.be.true;
+        });
+
+        it('should accept "always" with any answer_ref', function () {
+
+            //no answer at all
+            expect(import_form_validation.areJumpsValid(getStructure('ALL', null))).to.be.true;
+
+            //dangling answer_ref, it is not checked as the condition does not use it
+            expect(import_form_validation.areJumpsValid(getStructure('ALL', '5892028a3055f'))).to.be.true;
+
+            //a valid answer_ref, it is ignored
+            expect(import_form_validation.areJumpsValid(getStructure('ALL', '589202653055c'))).to.be.true;
+        });
+
+        it('should reject "answer is" / "answer is NOT" without an answer_ref', function () {
+
+            expect(import_form_validation.areJumpsValid(getStructure('IS', null))).to.be.false;
+            expect(import_form_validation.areJumpsValid(getStructure('IS_NOT', null))).to.be.false;
+        });
+    });
+
     describe('Test areJumpsValid() -> invalid jumps', function () {
 
         it('should flag invalid jumps', function () {

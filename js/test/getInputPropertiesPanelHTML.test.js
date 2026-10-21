@@ -369,6 +369,36 @@ var getInputPropertiesPanelHTMLTest = function () {
                         .to.equal(jump.answer_ref);
                 }
 
+                //the answer select exists only for multiple answer input types
+                if ($.inArray(input.type, consts.MULTIPLE_ANSWER_TYPES) > -1) {
+
+                    //the answer select must never contain a leftover "undefined" option
+                    expect(wrapper
+                        .find('.input-properties__form__jumps__list li')
+                        .eq(jumpIndex)
+                        .find('.input-properties__form__jumps__logic--answer select')
+                        .html())
+                        .to.not.contain('undefined');
+
+                    //conditions which do not reference an answer must lock the answer select
+                    if (jump.when === 'ALL' || jump.when === 'NO_ANSWER_GIVEN') {
+                        expect(wrapper
+                            .find('.input-properties__form__jumps__list li')
+                            .eq(jumpIndex)
+                            .find('.input-properties__form__jumps__logic--answer select')
+                            .prop('disabled'))
+                            .to.be.true;
+                    }
+                    else {
+                        expect(wrapper
+                            .find('.input-properties__form__jumps__list li')
+                            .eq(jumpIndex)
+                            .find('.input-properties__form__jumps__logic--answer select')
+                            .prop('disabled'))
+                            .to.be.false;
+                    }
+                }
+
                 //to
                 expect(wrapper
                     .find('.input-properties__form__jumps__list li')

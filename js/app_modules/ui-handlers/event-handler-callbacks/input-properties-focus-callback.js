@@ -60,6 +60,8 @@ var callback = function (e) {
             case input.ref + '-logic-when':
                 //list al the available conditions
                 jumps.listJumpConditions(focused_select);
+                //lock/unlock the "answer" select accordingly
+                jumps.toggleJumpAnswerSelect(focused_select, input);
                 break;
             /*
              get all possible answers for current input and list them as options
