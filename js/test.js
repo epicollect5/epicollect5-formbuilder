@@ -57,6 +57,16 @@ function getProjectStructure(name) {
     return deferred.promise();
 }
 
+/*
+    The app logs a lot of debug info, the node setup buffers it to keep the test output clean.
+    Restore the console at the end of the run, so the mocha reporter can print its summary.
+ */
+var node_setup = require('./test/setup-node');
+
+after(function () {
+    node_setup.restore_console_log();
+});
+
 describe('Test project definition', function () {
     //var foo = false;
     var structure = {};

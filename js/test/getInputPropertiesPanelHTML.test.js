@@ -425,8 +425,9 @@ var getInputPropertiesPanelHTMLTest = function () {
     describe('Test ec5-test-cleaning -> getInputPropertiesPanelHTML() -> valid dom', function () {
 
         //set urls for test environment
-        consts.API_DEVELOPMENT_GET_PATH = '../' + consts.API_DEVELOPMENT_GET_PATH;
-        consts.VIEWS_PATH = '../' + consts.VIEWS_PATH;
+        //(the test fixtures are in js/test, the views are in public/views)
+        consts.API_DEVELOPMENT_GET_PATH = '../../' + consts.API_DEVELOPMENT_GET_PATH;
+        consts.VIEWS_PATH = '../../public/' + consts.VIEWS_PATH;
         var forms = [];
 
         //get dependencies/resolve promises need for all the it() tests

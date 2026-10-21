@@ -13,6 +13,7 @@
     "modernizr": "^3.0.0-alpha.3"
   },
   "devDependencies": {
+    "agent-browser": "^0.27.0",
     "bootstrap-toggle": "^2.0.0",
     "browserify": "^9.0.8",
     "chai": "^3.5.0",
@@ -33,6 +34,8 @@
     "gulp-uglify": "^1.5.4",
     "gulp-util": "^3.0.8",
     "gutil": "^1.6.4",
+    "jquery": "^3.7.1",
+    "jsdom": "^29.1.1",
     "lodash": "^3.6.0",
     "lodash.assign": "^3.2.0",
     "mocha": "^2.5.3",
@@ -44,7 +47,7 @@
     "watchify": "^3.11.1"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --opts js/test/mocha.opts",
     "build": "gulp",
     "watch-js": ""
   },

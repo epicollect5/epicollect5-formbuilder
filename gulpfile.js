@@ -18,7 +18,6 @@ var concat_css = require('gulp-concat-css');
 var minify_css = require('gulp-minify-css');
 var uglify = require('gulp-uglify');
 var header = require('gulp-header');
-var notify = require('gulp-notify');
 var mocha = require('gulp-mocha');
 var stripDebug = require('gulp-strip-debug');
 
@@ -137,46 +136,7 @@ gulp.task('default', gulp.series('vendor-js', 'vendor-css', 'sass', 'browserify'
 
 /*****************************************************************************************/
 //tests
-// add custom browserify options here
-var testOpts = {
-    entries: ['./js/test.js'],//test entry point,
-    /* add path to have absolute paths when requiring modules
-     * to avoid ../../../../ stuff
-     */
-    paths: ['./node_modules', './js/app_modules', './js/test'],
-    debug: true
-};
-
-var test_opts = assign({}, watchify.args, testOpts);
-var b_test = watchify(browserify(test_opts));
-
-//run test manually
-gulp.task('test', function () {
-    return browserify(test_opts)
-        .bundle()
-        // log errors if they happen
-        .on('error', function (err) {
-            return notify().write(err);
-        })
-        .pipe(source('test-bundle.js'))
-        .pipe(buffer())
-        .pipe(gulp.dest('./public/test/'));
-});
-
-//build test automatically via watchify
-gulp.task('watch-test', test_bundle); // so you can run `gulp test` to build the file
-b_test.on('update', test_bundle); // on any dep update, runs the bundler
-b_test.on('log', gutil.log); // output build logs to terminal
-
-function test_bundle() {
-    return b_test.bundle()
-        // log errors if they happen
-        .on('error', gutil.log.bind(gutil, 'Browserify Test Error'))
-        .pipe(source('test-bundle.js'))
-        .pipe(buffer())
-        .pipe(gulp.dest('./public/test/'));
-}
-
+// the test suite runs in node (CLI), see js/test/setup-node.js and js/test/mocha.opts
 gulp.task('mocha', function () {
     return gulp.src('test.js')
         .pipe(mocha())

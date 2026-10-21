@@ -7,7 +7,7 @@ Started with Yeoman HTML5 Boilerplate generator https://github.com/h5bp/generato
 ###
 watch → 'gulp watch' → {root}/public/index.html
 build → `gulp' → {root}/public/index.html
-test → 'gulp test'→ {root}/public/test/index.html
+test → `npm test' (runs the test suite in node)
 
 ## Forking
 
