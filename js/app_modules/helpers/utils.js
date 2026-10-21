@@ -551,7 +551,8 @@ var utils = {
 
     slugify: function (text) {
 
-        var trimmed = $.trim(text);
+        //the name can come from an imported form, so it might be empty
+        var trimmed = (text === null || text === undefined) ? '' : String(text).trim();
         var $slug = trimmed.replace(/[^a-z0-9-]/gi, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
         return $slug.toLowerCase();
     },

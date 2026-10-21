@@ -68,7 +68,7 @@ var import_form_validation = {
 
         var answer_ref_regex = new RegExp(consts.REGEX.possible_answer_ref);
 
-        if (!$.isArray(jumps)) {
+        if (!Array.isArray(jumps)) {
             are_valid = false;
         }
         else {
@@ -189,24 +189,24 @@ var import_form_validation = {
 
         var last_input;
 
-        if (!$.isArray(inputs) || inputs.length === 0) {
+        if (!Array.isArray(inputs) || inputs.length === 0) {
             return inputs;
         }
 
         last_input = inputs[inputs.length - 1];
-        if ($.isArray(last_input.jumps)) {
+        if (Array.isArray(last_input.jumps)) {
             last_input.jumps = [];
         }
 
         $(inputs).each(function (index, input) {
             var last_branch_input;
 
-            if (!$.isArray(input.branch) || input.branch.length === 0) {
+            if (!Array.isArray(input.branch) || input.branch.length === 0) {
                 return;
             }
 
             last_branch_input = input.branch[input.branch.length - 1];
-            if ($.isArray(last_branch_input.jumps)) {
+            if (Array.isArray(last_branch_input.jumps)) {
                 last_branch_input.jumps = [];
             }
         });
@@ -223,7 +223,7 @@ var import_form_validation = {
             answer_ref: ''//this must be unique
         };
 
-        if (!$.isArray(possible_answers)) {
+        if (!Array.isArray(possible_answers)) {
             return false;
         }
         else {
@@ -650,7 +650,7 @@ var import_form_validation = {
             //top level input, validate branch and group recursively
 
             //branch
-            if ($.isArray(input.branch)) {
+            if (Array.isArray(input.branch)) {
                 $(input.branch).each(function (index, branch_input) {
                     self.isValidInput(form_ref, branch_input, true, false);
                 });
@@ -660,7 +660,7 @@ var import_form_validation = {
             }
 
             //group
-            if ($.isArray(input.group)) {
+            if (Array.isArray(input.group)) {
                 $(input.group).each(function (index, group_input) {
                     self.isValidInput(form_ref, group_input, false, true);
                 });

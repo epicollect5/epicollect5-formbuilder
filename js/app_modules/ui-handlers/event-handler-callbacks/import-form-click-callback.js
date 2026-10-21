@@ -104,7 +104,7 @@ var callback = function (files) {
         }
 
         //is inputs array?
-        if (!$.isArray(inputs)) {
+        if (!Array.isArray(inputs)) {
             formbuilder.dom.overlay.fadeOut(consts.ANIMATION_FAST);
             toastr.error(messages.error.FORM_FILE_INVALID);
             return;
