@@ -1,6 +1,6 @@
 {
-  "name": "jquery-ui-form-builder",
-  "version": "1.0.0",
+  "name": "jquery-ui-formbuilder",
+  "version": "0.1.0",
   "description": "Form builder created with jQuery & jQuery UI",
   "main": "js/app.js",
   "directories": {
