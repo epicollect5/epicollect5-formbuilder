@@ -9,8 +9,8 @@ Generate QA documentation from a codebase change or QA spec file.
 
 - qa_spec_file (optional)
   docs/QA-{version}.md — `{version}` is this repo's release version (`X.Y.Z` from
-  `CHANGELOG.md` and the git tags), e.g. `docs/QA-0.0.10.md`. The latest tag is
-  `0.0.9`; `CHANGELOG.md` does not exist yet.
+  `CHANGELOG.md` and the git tags), e.g. `docs/QA-0.1.0.md`. The latest tag is
+  `0.1.0`.
 
 ## Diff scope
 

@@ -498,24 +498,34 @@ Deployable tree: `public/index.html`, `public/js/`, `public/css/`,
 4. Prepend the release notes to `CHANGELOG.md`.
 5. `npm run build` — rebuild the four tracked artifacts.
 6. Bump both cache-buster fields in `public/index.html` to the same fresh value.
-7. Commit (`chore: release <version>`), tag `X.Y.Z`, push the tag, and attach the
-   built artifacts to the GitHub Release.
-8. Deploy is a **separate, explicit** step: copy the deployable tree into the
-   EpiCollect5 server's `public/formbuilder/` directory. There is no deploy
-   script. Bump the server's own `config('app.release')` cache-buster when the
-   shell or views change, so production does not keep serving the previous
-   release.
+7. Commit (`chore: release <version>`) and create the annotated tag `X.Y.Z`.
+8. **Ask before pushing.** Show what would go out — the branch, the number of
+   commits and the tag — and wait for an explicit yes. A request to cut a
+   release is not consent to push. Then push `master` and the tag.
+9. **Ask before publishing.** Create the GitHub Release and upload the four
+   built artifacts only after a separate confirmation naming the repository.
+10. Deploy is a **separate, explicit** step: copy the deployable tree into the
+    EpiCollect5 server's `public/formbuilder/` directory. There is no deploy
+    script. Bump the server's own `config('app.release')` cache-buster when the
+    shell or views change, so production does not keep serving the previous
+    release.
+
+The full procedure, including the confirmation wording, is in
+`.agents/skills/release/SKILL.md`.
 
 ## Versions
 
 The release version is plain semver `X.Y.Z`.
 
-- The latest git tag is **`0.0.9`**.
-- `package.json` and `package-lock.json` currently read **`1.0.0`**; they have
-  drifted from the tag. The tag is authoritative.
-- There is **no `CHANGELOG.md`** yet. The first release bootstraps it with a
-  `# Release Notes` heading.
-- There are no GitHub Releases yet.
+- The latest git tag is **`0.1.0`**.
+- `package.json` and both `package-lock.json` version fields read **`0.1.0`**;
+  they are in sync with the tag.
+- `CHANGELOG.md` exists and carries an entry for every tagged version, back to
+  `0.0.2`.
+- GitHub Releases carry the four built artifacts.
 
 > **The git tag and the CHANGELOG heading are authoritative — not
-> `package.json`.** Keep all three in sync from the first managed release onward.
+> `package.json`.** Keep all three in sync.
+
+> **Pushing always requires an explicit confirmation** — see `AGENTS.md`,
+> "Pushing always requires explicit confirmation".

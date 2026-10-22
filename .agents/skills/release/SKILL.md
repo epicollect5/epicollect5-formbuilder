@@ -20,13 +20,12 @@ Release.
   version = `<major>.<minor>.<patch>`   (plain semver)
 
 - The release version is the `## X.Y.Z` heading in `CHANGELOG.md` and the matching
-  git tag (`X.Y.Z`). The current latest tag is `0.0.9`.
+  git tag (`X.Y.Z`). The current latest tag is `0.1.0`.
 - **The git tag and the CHANGELOG heading are authoritative — not `package.json`.**
-  `package.json` and `package-lock.json` currently read `1.0.0`, which has drifted
-  from the tag. Always detect the current version from the tag and the CHANGELOG,
-  and warn the user about the drift instead of trusting `package.json`.
-- There is no `CHANGELOG.md` yet. The first managed release creates it with a
-  `# Release Notes` heading before the new `## X.Y.Z` section.
+  Always detect the current version from the tag and the CHANGELOG, and warn the
+  user about any drift instead of trusting `package.json`.
+- `CHANGELOG.md` exists and carries the full history back to `0.0.2`; every
+  tagged version has an entry.
 - There is no build number and no native app: this is a web app deployed as the
   `public/` tree.
 
@@ -61,8 +60,9 @@ Release.
      `packages[""]`). npm does not sync these on a hand-edit of `package.json`,
      so bump them explicitly — never `npm install` for this (it rewrites pins
      and may churn unrelated entries).
-   - Risk: `package.json` and the git tag drifting apart. This repo has already
-     drifted (`1.0.0` vs tag `0.0.9`) — keep them in sync from now on.
+   - Risk: `package.json` and the git tag drifting apart. They were out of sync
+     for the whole `0.0.x` series (the manifests read `1.0.0` while the tag read
+     `0.0.9`); they are aligned now — keep them that way.
 
 4. Generate release notes
    - `git log --oneline <prev-tag>..HEAD` (base = previous release tag).
@@ -89,14 +89,33 @@ Release.
    - They must match; a mismatch makes the app bundle and the runtime views load
      different builds.
 
-7. Report and confirm follow-up
+7. Report and confirm — LOCAL steps
    - Show version, changed files, the cache-buster value and the built artifacts.
-   - Ask whether to commit (`chore: release <new>`), create an annotated tag
-     (`<new>`, e.g. `0.1.0`), and push `master` + the tag. Do not commit, tag or
-     push unless confirmed.
+   - Ask whether to commit (`chore: release <new>`) and create an annotated tag
+     (`<new>`, e.g. `0.1.0`). Do not commit or tag unless confirmed.
+   - Local commit and tag are reversible and may be done in one go.
+
+8. Report and confirm — PUSH and PUBLISH (a separate gate)
+   - A request to cut a release is **not** consent to push. Ask separately, and
+     show exactly what will go out: the branch, the number of commits and the
+     tag name.
+   - Example: "Local release 0.1.0 is ready. Push `master` (5 commits) and the
+     `0.1.0` tag to `origin`?"
+   - Wait for an explicit yes. Do not push on silence, on approval of an earlier
+     step, or because the surrounding task said "go".
+   - Then, and only then:
+
+     ```bash
+     git push origin master
+     git push origin <tag>
+     ```
+
    - The tag must be pushed to origin before the GitHub Release can point at it.
 
-8. Create the GitHub Release and attach the artifacts (after the tag is pushed)
+9. Create the GitHub Release and attach the artifacts (after the tag is pushed)
+   - Publishing is a separate outward-facing action. Ask for confirmation naming
+     the destination repository, e.g. "Create the GitHub Release `0.1.0` on
+     `epicollect5/epicollect5-formbuilder` and upload the four built artifacts?"
    - With the user's confirmation, create the release:
 
      ```bash
@@ -121,14 +140,14 @@ Release.
      gh release view <tag> --json assets
      ```
 
-9. Deploy to the server is a **separate, explicit** step
-   - There is no deploy script. Copy the deployable tree into the EpiCollect5
-     server's `public/formbuilder/` directory: `index.html`, `js/`, `css/`,
-     `views/`, and the static `fonts/`/`favicons/` when they changed.
-   - Bump the server's own `config('app.release')` cache-buster when the shell or
-     views change, so production does not keep serving the previous release.
-   - Never deploy as part of the release unless the user asks for it, and confirm
-     the destination path first.
+10. Deploy to the server is a **separate, explicit** step
+    - There is no deploy script. Copy the deployable tree into the EpiCollect5
+      server's `public/formbuilder/` directory: `index.html`, `js/`, `css/`,
+      `views/`, and the static `fonts/`/`favicons/` when they changed.
+    - Bump the server's own `config('app.release')` cache-buster when the shell or
+      views change, so production does not keep serving the previous release.
+    - Never deploy as part of the release unless the user asks for it, and confirm
+      the destination path first.
 
 ## Constraints (AGENTS.md)
 
@@ -142,3 +161,7 @@ Release.
   ships code that does not match the tag.
 - Copying to the server writes outside the repo — confirm the destination before
   doing it.
+- **Pushing is always a separate, explicit confirmation** (see `AGENTS.md`,
+  "Pushing always requires explicit confirmation"). Never fold the push into the
+  commit/tag question, and never infer consent from the request that started the
+  release.

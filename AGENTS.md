@@ -167,6 +167,34 @@ Commit messages follow Conventional Commits:
 - Maximum 75 characters total, including type and scope
 - If the change includes both a fix and a feature, prefer the type that best reflects the primary purpose
 
+### Pushing always requires explicit confirmation
+
+**Never push without asking first.** This applies to `git push`, `git push --tags`,
+`git push origin <branch>`, `git push origin <tag>`, and any command that
+uploads a branch, a tag or a ref to a remote.
+
+- A request to commit, release, tag, publish or ship **does not** authorize a
+  push. "Cut a 0.1.0 release" means build, bump, tag and prepare — it is not
+  consent to publish. Ask separately, after showing exactly what will be pushed.
+- Ask once per push, naming the branch and the refs: for example
+  "Push `master` (5 commits) and the `0.1.0` tag to origin?"
+- Wait for an explicit yes. Silence, an earlier approval for a different step,
+  or "just do it" for the surrounding task is not consent.
+- Local work (commit, tag, build) is reversible and may proceed. A push is
+  outward-facing and effectively permanent: it moves shared branches, can
+  trigger CI and deployments, and bypasses the repo's pull-request protection.
+- The same rule covers publishing to a remote: creating a GitHub Release,
+  uploading release assets, opening a pull request or an issue. Confirm each
+  one explicitly, and name the destination repository.
+- If the user has not confirmed a push, stop at the local commit and report
+  exactly what is ready to push, so they can say yes in one word.
+
+## Release
+
+The full release procedure lives in `.agents/skills/release/SKILL.md`. It ends
+with two separate confirmations: one to commit and tag locally, one to push and
+publish. Do not collapse them into a single question.
+
 ## Source of Truth
 
 - Architecture → `docs/ARCHITECTURE.md`
