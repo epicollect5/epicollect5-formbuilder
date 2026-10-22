@@ -7,3 +7,4 @@ node_modules
 public/js/formbuilder.js.map
 project/project.json
 .history/*
+docs/QA-*

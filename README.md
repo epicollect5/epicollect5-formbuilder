@@ -9,6 +9,14 @@ watch → 'gulp watch' → {root}/public/index.html
 build → `gulp' → {root}/public/index.html
 test → `npm test' (runs the test suite in node)
 
+## Repository docs
+
+- `AGENTS.md` — working rules, two-codebase boundaries, build and test commands
+- `docs/ARCHITECTURE.md` — how the legacy app works and the Vue port target
+- `docs/CODE-STYLE.md` — coding style for `formbuilder-vue/` only
+- `docs/legacy-known-defects.md` — legacy behaviour not to reproduce
+- `.agents/skills/` — canonical agent commands (wrappers in `.opencode/commands/`)
+
 ## Forking
 
 We provide this software as is, under MIT license, for the benefit and use of the community, however, we are unable to
