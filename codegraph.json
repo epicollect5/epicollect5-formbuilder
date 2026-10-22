@@ -1,0 +1,8 @@
+{
+  "exclude": [
+    "public/js/**",
+    "js/vendor/**",
+    "css/paper/**",
+    "doc/**"
+  ]
+}
