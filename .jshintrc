@@ -9,5 +9,6 @@
         "module": true,
         "console": true
     },
-    "node": true
+    "node": true,
+    "esversion": 8
 }

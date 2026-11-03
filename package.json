@@ -6,13 +6,8 @@
   "directories": {
     "doc": "doc"
   },
-  "dependencies": {
-    "bootstrap": "^3.3.4",
-    "font-awesome": "^4.3.0",
-    "jshint": "^2.13.4",
-    "modernizr": "^3.0.0-alpha.3"
-  },
   "devDependencies": {
+    "jshint": "^2.13.4",
     "agent-browser": "^0.27.0",
     "bootstrap-toggle": "^2.0.0",
     "browserify": "^9.0.8",
@@ -36,8 +31,6 @@
     "gutil": "^1.6.4",
     "jquery": "^3.7.1",
     "jsdom": "^29.1.1",
-    "lodash": "^3.6.0",
-    "lodash.assign": "^3.2.0",
     "mocha": "^2.5.3",
     "sass": "^1.67.0",
     "use-import": "^0.1.2",
@@ -49,7 +42,7 @@
   "scripts": {
     "test": "mocha --opts js/test/mocha.opts",
     "build": "gulp",
-    "watch-js": ""
+    "start": "gulp watch"
   },
   "repository": {
     "type": "git",

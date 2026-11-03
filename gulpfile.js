@@ -10,7 +10,6 @@ var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
-var assign = require('lodash.assign');
 var concat = require('gulp-concat');
 var order = require('gulp-order');
 var sass = require('gulp-sass')(require('sass'));
@@ -31,7 +30,7 @@ var customOpts = {
     debug: true
 };
 
-var opts = assign({}, watchify.args, customOpts);
+var opts = Object.assign({}, watchify.args, customOpts);
 var b = watchify(browserify(opts));
 
 // Concatenate vendor js files
