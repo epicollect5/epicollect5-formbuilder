@@ -1,6 +1,7 @@
 /* Legacy Bootstrap nav-tabs: the strip is only a baseline, the selected tab
    is marked with a primary underline instead of a filled pill. */
-.main__tabs {
+/* The strip also carries .nav-tabs, so scope it to win over those rules. */
+.main > .main__tabs {
     display: flex;
     align-items: stretch;
     gap: 2px;
@@ -9,8 +10,10 @@
     padding: 0;
     list-style: none;
     background: var(--fb-surface-2);
-    border: 1px solid var(--fb-border);
-    border-radius: var(--fb-radius);
+    /* the .main card draws the outer border; the strip only closes itself */
+    border: 0;
+    border-bottom: 1px solid var(--fb-border);
+    border-radius: var(--fb-radius) var(--fb-radius) 0 0;
     overflow-x: auto;
 }
 

@@ -100,16 +100,22 @@
     overflow: auto;
 }
 
+/* The tab strip and its content are one card: the strip is the header row and
+   the content area carries the padding, so they read as a single surface. */
 .main {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    gap: 12px;
+    gap: 0;
+    background: var(--fb-surface);
+    border: 1px solid var(--fb-border);
+    border-radius: var(--fb-radius);
 }
 
 .main__tabs-content {
     flex: 1;
     min-height: 0;
+    padding: 16px;
 }
 
 .main__tabs-content.tab-content > .main__tabs-content-tabpanel.tab-pane.active {
