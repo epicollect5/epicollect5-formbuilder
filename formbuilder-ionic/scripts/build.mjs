@@ -37,7 +37,6 @@ const vendor_scripts = [
     ['jquery/dist/jquery.min.js', 'vendor/jquery.min.js'],
     ['jquery-ui/dist/jquery-ui.min.js', 'vendor/jquery-ui.min.js']
 ];
-const vendor_css = ['summernote.css'];
 
 function log(message) {
     console.log('[formbuilder-ionic] ' + message);
@@ -97,15 +96,6 @@ async function copyStaticAssets() {
         path.join(root, 'node_modules/@ionic/core/css/ionic.bundle.css'),
         path.join(dist, 'vendor/ionic/css/ionic.bundle.css')
     );
-
-    await fs.mkdir(path.join(dist, 'vendor/css'), { recursive: true });
-
-    for (const file of vendor_css) {
-        await fs.copyFile(
-            path.join(repo, 'css/vendor', file),
-            path.join(dist, 'vendor/css', file)
-        );
-    }
 
     const icons_source = path.join(root, 'node_modules/ionicons/dist/ionicons/svg');
     const icons_target = path.join(dist, 'vendor/ionicons/svg');
@@ -299,7 +289,7 @@ async function main() {
     await fs.rm(dist, { recursive: true, force: true });
     await fs.mkdir(dist, { recursive: true });
     await buildStyles();
-    await buildVendorBundle();
+    await copyVendorScripts();
     await copyStaticAssets();
 
     const contexts = await createScriptContexts();

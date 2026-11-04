@@ -8,11 +8,14 @@
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs --watch --serve",
     "start": "npm run dev",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "NODE_ENV=test vitest run",
+    "test:watch": "NODE_ENV=test vitest"
   },
   "dependencies": {
     "@ionic/core": "8.8.4",
+    "@tiptap/core": "3.31.3",
+    "@tiptap/pm": "3.31.3",
+    "@tiptap/starter-kit": "3.31.3",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "ionicons": "8.0.13"
