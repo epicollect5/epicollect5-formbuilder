@@ -3,10 +3,13 @@
 import { getForms, getProject } from '@/models/project-definition.js';
 import { QUESTION_TYPES, getQuestionType } from '@/models/question-types.js';
 import {
+    addInput,
     getCurrentForm,
     getCurrentInput,
     getCurrentInputs,
     getSession,
+    moveInput,
+    removeInput,
     selectForm,
     selectInput,
     updateCurrentInput
@@ -14,6 +17,7 @@ import {
 import { button, element, icon } from '@/ui/dom.js';
 
 let handlers = {};
+let dragged_ref = null;
 
 export function renderApp(app_handlers) {
     handlers = app_handlers || {};
@@ -48,10 +52,6 @@ function revealBuilder() {
     }
 }
 
-/*
- * Adding questions is a later slice, so the tools are a reference list rather
- * than controls that look interactive but do nothing.
- */
 function renderTools() {
     const container = document.getElementById('tools');
 
@@ -62,11 +62,31 @@ function renderTools() {
     container.replaceChildren();
 
     QUESTION_TYPES.forEach(function (question_type) {
-        container.append(element('div', { class: 'builder__tool' }, [
+        const tool = button({
+            type: 'button',
+            class: 'builder__tool',
+            'data-type': question_type.type,
+            'aria-label': 'Add a ' + question_type.label + ' question'
+        }, [
             icon(question_type.icon),
             element('span', { class: 'builder__tool-label' }, [question_type.label])
-        ]));
+        ]);
+
+        tool.addEventListener('click', function () {
+            addQuestion(question_type.type);
+        });
+
+        container.append(tool);
     });
+}
+
+function addQuestion(type) {
+    if (!addInput(type)) {
+        return;
+    }
+
+    renderQuestions();
+    renderProperties();
 }
 
 function renderForms() {
@@ -122,30 +142,96 @@ function renderQuestions() {
     }
 
     inputs.forEach(function (input) {
-        const question_type = getQuestionType(input.type);
-        const row = element('li', {
-            class: 'builder__question',
-            role: 'button',
-            tabindex: '0',
-            'data-input-ref': input.ref,
-            'aria-current': input.ref === current_ref ? 'true' : 'false'
-        }, [
-            icon(question_type ? question_type.icon : 'help-outline'),
-            element('span', { class: 'builder__question-text' }, [input.question || 'Untitled question'])
-        ]);
+        list.append(buildQuestionRow(input, input.ref === current_ref));
+    });
+}
 
-        row.addEventListener('click', function () {
+function buildQuestionRow(input, is_current) {
+    const question_type = getQuestionType(input.type);
+    const row = element('li', {
+        class: 'builder__question',
+        role: 'button',
+        tabindex: '0',
+        draggable: 'true',
+        'data-input-ref': input.ref,
+        'aria-current': is_current ? 'true' : 'false'
+    }, [
+        icon('reorder-three-outline'),
+        icon(question_type ? question_type.icon : 'help-outline'),
+        element('span', { class: 'builder__question-text' }, [input.question || 'Untitled question'])
+    ]);
+
+    row.addEventListener('click', function () {
+        chooseInput(input.ref);
+    });
+
+    row.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
             chooseInput(input.ref);
-        });
+        }
+    });
 
-        row.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                chooseInput(input.ref);
-            }
-        });
+    row.addEventListener('dragstart', function (event) {
+        dragged_ref = input.ref;
+        row.classList.add('builder__question--dragging');
 
-        list.append(row);
+        if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', input.ref);
+        }
+    });
+
+    row.addEventListener('dragend', function () {
+        dragged_ref = null;
+        row.classList.remove('builder__question--dragging');
+        clearDropTargets();
+    });
+
+    row.addEventListener('dragover', function (event) {
+        if (!dragged_ref || dragged_ref === input.ref) {
+            return;
+        }
+
+        event.preventDefault();
+        row.classList.add('builder__question--over');
+    });
+
+    row.addEventListener('dragleave', function () {
+        row.classList.remove('builder__question--over');
+    });
+
+    row.addEventListener('drop', function (event) {
+        event.preventDefault();
+        row.classList.remove('builder__question--over');
+        reorderBefore(input.ref);
+    });
+
+    return row;
+}
+
+function reorderBefore(target_ref) {
+    const inputs = getCurrentInputs();
+    const from_index = inputs.findIndex(function (input) {
+        return input.ref === dragged_ref;
+    });
+    const to_index = inputs.findIndex(function (input) {
+        return input.ref === target_ref;
+    });
+
+    dragged_ref = null;
+
+    if (!moveInput(from_index, to_index)) {
+        return;
+    }
+
+    renderQuestions();
+    renderProperties();
+}
+
+function clearDropTargets() {
+    document.querySelectorAll('.builder__question--over').forEach(function (row) {
+        row.classList.remove('builder__question--over');
     });
 }
 
@@ -172,13 +258,7 @@ function renderProperties() {
         return;
     }
 
-    container.replaceChildren(
-        element('div', { class: 'builder__panel-heading' }, [
-            element('span', { class: 'builder__panel-title' }, [
-                input ? (input.question || 'Untitled question') : 'Question properties'
-            ])
-        ])
-    );
+    container.replaceChildren(buildPropertiesHeading(input));
 
     if (!input) {
         container.append(element('div', { class: 'builder__empty' }, ['Select a question to edit it.']));
@@ -200,6 +280,34 @@ function renderProperties() {
     ]));
 
     container.append(body);
+}
+
+function buildPropertiesHeading(input) {
+    const heading = element('div', { class: 'builder__panel-heading' }, [
+        element('span', { class: 'builder__panel-title' }, [
+            input ? (input.question || 'Untitled question') : 'Question properties'
+        ])
+    ]);
+
+    if (!input) {
+        return heading;
+    }
+
+    const delete_button = button({
+        type: 'button',
+        class: 'builder__delete',
+        'aria-label': 'Delete question'
+    }, [icon('trash-outline')]);
+
+    delete_button.addEventListener('click', function () {
+        removeInput(input.ref);
+        renderQuestions();
+        renderProperties();
+    });
+
+    heading.append(delete_button);
+
+    return heading;
 }
 
 function buildQuestionField(value) {

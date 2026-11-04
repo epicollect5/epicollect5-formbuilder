@@ -1,6 +1,7 @@
 'use strict';
 
 import { findInput, getForm, getForms, getInputs } from '@/models/project-definition.js';
+import { createInput } from '@/models/input-factory.js';
 
 /*
  * The project definition is the state. This module only holds the reference to
@@ -65,4 +66,53 @@ export function updateCurrentInput(changes) {
     });
 
     return input;
+}
+
+export function addInput(type) {
+    const form = getCurrentForm();
+
+    if (!form) {
+        return null;
+    }
+
+    const input = createInput(type, form.ref);
+
+    form.inputs.push(input);
+    session.current_input_ref = input.ref;
+
+    return input;
+}
+
+export function removeInput(input_ref) {
+    const form = getCurrentForm();
+    const inputs = getInputs(form);
+    const index = inputs.findIndex(function (input) {
+        return input.ref === input_ref;
+    });
+
+    if (index === -1) {
+        return false;
+    }
+
+    inputs.splice(index, 1);
+
+    if (session.current_input_ref === input_ref) {
+        session.current_input_ref = null;
+    }
+
+    return true;
+}
+
+export function moveInput(from_index, to_index) {
+    const inputs = getCurrentInputs();
+
+    if (from_index === to_index || from_index < 0 || to_index < 0 || from_index >= inputs.length || to_index >= inputs.length) {
+        return false;
+    }
+
+    const input = inputs.splice(from_index, 1)[0];
+
+    inputs.splice(to_index, 0, input);
+
+    return true;
 }

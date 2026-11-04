@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { getCurrentInput, getSession, setProject } from '@/services/session.js';
+import { getCurrentInput, getCurrentInputs, getSession, setProject } from '@/services/session.js';
 import { renderApp } from '@/ui/shell.js';
 
 function build_markup() {
@@ -70,6 +70,41 @@ describe('builder shell', () => {
         expect(rows[1].getAttribute('aria-current')).toBe('true');
         expect(rows[0].getAttribute('aria-current')).toBe('false');
         expect(document.querySelector('#properties ion-input').value).toBe('Your name');
+    });
+
+    it('adds a question from the tools and selects it', () => {
+        const tools = [...document.querySelectorAll('#tools .builder__tool')];
+
+        tools.find((tool) => tool.getAttribute('data-type') === 'radio').click();
+
+        const inputs = getCurrentInputs();
+
+        expect(inputs).toHaveLength(3);
+        expect(inputs[2].type).toBe('radio');
+        expect(getSession().current_input_ref).toBe(inputs[2].ref);
+        expect(document.querySelectorAll('#questions .builder__question')).toHaveLength(3);
+        expect(document.querySelector('#questions .builder__question[aria-current="true"] .builder__question-text').textContent).toBe('Untitled question');
+    });
+
+    it('deletes the selected question', () => {
+        document.querySelectorAll('#questions .builder__question')[0].click();
+        document.querySelector('#properties .builder__delete').click();
+
+        expect(getCurrentInputs()).toHaveLength(1);
+        expect(getSession().current_input_ref).toBeNull();
+        expect(document.querySelectorAll('#questions .builder__question')).toHaveLength(1);
+        expect(document.querySelector('#properties .builder__empty')).not.toBeNull();
+    });
+
+    it('reorders questions with a drag', () => {
+        const rows = [...document.querySelectorAll('#questions .builder__question')];
+
+        rows[0].dispatchEvent(new Event('dragstart', { bubbles: true }));
+        rows[1].dispatchEvent(new Event('dragover', { bubbles: true, cancelable: true }));
+        rows[1].dispatchEvent(new Event('drop', { bubbles: true, cancelable: true }));
+
+        expect(getCurrentInputs().map((input) => input.ref)).toEqual(['input_2', 'input_1']);
+        expect(document.querySelectorAll('#questions .builder__question')[0].getAttribute('data-input-ref')).toBe('input_2');
     });
 
     it('switches form and clears the selection', () => {

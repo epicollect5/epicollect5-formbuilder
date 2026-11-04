@@ -18,7 +18,7 @@ session, so each slice can be compared side by side.
 | Current form / current question / edits | `config/formbuilder.js` singleton | `src/services/session.js` | ported |
 | Shell, form switching, question list, selection | `loaders/load-containers.js`, `actions/parse/**`, `ui-handlers/*sortable*` | `src/ui/shell.js` | ported (slice 1) |
 | Basic question editing (text, required, title) | `actions/parse`, `actions/validation`, `inputs/**` | `src/ui/shell.js` | ported (slice 2, minimal) |
-| Adding / reordering / deleting questions | `ui-handlers/sortable.js`, `actions/input-collection*` | — | pending |
+| Adding / reordering / deleting questions | `ui-handlers/sortable.js`, `actions/input-collection*`, `factory/input-factory.js` | `src/models/input-factory.js`, `src/models/refs.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 2) |
 | Possible answers (add, remove, sort, import) | `actions/possible-answers*.js`, `template/methods/getPossibleAnswers*` | — | pending |
 | Branches and groups | `inputs/branch.js`, `inputs/group.js`, `ui-handlers/*branch*`, `ui-handlers/*group*` | — | pending |
 | Jumps | `actions/jumps.js`, `helpers/utils.getJumpAvailableDestinations` | — | pending |
@@ -31,7 +31,7 @@ session, so each slice can be compared side by side.
 ## Slices
 
 1. Boundary and project loading: own entry, own DOM, form switching, question list, selection.
-2. Basic question editing.
+2. Basic question editing, adding, reordering and deleting questions.
 3. Possible answers.
 4. Branches and groups.
 5. Validation.
