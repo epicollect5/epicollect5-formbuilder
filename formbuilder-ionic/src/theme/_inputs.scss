@@ -71,6 +71,9 @@
 
 .inputs-collection .sortable {
     position: relative;
+    /* same vertical rhythm as the tools list in the left sidebar */
+    display: grid;
+    gap: 6px;
 }
 
 .branch-sortable,
