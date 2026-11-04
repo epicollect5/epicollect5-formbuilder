@@ -18,6 +18,12 @@
     border-radius: var(--fb-radius) var(--fb-radius) 0 0;
 }
 
+/* The legacy header floats this group right; the header is a flex row, where a
+   float has no effect, so the group is pushed to the trailing edge instead. */
+.input-properties__form__possible-answers .panel-heading > .btn-group {
+    margin-left: auto;
+}
+
 /* The header is a compact toolbar: its icon buttons sit below the row scale. */
 .panel-heading .btn-sm {
     display: inline-flex;
