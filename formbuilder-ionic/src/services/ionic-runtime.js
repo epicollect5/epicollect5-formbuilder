@@ -29,19 +29,20 @@ const IONIC_COMPONENTS = [
 /*
  * Register the Ionic Core components this UI renders and point ion-icon at the
  * pinned Ionicons assets copied into dist/vendor/ionicons/svg by the build.
+ * The asset path comes first: defining ion-icon upgrades the ion-icon elements
+ * already in the document and loads their svg immediately, and Ionic core and
+ * the standalone `ionicons` package keep that path on separate platform
+ * objects, so both copies need it.
  */
 export function setupIonic() {
+    const asset_path = new URL('vendor/ionicons/svg', document.baseURI).href;
+
+    setAssetPath(asset_path);
+    setIoniconAssetPath(asset_path);
+
     initialize();
 
     IONIC_COMPONENTS.forEach(function (defineComponent) {
         defineComponent();
     });
-
-    const asset_path = new URL('vendor/ionicons/svg', document.baseURI).href;
-
-    // `initialize()` registers ion-icon from Ionic core's own ionicons build,
-    // which keeps its asset path on a different platform object than the
-    // standalone `ionicons` package, so both copies need the same path.
-    setAssetPath(asset_path);
-    setIoniconAssetPath(asset_path);
 }
