@@ -163,10 +163,21 @@ describe('partial views', () => {
 });
 
 describe('theme', () => {
+    it('uses the theme secondary role for action buttons', async () => {
+        const controls = await read('src/theme/_controls.scss');
+        const tokens = await read('src/theme/_tokens.scss');
+
+        expect(controls).toContain('background: var(--ion-color-secondary);');
+        expect(controls).toContain('color: var(--ion-color-secondary-contrast);');
+        expect(controls).not.toContain('background: var(--ion-color-primary);');
+        expect(tokens).toContain('--ion-color-secondary: #3b7284;');
+    });
+
     it('keeps the legacy text and border palette', async () => {
         const tokens = await read('src/theme/_tokens.scss');
 
-        expect(tokens).toContain('--fb-text: #333333;');
+        expect(tokens).toContain('--fb-text: var(--app-text, #333333);');
+        expect(tokens).toContain('--fb-surface: var(--app-surface, #ffffff);');
         expect(tokens).toContain('--fb-muted: #777777;');
         expect(tokens).toContain('--fb-border: #dddddd;');
         expect(tokens).toContain('--fb-border-strong: #cccccc;');

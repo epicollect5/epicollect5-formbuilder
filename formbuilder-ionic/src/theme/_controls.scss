@@ -38,22 +38,28 @@
     font-size: 12px;
 }
 
+/* Action buttons use the app theme's secondary role, not primary. */
 .btn-primary,
 .btn-action {
-    background: var(--ion-color-primary);
-    border-color: var(--ion-color-primary);
-    color: var(--ion-color-primary-contrast);
+    background: var(--ion-color-secondary);
+    border-color: var(--ion-color-secondary);
+    color: var(--ion-color-secondary-contrast);
 }
 
 .btn-primary:hover,
 .btn-action:hover {
-    background: var(--ion-color-primary-shade);
+    background: var(--ion-color-secondary-shade);
+    border-color: var(--ion-color-secondary-shade);
 }
 
 .btn-action-inverse {
     background: transparent;
-    color: var(--ion-color-primary);
-    border-color: var(--ion-color-primary);
+    color: var(--ion-color-secondary);
+    border-color: var(--ion-color-secondary);
+}
+
+.btn-action-inverse:hover {
+    background: rgba(var(--ion-color-secondary-rgb), 0.08);
 }
 
 .btn-danger {
