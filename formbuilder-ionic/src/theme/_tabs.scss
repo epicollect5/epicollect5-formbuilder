@@ -1,9 +1,12 @@
+/* Legacy Bootstrap nav-tabs: the strip is only a baseline, the selected tab
+   is marked with a primary underline instead of a filled pill. */
 .main__tabs {
     display: flex;
-    align-items: center;
-    gap: 4px;
+    align-items: stretch;
+    gap: 2px;
+    min-height: 50px;
     margin: 0;
-    padding: 6px;
+    padding: 0;
     list-style: none;
     background: var(--fb-surface-2);
     border: 1px solid var(--fb-border);
@@ -12,6 +15,7 @@
 }
 
 .main__tabs > li {
+    display: flex;
     flex: 0 0 auto;
     list-style: none;
 }
@@ -19,10 +23,11 @@
 .main__tabs > li > a {
     display: inline-flex;
     align-items: center;
+    height: 100%;
     gap: 6px;
-    padding: 9px 14px;
-    border: 1px solid transparent;
-    border-radius: 10px;
+    padding: 0 14px;
+    border: 0;
+    border-bottom: 2px solid transparent;
     color: var(--fb-label);
     font-size: 15px;
     font-weight: 600;
@@ -36,8 +41,9 @@
 }
 
 .main__tabs > li.active > a {
-    background: var(--ion-color-primary);
-    color: var(--ion-color-primary-contrast);
+    background: transparent;
+    border-bottom-color: var(--ion-color-primary);
+    color: var(--ion-color-primary);
 }
 
 .main__tabs > li.disabled > a,
@@ -52,9 +58,11 @@
 
 .nav-tabs {
     display: flex;
-    gap: 4px;
+    align-items: stretch;
+    gap: 2px;
+    min-height: 42px;
     margin: 0 0 12px;
-    padding: 4px;
+    padding: 0;
     list-style: none;
     background: var(--fb-surface-2);
     border: 1px solid var(--fb-border);
@@ -63,6 +71,7 @@
 }
 
 .nav-tabs > li {
+    display: flex;
     flex: 0 0 auto;
     list-style: none;
 }
@@ -70,9 +79,11 @@
 .nav-tabs > li > a {
     display: inline-flex;
     align-items: center;
+    height: 100%;
     gap: 4px;
-    padding: 7px 11px;
-    border-radius: 9px;
+    padding: 0 12px;
+    border: 0;
+    border-bottom: 2px solid transparent;
     color: var(--fb-label);
     font-size: 14px;
     font-weight: 600;
@@ -86,8 +97,9 @@
 }
 
 .nav-tabs > li.active > a {
-    background: var(--ion-color-primary);
-    color: var(--ion-color-primary-contrast);
+    background: transparent;
+    border-bottom-color: var(--ion-color-primary);
+    color: var(--ion-color-primary);
 }
 
 .nav-tabs > li.disabled > a,
