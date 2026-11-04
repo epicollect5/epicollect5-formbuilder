@@ -13,7 +13,7 @@
 }
 
 .legacy-icon.fa-2x > ion-icon {
-    font-size: 2.2em;
+    font-size: 1.8em;
 }
 
 .legacy-icon.fa-fw {
@@ -21,12 +21,25 @@
 }
 
 .legacy-icon.fa-2x.fa-fw {
-    width: 2.4em;
+    width: 2em;
 }
 
 button .legacy-icon > ion-icon,
 .btn .legacy-icon > ion-icon {
     font-size: 1.5em;
+}
+
+/* the 2x size is for the toolbar and panel header buttons only, not for the question rows */
+button .legacy-icon.fa-2x > ion-icon,
+.btn .legacy-icon.fa-2x > ion-icon,
+.panel-heading .legacy-icon.fa-2x > ion-icon {
+    font-size: 2.2em;
+}
+
+button .legacy-icon.fa-2x.fa-fw,
+.btn .legacy-icon.fa-2x.fa-fw,
+.panel-heading .legacy-icon.fa-2x.fa-fw {
+    width: 2.4em;
 }
 
 .question-state,
