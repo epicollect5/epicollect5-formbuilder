@@ -4,6 +4,8 @@ ion-toast.fb-toast {
     --width: min(560px, calc(100vw - 32px));
     --max-width: 560px;
     --border-radius: 8px;
+    /* matches the top bar height, and still grows for a long message */
+    --min-height: 60px;
     --box-shadow: 0 14px 32px rgba(28, 18, 40, 0.18);
     --background: var(--ion-color-primary);
     --color: var(--ion-color-primary-contrast);
