@@ -186,10 +186,10 @@ describe('theme', () => {
         expect(tabs).toContain('font-size: 14px;');
     });
 
-    it('uses larger uppercase labels for the toolbar actions', async () => {
+    it('uses bold compact labels for the toolbar actions', async () => {
         const layout = await read('src/theme/_layout.scss');
 
-        expect(layout).toMatch(/\.navbar-button-label\s*\{[^}]*font-size:\s*17px;[^}]*text-transform:\s*uppercase;/);
+        expect(layout).toMatch(/\.navbar-button-label\s*\{[^}]*font-size:\s*14px;[^}]*font-weight:\s*700;[^}]*letter-spacing:\s*0;[^}]*text-transform:\s*uppercase;/);
     });
 
     it('keeps dragged input tiles the same size as resting tiles', async () => {
