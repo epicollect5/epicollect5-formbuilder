@@ -1,5 +1,13 @@
 'use strict';
 
-import { bootIonicPrototype } from '@/pages/formbuilder.page.js';
+import { bootFormbuilder } from '@/pages/formbuilder.page.js';
 
-bootIonicPrototype(window.jQuery, document.body);
+bootFormbuilder().catch(function (error) {
+    console.error('[formbuilder-ionic] boot failed', error);
+
+    const loader = document.querySelector('.loader');
+
+    if (loader) {
+        loader.textContent = 'The formbuilder could not be loaded.';
+    }
+});

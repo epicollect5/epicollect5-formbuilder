@@ -18,25 +18,7 @@ const is_serve = args.has('--serve');
 const port = 5183;
 
 const alias = {
-    '@': path.join(root, 'src'),
-    legacy: path.join(repo, 'js'),
-    config: path.join(repo, 'js/app_modules/config'),
-    actions: path.join(repo, 'js/app_modules/actions'),
-    factory: path.join(repo, 'js/app_modules/factory'),
-    helpers: path.join(repo, 'js/app_modules/helpers'),
-    inputs: path.join(repo, 'js/app_modules/inputs'),
-    loaders: path.join(repo, 'js/app_modules/loaders'),
-    template: path.join(repo, 'js/app_modules/template'),
-    'ui-handlers': path.join(repo, 'js/app_modules/ui-handlers')
-};
-
-const import_validation_alias = {
-    name: 'import-validation-alias',
-    setup(build) {
-        build.onResolve({ filter: /^helpers\/import-form-validation$/ }, function () {
-            return { path: path.join(root, 'src/services/import-form-validation.js') };
-        });
-    }
+    '@': path.join(root, 'src')
 };
 
 const esbuild_common = {
@@ -44,7 +26,6 @@ const esbuild_common = {
     format: 'iife',
     target: ['es2019'],
     alias: alias,
-    plugins: [import_validation_alias],
     define: {
         'process.env.NODE_ENV': '"development"'
     },
@@ -66,12 +47,6 @@ async function buildScriptsOnce() {
         outdir: path.join(dist, 'js'),
         sourcemap: true
     });
-
-    await esbuild.build({
-        ...esbuild_common,
-        entryPoints: { 'legacy-formbuilder': path.join(repo, 'js/app.js') },
-        outdir: path.join(dist, 'js')
-    });
 }
 
 async function createScriptContexts() {
@@ -82,15 +57,9 @@ async function createScriptContexts() {
         sourcemap: true
     });
 
-    const legacy = await esbuild.context({
-        ...esbuild_common,
-        entryPoints: { 'legacy-formbuilder': path.join(repo, 'js/app.js') },
-        outdir: path.join(dist, 'js')
-    });
+    await app.watch();
 
-    await Promise.all([app.watch(), legacy.watch()]);
-
-    return [app, legacy];
+    return [app];
 }
 
 async function buildStyles() {
@@ -121,12 +90,6 @@ async function buildVendorBundle() {
 
     await fs.mkdir(path.join(dist, 'js'), { recursive: true });
     await fs.writeFile(path.join(dist, 'js/vendor-formbuilder.js'), bundle);
-}
-
-async function copyViews() {
-    await fs.rm(path.join(dist, 'views'), { recursive: true, force: true });
-    await fs.cp(path.join(root, 'src/views'), path.join(dist, 'views'), { recursive: true });
-    await fs.cp(path.join(repo, 'public/views/properties'), path.join(dist, 'views/properties'), { recursive: true });
 }
 
 async function copyStaticAssets() {
@@ -168,7 +131,6 @@ async function buildAll() {
     await buildScriptsOnce();
     await buildStyles();
     await buildVendorBundle();
-    await copyViews();
     await copyStaticAssets();
 
     log('built dist/');
@@ -177,9 +139,8 @@ async function buildAll() {
 async function refreshAssets() {
     await buildStyles();
     await buildVendorBundle();
-    await copyViews();
     await copyStaticAssets();
-    log('refreshed styles, views and static assets');
+    log('refreshed styles and static assets');
 }
 
 const mime_types = {
@@ -307,8 +268,6 @@ function startServer() {
 function watchSources(onChange) {
     const directories = [
         path.join(root, 'src'),
-        path.join(repo, 'js/app_modules'),
-        path.join(repo, 'public/views'),
         path.join(repo, 'js/vendor'),
         path.join(repo, 'css/vendor')
     ];
@@ -347,7 +306,6 @@ async function main() {
     await fs.mkdir(dist, { recursive: true });
     await buildStyles();
     await buildVendorBundle();
-    await copyViews();
     await copyStaticAssets();
 
     const contexts = await createScriptContexts();

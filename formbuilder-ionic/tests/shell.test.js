@@ -1,0 +1,84 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+import { getCurrentInput, getSession, setProject } from '@/services/session.js';
+import { renderApp } from '@/ui/shell.js';
+
+function build_markup() {
+    document.body.innerHTML = [
+        '<span id="project-name"></span>',
+        '<section id="tools"></section>',
+        '<nav id="form-tabs" role="tablist"></nav>',
+        '<section id="questions"></section>',
+        '<section id="properties"></section>'
+    ].join('');
+}
+
+function project_definition() {
+    return {
+        data: {
+            project: {
+                name: 'Test mapping issue',
+                forms: [
+                    {
+                        ref: 'form_1',
+                        name: 'Screening form',
+                        inputs: [
+                            { ref: 'input_1', type: 'radio', question: 'Do you have children', is_required: false, is_title: false },
+                            { ref: 'input_2', type: 'text', question: 'Your name', is_required: false, is_title: false }
+                        ]
+                    },
+                    { ref: 'form_2', name: 'Second form', inputs: [] }
+                ]
+            }
+        }
+    };
+}
+
+describe('builder shell', () => {
+    beforeEach(() => {
+        build_markup();
+        setProject(project_definition());
+        renderApp();
+    });
+
+    it('shows the project name and one tab per form', () => {
+        expect(document.getElementById('project-name').textContent).toBe('Test mapping issue');
+
+        const tabs = document.querySelectorAll('#form-tabs .builder__form-tab');
+
+        expect(tabs).toHaveLength(2);
+        expect(tabs[0].textContent).toBe('Screening form');
+        expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+        expect(tabs[1].getAttribute('aria-selected')).toBe('false');
+    });
+
+    it('lists the current form questions', () => {
+        const rows = document.querySelectorAll('#questions .builder__question');
+
+        expect(rows).toHaveLength(2);
+        expect(rows[0].querySelector('.builder__question-text').textContent).toBe('Do you have children');
+        expect(rows[1].querySelector('.builder__question-text').textContent).toBe('Your name');
+        expect(document.querySelectorAll('#tools .builder__tool')).toHaveLength(18);
+    });
+
+    it('selects a question and opens its properties', () => {
+        const rows = document.querySelectorAll('#questions .builder__question');
+
+        rows[1].click();
+
+        expect(getSession().current_input_ref).toBe('input_2');
+        expect(getCurrentInput().question).toBe('Your name');
+        expect(rows[1].getAttribute('aria-current')).toBe('true');
+        expect(rows[0].getAttribute('aria-current')).toBe('false');
+        expect(document.querySelector('#properties ion-input').value).toBe('Your name');
+    });
+
+    it('switches form and clears the selection', () => {
+        document.querySelectorAll('#questions .builder__question')[0].click();
+        document.querySelectorAll('#form-tabs .builder__form-tab')[1].click();
+
+        expect(getSession().current_form_index).toBe(1);
+        expect(getSession().current_input_ref).toBeNull();
+        expect(document.querySelector('#questions .builder__empty')).not.toBeNull();
+        expect(document.querySelector('#properties .builder__empty')).not.toBeNull();
+    });
+});

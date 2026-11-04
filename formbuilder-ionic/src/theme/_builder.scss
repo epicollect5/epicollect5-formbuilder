@@ -1,0 +1,215 @@
+/* Native builder shell: its own DOM, no legacy panel/tab hooks. */
+.builder {
+    display: grid;
+    grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
+    gap: 16px;
+    height: 100%;
+    min-height: 0;
+    padding: 16px;
+}
+
+.builder-bar {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+}
+
+.builder-bar__project {
+    overflow: hidden;
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.builder__tools {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 0;
+    padding: 8px;
+    overflow: auto;
+    background: var(--fb-surface);
+    border: 1px solid var(--fb-border);
+    border-radius: var(--fb-radius);
+}
+
+.builder__tool {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: var(--fb-text);
+    font-size: 14px;
+}
+
+.builder__tool ion-icon {
+    color: var(--fb-muted);
+    font-size: 18px;
+}
+
+.builder__tool-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.builder__workspace {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--fb-surface);
+    border: 1px solid var(--fb-border);
+    border-radius: var(--fb-radius);
+}
+
+.builder__forms {
+    display: flex;
+    gap: 4px;
+    padding: 0 12px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--fb-border);
+}
+
+.builder__form-tab {
+    padding: 14px 12px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--fb-muted);
+    font: inherit;
+    font-size: 15px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.builder__form-tab[aria-selected='true'] {
+    border-bottom-color: var(--ion-color-primary);
+    color: var(--ion-color-primary);
+    font-weight: 600;
+}
+
+.builder__columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    min-height: 0;
+    padding: 16px;
+}
+
+.builder__questions,
+.builder__properties {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--fb-surface);
+    border: 1px solid var(--fb-border);
+    border-radius: 12px;
+}
+
+.builder__panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--fb-border-strong);
+    background: #93cdafb5;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.builder__panel-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.builder__count {
+    color: var(--fb-muted);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.builder__question-list {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 10px;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.builder__question {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 7px 10px;
+    border: 1px solid #999999;
+    border-radius: 8px;
+    background: var(--fb-surface);
+    cursor: pointer;
+}
+
+.builder__question ion-icon {
+    color: var(--fb-muted);
+    font-size: 20px;
+}
+
+.builder__question[aria-current='true'] {
+    border-color: var(--ion-color-primary);
+    background: #c76abb73;
+}
+
+.builder__question-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.builder__properties-body {
+    display: grid;
+    gap: 12px;
+    padding: 12px;
+    overflow-y: auto;
+}
+
+.builder__field {
+    --background: var(--fb-surface);
+    --border-color: var(--fb-border-strong);
+    font-size: 15px;
+}
+
+.builder__hint {
+    margin: 0;
+    color: var(--fb-muted);
+    font-size: 14px;
+}
+
+.builder__empty {
+    padding: 16px;
+    color: var(--fb-muted);
+    font-size: 14px;
+}
+
+@media (max-width: 900px) {
+    .builder {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .builder__columns {
+        grid-template-columns: 1fr;
+    }
+}

@@ -55,10 +55,6 @@ ui.input_properties_panel.toggleAddAnswerBtn = vi.fn();
 
 const INPUT_REF = 'ec5_1';
 
-function read_prototype_view(relative_path) {
-    return fs.readFileSync(path.join(prototype_root, relative_path), 'utf8');
-}
-
 function read_legacy_view(relative_path) {
     return fs.readFileSync(path.join(repo_root, relative_path), 'utf8');
 }
@@ -66,8 +62,8 @@ function read_legacy_view(relative_path) {
 const POSSIBLE_ANSWER_PARTIAL = read_legacy_view('public/views/partials/possible-answer-list-item.html');
 
 const PARTIALS = {
-    jump_list_item: read_prototype_view('src/views/partials/jump-list-item.html'),
-    jump_list_item_always_jump: read_prototype_view('src/views/partials/jump-list-item-always-jump.html'),
+    jump_list_item: read_legacy_view('public/views/partials/jump-list-item.html'),
+    jump_list_item_always_jump: read_legacy_view('public/views/partials/jump-list-item-always-jump.html'),
     // a row added at runtime always starts with the remove button enabled
     possible_answer_list_item: POSSIBLE_ANSWER_PARTIAL.replace('{{disabled}}', '')
 };
