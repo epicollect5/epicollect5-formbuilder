@@ -65,6 +65,16 @@
     font-size: 15px;
 }
 
+/* Question rows inherit a 16px base while the sidebar rows use 14px, so a 2x
+   glyph would render larger here. Pin it to the sidebar size instead. */
+.inputs-collection .input .legacy-icon.fa-2x > ion-icon {
+    font-size: 1.575em;
+}
+
+.inputs-collection .input .legacy-icon.fa-2x.fa-fw {
+    width: 1.75em;
+}
+
 .inputs-collection .panel-body {
     min-height: 140px;
 }
@@ -113,8 +123,8 @@
     border-radius: 8px;
     background: rgba(var(--ion-color-primary-rgb), 0.08);
     /* matches a question row so the list does not jump when it appears */
-    height: 47px;
-    min-height: 47px;
+    height: 43px;
+    min-height: 43px;
     list-style: none;
 }
 
