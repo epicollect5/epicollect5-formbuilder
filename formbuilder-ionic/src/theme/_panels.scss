@@ -187,9 +187,15 @@
 
 .input_properties__forms_wrapper .input-properties__form__possible-answers > .panel-heading {
     padding: 8px 12px;
-    background: var(--fb-surface-2);
+    background: #93cdafb5;
     border-bottom: 1px solid var(--fb-border-strong);
     border-radius: 8px 8px 0 0;
+}
+
+/* The properties card header carries the same tint as the possible answers
+   section: both are properties surfaces. */
+.input-properties > .panel > .panel-heading {
+    background: #93cdafb5;
 }
 
 .input_properties__forms_wrapper .input-properties__form__possible-answers > .panel-body {
