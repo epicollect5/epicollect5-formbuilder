@@ -91,7 +91,6 @@
 
 .ui-sortable-helper {
     box-shadow: 0 16px 34px rgba(28, 18, 40, 0.22);
-    transform: rotate(0.4deg);
 }
 
 .ui-sortable-placeholder {
@@ -101,9 +100,13 @@
     background: rgba(var(--ion-color-primary-rgb), 0.08);
 }
 
-.ui-draggable-dragging {
+/* jQuery UI writes a content width and a stale inline height on the clone.
+   content-box keeps padding/border, height:auto restores the content height. */
+.input.ui-draggable-dragging {
     z-index: 9999;
     cursor: grabbing;
+    box-sizing: content-box;
+    height: auto !important;
 }
 
 .dragging-disabled {

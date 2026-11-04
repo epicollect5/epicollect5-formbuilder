@@ -163,6 +163,15 @@ describe('partial views', () => {
 });
 
 describe('theme', () => {
+    it('keeps dragged input tiles the same size as resting tiles', async () => {
+        const inputs = await read('src/theme/_inputs.scss');
+
+        expect(inputs).toContain('.input.ui-draggable-dragging');
+        expect(inputs).toContain('box-sizing: content-box;');
+        expect(inputs).toContain('height: auto !important;');
+        expect(inputs).not.toContain('transform: rotate(0.4deg);');
+    });
+
     it('uses the theme secondary role for action buttons', async () => {
         const controls = await read('src/theme/_controls.scss');
         const tokens = await read('src/theme/_tokens.scss');
