@@ -13,6 +13,7 @@ import { defineCustomElement as defineIonCardTitle } from '@ionic/core/component
 import { defineCustomElement as defineIonCardContent } from '@ionic/core/components/ion-card-content.js';
 import { defineCustomElement as defineIonNote } from '@ionic/core/components/ion-note.js';
 import { defineCustomElement as defineIonModal } from '@ionic/core/components/ion-modal.js';
+import { defineCustomElement as defineIonToast } from '@ionic/core/components/ion-toast.js';
 import { setAssetPath } from 'ionicons/components';
 import { defineCustomElement as defineIonIcon } from 'ionicons/components/ion-icon.js';
 
@@ -29,6 +30,7 @@ const IONIC_COMPONENTS = [
     defineIonCardContent,
     defineIonNote,
     defineIonModal,
+    defineIonToast,
     defineIonIcon
 ];
 

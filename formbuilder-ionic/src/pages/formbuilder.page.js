@@ -3,6 +3,7 @@
 import { setupIonic } from '@/services/ionic-runtime.js';
 import { installLegacyUi } from '@/services/legacy-ui.js';
 import { startIconBridge } from '@/components/legacy-icons/legacy-icons.js';
+import { installLegacyToast } from '@/components/legacy-toast/legacy-toast.js';
 
 /**
  * Boot order matters: Ionic must be registered before the legacy app presents
@@ -12,5 +13,6 @@ import { startIconBridge } from '@/components/legacy-icons/legacy-icons.js';
 export function bootIonicPrototype($, root) {
     setupIonic();
     installLegacyUi($, document);
+    installLegacyToast(window);
     startIconBridge(root);
 }

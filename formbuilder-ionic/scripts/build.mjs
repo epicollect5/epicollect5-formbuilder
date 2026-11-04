@@ -53,7 +53,7 @@ const esbuild_common = {
 };
 
 const vendor_files_order = ['jquery-2.1.4.min.js', 'jquery-ui.min.js'];
-const vendor_css = ['toastr.min.css', 'summernote.css'];
+const vendor_css = ['summernote.css'];
 
 function log(message) {
     console.log('[formbuilder-ionic] ' + message);
