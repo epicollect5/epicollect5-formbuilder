@@ -135,7 +135,23 @@
     flex-direction: column;
 }
 
+/* Same treatment as the main tab strip: the tab area is a card whose first row
+   is the strip, so the tabs sit on their content instead of floating above it. */
 .input-properties__tabs {
-    /* the card body has no padding of its own, the tab area provides it */
-    padding: 14px;
+    margin: 14px;
+    padding: 0;
+    background: var(--fb-surface);
+    border: 1px solid var(--fb-border);
+    border-radius: var(--fb-radius);
+}
+
+.input-properties__tabs > .nav-tabs {
+    margin: 0;
+    border: 0;
+    border-bottom: 1px solid var(--fb-border);
+    border-radius: var(--fb-radius) var(--fb-radius) 0 0;
+}
+
+.input-properties__tabs > .tab-content {
+    padding: 0 14px 14px;
 }
