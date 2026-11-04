@@ -264,19 +264,91 @@ input[type='radio'] {
     color: var(--fb-label);
 }
 
-.note-editor {
+.builder__readme-editor {
     border: 1px solid var(--fb-border-strong);
     border-radius: 10px;
     overflow: hidden;
 }
 
-.note-editor .note-toolbar {
+.builder__readme-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     background: var(--fb-surface-2);
     border-bottom: 1px solid var(--fb-border);
-    padding: 4px 6px;
+    padding: 6px;
 }
 
-.note-editor .btn {
-    min-height: 28px;
-    padding: 4px 8px;
+.builder__readme-toolbar-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fb-text);
+    font: inherit;
+    cursor: pointer;
+}
+
+.builder__readme-toolbar-button:hover,
+.builder__readme-toolbar-button[aria-pressed='true'] {
+    border-color: var(--fb-border-strong);
+    background: var(--fb-surface);
+}
+
+.builder__readme-toolbar-button[aria-label='Bold'] {
+    font-weight: 700;
+}
+
+.builder__readme-toolbar-button[aria-label='Italic'] {
+    font-style: italic;
+}
+
+.builder__readme-toolbar-button[aria-label='Underline'] {
+    text-decoration: underline;
+}
+
+.builder__readme-toolbar-button:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+}
+
+.builder__readme-content {
+    position: relative;
+    min-height: 120px;
+    padding: 10px 12px;
+    background: var(--fb-surface);
+    color: var(--fb-text);
+    font: inherit;
+    font-size: 15px;
+    outline: none;
+}
+
+.builder__readme-content p {
+    margin: 0 0 10px;
+}
+
+.builder__readme-content p:last-child {
+    margin-bottom: 0;
+}
+
+.builder__readme-content.is-empty::before {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    color: var(--fb-muted);
+    content: attr(data-placeholder);
+    pointer-events: none;
+}
+
+.builder__readme-editor:focus-within {
+    border-color: var(--ion-color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.18);
+}
+
+.builder__readme-content:focus {
+    outline: none;
 }

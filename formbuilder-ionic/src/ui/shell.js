@@ -25,11 +25,13 @@ import {
     updateCurrentInput
 } from '@/services/session.js';
 import { button, element, icon } from '@/ui/dom.js';
+import { createReadmeEditor } from '@/ui/readme-editor.js';
 import { installAnswerSortable, installQuestionSortable, installToolDrag } from '@/ui/sortable.js';
 
 const QUESTION_LIST = '#questions .builder__question-list';
 
 let handlers = {};
+let active_readme_editor = null;
 
 export function renderApp(app_handlers) {
     handlers = app_handlers || {};
@@ -255,7 +257,7 @@ function buildQuestionRow(input, is_current) {
         'aria-current': is_current ? 'true' : 'false'
     }, [
         icon(question_type ? question_type.icon : 'help-outline'),
-        element('span', { class: 'builder__question-text' }, [input.question || 'Untitled question'])
+        element('span', { class: 'builder__question-text' }, [getQuestionLabel(input)])
     ]);
 
     row.addEventListener('click', function () {
@@ -315,6 +317,11 @@ function renderProperties() {
         return;
     }
 
+    if (active_readme_editor) {
+        active_readme_editor.destroy();
+        active_readme_editor = null;
+    }
+
     const previous_body = container.querySelector('.builder__properties-body');
     const previous_scroll = previous_body ? previous_body.scrollTop : 0;
 
@@ -328,13 +335,26 @@ function renderProperties() {
     const question_type = getQuestionType(input.type);
     const body = element('div', { class: 'builder__properties-body' });
 
-    body.append(buildQuestionField(input.question || ''));
-    body.append(buildToggle('Required', input.is_required === true, function (checked) {
-        updateCurrentInput({ is_required: checked });
-    }));
-    body.append(buildToggle('Use as entry title', input.is_title === true, function (checked) {
-        updateCurrentInput({ is_title: checked });
-    }));
+    if (input.type === 'readme') {
+        active_readme_editor = createReadmeEditor(input.question || '', function (question, plain_text) {
+            if (getSession().current_input_ref !== input.ref) {
+                return;
+            }
+
+            updateCurrentInput({ question: question });
+            updateQuestionText(plain_text);
+        });
+        body.append(active_readme_editor.element);
+    }
+    else {
+        body.append(buildQuestionField(input.question || ''));
+        body.append(buildToggle('Required', input.is_required === true, function (checked) {
+            updateCurrentInput({ is_required: checked });
+        }));
+        body.append(buildToggle('Use as entry title', input.is_title === true, function (checked) {
+            updateCurrentInput({ is_title: checked });
+        }));
+    }
     body.append(element('p', { class: 'builder__hint' }, [
         'Type: ' + (question_type ? question_type.label : input.type)
     ]));
@@ -355,7 +375,7 @@ function renderProperties() {
 function buildPropertiesHeading(input) {
     const heading = element('div', { class: 'builder__panel-heading' }, [
         element('span', { class: 'builder__panel-title' }, [
-            input ? (input.question || 'Untitled question') : 'Question properties'
+            input ? getQuestionLabel(input) : 'Question properties'
         ])
     ]);
     const actions = element('div', { class: 'builder__heading-actions' });
@@ -431,6 +451,20 @@ function buildQuestionField(value) {
     });
 
     return field;
+}
+
+function getQuestionLabel(input) {
+    if (!input || !input.question) {
+        return input && input.type === 'readme' ? 'Readme' : 'Untitled question';
+    }
+
+    if (input.type !== 'readme') {
+        return input.question;
+    }
+
+    const parsed = new DOMParser().parseFromString(input.question, 'text/html');
+
+    return parsed.body.textContent.trim() || 'Readme';
 }
 
 function buildToggle(label, checked, on_change) {
@@ -552,9 +586,10 @@ function buildAddAnswerButton(input) {
  * without re-rendering the field being typed into.
  */
 function updateQuestionText(question) {
+    const input = getCurrentInput();
     const title = document.querySelector('#properties > .builder__panel-heading .builder__panel-title');
     const row = document.querySelector('.builder__question[aria-current="true"] .builder__question-text');
-    const label = question || 'Untitled question';
+    const label = question || (input && input.type === 'readme' ? 'Readme' : 'Untitled question');
 
     if (title) {
         title.textContent = label;
