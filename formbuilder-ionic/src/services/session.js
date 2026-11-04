@@ -1,7 +1,8 @@
 'use strict';
 
-import { findInput, getForm, getForms, getInputs } from '@/models/project-definition.js';
+import { findInput, getForm, getForms, getInputs, getProject } from '@/models/project-definition.js';
 import { createInput } from '@/models/input-factory.js';
+import { generateFormRef } from '@/models/refs.js';
 
 /*
  * The project definition is the state. This module only holds the reference to
@@ -75,12 +76,74 @@ export function addInput(type) {
         return null;
     }
 
-    const input = createInput(type, form.ref);
+    return insertInput(type, form.inputs.length);
+}
 
-    form.inputs.push(input);
+export function insertInput(type, index) {
+    const form = getCurrentForm();
+
+    if (!form) {
+        return null;
+    }
+
+    const input = createInput(type, form.ref);
+    const bounded_index = Math.max(0, Math.min(index, form.inputs.length));
+
+    form.inputs.splice(bounded_index, 0, input);
     session.current_input_ref = input.ref;
 
     return input;
+}
+
+/* Applies the order the sortable produced; refuses a partial list. */
+export function reorderInputs(refs) {
+    const form = getCurrentForm();
+
+    if (!form) {
+        return false;
+    }
+
+    const by_ref = new Map(form.inputs.map(function (input) {
+        return [input.ref, input];
+    }));
+    const ordered = refs.map(function (ref) {
+        return by_ref.get(ref);
+    }).filter(Boolean);
+
+    if (ordered.length !== form.inputs.length) {
+        return false;
+    }
+
+    form.inputs.splice.apply(form.inputs, [0, form.inputs.length].concat(ordered));
+
+    return true;
+}
+
+export function addForm() {
+    const project = getProject(session.project_definition);
+
+    if (!project) {
+        return null;
+    }
+
+    const name = 'New form';
+    const form = {
+        ref: generateFormRef(project.ref),
+        name: name,
+        slug: slugify(name + '-' + (project.forms.length + 1)),
+        type: 'hierarchy',
+        inputs: []
+    };
+
+    project.forms.push(form);
+    session.current_form_index = project.forms.length - 1;
+    session.current_input_ref = null;
+
+    return form;
+}
+
+function slugify(text) {
+    return String(text).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 }
 
 export function removeInput(input_ref) {

@@ -9,13 +9,45 @@
 }
 
 .builder-bar {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     min-width: 0;
     width: 100%;
+    gap: 10px;
+}
+
+.builder-bar__link {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 4px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: #ffffff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.builder-bar__link[data-action='exit'] {
+    justify-self: end;
+}
+
+.builder-bar__link:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.builder-bar__link ion-icon {
+    font-size: 18px;
 }
 
 .builder-bar__project {
+    justify-self: center;
     overflow: hidden;
     color: #ffffff;
     font-size: 17px;
@@ -82,12 +114,93 @@
     border-radius: var(--fb-radius);
 }
 
+.builder__forms-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--fb-border);
+}
+
 .builder__forms {
     display: flex;
+    flex: 1;
     gap: 4px;
-    padding: 0 12px;
+    min-width: 0;
     overflow-x: auto;
-    border-bottom: 1px solid var(--fb-border);
+}
+
+.builder__add-form,
+.builder__action {
+    flex: none;
+    padding: 6px 12px;
+    border: 1px solid var(--fb-border-strong);
+    border-radius: 6px;
+    background: var(--fb-surface);
+    color: var(--fb-text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.builder__add-form:hover,
+.builder__action:hover:not(:disabled) {
+    background: var(--fb-surface-2);
+}
+
+.builder__form-actions {
+    display: flex;
+    flex: none;
+    gap: 6px;
+}
+
+.builder__action--primary {
+    border-color: var(--ion-color-secondary-shade);
+    background: var(--ion-color-secondary);
+    color: var(--ion-color-secondary-contrast);
+}
+
+.builder__action:disabled {
+    color: var(--fb-muted);
+    cursor: not-allowed;
+}
+
+.builder__heading-actions {
+    display: flex;
+    flex: none;
+    gap: 4px;
+}
+
+.builder__icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--fb-border-strong);
+    border-radius: 6px;
+    background: var(--fb-surface);
+    color: var(--fb-text);
+    cursor: pointer;
+}
+
+.builder__icon-btn ion-icon {
+    font-size: 18px;
+}
+
+.builder__icon-btn:disabled {
+    color: var(--fb-border-strong);
+    cursor: not-allowed;
+}
+
+.builder__icon-btn--danger {
+    color: var(--ion-color-danger);
+}
+
+.builder__icon-btn:hover:not(:disabled) {
+    background: var(--fb-surface-2);
 }
 
 .builder__form-tab {
@@ -110,7 +223,9 @@
 
 .builder__columns {
     display: grid;
+    flex: 1;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     gap: 16px;
     min-height: 0;
     padding: 16px;
@@ -155,7 +270,10 @@
 
 .builder__question-list {
     display: grid;
+    flex: 1;
+    align-content: start;
     gap: 6px;
+    min-height: 0;
     margin: 0;
     padding: 10px;
     overflow-y: auto;
@@ -174,13 +292,23 @@
     cursor: pointer;
 }
 
-.builder__question--dragging {
-    opacity: 0.5;
+.builder__question {
+    cursor: grab;
 }
 
-.builder__question--over {
-    border-color: var(--ion-color-primary);
-    box-shadow: 0 0 0 2px rgba(var(--ion-color-primary-rgb), 0.18);
+.builder__question--helper {
+    cursor: grabbing;
+    opacity: 0.9;
+    background: var(--fb-surface);
+    box-shadow: 0 8px 24px rgba(28, 18, 40, 0.18);
+}
+
+.builder__question-placeholder {
+    min-height: 42px;
+    border: 1px dashed var(--ion-color-primary);
+    border-radius: 8px;
+    background: #c76abb22;
+    visibility: visible !important;
 }
 
 .builder__delete {
@@ -222,8 +350,12 @@
 
 .builder__properties-body {
     display: grid;
+    flex: 1;
+    align-content: start;
     gap: 12px;
+    min-height: 0;
     padding: 12px;
+    overflow-y: auto;
     overflow-y: auto;
 }
 
@@ -275,6 +407,15 @@
     align-items: center;
     gap: 6px;
     min-height: 40px;
+    cursor: grab;
+}
+
+.builder__answer-placeholder {
+    min-height: 40px;
+    border: 1px dashed var(--ion-color-primary);
+    border-radius: 8px;
+    background: #c76abb22;
+    visibility: visible !important;
 }
 
 .builder__answer > ion-icon {
@@ -362,5 +503,11 @@
 
     .builder__columns {
         grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
+
+    .builder__question-list {
+        flex: none;
+        overflow-y: visible;
     }
 }

@@ -27,3 +27,7 @@ export function generateUniqID() {
 export function generateInputRef(form_ref) {
     return form_ref + '_' + generateUniqID();
 }
+
+export function generateFormRef(project_ref) {
+    return project_ref + '_' + generateUniqID();
+}

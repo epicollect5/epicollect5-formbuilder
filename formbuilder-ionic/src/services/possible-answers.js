@@ -68,6 +68,25 @@ export function renamePossibleAnswer(input, answer_ref, value) {
     return true;
 }
 
+/* Applies the order the sortable produced; refuses a partial list. */
+export function reorderPossibleAnswers(input, refs) {
+    const answers = input ? input.possible_answers : [];
+    const by_ref = new Map(answers.map(function (answer) {
+        return [answer.answer_ref, answer];
+    }));
+    const ordered = refs.map(function (ref) {
+        return by_ref.get(ref);
+    }).filter(Boolean);
+
+    if (ordered.length !== answers.length) {
+        return false;
+    }
+
+    answers.splice.apply(answers, [0, answers.length].concat(ordered));
+
+    return true;
+}
+
 export function movePossibleAnswer(input, from_index, to_index) {
     const answers = input ? input.possible_answers : [];
 

@@ -4,7 +4,8 @@ import {
     addPossibleAnswer,
     movePossibleAnswer,
     removePossibleAnswer,
-    renamePossibleAnswer
+    renamePossibleAnswer,
+    reorderPossibleAnswers
 } from '@/services/possible-answers.js';
 
 function create_input(overrides) {
@@ -77,6 +78,14 @@ describe('possible answers', () => {
         expect(input.possible_answers[1].answer).toBe('Nope');
         expect(input.possible_answers[0].answer).toBe('Yes');
         expect(renamePossibleAnswer(input, 'missing', 'Nope')).toBe(false);
+    });
+
+    it('applies a new answer order and refuses a partial one', () => {
+        const input = create_input();
+
+        expect(reorderPossibleAnswers(input, ['answer_2'])).toBe(false);
+        expect(reorderPossibleAnswers(input, ['answer_2', 'answer_1'])).toBe(true);
+        expect(input.possible_answers.map((answer) => answer.answer)).toEqual(['No', 'Yes']);
     });
 
     it('reorders answers within the input', () => {

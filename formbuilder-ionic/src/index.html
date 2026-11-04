@@ -37,8 +37,26 @@
     <ion-header class="ion-no-border">
         <ion-toolbar class="formbuilder-toolbar">
             <div class="builder-bar">
+                <button type="button"
+                        class="builder-bar__link"
+                        data-action="back"
+                        aria-label="Back to project">
+                    <ion-icon name="chevron-back-outline"
+                              aria-hidden="true"></ion-icon>
+                    <span>Back</span>
+                </button>
+
                 <span class="builder-bar__project"
                       id="project-name"></span>
+
+                <button type="button"
+                        class="builder-bar__link"
+                        data-action="exit"
+                        aria-label="Exit the formbuilder">
+                    <ion-icon name="power-outline"
+                              aria-hidden="true"></ion-icon>
+                    <span>Exit</span>
+                </button>
             </div>
         </ion-toolbar>
     </ion-header>
@@ -57,10 +75,29 @@
                      aria-label="Question types"></section>
 
             <section class="builder__workspace">
-                <nav class="builder__forms"
-                     id="form-tabs"
-                     role="tablist"
-                     aria-label="Forms"></nav>
+                <div class="builder__forms-row">
+                    <nav class="builder__forms"
+                         id="form-tabs"
+                         role="tablist"
+                         aria-label="Forms"></nav>
+
+                    <button type="button"
+                            class="builder__add-form"
+                            id="add-form">Add form</button>
+
+                    <div class="builder__form-actions">
+                        <button type="button"
+                                class="builder__action"
+                                id="undo"
+                                title="Undo is not ported yet"
+                                disabled>Undo</button>
+                        <button type="button"
+                                class="builder__action builder__action--primary"
+                                id="save"
+                                title="Save is not ported yet"
+                                disabled>Save project</button>
+                    </div>
+                </div>
 
                 <div class="builder__columns">
                     <section class="builder__questions"
@@ -75,6 +112,12 @@
     </ion-content>
 </ion-app>
 
+<!-- jQuery UI is the drag-and-drop layer, as in the legacy builder. -->
+<script src="https://code.jquery.com/jquery-2.2.1.min.js"
+        integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+        crossorigin="anonymous"></script>
+<script src="js/vendor-formbuilder.js"
+        defer></script>
 <script src="js/formbuilder-ionic.js"
         defer></script>
 

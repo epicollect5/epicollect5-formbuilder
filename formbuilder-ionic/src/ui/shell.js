@@ -5,33 +5,38 @@ import { getAnswerLimit, isMultipleAnswerType } from '@/models/possible-answers.
 import { QUESTION_TYPES, getQuestionType } from '@/models/question-types.js';
 import {
     addPossibleAnswer,
-    movePossibleAnswer,
     removePossibleAnswer,
-    renamePossibleAnswer
+    renamePossibleAnswer,
+    reorderPossibleAnswers
 } from '@/services/possible-answers.js';
+import { goBack } from '@/services/navigation.js';
 import {
+    addForm,
     addInput,
     getCurrentForm,
     getCurrentInput,
     getCurrentInputs,
     getSession,
-    moveInput,
+    insertInput,
     removeInput,
+    reorderInputs,
     selectForm,
     selectInput,
     updateCurrentInput
 } from '@/services/session.js';
 import { button, element, icon } from '@/ui/dom.js';
+import { installAnswerSortable, installQuestionSortable, installToolDrag } from '@/ui/sortable.js';
+
+const QUESTION_LIST = '#questions .builder__question-list';
 
 let handlers = {};
-let dragged_ref = null;
-let dragged_answer_ref = null;
 
 export function renderApp(app_handlers) {
     handlers = app_handlers || {};
 
     renderProjectName();
     revealBuilder();
+    bindChrome();
     renderTools();
     renderForms();
     renderQuestions();
@@ -60,6 +65,25 @@ function revealBuilder() {
     }
 }
 
+/* Chrome controls are static, so assigning handlers keeps re-renders from
+   stacking duplicate listeners. */
+function bindChrome() {
+    document.querySelectorAll('[data-action="back"], [data-action="exit"]').forEach(function (control) {
+        control.onclick = function () {
+            goBack();
+        };
+    });
+
+    const add_form = document.getElementById('add-form');
+
+    if (add_form) {
+        add_form.onclick = function () {
+            addForm();
+            renderApp(handlers);
+        };
+    }
+}
+
 function renderTools() {
     const container = document.getElementById('tools');
 
@@ -85,6 +109,12 @@ function renderTools() {
         });
 
         container.append(tool);
+    });
+
+    installToolDrag('#tools .builder__tool', QUESTION_LIST, function (type, index) {
+        insertInput(type, index);
+        renderQuestions();
+        renderProperties();
     });
 }
 
@@ -146,12 +176,14 @@ function renderQuestions() {
 
     if (!inputs.length) {
         list.append(element('li', { class: 'builder__empty' }, ['No questions in this form yet.']));
-        return;
+    }
+    else {
+        inputs.forEach(function (input) {
+            list.append(buildQuestionRow(input, input.ref === current_ref));
+        });
     }
 
-    inputs.forEach(function (input) {
-        list.append(buildQuestionRow(input, input.ref === current_ref));
-    });
+    installQuestionSortable(QUESTION_LIST, syncAfterDrop);
 }
 
 function buildQuestionRow(input, is_current) {
@@ -160,7 +192,6 @@ function buildQuestionRow(input, is_current) {
         class: 'builder__question',
         role: 'button',
         tabindex: '0',
-        draggable: 'true',
         'data-input-ref': input.ref,
         'aria-current': is_current ? 'true' : 'false'
     }, [
@@ -180,67 +211,27 @@ function buildQuestionRow(input, is_current) {
         }
     });
 
-    row.addEventListener('dragstart', function (event) {
-        dragged_ref = input.ref;
-        row.classList.add('builder__question--dragging');
-
-        if (event.dataTransfer) {
-            event.dataTransfer.effectAllowed = 'move';
-            event.dataTransfer.setData('text/plain', input.ref);
-        }
-    });
-
-    row.addEventListener('dragend', function () {
-        dragged_ref = null;
-        row.classList.remove('builder__question--dragging');
-        clearDropTargets('.builder__question--over');
-    });
-
-    row.addEventListener('dragover', function (event) {
-        if (!dragged_ref || dragged_ref === input.ref) {
-            return;
-        }
-
-        event.preventDefault();
-        row.classList.add('builder__question--over');
-    });
-
-    row.addEventListener('dragleave', function () {
-        row.classList.remove('builder__question--over');
-    });
-
-    row.addEventListener('drop', function (event) {
-        event.preventDefault();
-        row.classList.remove('builder__question--over');
-        reorderBefore(input.ref);
-    });
-
     return row;
 }
 
-function reorderBefore(target_ref) {
-    const inputs = getCurrentInputs();
-    const from_index = inputs.findIndex(function (input) {
-        return input.ref === dragged_ref;
-    });
-    const to_index = inputs.findIndex(function (input) {
-        return input.ref === target_ref;
-    });
+/* Persists the order the sortable left in the DOM. */
+function syncAfterDrop() {
+    const list = document.querySelector(QUESTION_LIST);
 
-    dragged_ref = null;
-
-    if (!moveInput(from_index, to_index)) {
+    if (!list) {
         return;
     }
 
-    renderQuestions();
-    renderProperties();
-}
+    reorderInputs([...list.querySelectorAll('.builder__question')].map(function (row) {
+        return row.getAttribute('data-input-ref');
+    }));
 
-function clearDropTargets(class_name) {
-    document.querySelectorAll('.' + class_name).forEach(function (node) {
-        node.classList.remove(class_name);
-    });
+    // jQuery UI is still unwinding its own drop when stop fires, so the
+    // re-render waits for the next task.
+    setTimeout(function () {
+        renderQuestions();
+        renderProperties();
+    }, 0);
 }
 
 function chooseInput(input_ref) {
@@ -295,6 +286,11 @@ function renderProperties() {
     }
 
     container.append(body);
+
+    if (isMultipleAnswerType(input.type)) {
+        installAnswersSortable(input);
+    }
+
     body.scrollTop = previous_scroll;
 }
 
@@ -304,16 +300,32 @@ function buildPropertiesHeading(input) {
             input ? (input.question || 'Untitled question') : 'Question properties'
         ])
     ]);
+    const actions = element('div', { class: 'builder__heading-actions' });
 
     if (!input) {
         return heading;
     }
 
-    const delete_button = button({
-        type: 'button',
-        class: 'builder__delete',
-        'aria-label': 'Delete question'
-    }, [icon('trash-outline')]);
+    actions.append(iconButton({
+        class: 'builder__icon-btn',
+        icon_name: 'copy-outline',
+        label: 'Copy question',
+        title: 'Copy is not ported yet',
+        disabled: true
+    }));
+    actions.append(iconButton({
+        class: 'builder__icon-btn',
+        icon_name: 'checkmark-circle-outline',
+        label: 'Validate question',
+        title: 'Validation is not ported yet',
+        disabled: true
+    }));
+
+    const delete_button = iconButton({
+        class: 'builder__icon-btn builder__icon-btn--danger',
+        icon_name: 'trash-outline',
+        label: 'Delete question'
+    });
 
     delete_button.addEventListener('click', function () {
         removeInput(input.ref);
@@ -321,9 +333,25 @@ function buildPropertiesHeading(input) {
         renderProperties();
     });
 
-    heading.append(delete_button);
+    actions.append(delete_button);
+    heading.append(actions);
 
     return heading;
+}
+
+function iconButton(options) {
+    const attributes = {
+        type: 'button',
+        class: options.class,
+        'aria-label': options.label,
+        title: options.title || options.label
+    };
+
+    if (options.disabled) {
+        attributes.disabled = 'disabled';
+    }
+
+    return button(attributes, [icon(options.icon_name)]);
 }
 
 function buildQuestionField(value) {
@@ -384,10 +412,32 @@ function buildPossibleAnswers(input) {
     return section;
 }
 
+/* The list has to be in the document before jQuery UI can hold on to it. */
+function installAnswersSortable(input) {
+    installAnswerSortable('#properties .builder__answer-list', function () {
+        const answers_list = document.querySelector('#properties .builder__answer-list');
+
+        if (!answers_list) {
+            return;
+        }
+
+        const refs = [...answers_list.querySelectorAll('.builder__answer')].map(function (row) {
+            return row.getAttribute('data-answer-ref');
+        });
+
+        if (!reorderPossibleAnswers(input, refs)) {
+            return;
+        }
+
+        setTimeout(function () {
+            renderProperties();
+        }, 0);
+    });
+}
+
 function buildAnswerRow(input, answer, index, total) {
     const row = element('li', {
         class: 'builder__answer',
-        draggable: 'true',
         'data-answer-ref': answer.answer_ref
     });
 
@@ -419,60 +469,7 @@ function buildAnswerRow(input, answer, index, total) {
     row.append(field);
     row.append(remove_button);
 
-    row.addEventListener('dragstart', function (event) {
-        dragged_answer_ref = answer.answer_ref;
-        row.classList.add('builder__answer--dragging');
-
-        if (event.dataTransfer) {
-            event.dataTransfer.effectAllowed = 'move';
-            event.dataTransfer.setData('text/plain', answer.answer_ref);
-        }
-    });
-
-    row.addEventListener('dragend', function () {
-        dragged_answer_ref = null;
-        row.classList.remove('builder__answer--dragging');
-        clearDropTargets('builder__answer--over');
-    });
-
-    row.addEventListener('dragover', function (event) {
-        if (!dragged_answer_ref || dragged_answer_ref === answer.answer_ref) {
-            return;
-        }
-
-        event.preventDefault();
-        row.classList.add('builder__answer--over');
-    });
-
-    row.addEventListener('dragleave', function () {
-        row.classList.remove('builder__answer--over');
-    });
-
-    row.addEventListener('drop', function (event) {
-        event.preventDefault();
-        row.classList.remove('builder__answer--over');
-        reorderAnswer(input, answer.answer_ref);
-    });
-
     return row;
-}
-
-function reorderAnswer(input, target_ref) {
-    const answers = input.possible_answers;
-    const from_index = answers.findIndex(function (answer) {
-        return answer.answer_ref === dragged_answer_ref;
-    });
-    const to_index = answers.findIndex(function (answer) {
-        return answer.answer_ref === target_ref;
-    });
-
-    dragged_answer_ref = null;
-
-    if (!movePossibleAnswer(input, from_index, to_index)) {
-        return;
-    }
-
-    renderProperties();
 }
 
 function buildAddAnswerButton(input) {
