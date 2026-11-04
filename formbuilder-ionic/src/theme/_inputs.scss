@@ -74,6 +74,10 @@
     /* same vertical rhythm as the tools list in the left sidebar */
     display: grid;
     gap: 6px;
+    /* the body fills the card, so rows must keep their content height
+       instead of stretching to share the available space */
+    align-content: start;
+    grid-auto-rows: min-content;
 }
 
 .branch-sortable,
@@ -81,6 +85,8 @@
 .nested-group-sortable {
     display: grid;
     gap: 6px;
+    align-content: start;
+    grid-auto-rows: min-content;
     min-height: 64px;
     margin: 6px 0 0;
     padding: 6px;
