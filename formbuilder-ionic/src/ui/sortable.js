@@ -46,15 +46,23 @@ export function installToolDrag(tools_selector, list_selector, on_drop) {
             placeholder.className = 'builder__question-placeholder';
         }
 
-        placeholder.remove();
-
         const rows = drop.list.querySelectorAll('.builder__question');
+        const target = rows[drop.index] || null;
+
+        // Keep the placeholder in place while the pointer stays in the same
+        // slot. Re-inserting it on every drag event shifts the rows repeatedly
+        // and makes the first drop position flicker near the list's top edge.
+        if (placeholder.parentNode === drop.list && placeholder.nextElementSibling === target) {
+            return;
+        }
+
+        placeholder.remove();
 
         if (drop.index >= rows.length) {
             drop.list.append(placeholder);
         }
         else {
-            drop.list.insertBefore(placeholder, rows[drop.index]);
+            drop.list.insertBefore(placeholder, target);
         }
     };
 
@@ -205,7 +213,7 @@ function resolveDrop(list_selector, pointer) {
     const left = Math.min(first_rect.left, list_rect.left);
     const right = Math.max(first_rect.right, list_rect.right);
 
-    if (pointer.x < left || pointer.x > right || pointer.y < first_rect.top || pointer.y > last_rect.bottom) {
+    if (pointer.x < left || pointer.x > right || pointer.y < list_rect.top || pointer.y > last_rect.bottom) {
         return null;
     }
 
