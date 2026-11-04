@@ -13,7 +13,7 @@
 .input {
     color: var(--fb-text);
     border: 1px solid var(--fb-border);
-    border-radius: 12px;
+    border-radius: 8px;
     background: var(--fb-surface);
     padding: 8px 10px;
     cursor: grab;
@@ -84,7 +84,7 @@
     min-height: 64px;
     margin: 6px 0 0;
     padding: 6px;
-    border-radius: 12px;
+    border-radius: 8px;
     border: 1px dashed transparent;
 }
 
@@ -92,7 +92,7 @@
 .active-group {
     outline: 2px solid var(--ion-color-primary);
     outline-offset: 2px;
-    border-radius: 12px;
+    border-radius: 8px;
 }
 
 .active-branch .input,
@@ -106,7 +106,7 @@
 
 .input-collection-drop-placeholder {
     border: 2px dashed var(--ion-color-primary-tint);
-    border-radius: 12px;
+    border-radius: 8px;
     background: rgba(var(--ion-color-primary-rgb), 0.08);
     min-height: 52px;
     list-style: none;
@@ -119,7 +119,7 @@
 .ui-sortable-placeholder {
     visibility: visible !important;
     border: 2px dashed var(--ion-color-primary-tint);
-    border-radius: 12px;
+    border-radius: 8px;
     background: rgba(var(--ion-color-primary-rgb), 0.08);
 }
 

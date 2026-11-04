@@ -3,7 +3,7 @@ ion-toast.fb-toast {
     /* vw, not %: the percentages resolve against the shrink-wrapped toast wrapper. */
     --width: min(560px, calc(100vw - 32px));
     --max-width: 560px;
-    --border-radius: 12px;
+    --border-radius: 8px;
     --box-shadow: 0 14px 32px rgba(28, 18, 40, 0.18);
     --background: var(--ion-color-primary);
     --color: var(--ion-color-primary-contrast);
