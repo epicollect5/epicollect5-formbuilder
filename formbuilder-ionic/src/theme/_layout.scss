@@ -158,11 +158,14 @@
     display: flex;
     align-items: center;
     padding-left: 8px;
+    /* keeps the save action off the edge of the tab strip */
+    padding-right: 16px;
 }
 
 .main__tabs-btns .btn-group {
     box-shadow: none;
 }
+
 
 @media (max-width: 900px) {
     .container-fluid > .row {
