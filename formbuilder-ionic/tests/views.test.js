@@ -201,6 +201,14 @@ describe('theme', () => {
         expect(tokens).toContain('--ion-text-color: #333333;');
     });
 
+    it('keeps both editor panel headers the same height', async () => {
+        const panels = await read('src/theme/_panels.scss');
+
+        expect(panels).toContain('.inputs-collection .panel-heading,');
+        expect(panels).toContain('.input-properties > .panel > .panel-heading');
+        expect(panels).toContain('min-height: 51px;');
+    });
+
     it('keeps the triple-column editor layout', async () => {
         const layout = await read('src/theme/_layout.scss');
 

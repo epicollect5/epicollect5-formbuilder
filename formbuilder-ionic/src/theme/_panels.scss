@@ -17,6 +17,12 @@
     border-radius: var(--fb-radius) var(--fb-radius) 0 0;
 }
 
+/* Keep the empty properties header as tall as the populated collection header. */
+.inputs-collection .panel-heading,
+.input-properties > .panel > .panel-heading {
+    min-height: 51px;
+}
+
 .panel-title {
     display: flex;
     align-items: center;
