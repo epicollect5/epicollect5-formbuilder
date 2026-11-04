@@ -143,6 +143,50 @@
     margin-left: auto;
 }
 
+/* Jumps: one per row, the logic selects on the left (9) and the remove action on the right (3). */
+.input-properties__form__jumps__add-jump {
+    margin-bottom: 10px;
+}
+
+.input-properties__form__jumps__list-item {
+    display: grid;
+    grid-template-columns: minmax(0, 9fr) minmax(0, 3fr);
+    column-gap: 12px;
+    row-gap: 8px;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.input-properties__form__jumps__list-item > .form-group {
+    grid-column: 1;
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 8px;
+    margin: 0;
+}
+
+.input-properties__form__jumps__list-item > .form-group > label {
+    margin: 0;
+    font-size: 15px;
+    color: var(--fb-label);
+}
+
+.input-properties__form__jumps__list-item > .form-group > .form-control {
+    width: 100%;
+}
+
+.input-properties__form__jumps__list-item > .form-group > .input-properties__form__error {
+    grid-column: 1 / -1;
+}
+
+.input-properties__form__jumps__list-item > .input-properties__form__jumps__remove-jump {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: center;
+    justify-self: end;
+}
+
 .warning-well.no-form-title-set {
     display: flex;
     align-items: center;
