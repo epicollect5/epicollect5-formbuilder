@@ -153,6 +153,22 @@ textarea.form-control {
     resize: vertical;
 }
 
+/* The legacy views mark dense controls with .input-sm (jumps, advanced
+   properties). Bootstrap sized those at 30px with one 12px line; keep that
+   proportion against the 16px base instead of inheriting the full field size. */
+.input-sm {
+    height: 30px;
+    min-height: 30px;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 8px;
+}
+
+select.input-sm {
+    padding-right: 28px;
+    background-position: calc(100% - 14px) 52%, calc(100% - 9px) 52%;
+}
+
 .checkbox,
 .radio {
     display: flex;

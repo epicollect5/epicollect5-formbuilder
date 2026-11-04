@@ -190,24 +190,24 @@
 .input-properties__form__jumps__list-item {
     display: grid;
     grid-template-columns: minmax(0, 9fr) minmax(0, 3fr);
-    column-gap: 12px;
-    row-gap: 8px;
+    column-gap: 10px;
+    row-gap: 6px;
     align-items: center;
-    padding: 10px 0;
+    padding: 8px 0;
 }
 
 .input-properties__form__jumps__list-item > .form-group {
     grid-column: 1;
     display: grid;
-    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-columns: 56px minmax(0, 1fr);
     align-items: center;
-    column-gap: 8px;
+    column-gap: 6px;
     margin: 0;
 }
 
 .input-properties__form__jumps__list-item > .form-group > label {
     margin: 0;
-    font-size: 15px;
+    font-size: 14px;
     color: var(--fb-label);
 }
 

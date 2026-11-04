@@ -38,6 +38,15 @@ button .legacy-icon > ion-icon,
     width: 2.4em;
 }
 
+/* Jump rows are dense: their buttons follow the 30px small-control height. */
+.input-properties__form__jumps .legacy-icon.fa-2x > ion-icon {
+    font-size: 1.15em;
+}
+
+.input-properties__form__jumps .legacy-icon.fa-2x.fa-fw {
+    width: 1.2em;
+}
+
 /* Panel header actions are compact icon buttons, below the sidebar row scale. */
 .panel-heading .legacy-icon.fa-2x > ion-icon {
     font-size: 1.3em;
