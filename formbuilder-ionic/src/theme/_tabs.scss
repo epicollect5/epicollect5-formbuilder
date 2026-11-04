@@ -109,6 +109,17 @@
     display: block;
 }
 
+/* Some legacy advanced property views omit .tab-pane; keep them hidden
+   until the Advanced tab explicitly activates them. */
+.input-properties__tabs__content > .input-properties__form__advanced-properties:not(.tab-pane) {
+    display: none;
+}
+
+.input-properties__tabs__content > .input-properties__form__advanced-properties.active:not(.tab-pane) {
+    display: flex;
+    flex-direction: column;
+}
+
 .input-properties__tabs {
     padding: 0;
 }

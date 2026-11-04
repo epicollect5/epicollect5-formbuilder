@@ -201,6 +201,14 @@ describe('theme', () => {
         expect(tokens).toContain('--ion-text-color: #333333;');
     });
 
+    it('hides advanced property sections outside the Advanced tab', async () => {
+        const tabs = await read('src/theme/_tabs.scss');
+
+        expect(tabs).toContain('.input-properties__tabs__content > .input-properties__form__advanced-properties:not(.tab-pane)');
+        expect(tabs).toContain('.input-properties__form__advanced-properties.active:not(.tab-pane)');
+        expect(tabs).toContain('display: flex;');
+    });
+
     it('keeps both editor panel headers the same height', async () => {
         const panels = await read('src/theme/_panels.scss');
 

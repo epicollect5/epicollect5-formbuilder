@@ -142,6 +142,33 @@ describe('tab replacement', () => {
         expect(shown).toHaveBeenCalledTimes(1);
     });
 
+    it('deactivates advanced property panels without the tab-pane class', () => {
+        document.body.innerHTML = `
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="active nav-tabs__tab-btn-item">
+                    <a id="basic-tab" href="#basic-pane" role="tab" data-toggle="tab">Properties</a>
+                </li>
+                <li class="nav-tabs__tab-btn-item">
+                    <a id="advanced-tab" href="#advanced-pane" role="tab" data-toggle="tab">Advanced</a>
+                </li>
+            </ul>
+            <div class="tab-content input-properties__tabs__content">
+                <div id="basic-pane" class="tab-pane active in"></div>
+                <div id="advanced-pane" class="input-properties__form__advanced-properties panel"></div>
+            </div>
+        `;
+
+        $('#advanced-tab').trigger('click');
+
+        expect($('#advanced-pane').hasClass('active')).toBe(true);
+        expect($('#basic-pane').hasClass('active')).toBe(false);
+
+        $('#basic-tab').trigger('click');
+
+        expect($('#advanced-pane').hasClass('active')).toBe(false);
+        expect($('#basic-pane').hasClass('active')).toBe(true);
+    });
+
     it('activates tabs through the data API and ignores disabled tabs', () => {
         $('#tab-two').trigger('click');
 

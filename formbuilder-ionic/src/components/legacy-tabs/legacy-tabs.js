@@ -1,5 +1,7 @@
 'use strict';
 
+const SIBLING_PANES = '.tab-pane, .main__tabs-content-tabpanel, .input-properties__form__advanced-properties';
+
 function previousTab($item) {
     return $item.parent().children('li.active').first().find('a[role="tab"]').first();
 }
@@ -35,7 +37,7 @@ export function installTabs($, document) {
         $item.addClass('active');
 
         $target
-            .siblings('.tab-pane, .main__tabs-content-tabpanel')
+            .siblings(SIBLING_PANES)
             .removeClass('active in')
             .attr('aria-hidden', 'true');
 
