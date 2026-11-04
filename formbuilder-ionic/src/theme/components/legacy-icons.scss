@@ -29,14 +29,12 @@ button .legacy-icon > ion-icon,
     font-size: 1.5em;
 }
 
-/* the 2x size is for the toolbar buttons only, not for the question rows */
-button .legacy-icon.fa-2x > ion-icon,
-.btn .legacy-icon.fa-2x > ion-icon {
+/* the toolbar keeps the larger scale; every other 2x glyph follows the row size */
+.formbuilder-toolbar .legacy-icon.fa-2x > ion-icon {
     font-size: 2.2em;
 }
 
-button .legacy-icon.fa-2x.fa-fw,
-.btn .legacy-icon.fa-2x.fa-fw {
+.formbuilder-toolbar .legacy-icon.fa-2x.fa-fw {
     width: 2.4em;
 }
 

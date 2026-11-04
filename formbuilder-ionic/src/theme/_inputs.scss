@@ -145,7 +145,19 @@
 
 .input-properties__form__possible-answers__list__drag-answer,
 .input-properties__form__possible-answers__list__remove-answer {
-    min-height: 34px;
+    min-height: 30px;
+    padding: 4px 8px;
+}
+
+/* keep answer rows on the same rhythm as the question rows */
+.input-properties__form__possible-answers__list .list-group-item {
+    padding: 6px 0;
+}
+
+.input-properties__form__possible-answers__list .form-control {
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 15px;
 }
 
 .question-state.fa-check {
