@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@ionic/core": "8.8.4",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
     "ionicons": "8.0.13"
   },
   "devDependencies": {

@@ -30,11 +30,21 @@ const alias = {
     'ui-handlers': path.join(repo, 'js/app_modules/ui-handlers')
 };
 
+const import_validation_alias = {
+    name: 'import-validation-alias',
+    setup(build) {
+        build.onResolve({ filter: /^helpers\/import-form-validation$/ }, function () {
+            return { path: path.join(root, 'src/services/import-form-validation.js') };
+        });
+    }
+};
+
 const esbuild_common = {
     bundle: true,
     format: 'iife',
     target: ['es2019'],
     alias: alias,
+    plugins: [import_validation_alias],
     define: {
         'process.env.NODE_ENV': '"development"'
     },

@@ -40,6 +40,7 @@ A side-by-side prototype served next to the legacy entry point against the same 
 - It bundles the frozen `js/app_modules/**` behaviour through esbuild aliases (`config`, `actions`, `factory`, `helpers`, `inputs`, `loaders`, `template`, `ui-handlers`, `legacy`). Do not copy or fork legacy behaviour into `src/`; fix shared behaviour in `js/app_modules/**` only through the normal legacy rules.
 - Only presentation is replaced: `src/views/**` containers/partials, `src/theme/**`, and `src/components/legacy-*` adapters that stand in for Bootstrap JS (Ionic modal/tabs/menus) and Font Awesome (Ionicons).
 - `public/views/properties/**` is reused verbatim at build time; it is placeholder-only markup. Keep the legacy hook classes and `div.panel` / `div.panel-body` tags that legacy selectors depend on.
+- Import validation is schema-driven: `src/services/import-form-validation.js` validates against `schemas/project.schema.json` with Ajv (`ajv/dist/2020` + `ajv-formats`) and replaces the legacy `helpers/import-form-validation` specifier through an esbuild alias. Do not also change the legacy validator.
 - jQuery and jQuery UI remain the drag-and-drop and event layer. No Vue, React, TypeScript, router or state library.
 - `npm run build` writes only `formbuilder-ionic/dist/`; `npm run dev` also serves the legacy baseline and the project file. Tests are Vitest + jsdom (`npm test` inside `formbuilder-ionic/`), and the legacy Mocha suite stays the shared-behaviour gate.
 

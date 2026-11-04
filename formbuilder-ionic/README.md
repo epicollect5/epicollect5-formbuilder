@@ -67,6 +67,20 @@ and hooks consumed by the legacy template layer, and are styled by the Ionic
 theme. Containers and partials that carried Bootstrap components are re-authored
 under `src/views/`.
 
+## Import validation
+
+Form imports are validated against `schemas/project.schema.json` with Ajv
+(`ajv/dist/2020` plus `ajv-formats`) in
+`src/services/import-form-validation.js`. The build aliases the legacy
+`helpers/import-form-validation` specifier to that module, so the prototype uses
+the schema-driven checks while the legacy entry point keeps its original
+validator untouched.
+
+The schema validates structure, types and per-type constraints. The rules JSON
+Schema cannot express stay in the module: ref prefixes, jump destinations and
+answer-ref uniqueness, numeric `min`/`max` ordering, and conditional jumps
+matching a possible answer.
+
 ## Tests
 
 ```bash

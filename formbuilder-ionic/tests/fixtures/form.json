@@ -1,0 +1,33 @@
+{
+  "data": {
+    "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "type": "form",
+    "form": {
+      "ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_bbbbbbbbbbbbb",
+      "name": "Imported form",
+      "slug": "imported-form",
+      "type": "hierarchy",
+      "inputs": [
+        {
+          "ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_bbbbbbbbbbbbb_ccccccccccccc",
+          "type": "text",
+          "question": "Imported question?",
+          "is_title": false,
+          "is_required": false,
+          "uniqueness": "none",
+          "regex": null,
+          "default": null,
+          "verify": false,
+          "max": null,
+          "min": null,
+          "datetime_format": null,
+          "set_to_current_datetime": false,
+          "possible_answers": [],
+          "jumps": [],
+          "branch": [],
+          "group": []
+        }
+      ]
+    }
+  }
+}
