@@ -83,7 +83,8 @@
 
 .container-fluid > .row {
     display: grid;
-    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    /* Legacy desktop grid: inputs-tools col-md-2, main col-md-10. */
+    grid-template-columns: minmax(0, 2fr) minmax(0, 10fr);
     gap: 16px;
     height: 100%;
     min-height: 0;

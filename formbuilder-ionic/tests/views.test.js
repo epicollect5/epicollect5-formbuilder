@@ -206,7 +206,7 @@ describe('theme', () => {
 
         expect(layout).toContain('.main__tabs-content.tab-content > .main__tabs-content-tabpanel.tab-pane.active');
         expect(layout).toContain('grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);');
-        expect(layout).toContain('grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);');
+        expect(layout).toContain('grid-template-columns: minmax(0, 2fr) minmax(0, 10fr);');
     });
 
     it('is built from Ionic tokens and does not import Bootstrap', async () => {
