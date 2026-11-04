@@ -8,6 +8,12 @@ it does not bundle, load or query legacy presentation code.
 `/epicollect5-formbuilder/public/index.html` against the same project file and
 session, so each slice can be compared side by side.
 
+> **Scope rule for this branch.** Change only `formbuilder-ionic/**`. The legacy
+> app (`js/**`, `css/**`, `public/**`, the root `package.json` and `gulpfile.js`)
+> is frozen reference material: read it to port behaviour, never edit it. New
+> dependencies (jQuery 4, jQuery UI 1.14.2, Tiptap) and every fix live in
+> `formbuilder-ionic/`.
+
 ## Legacy inventory by responsibility
 
 | Responsibility | Legacy source | Port target | Status |
@@ -23,13 +29,18 @@ session, so each slice can be compared side by side.
 | Adding / reordering / deleting questions | `ui-handlers/sortable.js`, `actions/input-collection*`, `factory/input-factory.js` | `src/models/input-factory.js`, `src/models/refs.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 2) |
 | Possible answers (add, rename, remove, sort) | `actions/possible-answers*.js`, `template/methods/getPossibleAnswers*` | `src/models/possible-answers.js`, `src/services/possible-answers.js`, `src/ui/shell.js` | ported (slice 3) |
 | Possible answers CSV import and pagination | `actions/possible-answers.js`, `possible-answers-pager.js` | — | pending |
+| Advanced properties, uniqueness, title rules | `template/methods/prepareAdvancedInputPropertiesHTML.js`, `getUniquenessHTML.js` | — | pending |
+| Form management (rename / delete form, name modal, child-form cap) | `ui-handlers/event-handler-callbacks/*form*`, `factory/form-factory.js` | — | pending |
 | Branches and groups | `inputs/branch.js`, `inputs/group.js`, `ui-handlers/*branch*`, `ui-handlers/*group*` | — | pending |
 | Jumps | `actions/jumps.js`, `helpers/utils.getJumpAvailableDestinations` | — | pending |
 | Validation and question copy | `actions/validation.js`, `ui-handlers/event-handler-callbacks/*` | — | pending (buttons present, disabled) |
 | Undo | `actions/undo.js` | — | pending |
 | Save / export / import | `actions/save/**`, `helpers/import-form-validation.js` | `src/services/import-form-validation.js` (schema half only) | pending |
-| Readme editor | summernote vendor bundle | — | pending |
+| Readme editor | Summernote rich-text field | Tiptap 3 rich-text field | ported |
 | Modals, menus, tooltips | Bootstrap JS | Ionic components per slice | pending |
+
+The finer-grained gap against the legacy feature surface, and the phase order
+that closes it, are in `ROADMAP.md`.
 
 ## Slices
 

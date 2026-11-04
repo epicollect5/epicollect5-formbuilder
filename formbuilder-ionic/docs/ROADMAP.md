@@ -1,0 +1,141 @@
+# Roadmap
+
+Audit of the Ionic port against the legacy formbuilder, and the phases that
+close the gap. The legacy app under `js/`, `css/` and `public/` is the reference
+and is never edited (see `PORTING.md`); the project-definition JSON contract is
+frozen.
+
+## Where the port stands
+
+Ported today:
+
+- Project load (plain JSON and gzip/base64), project name and logo.
+- Back / exit navigation, form tabs, form switching, add form.
+- Tool palette (click to add and drag to drop).
+- Question list: add, reorder, delete, select.
+- Basic properties: question text, required toggle, title toggle.
+- Readme editor (Tiptap, replacing Summernote), 1000-char cap.
+- Possible answers: add, rename, remove, reorder.
+- Import validation schema half (`services/import-form-validation.js`, Ajv).
+
+## Gap vs legacy
+
+### Chrome and shell actions
+
+- Save project — `base64(gzip(JSON))` POST to the project URL.
+- Export form — plain JSON envelope via FileSaver.
+- Import form — parse, structure check, ref remap, render.
+- Print as PDF.
+- Save / Undo enable-disable gates and per-form valid/invalid tab icons.
+- Form management: rename form, delete form, form "more" menu, the add-form
+  name modal, and the `MAX_NUMBER_OF_NESTED_CHILD_FORMS = 5` cap. `addForm()`
+  currently hard-codes `"New form"`.
+- Delete all questions; `beforeunload` guard.
+
+### Properties panel
+
+- Properties / Advanced / Jumps tab strip with error badges.
+- Advanced fields per type: `default`, `regex` (+ three "apply this" presets),
+  `verify` (double entry), `min` / `max`, integer / **decimal** radio,
+  `datetime_format` + `set_to_current_datetime`, initial-answer select,
+  `searchsingle` / **searchmultiple** radio.
+- Uniqueness control (`none` / `form` / `hierarchy`, plus the branch variant).
+- Title rules: `LIMITS.titles_max = 3` and the info-title modal.
+- Per-type gating: required only on `REQUIRED_ALLOWED_TYPES`, no required/title
+  on media / branch / group / readme (the port shows both everywhere).
+- Copy / duplicate question (`input-duplicator`: ref and answer_ref
+  regeneration, default remap, jump drop) and the Validate button.
+- Text caps: 255 for question and header, 1000 for readme.
+
+### Branches and groups
+
+- `branch[]` / `group[]` child arrays, enter and exit editing, branch / group
+  sortables, nested group inside a branch, breadcrumbs.
+- Nesting rules: no branch-in-branch, no group-in-group, no branch-in-group.
+- Branch-scoped jumps (destinations limited to later inputs in the same branch)
+  and branch-scoped uniqueness.
+- Ref conventions: top-level refs are `form_ref_uniqid` (3 `_` segments),
+  branch / group children 4, nested-group children 5. `generateInputRef` only
+  builds the top-level form today.
+
+### Jumps
+
+- Jump rows: When (`NO_ANSWER_GIVEN` / `IS` / `IS_NOT` / `ALL`), Answer,
+  destination.
+- The single-answer "always" variant, jump limits, and the row jump icon.
+
+### Possible answers (beyond add / rename / remove / reorder)
+
+- Default / initial answer selection.
+- CSV import (column picker, headers toggle, replace / append) and CSV export.
+- Pagination (100 per page), ordering A-Z / Z-A / shuffle, delete all.
+- Duplicate `answer_ref` detection, 150-char answer cap, `<` / `>` sanitisation.
+
+### Validation
+
+- `actions/validation.js` port: question text, default vs regex, numeric
+  min/max, per-object, branch / group, jump validity, `areAllInputsValid` /
+  `areFormInputsValid`.
+- Save-time gate: `INPUTS_MAX_ALLOWED = 300`, titles <= 3,
+  `search_inputs_max = 5`, jump destinations.
+
+### Modals, menus, toasts
+
+- Replace Bootstrap: edit-form-name, info-title, info-regex, info-import-form,
+  csv-import, warning-delete-question modals; the two "more" dropdowns;
+  tooltips; the global busy overlay; toastr toasts.
+
+## Phases
+
+1. **Properties panel, full.** Advanced tab per type, uniqueness, title cap and
+   gating, text caps, decimal / searchmultiple switches. Pure presentation over
+   the existing contract, so no new models.
+2. **Branches and groups.** Nesting model and refs (4 / 5 segments), enter and
+   exit editing, branch / group sortables, nesting rules, breadcrumbs.
+3. **Jumps.** Jump model, destination rules (form- and branch-scoped), the
+   Jumps tab, the row icon.
+4. **Validation and question actions.** Port `actions/validation.js`, wire the
+   Validate button and the error badges; port copy / duplicate question.
+5. **Possible answers completion.** Default select, ordering, delete all,
+   pagination, CSV import / export, limits and per-answer validation.
+6. **Undo.** Ten-state deep snapshot with the same push points. Must precede
+   save / export, which push state.
+7. **Save, export, import and form management.** Save pipeline (cleaning, trim,
+   `base64(gzip)` POST), export envelope, import flow on the existing Ajv
+   validator, form rename / delete plus name modal and the 5-form cap, delete
+   all questions.
+8. **Chrome polish.** Ionic modals / menus / tooltips / toasts, busy overlay,
+   print as PDF, `beforeunload`.
+
+## Limits (from the legacy contract)
+
+| Limit | Value |
+|---|---|
+| Questions per project (`INPUTS_MAX_ALLOWED`) | 300 |
+| Possible answers (radio, checkbox, dropdown) | 300 |
+| Possible answers (searchsingle, searchmultiple) | 1000 |
+| Possible answers per page | 100 |
+| Possible answer length | 150 |
+| Titles per form / branch | 3 |
+| Search questions per project | 5 |
+| Child forms (`MAX_NUMBER_OF_NESTED_CHILD_FORMS`) | 5 |
+| Question / header length | 255 |
+| Readme length | 1000 |
+| Regex and min / max length | 50 |
+| Undo states | 10 |
+
+## Constraints and risks
+
+- **Contract frozen.** Keep exact field shapes and the 3 / 4 / 5-segment ref
+  format; never serialize `dom` (`serializeProject` already strips it).
+- **Do not reproduce legacy defects** (`docs/legacy-known-defects.md`): the
+  `validation.js` possible-answer parenthesis bug, `getInputsTotal` not counting
+  nested-group children, branch jumps validated against the array instead of the
+  input, and the branch owner's leftover `group[]`.
+- **Single source for limits.** `300` / `1000` are declared in both
+  `models/possible-answers.js` and `services/import-form-validation.js`;
+  consolidate when the answers work lands.
+- **Two save formats.** Save is `base64(gzip(JSON))`; export and import are
+  plain JSON. They must stay distinct.
+- **State model.** Save and undo assume a deep clone that survives a re-render;
+  the in-place `session` model is the likely divergence point.

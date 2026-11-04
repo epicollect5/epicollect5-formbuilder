@@ -20,6 +20,7 @@ formbuilder-ionic/
   scripts/                 esbuild/sass build and comparison server
   tests/                   Vitest + jsdom
   docs/PORTING.md          legacy inventory and slice status
+  docs/ROADMAP.md          gap vs legacy and the next phases
   dist/                    generated output (ignored by git)
 ```
 
@@ -61,12 +62,14 @@ npm run dev
 
 ## Status
 
-Ported: project loading, form switching, question list, selection, and basic
-question editing (text, required, title).
+Ported: project loading, form switching and adding, question list
+(add/reorder/delete/select), basic question editing (text, required, title),
+readme editor (Tiptap), and possible answers (add/rename/remove/reorder).
 
-Pending: adding/reordering/deleting questions, possible answers, branches and
-groups, jumps, validation, undo, save/import/export, readme editor. The tool
-list is rendered read-only until adding questions is ported.
+Pending: advanced properties and uniqueness, branches and groups, jumps, full
+validation, possible-answers default/CSV/pagination, undo, save/export/import,
+form rename/delete, and the modals/menus/toasts. The full breakdown and the
+phase order are in `docs/ROADMAP.md`.
 
 ## Tests
 
