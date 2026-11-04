@@ -163,6 +163,14 @@ describe('partial views', () => {
 });
 
 describe('theme', () => {
+    it('centers the project identity in the toolbar', async () => {
+        const layout = await read('src/theme/_layout.scss');
+
+        expect(layout).toContain('grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);');
+        expect(layout).toContain('justify-self: center;');
+        expect(layout).toContain('color: #ffffff;');
+    });
+
     it('keeps dragged input tiles the same size as resting tiles', async () => {
         const inputs = await read('src/theme/_inputs.scss');
 

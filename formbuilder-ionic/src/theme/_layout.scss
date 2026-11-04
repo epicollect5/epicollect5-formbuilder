@@ -11,19 +11,40 @@
 }
 
 .navbar-inner {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     width: 100%;
     gap: 10px;
 }
 
+.navbar-inner > ion-buttons:first-child {
+    justify-self: start;
+}
+
+.navbar-inner > ion-buttons:last-child {
+    justify-self: end;
+}
+
 .navbar-brand {
     display: flex;
     align-items: center;
+    justify-self: center;
+    min-width: 0;
     gap: 10px;
-    margin: 0 auto 0 6px;
+    margin: 0;
     font-size: 15px;
     font-weight: 600;
+    color: #ffffff;
+}
+
+.formbuilder-toolbar,
+.formbuilder-toolbar .navbar,
+.navbar-brand,
+.navbar-brand span,
+.navbar-back-button,
+.navbar-back-button .fa,
+.navbar-back-button span {
     color: #ffffff;
 }
 
