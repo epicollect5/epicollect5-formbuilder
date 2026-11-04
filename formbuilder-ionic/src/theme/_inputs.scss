@@ -34,7 +34,7 @@
 /* The selected question in the middle column carries a filled tint; scoped to
    the collection so the tool rows keep the plain active outline. */
 .inputs-collection .input.active {
-    background: #c76abb73;
+    background: var(--ion-color-tertiary-tint)
 }
 
 .input-inner {
@@ -91,6 +91,13 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+/* The connected sortable keeps the draggable classes on collection items.
+   Keep their measured width inside this column while jQuery UI is moving them. */
+.inputs-collection .sortable > .input.ui-draggable.ui-draggable-handle {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
 }
 
 .branch-sortable,
@@ -156,6 +163,7 @@
     z-index: 9999;
     cursor: grabbing;
     box-sizing: content-box;
+    max-width: calc(100% - 22px) !important;
     height: auto !important;
     font-size: 14px;
     min-height: 26px;
@@ -185,6 +193,16 @@
 /* keep answer rows on the same rhythm as the question rows */
 .input-properties__form__possible-answers__list .list-group-item {
     padding: 6px 0;
+}
+
+.input-properties__form__possible-answers__list .possible-answers-drop-placeholder {
+    display: block;
+    box-sizing: border-box;
+    min-height: 48px;
+    border: 2px dashed var(--ion-color-primary-tint);
+    border-radius: 8px;
+    background: rgba(var(--ion-color-primary-rgb), 0.08);
+    list-style: none;
 }
 
 .input-properties__form__possible-answers__list .form-control {
