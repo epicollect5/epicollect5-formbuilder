@@ -31,6 +31,12 @@
     box-shadow: 0 0 0 2px rgba(var(--ion-color-primary-rgb), 0.18);
 }
 
+/* The selected question in the middle column carries a filled tint; scoped to
+   the collection so the tool rows keep the plain active outline. */
+.inputs-collection .input.active {
+    background: #c76abb73;
+}
+
 .input-inner {
     display: flex;
     align-items: center;
