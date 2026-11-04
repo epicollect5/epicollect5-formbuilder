@@ -148,6 +148,8 @@
     align-items: center;
     gap: 8px;
     margin-top: 10px;
+    /* the legacy toggle animates an inline 37px height onto this element */
+    height: auto !important;
 }
 
 .dropdown-menu {
