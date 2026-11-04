@@ -33,7 +33,10 @@ const esbuild_common = {
     logLevel: 'silent'
 };
 
-const vendor_files_order = ['jquery-2.1.4.min.js', 'jquery-ui.min.js'];
+const vendor_scripts = [
+    ['jquery/dist/jquery.min.js', 'vendor/jquery.min.js'],
+    ['jquery-ui/dist/jquery-ui.min.js', 'vendor/jquery-ui.min.js']
+];
 const vendor_css = ['summernote.css'];
 
 function log(message) {
@@ -73,23 +76,15 @@ async function buildStyles() {
     await fs.writeFile(path.join(dist, 'css/ionic-formbuilder.css'), result.css);
 }
 
-async function buildVendorBundle() {
-    const source_dir = path.join(repo, 'js/vendor');
-    const files = await fs.readdir(source_dir);
-    const ordered = [
-        ...vendor_files_order.filter((file) => files.includes(file)),
-        ...files.filter((file) => file.endsWith('.js') && !vendor_files_order.includes(file)).sort()
-    ];
+async function copyVendorScripts() {
+    await fs.mkdir(path.join(dist, 'vendor'), { recursive: true });
 
-    let bundle = '';
-
-    for (const file of ordered) {
-        const contents = await fs.readFile(path.join(source_dir, file), 'utf8');
-        bundle += '/* ' + file + ' */\n' + contents + '\n';
+    for (const script of vendor_scripts) {
+        await fs.copyFile(
+            path.join(root, 'node_modules', script[0]),
+            path.join(dist, script[1])
+        );
     }
-
-    await fs.mkdir(path.join(dist, 'js'), { recursive: true });
-    await fs.writeFile(path.join(dist, 'js/vendor-formbuilder.js'), bundle);
 }
 
 async function copyStaticAssets() {
@@ -130,7 +125,7 @@ async function buildAll() {
 
     await buildScriptsOnce();
     await buildStyles();
-    await buildVendorBundle();
+    await copyVendorScripts();
     await copyStaticAssets();
 
     log('built dist/');
@@ -138,7 +133,7 @@ async function buildAll() {
 
 async function refreshAssets() {
     await buildStyles();
-    await buildVendorBundle();
+    await copyVendorScripts();
     await copyStaticAssets();
     log('refreshed styles and static assets');
 }
@@ -268,7 +263,6 @@ function startServer() {
 function watchSources(onChange) {
     const directories = [
         path.join(root, 'src'),
-        path.join(repo, 'js/vendor'),
         path.join(repo, 'css/vendor')
     ];
 

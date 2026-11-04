@@ -7,13 +7,15 @@ function read(relative_path) {
 }
 
 describe('Ionic entry point', () => {
-    it('loads the Ionic bundle, jQuery UI and the native builder', async () => {
+    it('loads the Ionic bundle and the vendored jQuery runtime', async () => {
         const html = await read('src/index.html');
 
         expect(html).toContain('vendor/ionic/css/ionic.bundle.css');
         expect(html).toContain('js/formbuilder-ionic.js');
-        expect(html).toContain('js/vendor-formbuilder.js');
-        expect(html).toContain('jquery-2.2.1.min.js');
+        expect(html).toContain('vendor/jquery.min.js');
+        expect(html).toContain('vendor/jquery-ui.min.js');
+        expect(html).not.toContain('js/vendor-formbuilder.js');
+        expect(html).not.toContain('code.jquery.com');
         expect(html).not.toContain('js/legacy-formbuilder.js');
         expect(html).not.toMatch(/bootstrap(\.min)?\.(css|js)|bootstrapcdn/i);
         expect(html).not.toContain('font-awesome.min.css');
