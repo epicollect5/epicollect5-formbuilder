@@ -201,25 +201,30 @@ describe('theme', () => {
         expect(inputs).not.toContain('transform: rotate(0.4deg);');
     });
 
-    it('uses the theme secondary role for action buttons', async () => {
+    it('uses the app palette secondary role for action buttons', async () => {
         const controls = await read('src/theme/_controls.scss');
-        const tokens = await read('src/theme/_tokens.scss');
+        const palette = await read('src/theme/_palette.scss');
 
         expect(controls).toContain('background: var(--ion-color-secondary);');
         expect(controls).toContain('color: var(--ion-color-secondary-contrast);');
         expect(controls).not.toContain('background: var(--ion-color-primary);');
-        expect(tokens).toContain('--ion-color-secondary: #3b7284;');
+        expect(palette).toContain('--ion-color-secondary: #87C7A6;');
+        expect(palette).toContain('--ion-color-secondary-contrast: #000000;');
     });
 
-    it('keeps the legacy text and border palette', async () => {
+    it('derives text and border colours from the app palette', async () => {
         const tokens = await read('src/theme/_tokens.scss');
+        const palette = await read('src/theme/_palette.scss');
 
         expect(tokens).toContain('--fb-text: var(--app-text, #333333);');
         expect(tokens).toContain('--fb-surface: var(--app-surface, #ffffff);');
         expect(tokens).toContain('--fb-muted: #777777;');
-        expect(tokens).toContain('--fb-border: #333333;');
-        expect(tokens).toContain('--fb-border-strong: #333333;');
-        expect(tokens).toContain('--ion-text-color: #333333;');
+        expect(tokens).toContain('--fb-border: var(--app-border, #dddddd);');
+        expect(tokens).toContain('--fb-border-strong: var(--app-border, #dddddd);');
+        expect(tokens).toContain('--ion-text-color: var(--app-text, #333333);');
+        expect(palette).toContain('--app-text: #333333;');
+        expect(palette).toContain('--app-border: #dddddd;');
+        expect(palette).toContain('--app-surface-muted: #f5f5f5;');
     });
 
     it('hides advanced property sections outside the Advanced tab', async () => {

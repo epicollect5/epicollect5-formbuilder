@@ -53,13 +53,14 @@
 }
 
 .btn-action-inverse {
-    background: transparent;
-    color: var(--ion-color-secondary);
+    background: var(--ion-color-secondary);
+    color: var(--ion-color-secondary-contrast);
     border-color: var(--ion-color-secondary);
 }
 
 .btn-action-inverse:hover {
-    background: rgba(var(--ion-color-secondary-rgb), 0.08);
+    background: var(--ion-color-secondary-shade);
+    border-color: var(--ion-color-secondary-shade);
 }
 
 .btn-danger {
@@ -121,7 +122,7 @@ label {
     border: 1px solid var(--fb-border-strong);
     border-radius: 10px;
     background: var(--fb-surface);
-    color: #555555;
+    color: var(--fb-text);
     font: inherit;
     font-size: 16px;
 }
