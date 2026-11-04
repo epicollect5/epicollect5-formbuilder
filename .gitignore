@@ -8,3 +8,5 @@ public/js/formbuilder.js.map
 project/project.json
 .history/*
 docs/QA-*
+public/js/formbuilder.js
+public/js/vendor-formbuilder.js
