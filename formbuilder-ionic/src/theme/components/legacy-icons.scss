@@ -29,17 +29,24 @@ button .legacy-icon > ion-icon,
     font-size: 1.5em;
 }
 
-/* the 2x size is for the toolbar and panel header buttons only, not for the question rows */
+/* the 2x size is for the toolbar buttons only, not for the question rows */
 button .legacy-icon.fa-2x > ion-icon,
-.btn .legacy-icon.fa-2x > ion-icon,
-.panel-heading .legacy-icon.fa-2x > ion-icon {
+.btn .legacy-icon.fa-2x > ion-icon {
     font-size: 2.2em;
 }
 
 button .legacy-icon.fa-2x.fa-fw,
-.btn .legacy-icon.fa-2x.fa-fw,
-.panel-heading .legacy-icon.fa-2x.fa-fw {
+.btn .legacy-icon.fa-2x.fa-fw {
     width: 2.4em;
+}
+
+/* Panel header actions follow the sidebar row scale, not the toolbar scale. */
+.panel-heading .legacy-icon.fa-2x > ion-icon {
+    font-size: 1.8em;
+}
+
+.panel-heading .legacy-icon.fa-2x.fa-fw {
+    width: 2em;
 }
 
 .question-state,

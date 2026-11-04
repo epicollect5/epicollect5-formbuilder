@@ -18,6 +18,12 @@
     border-radius: var(--fb-radius) var(--fb-radius) 0 0;
 }
 
+/* The header is a compact toolbar, so its action buttons stay row-sized. */
+.panel-heading .btn-sm {
+    min-height: 30px;
+    padding: 4px 8px;
+}
+
 /* Keep the empty properties header as tall as the populated collection header. */
 .inputs-collection .panel-heading,
 .input-properties > .panel > .panel-heading {
