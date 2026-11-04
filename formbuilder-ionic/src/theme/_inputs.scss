@@ -20,6 +20,10 @@
     transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 
+#inputs-tools-list .input {
+    border-color: #999999;
+}
+
 .input:hover {
     border-color: var(--ion-color-primary-tint);
 }
