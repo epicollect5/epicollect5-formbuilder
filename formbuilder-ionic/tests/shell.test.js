@@ -4,7 +4,7 @@ import { renderApp } from '@/ui/shell.js';
 
 function build_markup() {
     document.body.innerHTML = [
-        '<span id="project-name"></span>',
+        '<span id="project-name"><img id="project-logo" alt=""><span class="builder-bar__project-name"></span></span>',
         '<button type="button" data-action="back"></button>',
         '<button type="button" data-action="exit"></button>',
         '<section id="tools"></section>',
@@ -22,6 +22,7 @@ function project_definition() {
         data: {
             project: {
                 name: 'Test mapping issue',
+                slug: 'test-mapping-issue',
                 forms: [
                     {
                         ref: 'form_1',
@@ -83,6 +84,20 @@ describe('builder shell', () => {
         expect(document.getElementById('save').disabled).toBe(true);
     });
 
+    it('shows the project logo beside the project name', () => {
+        const logo = document.getElementById('project-logo');
+
+        expect(document.getElementById('project-name').textContent).toBe('Test mapping issue');
+        expect(logo.src).toContain('api/internal/media/test-mapping-issue');
+    });
+
+    it('puts the form actions in the questions heading', () => {
+        const actions = document.querySelectorAll('#questions .builder__heading-actions .builder__icon-btn');
+
+        expect(actions).toHaveLength(3);
+        expect([...actions].every((action) => action.disabled)).toBe(true);
+    });
+
     it('lists the current form questions', () => {
         const rows = document.querySelectorAll('#questions .builder__question');
 
@@ -91,6 +106,7 @@ describe('builder shell', () => {
         expect(rows[1].querySelector('.builder__question-text').textContent).toBe('Your name');
         expect(document.querySelectorAll('#tools .builder__tool')).toHaveLength(18);
         expect(rows[0].getAttribute('data-input-ref')).toBe('input_1');
+        expect(rows[0].querySelectorAll('ion-icon')).toHaveLength(1);
     });
 
     it('selects a question and opens its properties', () => {

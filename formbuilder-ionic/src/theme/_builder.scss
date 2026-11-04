@@ -47,21 +47,37 @@
 }
 
 .builder-bar__project {
+    display: inline-flex;
+    align-items: center;
     justify-self: center;
-    overflow: hidden;
+    gap: 10px;
+    min-width: 0;
     color: #ffffff;
     font-size: 17px;
     font-weight: 600;
+}
+
+.builder-bar__project-name {
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.builder-bar__logo {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    object-fit: cover;
 }
 
 .builder__tools {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 6px;
     min-height: 0;
-    padding: 8px;
+    padding: 10px;
     overflow: auto;
     background: var(--fb-surface);
     border: 1px solid var(--fb-border);
@@ -70,18 +86,21 @@
 
 .builder__tool {
     display: flex;
+    flex: none;
     align-items: center;
     gap: 10px;
     width: 100%;
-    padding: 8px 10px;
-    border: 0;
+    min-height: 42px;
+    padding: 7px 10px;
+    border: 1px solid #999999;
     border-radius: 8px;
-    background: none;
+    background: var(--fb-surface);
     color: var(--fb-text);
     font: inherit;
     font-size: 14px;
     text-align: left;
-    cursor: pointer;
+    cursor: grab;
+    box-sizing: border-box;
 }
 
 .builder__tool:hover,
@@ -94,8 +113,9 @@
 }
 
 .builder__tool ion-icon {
+    flex: none;
     color: var(--fb-muted);
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .builder__tool-label {
@@ -124,7 +144,7 @@
 
 .builder__forms {
     display: flex;
-    flex: 1;
+    flex: 0 1 auto;
     gap: 4px;
     min-width: 0;
     overflow-x: auto;
@@ -132,7 +152,10 @@
 
 .builder__add-form,
 .builder__action {
+    display: inline-flex;
     flex: none;
+    align-items: center;
+    gap: 6px;
     padding: 6px 12px;
     border: 1px solid var(--fb-border-strong);
     border-radius: 6px;
@@ -144,6 +167,11 @@
     cursor: pointer;
 }
 
+.builder__add-form ion-icon,
+.builder__action ion-icon {
+    font-size: 16px;
+}
+
 .builder__add-form:hover,
 .builder__action:hover:not(:disabled) {
     background: var(--fb-surface-2);
@@ -153,12 +181,7 @@
     display: flex;
     flex: none;
     gap: 6px;
-}
-
-.builder__action--primary {
-    border-color: var(--ion-color-secondary-shade);
-    background: var(--ion-color-secondary);
-    color: var(--ion-color-secondary-contrast);
+    margin-left: auto;
 }
 
 .builder__action:disabled {
@@ -297,6 +320,7 @@
 }
 
 .builder__question--helper {
+    box-sizing: border-box;
     cursor: grabbing;
     opacity: 0.9;
     background: var(--fb-surface);

@@ -47,7 +47,14 @@
                 </button>
 
                 <span class="builder-bar__project"
-                      id="project-name"></span>
+                      id="project-name">
+                    <img class="builder-bar__logo"
+                         id="project-logo"
+                         alt=""
+                         width="32"
+                         height="32">
+                    <span class="builder-bar__project-name"></span>
+                </span>
 
                 <button type="button"
                         class="builder-bar__link"
@@ -83,19 +90,31 @@
 
                     <button type="button"
                             class="builder__add-form"
-                            id="add-form">Add form</button>
+                            id="add-form">
+                        <ion-icon name="add-outline"
+                                  aria-hidden="true"></ion-icon>
+                        <span>Add form</span>
+                    </button>
 
                     <div class="builder__form-actions">
                         <button type="button"
                                 class="builder__action"
                                 id="undo"
                                 title="Undo is not ported yet"
-                                disabled>Undo</button>
+                                disabled>
+                            <ion-icon name="arrow-undo-outline"
+                                      aria-hidden="true"></ion-icon>
+                            <span>Undo</span>
+                        </button>
                         <button type="button"
-                                class="builder__action builder__action--primary"
+                                class="builder__action"
                                 id="save"
                                 title="Save is not ported yet"
-                                disabled>Save project</button>
+                                disabled>
+                            <ion-icon name="save-outline"
+                                      aria-hidden="true"></ion-icon>
+                            <span>Save project</span>
+                        </button>
                     </div>
                 </div>
 

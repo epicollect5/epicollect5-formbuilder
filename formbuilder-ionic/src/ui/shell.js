@@ -45,11 +45,42 @@ export function renderApp(app_handlers) {
 
 function renderProjectName() {
     const project = getProject(getSession().project_definition);
-    const name = document.getElementById('project-name');
+    const container = document.getElementById('project-name');
+    const logo = document.getElementById('project-logo');
 
-    if (name) {
-        name.textContent = project ? project.name : '';
+    if (container) {
+        const label = container.querySelector('.builder-bar__project-name');
+
+        if (label) {
+            label.textContent = project ? project.name : '';
+        }
+        else {
+            container.textContent = project ? project.name : '';
+        }
     }
+
+    if (logo) {
+        logo.src = getProjectLogoUrl(project);
+    }
+}
+
+/* Same source as the legacy navbar: the project logo, else the media endpoint. */
+function getProjectLogoUrl(project) {
+    if (!project) {
+        return '';
+    }
+
+    if (project.logo_url) {
+        return project.logo_url;
+    }
+
+    const protocol = window.location.protocol;
+    const parts = window.location.href.split('?')[0].split('#')[0].replace(protocol + '//', '').split('/');
+
+    parts.pop();
+
+    return protocol + '//' + parts.join('/') + '/api/internal/media/' + project.slug +
+        '?type=photo&name=logo.jpg&format=project_mobile_logo';
 }
 
 function revealBuilder() {
@@ -169,7 +200,8 @@ function renderQuestions() {
     container.replaceChildren(
         element('div', { class: 'builder__panel-heading' }, [
             element('span', { class: 'builder__panel-title' }, ['Questions']),
-            element('span', { class: 'builder__count' }, [String(inputs.length)])
+            element('span', { class: 'builder__count' }, [String(inputs.length)]),
+            buildFormActions()
         ]),
         list
     );
@@ -186,6 +218,33 @@ function renderQuestions() {
     installQuestionSortable(QUESTION_LIST, syncAfterDrop);
 }
 
+/* Legacy form-level actions: remove form, edit form name, more. */
+function buildFormActions() {
+    return element('div', { class: 'builder__heading-actions' }, [
+        iconButton({
+            class: 'builder__icon-btn',
+            icon_name: 'trash-outline',
+            label: 'Delete form',
+            title: 'Deleting a form is not ported yet',
+            disabled: true
+        }),
+        iconButton({
+            class: 'builder__icon-btn',
+            icon_name: 'create-outline',
+            label: 'Edit form name',
+            title: 'Renaming a form is not ported yet',
+            disabled: true
+        }),
+        iconButton({
+            class: 'builder__icon-btn',
+            icon_name: 'ellipsis-horizontal',
+            label: 'Form actions',
+            title: 'Form actions are not ported yet',
+            disabled: true
+        })
+    ]);
+}
+
 function buildQuestionRow(input, is_current) {
     const question_type = getQuestionType(input.type);
     const row = element('li', {
@@ -195,7 +254,6 @@ function buildQuestionRow(input, is_current) {
         'data-input-ref': input.ref,
         'aria-current': is_current ? 'true' : 'false'
     }, [
-        icon('reorder-three-outline'),
         icon(question_type ? question_type.icon : 'help-outline'),
         element('span', { class: 'builder__question-text' }, [input.question || 'Untitled question'])
     ]);

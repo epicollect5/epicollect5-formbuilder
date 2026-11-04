@@ -61,11 +61,16 @@ export function installToolDrag(tools_selector, list_selector, on_drop) {
     $tools.draggable({
         cancel: '[data-no-drag]',
         helper: function () {
+            const $tool = $(this);
+
+            // Keep the tool's own shape while dragging instead of stretching
+            // it to the question list width.
             return $('<div class="builder__question builder__question--helper"></div>')
-                .attr('data-type', $(this).attr('data-type'))
-                .append($(this).children().clone());
+                .attr('data-type', $tool.attr('data-type'))
+                .css({ width: $tool.outerWidth(), height: $tool.outerHeight() })
+                .append($tool.children().clone());
         },
-        revert: 'invalid',
+        revert: false,
         cursor: 'grabbing',
         distance: 4,
         zIndex: 2000,
