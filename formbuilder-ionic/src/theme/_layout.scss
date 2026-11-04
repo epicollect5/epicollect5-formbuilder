@@ -86,9 +86,9 @@
     min-height: 0;
 }
 
-.main__tabs-content > .main__tabs-content-tabpanel.active {
+.main__tabs-content.tab-content > .main__tabs-content-tabpanel.tab-pane.active {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(320px, 440px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
     height: 100%;
     min-height: 0;
@@ -134,7 +134,7 @@
         height: auto;
     }
 
-    .main__tabs-content > .main__tabs-content-tabpanel.active {
+    .main__tabs-content.tab-content > .main__tabs-content-tabpanel.tab-pane.active {
         grid-template-columns: 1fr;
         height: auto;
     }

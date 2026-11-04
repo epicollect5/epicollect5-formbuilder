@@ -163,6 +163,14 @@ describe('partial views', () => {
 });
 
 describe('theme', () => {
+    it('keeps the triple-column editor layout', async () => {
+        const layout = await read('src/theme/_layout.scss');
+
+        expect(layout).toContain('.main__tabs-content.tab-content > .main__tabs-content-tabpanel.tab-pane.active');
+        expect(layout).toContain('grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);');
+        expect(layout).toContain('grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);');
+    });
+
     it('is built from Ionic tokens and does not import Bootstrap', async () => {
         const theme = await read('src/theme/ionic-formbuilder.scss');
         const tokens = await read('src/theme/_tokens.scss');
