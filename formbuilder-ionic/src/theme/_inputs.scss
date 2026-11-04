@@ -71,22 +71,20 @@
 
 .inputs-collection .sortable {
     position: relative;
-    /* same vertical rhythm as the tools list in the left sidebar */
-    display: grid;
+    /* same vertical rhythm as the tools list in the left sidebar.
+       A column flow keeps every row at its content height: a grid body shares
+       its height between the rows, so a drop would briefly resize them all. */
+    display: flex;
+    flex-direction: column;
     gap: 6px;
-    /* the body fills the card, so rows must keep their content height
-       instead of stretching to share the available space */
-    align-content: start;
-    grid-auto-rows: min-content;
 }
 
 .branch-sortable,
 .group-sortable,
 .nested-group-sortable {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 6px;
-    align-content: start;
-    grid-auto-rows: min-content;
     min-height: 64px;
     margin: 6px 0 0;
     padding: 6px;
@@ -114,7 +112,9 @@
     border: 2px dashed var(--ion-color-primary-tint);
     border-radius: 8px;
     background: rgba(var(--ion-color-primary-rgb), 0.08);
-    min-height: 52px;
+    /* matches a question row so the list does not jump when it appears */
+    height: 47px;
+    min-height: 47px;
     list-style: none;
 }
 
