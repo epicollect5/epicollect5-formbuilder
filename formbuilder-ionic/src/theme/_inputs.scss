@@ -36,6 +36,22 @@
     min-width: 0;
 }
 
+/* The legacy template emits the validation mark before the jump marker and floats
+   both right; flex ignores the floats, so set the order explicitly: jump, then check. */
+.input-inner > .jump-state {
+    order: 1;
+}
+
+.input-inner > .question-state {
+    order: 2;
+}
+
+.input-inner > .branch-sortable,
+.input-inner > .group-sortable,
+.input-inner > .nested-group-sortable {
+    order: 3;
+}
+
 .input .question-preview {
     flex: 1;
     min-width: 0;
