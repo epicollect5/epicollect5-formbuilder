@@ -138,12 +138,31 @@
 }
 
 /* jQuery UI writes a content width and a stale inline height on the clone.
-   content-box keeps padding/border, height:auto restores the content height. */
-.input.ui-draggable-dragging {
+   content-box keeps padding/border, height:auto restores the content height.
+   The row's 42px min-height is a border-box figure, so under content-box it
+   would add the 16px of padding and border on top; pin the content height
+   instead (26 + 16 = 42) so the clone matches the row it came from. */
+/* The clone is .ui-draggable-dragging outside the list and .ui-sortable-helper
+   once jQuery UI hands it to the collection; both must keep the 14px row base
+   and the 42px outer height (26 content + 16 padding/border). */
+.input.ui-draggable-dragging,
+.input.ui-sortable-helper {
     z-index: 9999;
     cursor: grabbing;
     box-sizing: content-box;
     height: auto !important;
+    font-size: 14px;
+    min-height: 26px;
+}
+
+.input.ui-draggable-dragging .legacy-icon.fa-2x > ion-icon,
+.input.ui-sortable-helper .legacy-icon.fa-2x > ion-icon {
+    font-size: 1.8em;
+}
+
+.input.ui-draggable-dragging .legacy-icon.fa-2x.fa-fw,
+.input.ui-sortable-helper .legacy-icon.fa-2x.fa-fw {
+    width: 2em;
 }
 
 .dragging-disabled {
