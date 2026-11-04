@@ -136,11 +136,15 @@
     margin: 0;
 }
 
+/* jQuery UI positions the dragged tile inside the panel while it is being
+   moved, so a sideways drag used to grow the panel's scrollable width. Only
+   the vertical axis is scrollable. */
 .inputs-collection .panel-body,
 .input-properties .panel-body {
     flex: 1;
     min-height: 0;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .main__tabs-btns {
