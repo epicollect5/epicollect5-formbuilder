@@ -177,6 +177,25 @@
     padding: 10px 0 14px;
 }
 
+/* Possible answers is a component in its own right: a tinted header band over
+   its body, instead of the flattened header the other nested panels use.
+   No overflow clipping, so the "more" dropdown can still escape the card. */
+.input_properties__forms_wrapper .input-properties__form__possible-answers {
+    border: 1px solid var(--fb-border);
+    border-radius: 8px;
+}
+
+.input_properties__forms_wrapper .input-properties__form__possible-answers > .panel-heading {
+    padding: 8px 12px;
+    background: var(--fb-surface-2);
+    border-bottom: 1px solid var(--fb-border-strong);
+    border-radius: 8px 8px 0 0;
+}
+
+.input_properties__forms_wrapper .input-properties__form__possible-answers > .panel-body {
+    padding: 10px 12px 12px;
+}
+
 .input-properties__header {
     min-width: 0;
 }
