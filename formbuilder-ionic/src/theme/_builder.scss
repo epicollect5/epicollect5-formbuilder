@@ -239,6 +239,115 @@
     font-size: 14px;
 }
 
+.builder__answers {
+    display: grid;
+    gap: 8px;
+    margin-top: 4px;
+    padding: 8px;
+    border: 1px solid var(--fb-border-strong);
+    border-radius: 10px;
+}
+
+.builder__answers-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 4px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.builder__answers-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.builder__answer-list {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.builder__answer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+}
+
+.builder__answer > ion-icon {
+    flex: none;
+    color: var(--fb-muted);
+    font-size: 18px;
+    cursor: grab;
+}
+
+.builder__answer-field {
+    flex: 1;
+    min-width: 0;
+    --background: var(--fb-surface);
+    --border-color: var(--fb-border-strong);
+    font-size: 14px;
+}
+
+.builder__answer--dragging {
+    opacity: 0.5;
+}
+
+.builder__answer--over {
+    outline: 2px solid rgba(var(--ion-color-primary-rgb), 0.35);
+    outline-offset: 1px;
+    border-radius: 8px;
+}
+
+.builder__answer-remove {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--ion-color-danger);
+    cursor: pointer;
+}
+
+.builder__answer-remove:disabled {
+    color: var(--fb-border-strong);
+    cursor: not-allowed;
+}
+
+.builder__answer-remove ion-icon {
+    font-size: 20px;
+}
+
+.builder__add-answer {
+    justify-self: start;
+    padding: 6px 12px;
+    border: 1px solid var(--fb-border-strong);
+    border-radius: 6px;
+    background: var(--fb-surface);
+    color: var(--ion-color-primary);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.builder__add-answer:hover:not(:disabled) {
+    background: var(--fb-surface-2);
+}
+
+.builder__add-answer:disabled {
+    color: var(--fb-muted);
+    cursor: not-allowed;
+}
+
 .builder__empty {
     padding: 16px;
     color: var(--fb-muted);

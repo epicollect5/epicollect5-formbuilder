@@ -4,7 +4,15 @@ export function element(tag, attributes, children) {
     const node = document.createElement(tag);
 
     Object.keys(attributes || {}).forEach(function (name) {
-        node.setAttribute(name, attributes[name]);
+        const value = attributes[name];
+
+        // an absent attribute must stay absent: setting `undefined` would
+        // write the string "undefined" (and disable buttons that are enabled)
+        if (value === undefined || value === null) {
+            return;
+        }
+
+        node.setAttribute(name, value);
     });
 
     (children || []).forEach(function (child) {

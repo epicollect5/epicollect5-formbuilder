@@ -1,7 +1,14 @@
 'use strict';
 
 import { getForms, getProject } from '@/models/project-definition.js';
+import { getAnswerLimit, isMultipleAnswerType } from '@/models/possible-answers.js';
 import { QUESTION_TYPES, getQuestionType } from '@/models/question-types.js';
+import {
+    addPossibleAnswer,
+    movePossibleAnswer,
+    removePossibleAnswer,
+    renamePossibleAnswer
+} from '@/services/possible-answers.js';
 import {
     addInput,
     getCurrentForm,
@@ -18,6 +25,7 @@ import { button, element, icon } from '@/ui/dom.js';
 
 let handlers = {};
 let dragged_ref = null;
+let dragged_answer_ref = null;
 
 export function renderApp(app_handlers) {
     handlers = app_handlers || {};
@@ -185,7 +193,7 @@ function buildQuestionRow(input, is_current) {
     row.addEventListener('dragend', function () {
         dragged_ref = null;
         row.classList.remove('builder__question--dragging');
-        clearDropTargets();
+        clearDropTargets('.builder__question--over');
     });
 
     row.addEventListener('dragover', function (event) {
@@ -229,9 +237,9 @@ function reorderBefore(target_ref) {
     renderProperties();
 }
 
-function clearDropTargets() {
-    document.querySelectorAll('.builder__question--over').forEach(function (row) {
-        row.classList.remove('builder__question--over');
+function clearDropTargets(class_name) {
+    document.querySelectorAll('.' + class_name).forEach(function (node) {
+        node.classList.remove(class_name);
     });
 }
 
@@ -258,6 +266,9 @@ function renderProperties() {
         return;
     }
 
+    const previous_body = container.querySelector('.builder__properties-body');
+    const previous_scroll = previous_body ? previous_body.scrollTop : 0;
+
     container.replaceChildren(buildPropertiesHeading(input));
 
     if (!input) {
@@ -279,7 +290,12 @@ function renderProperties() {
         'Type: ' + (question_type ? question_type.label : input.type)
     ]));
 
+    if (isMultipleAnswerType(input.type)) {
+        body.append(buildPossibleAnswers(input));
+    }
+
     container.append(body);
+    body.scrollTop = previous_scroll;
 }
 
 function buildPropertiesHeading(input) {
@@ -346,6 +362,134 @@ function buildToggle(label, checked, on_change) {
     });
 
     return toggle;
+}
+
+function buildPossibleAnswers(input) {
+    const answers = input.possible_answers;
+    const section = element('section', { class: 'builder__answers' }, [
+        element('div', { class: 'builder__answers-head' }, [
+            element('span', { class: 'builder__answers-title' }, ['Possible answers']),
+            element('span', { class: 'builder__count' }, [String(answers.length)])
+        ])
+    ]);
+    const list = element('ul', { class: 'builder__answer-list' });
+
+    answers.forEach(function (answer, index) {
+        list.append(buildAnswerRow(input, answer, index, answers.length));
+    });
+
+    section.append(list);
+    section.append(buildAddAnswerButton(input));
+
+    return section;
+}
+
+function buildAnswerRow(input, answer, index, total) {
+    const row = element('li', {
+        class: 'builder__answer',
+        draggable: 'true',
+        'data-answer-ref': answer.answer_ref
+    });
+
+    const field = element('ion-input', {
+        class: 'builder__answer-field',
+        fill: 'outline',
+        'aria-label': 'Answer ' + (index + 1)
+    });
+
+    field.value = answer.answer;
+    field.addEventListener('ionInput', function (event) {
+        renamePossibleAnswer(input, answer.answer_ref, event.detail.value || '');
+    });
+
+    const remove_button = button({
+        type: 'button',
+        class: 'builder__answer-remove',
+        'aria-label': 'Remove answer ' + (index + 1),
+        disabled: total === 1 ? 'disabled' : undefined
+    }, [icon('close-circle-outline')]);
+
+    remove_button.addEventListener('click', function () {
+        if (removePossibleAnswer(input, answer.answer_ref)) {
+            renderProperties();
+        }
+    });
+
+    row.append(icon('reorder-three-outline'));
+    row.append(field);
+    row.append(remove_button);
+
+    row.addEventListener('dragstart', function (event) {
+        dragged_answer_ref = answer.answer_ref;
+        row.classList.add('builder__answer--dragging');
+
+        if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', answer.answer_ref);
+        }
+    });
+
+    row.addEventListener('dragend', function () {
+        dragged_answer_ref = null;
+        row.classList.remove('builder__answer--dragging');
+        clearDropTargets('builder__answer--over');
+    });
+
+    row.addEventListener('dragover', function (event) {
+        if (!dragged_answer_ref || dragged_answer_ref === answer.answer_ref) {
+            return;
+        }
+
+        event.preventDefault();
+        row.classList.add('builder__answer--over');
+    });
+
+    row.addEventListener('dragleave', function () {
+        row.classList.remove('builder__answer--over');
+    });
+
+    row.addEventListener('drop', function (event) {
+        event.preventDefault();
+        row.classList.remove('builder__answer--over');
+        reorderAnswer(input, answer.answer_ref);
+    });
+
+    return row;
+}
+
+function reorderAnswer(input, target_ref) {
+    const answers = input.possible_answers;
+    const from_index = answers.findIndex(function (answer) {
+        return answer.answer_ref === dragged_answer_ref;
+    });
+    const to_index = answers.findIndex(function (answer) {
+        return answer.answer_ref === target_ref;
+    });
+
+    dragged_answer_ref = null;
+
+    if (!movePossibleAnswer(input, from_index, to_index)) {
+        return;
+    }
+
+    renderProperties();
+}
+
+function buildAddAnswerButton(input) {
+    const at_limit = input.possible_answers.length >= getAnswerLimit(input.type);
+    const add_button = button({
+        type: 'button',
+        class: 'builder__add-answer',
+        disabled: at_limit ? 'disabled' : undefined
+    }, ['Add answer']);
+
+    add_button.addEventListener('click', function () {
+        if (addPossibleAnswer(input)) {
+            renderProperties();
+        }
+    });
+
+    return add_button;
 }
 
 /*

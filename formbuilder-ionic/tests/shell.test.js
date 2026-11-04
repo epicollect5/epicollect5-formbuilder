@@ -22,7 +22,17 @@ function project_definition() {
                         ref: 'form_1',
                         name: 'Screening form',
                         inputs: [
-                            { ref: 'input_1', type: 'radio', question: 'Do you have children', is_required: false, is_title: false },
+                            {
+                                ref: 'input_1',
+                                type: 'radio',
+                                question: 'Do you have children',
+                                is_required: false,
+                                is_title: false,
+                                possible_answers: [
+                                    { answer: 'Yes', answer_ref: 'answer_1' },
+                                    { answer: 'No', answer_ref: 'answer_2' }
+                                ]
+                            },
                             { ref: 'input_2', type: 'text', question: 'Your name', is_required: false, is_title: false }
                         ]
                     },
@@ -31,6 +41,14 @@ function project_definition() {
             }
         }
     };
+}
+
+function select_first_question() {
+    document.querySelectorAll('#questions .builder__question')[0].click();
+}
+
+function answer_rows() {
+    return [...document.querySelectorAll('#properties .builder__answer')];
 }
 
 describe('builder shell', () => {
@@ -87,7 +105,7 @@ describe('builder shell', () => {
     });
 
     it('deletes the selected question', () => {
-        document.querySelectorAll('#questions .builder__question')[0].click();
+        select_first_question();
         document.querySelector('#properties .builder__delete').click();
 
         expect(getCurrentInputs()).toHaveLength(1);
@@ -108,12 +126,79 @@ describe('builder shell', () => {
     });
 
     it('switches form and clears the selection', () => {
-        document.querySelectorAll('#questions .builder__question')[0].click();
+        select_first_question();
         document.querySelectorAll('#form-tabs .builder__form-tab')[1].click();
 
         expect(getSession().current_form_index).toBe(1);
         expect(getSession().current_input_ref).toBeNull();
         expect(document.querySelector('#questions .builder__empty')).not.toBeNull();
         expect(document.querySelector('#properties .builder__empty')).not.toBeNull();
+    });
+});
+
+describe('possible answers', () => {
+    beforeEach(() => {
+        build_markup();
+        setProject(project_definition());
+        renderApp();
+        select_first_question();
+    });
+
+    it('lists the answers of a multiple-answer question', () => {
+        const fields = [...document.querySelectorAll('#properties .builder__answer ion-input')];
+
+        expect(answer_rows()).toHaveLength(2);
+        expect(fields.map((field) => field.value)).toEqual(['Yes', 'No']);
+        expect(document.querySelector('#properties .builder__add-answer')).not.toBeNull();
+    });
+
+    it('does not list answers for a single-answer question', () => {
+        document.querySelectorAll('#questions .builder__question')[1].click();
+
+        expect(answer_rows()).toHaveLength(0);
+        expect(document.querySelector('#properties .builder__add-answer')).toBeNull();
+    });
+
+    it('adds a placeholder answer', () => {
+        document.querySelector('#properties .builder__add-answer').click();
+
+        const answers = getCurrentInput().possible_answers;
+
+        expect(answers).toHaveLength(3);
+        expect(answers[2].answer).toBe('I am a placeholder answer');
+        expect(answer_rows()).toHaveLength(3);
+    });
+
+    it('renames an answer in place', () => {
+        const field = document.querySelector('#properties .builder__answer ion-input');
+
+        field.value = 'Yep';
+        field.dispatchEvent(new CustomEvent('ionInput', { detail: { value: 'Yep' } }));
+
+        expect(getCurrentInput().possible_answers[0].answer).toBe('Yep');
+    });
+
+    it('removes an answer and disables removing the last one', () => {
+        answer_rows()[0].querySelector('.builder__answer-remove').click();
+
+        expect(getCurrentInput().possible_answers.map((answer) => answer.answer)).toEqual(['No']);
+        expect(answer_rows()).toHaveLength(1);
+
+        const remove_button = answer_rows()[0].querySelector('.builder__answer-remove');
+
+        expect(remove_button.disabled).toBe(true);
+        remove_button.click();
+        expect(getCurrentInput().possible_answers).toHaveLength(1);
+    });
+
+    it('reorders answers with a drag', () => {
+        const rows = answer_rows();
+
+        rows[0].dispatchEvent(new Event('dragstart', { bubbles: true }));
+        rows[1].dispatchEvent(new Event('dragover', { bubbles: true, cancelable: true }));
+        rows[1].dispatchEvent(new Event('drop', { bubbles: true, cancelable: true }));
+
+        expect(getCurrentInput().possible_answers.map((answer) => answer.answer)).toEqual(['No', 'Yes']);
+        expect([...document.querySelectorAll('#properties .builder__answer ion-input')].map((field) => field.value)).toEqual(['No', 'Yes']);
     });
 });
