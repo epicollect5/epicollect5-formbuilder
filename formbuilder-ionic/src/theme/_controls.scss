@@ -208,15 +208,11 @@ input[type='radio'] {
     font-size: 14px;
 }
 
+/* The legacy views keep a Bootstrap feedback icon next to validated fields,
+   but the app only ever showed the error text under the field. The glyph is
+   left in the markup for the legacy hooks, not rendered. */
 .form-control-feedback {
-    position: absolute;
-    top: 34px;
-    right: 10px;
-    color: var(--ion-color-danger);
-}
-
-.input-properties__form__question .form-control-feedback {
-    top: 38px;
+    display: none !important;
 }
 
 .disabled-checkbox {
