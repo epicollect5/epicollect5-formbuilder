@@ -6,12 +6,16 @@
     --fb-warning-bg: #fff4e6;
 
     --fb-surface: var(--ion-background-color, #ffffff);
-    --fb-surface-2: var(--ion-color-step-50, #f6f5f8);
-    --fb-border: var(--ion-color-step-150, #dcd8e2);
-    --fb-muted: var(--ion-color-step-550, #736d7d);
-    --fb-label: var(--ion-color-step-700, #3d3746);
+    --fb-surface-2: #f5f5f5;
+    --fb-text: #333333;
+    --fb-border: #dddddd;
+    --fb-border-strong: #cccccc;
+    --fb-muted: #777777;
+    --fb-label: #333333;
     --fb-radius: 14px;
 
+    --ion-text-color: #333333;
+    --ion-text-color-rgb: 51, 51, 51;
     --ion-font-family: 'Arimo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
     --ion-color-primary: #673b91;

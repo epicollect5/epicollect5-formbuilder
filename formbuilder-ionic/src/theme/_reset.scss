@@ -13,10 +13,19 @@ body {
 
 body {
     background: var(--ion-background-color, #ffffff);
-    color: var(--ion-text-color, #1f1b24);
+    color: var(--fb-text, #333333);
     font-family: var(--ion-font-family);
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
+}
+
+ion-card-title,
+ion-card-content {
+    color: var(--fb-text);
+}
+
+ion-note {
+    color: var(--fb-muted);
 }
 
 h1,

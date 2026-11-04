@@ -163,6 +163,16 @@ describe('partial views', () => {
 });
 
 describe('theme', () => {
+    it('keeps the legacy text and border palette', async () => {
+        const tokens = await read('src/theme/_tokens.scss');
+
+        expect(tokens).toContain('--fb-text: #333333;');
+        expect(tokens).toContain('--fb-muted: #777777;');
+        expect(tokens).toContain('--fb-border: #dddddd;');
+        expect(tokens).toContain('--fb-border-strong: #cccccc;');
+        expect(tokens).toContain('--ion-text-color: #333333;');
+    });
+
     it('keeps the triple-column editor layout', async () => {
         const layout = await read('src/theme/_layout.scss');
 
