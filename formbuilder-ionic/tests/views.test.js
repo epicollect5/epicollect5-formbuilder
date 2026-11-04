@@ -171,6 +171,12 @@ describe('theme', () => {
         expect(layout).toContain('color: #ffffff;');
     });
 
+    it('uses larger uppercase labels for the toolbar actions', async () => {
+        const layout = await read('src/theme/_layout.scss');
+
+        expect(layout).toMatch(/\.navbar-button-label\s*\{[^}]*font-size:\s*15px;[^}]*text-transform:\s*uppercase;/);
+    });
+
     it('keeps dragged input tiles the same size as resting tiles', async () => {
         const inputs = await read('src/theme/_inputs.scss');
 
