@@ -150,6 +150,8 @@
     border: 0;
     border-bottom: 1px solid var(--fb-border);
     border-radius: var(--fb-radius) var(--fb-radius) 0 0;
+    /* spread Properties / Advanced / Jumps across the strip */
+    justify-content: space-between;
 }
 
 .input-properties__tabs > .tab-content {
