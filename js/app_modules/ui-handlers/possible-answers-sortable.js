@@ -4,6 +4,22 @@ var consts = require('config/consts');
 var ui = require('helpers/ui');
 var save_project_click_callback = require('ui-handlers/event-handler-callbacks/save-project-click-callback');
 
+/*
+ index of an answer row among the real rows: jQuery UI adds its own <li>
+ placeholder (and the dragged clone) as siblings, so a plain item.index()
+ can point one past the last answer and make Array.prototype.move grow the
+ array with a hole.
+ */
+var getAnswerRowIndex = function (the_item) {
+
+    var item = $(the_item);
+    var answers = item.parent().children('li').filter(function () {
+        return $(this).find('input[data-answer-ref]').length > 0;
+    });
+
+    return answers.index(item);
+};
+
 var possibleAnswersSortable = function (input) {
 
     var validation = require('actions/validation');
@@ -28,7 +44,7 @@ var possibleAnswersSortable = function (input) {
             placeholder: 'possible-answers-drop-placeholder',
             stop: function (e, jquery_ui) {
                 //'from_index is set in start event of sortable'
-                formbuilder.possible_answers.to_index = jquery_ui.item.index('') === 0 ? jquery_ui.item.index() : jquery_ui.item.index();
+                formbuilder.possible_answers.to_index = getAnswerRowIndex(jquery_ui.item);
 
                 //move inputs to keep the possible answers sequence like the sequence on screen (dom)
                 input.possible_answers.move(formbuilder.possible_answers.from_index, formbuilder.possible_answers.to_index);
@@ -49,7 +65,7 @@ var possibleAnswersSortable = function (input) {
                 }
             },
             start: function(e, jquery_ui){
-                formbuilder.possible_answers.from_index = jquery_ui.item.index() === 0 ? 0 : jquery_ui.item.index();
+                formbuilder.possible_answers.from_index = Math.max(getAnswerRowIndex(jquery_ui.item), 0);
             }
         }).disableSelection();
 
