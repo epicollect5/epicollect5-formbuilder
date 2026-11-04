@@ -85,8 +85,8 @@
     border-bottom-left-radius: 10px;
 }
 
-.btn-group > .btn:nth-last-child(2),
-.btn-group > .btn:last-child {
+/* Last button of the group, ignoring a trailing .dropdown-menu sibling. */
+.btn-group > .btn:last-of-type {
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
 }
