@@ -1,0 +1,49 @@
+.legacy-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fb-muted);
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
+.legacy-icon > ion-icon {
+    font-size: 1.25em;
+    pointer-events: none;
+}
+
+.legacy-icon.fa-2x > ion-icon {
+    font-size: 1.9em;
+}
+
+.legacy-icon.fa-fw {
+    width: 1.4em;
+}
+
+button .legacy-icon > ion-icon,
+.btn .legacy-icon > ion-icon {
+    font-size: 1.3em;
+}
+
+.question-state,
+.jump-state,
+.form-state,
+.project-state {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.question-state > ion-icon,
+.jump-state > ion-icon,
+.form-state > ion-icon,
+.project-state > ion-icon {
+    font-size: 1.1em;
+}
+
+.question-state.fa-2x > ion-icon,
+.jump-state.fa-2x > ion-icon,
+.form-state > ion-icon,
+.project-state > ion-icon {
+    font-size: 1.25em;
+}

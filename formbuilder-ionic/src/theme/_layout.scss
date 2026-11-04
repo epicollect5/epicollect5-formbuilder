@@ -1,0 +1,141 @@
+.formbuilder-toolbar {
+    --background: var(--fb-purple-dark);
+    --color: #ffffff;
+    --min-height: 58px;
+}
+
+.formbuilder-toolbar .navbar {
+    display: block;
+    width: 100%;
+    opacity: 1;
+}
+
+.navbar-inner {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 auto 0 6px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.navbar-project-name img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.navbar-back-button {
+    --color: #ffffff;
+    --background-hover: rgba(255, 255, 255, 0.12);
+    --padding-start: 8px;
+    --padding-end: 8px;
+    font-size: 13px;
+    text-transform: none;
+}
+
+.navbar-button-label {
+    margin-left: 4px;
+}
+
+.formbuilder-content::part(scroll) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.container-fluid {
+    flex: 1;
+    min-height: 0;
+    padding: 16px;
+}
+
+.container-fluid > .row {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    gap: 16px;
+    height: 100%;
+    min-height: 0;
+}
+
+.inputs-tools {
+    display: flex;
+    min-height: 0;
+    overflow: auto;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    gap: 12px;
+}
+
+.main__tabs-content {
+    flex: 1;
+    min-height: 0;
+}
+
+.main__tabs-content > .main__tabs-content-tabpanel.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 440px);
+    gap: 16px;
+    height: 100%;
+    min-height: 0;
+}
+
+.inputs-collection,
+.input-properties {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.inputs-collection .panel,
+.input-properties .panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+}
+
+.inputs-collection .panel-body,
+.input-properties .panel-body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+}
+
+.main__tabs-btns {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+}
+
+.main__tabs-btns .btn-group {
+    box-shadow: none;
+}
+
+@media (max-width: 900px) {
+    .container-fluid > .row {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .main__tabs-content > .main__tabs-content-tabpanel.active {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+}

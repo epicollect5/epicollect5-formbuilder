@@ -3,6 +3,8 @@
 .idea
 .vscode
 node_modules
+formbuilder-ionic/dist
+formbuilder-ionic/dev-server.log
 
 public/js/formbuilder.js.map
 project/project.json

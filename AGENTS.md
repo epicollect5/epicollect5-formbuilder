@@ -9,9 +9,9 @@
 - The legacy formbuilder (`js/**`, `css/**`, `public/**`) is frozen: do not restyle it, do not "modernise" it, do not convert it to Vue, and do not add a component/state framework to it.
 - Do NOT change the project-definition JSON contract (field names, nesting, refs) without an explicit request; the server, the mobile app and the dataviewer consume it.
 
-## Two Codebases
+## Three Codebases
 
-This repository holds the legacy formbuilder and, eventually, a Vue rewrite. They have different stacks, architectures and style rules. Never mix them.
+This repository holds the legacy formbuilder, an isolated Ionic UI prototype and, eventually, a Vue rewrite. They have different stacks, architectures and style rules. Never mix them.
 
 ### `js/`, `css/`, `public/` — legacy formbuilder (frozen style)
 
@@ -33,10 +33,20 @@ Vue 3 + Pinia + Vite, intended to use Ionic Vue 8 and `@vue-dnd-kit/core`. **The
 - Do not copy the legacy singleton, the `dom` mutation model, or the jQuery event delegation into the port.
 - The port's contract is the legacy project-definition JSON: same shapes in and out. The legacy app is the behavioural reference, not the structural one.
 
+### `formbuilder-ionic/` — isolated Ionic prototype (presentation only)
+
+A side-by-side prototype served next to the legacy entry point against the same session and project JSON. It is **not** a rewrite and not the Vue port.
+
+- It bundles the frozen `js/app_modules/**` behaviour through esbuild aliases (`config`, `actions`, `factory`, `helpers`, `inputs`, `loaders`, `template`, `ui-handlers`, `legacy`). Do not copy or fork legacy behaviour into `src/`; fix shared behaviour in `js/app_modules/**` only through the normal legacy rules.
+- Only presentation is replaced: `src/views/**` containers/partials, `src/theme/**`, and `src/components/legacy-*` adapters that stand in for Bootstrap JS (Ionic modal/tabs/menus) and Font Awesome (Ionicons).
+- `public/views/properties/**` is reused verbatim at build time; it is placeholder-only markup. Keep the legacy hook classes and `div.panel` / `div.panel-body` tags that legacy selectors depend on.
+- jQuery and jQuery UI remain the drag-and-drop and event layer. No Vue, React, TypeScript, router or state library.
+- `npm run build` writes only `formbuilder-ionic/dist/`; `npm run dev` also serves the legacy baseline and the project file. Tests are Vitest + jsdom (`npm test` inside `formbuilder-ionic/`), and the legacy Mocha suite stays the shared-behaviour gate.
+
 ## Environment
 
 - The shell may export `NODE_ENV=production`; npm then defaults to `omit=dev`, and `npm install`/`npm ci` removes Mocha, Chai, jsdom and the build toolchain. If that happens, restore with `npm ci --include=dev` before running tests or the build.
-- `npm install <pkg>` re-resolves the whole tree; do not use it to "just add" a package. Prefer working inside `formbuilder-vue/` once the port has its own `package.json`.
+- `npm install <pkg>` re-resolves the whole tree; do not use it to "just add" a package. Prefer working inside `formbuilder-vue/` or `formbuilder-ionic/`, which have their own lockfiles and pinned dependencies.
 - `npm test` is the whole legacy suite. The suite is green (155 passing); a failing test is a regression, not a known baseline.
 
 ## Build

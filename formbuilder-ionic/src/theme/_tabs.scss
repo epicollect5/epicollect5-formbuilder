@@ -1,0 +1,114 @@
+.main__tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    background: var(--fb-surface-2);
+    border: 1px solid var(--fb-border);
+    border-radius: var(--fb-radius);
+    overflow-x: auto;
+}
+
+.main__tabs > li {
+    flex: 0 0 auto;
+    list-style: none;
+}
+
+.main__tabs > li > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: var(--fb-label);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.main__tabs > li > a:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+}
+
+.main__tabs > li.active > a {
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+}
+
+.main__tabs > li.disabled > a,
+.main__tabs > li.disabled-tab > a {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.main__tabs-btns {
+    flex: 0 0 auto;
+}
+
+.nav-tabs {
+    display: flex;
+    gap: 4px;
+    margin: 0 0 12px;
+    padding: 4px;
+    list-style: none;
+    background: var(--fb-surface-2);
+    border: 1px solid var(--fb-border);
+    border-radius: 12px;
+    overflow-x: auto;
+}
+
+.nav-tabs > li {
+    flex: 0 0 auto;
+    list-style: none;
+}
+
+.nav-tabs > li > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 11px;
+    border-radius: 9px;
+    color: var(--fb-label);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.nav-tabs > li > a:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+}
+
+.nav-tabs > li.active > a {
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+}
+
+.nav-tabs > li.disabled > a,
+.nav-tabs > li.disabled-tab > a {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.nav-tabs > li.validation-error > a {
+    color: var(--ion-color-danger);
+    box-shadow: inset 0 0 0 1px var(--ion-color-danger);
+}
+
+.tab-content > .tab-pane {
+    display: none;
+}
+
+.tab-content > .tab-pane.active {
+    display: block;
+}
+
+.input-properties__tabs {
+    padding: 0;
+}

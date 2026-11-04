@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Formbuilder — Ionic prototype</title>
+    <meta id="formbuilder-version"
+          data-version="ionic-prototype-1">
+    <meta name="description"
+          content="Isolated Ionic UI prototype for the Epicollect5 formbuilder">
+
+    <link href="https://fonts.googleapis.com/css?family=Arimo"
+          rel="stylesheet"
+          type="text/css">
+
+    <!-- Ionic Core 8.8.4 (pinned, copied into vendor/ionic by the build) -->
+    <link rel="stylesheet"
+          href="vendor/ionic/css/ionic.bundle.css">
+
+    <!-- Vendor styles kept from the legacy bundle: no Bootstrap, no Font Awesome -->
+    <link rel="stylesheet"
+          href="vendor/css/toastr.min.css">
+    <link rel="stylesheet"
+          href="vendor/css/summernote.css">
+
+    <link rel="stylesheet"
+          href="css/ionic-formbuilder.css">
+
+    <!-- Same pinned jQuery as the legacy baseline -->
+    <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+            crossorigin="anonymous"></script>
+</head>
+
+<body class="loader-background">
+<ion-app>
+    <div class="loader">Loading...</div>
+    <div class="wait-overlay"></div>
+
+    <ion-header class="ion-no-border">
+        <ion-toolbar class="formbuilder-toolbar">
+            <nav class="navbar hidden formbuilder-navbar"
+                 role="navigation"
+                 aria-label="Project">
+                <!--navbar content goes here-->
+            </nav>
+        </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="formbuilder-content">
+        <div class="total-entries hidden"
+             data-total-entries="1"></div>
+        <div class="project-definition-version hidden"
+             data-project-definition-version="1"></div>
+
+        <div class="warning-well screen-resolution">
+            <p>The formbuilder does not support the current screen resolution</p>
+            <p>Please use a screen with a resolution of at least 1024x768</p>
+            <p>
+                <a href="https://docs.epicollect.net/formbuilder/build-your-questionnaire">
+                    More info on our User Guide
+                </a>
+            </p>
+        </div>
+
+        <div class="container-fluid hidden">
+            <div class="row">
+                <section class="inputs-tools"
+                         aria-label="Question types">
+                    <!--Inputs tools will show here (draggable)-->
+                </section>
+
+                <section class="main">
+                    <ul class="main__tabs nav nav-tabs"
+                        role="tablist">
+                        <li role="presentation"
+                            class="active main__tabs__form-btn">
+                            <a href="#{form-ref}-tabpanel"
+                               role="tab"
+                               aria-selected="true"
+                               data-toggle="tab"
+                               data-form-index="0">{form-name}
+                                <i class="form-state fa fa-exclamation-triangle"
+                                   aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <!-- trigger add form modal -->
+                            <a class="main__tabs_add-form"
+                               href="#"
+                               role="button"
+                               data-toggle="modal"
+                               data-target=".main__modal--edit-form-name">Add form
+                                <i class="fa fa-plus"
+                                   aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li class="main__tabs-btns">
+                            <div class="btn-group">
+                                <button type="button"
+                                        class="btn btn-default main__tabs__undo-btn"
+                                        disabled>
+                                    <i class="project-state fa fa-undo fa-fw"
+                                       aria-hidden="true"></i>
+                                    <span>Undo</span>
+                                </button>
+                                <button type="button"
+                                        class="btn btn-default main__tabs__save-project-btn"
+                                        disabled>
+                                    <i class="project-state fa fa-warning fa-fw"
+                                       aria-hidden="true"></i>
+                                    Save <span>project</span>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="main__modal--edit-form-name modal fade"
+                         tabindex="-1"
+                         role="dialog"
+                         aria-label="Edit form name">
+                        <!-- load modal dynamically -->
+                    </div>
+
+                    <div class="main__tabs-content tab-content">
+                        <div role="tabpanel"
+                             class="main__tabs-content-tabpanel tab-pane fade in active"
+                             id="{form-ref}-tabpanel">
+                            <div id="form-ref-inputs-collection"
+                                 class="inputs-collection">
+                                <!-- Inputs collection (sortable) container will load here dynamically -->
+                            </div>
+
+                            <div id="form-ref-input-properties"
+                                 class="input-properties">
+                                <!-- Properties panel is loaded here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="print-preview-wrapper"></div>
+    </ion-content>
+</ion-app>
+
+<footer class="formbuilder-modals">
+    <div id="info-title"
+         class="modal fade"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="info-title-label"
+         aria-hidden="true">
+        <div class="modal-dialog"
+             role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"
+                        id="info-title-label">What do you mean by <strong>title</strong>?</h4>
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p>Each entry you will add on your device will appear on a list.<br />
+                        To identify each entry, you can set some of your question answers to be part of the entry title
+                        (up to a maximum of 3 for either a form or a branch)</p>
+
+                    <p>For example, let's say you have 3 questions like:</p>
+                    <ul class="list-group">
+                        <li class="list-group-item">What is your name?</li>
+                        <li class="list-group-item">What is your age?</li>
+                        <li class="list-group-item">What is your date of birth?</li>
+                    </ul>
+                    <p>If you set all these questions to be a title, you will end up with a list of entries like:</p>
+                    <ul class="list-group">
+                        <li class="list-group-item">Mirko, 39, 22/05/1977</li>
+                        <li class="list-group-item">John, 18, 24/01/1990</li>
+                        <li class="list-group-item">...</li>
+                    </ul>
+                    <p>Remember, if you do not set any title at all, the entry unique identifier generated by the system
+                        will be shown instead: <br />
+                        <code>149da8d4-2807-11e6-b67b-9e71128cae77</code> <br />
+                        Since it is not really readable, we highly recommend you select some questions as
+                        <strong>title</strong>!
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-default btn-action"
+                            data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-regex"
+         class="modal fade"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="info-regex-label"
+         aria-hidden="true">
+        <div class="modal-dialog"
+             role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"
+                        id="info-regex-label">What is a <strong>regex</strong>?</h4>
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p>A regular expression (regex) is a special text string for describing a search pattern. You can
+                        think of regular expressions as wildcards. </p>
+
+                    <p> You are probably familiar with wildcard notations such
+                        as <code>*.txt</code> to find all text files in a file manager. The regex equivalent is
+                        <code>.*\.txt</code>
+                    </p>
+
+                    <p>There are many things you can do applying regex to your question, for example:</p>
+                    <table class="table table-hover">
+                        <tr>
+                            <th>
+                                Allow only letters
+                            </th>
+                            <td>
+                                <button class="btn btn-default btn-action-inverse pull-right"
+                                        data-apply-regex="only_letters">Apply this</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                Allow only digits
+                            </th>
+                            <td>
+                                <button class="btn btn-default btn-action-inverse pull-right"
+                                        data-apply-regex="only_digits">Apply this</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                Limit the answer length to 20 chars <br />(or any length you like, just replace 20 with
+                                the length you want)
+                            </th>
+                            <td>
+                                <button class="btn btn-default btn-action-inverse pull-right"
+                                        data-apply-regex="limit_length_20">Apply this</button>
+                            </td>
+                        </tr>
+                    </table>
+                    <p class="bg-warning"><strong>Important: </strong>make sure the regex fits the context of the input
+                        type, as if you apply a letter
+                        only regex to a numeric input (which accepts only digits), it would be impossible for the user
+                        to answer!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-default btn-action"
+                            data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-import-form"
+         class="modal fade"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="info-import-form-label"
+         aria-hidden="true">
+        <div class="modal-dialog"
+             role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"
+                        id="info-import-form-label">What are Epicollect5 forms?</h4>
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p class="lead">Each Epicollect5 form you create using the formbuilder can be exported as a
+                        <code>.json</code> file and imported
+                        within the same project or another project.
+                    </p>
+
+                    <p class="lead text-center text-underline">
+                        <strong>
+                            <a href="https://docs.epicollect.net/formbuilder/importexport-forms"
+                               target="_blank"
+                               rel="noreferrer">Show me
+                                how to do it!</a>
+                        </strong>
+                    </p>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-default btn-action"
+                            data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="csv-import-possible_answers"
+         class="modal fade"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="csv-import-label"
+         aria-hidden="true">
+        <div class="modal-dialog"
+             role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"
+                        id="csv-import-label">Possible answers csv import options</h4>
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+
+                        <div class="form-group possible_answers__selected-column">
+                            <label>Select which dataset to import</label>
+                            <div class="possible-answers-column-picker btn-group pull-right">
+                                <button type="button"
+                                        class="btn btn-default btn-sm dropdown-toggle"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false">
+                                    Pick column <span class="caret"
+                                                       aria-hidden="true"></span>
+                                </button>
+                                <ul class="dropdown-menu"
+                                    role="menu">
+                                </ul>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div class="form-group possible_answers__first-row-headers">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox"
+                                           checked> First row contains headers
+                                </label>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div class="form-group possible_answers__append-or-replace">
+                            <div class="radio">
+                                <label>
+                                    <input type="radio"
+                                           name="possibleAnswersImportOptions"
+                                           id="replace"
+                                           value="option2"
+                                           checked>
+                                    Replace all existing possible answers
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio"
+                                           name="possibleAnswersImportOptions"
+                                           id="append"
+                                           value="option1">
+                                    Append to existing possible answers
+                                </label>
+                            </div>
+                        </div>
+                        <hr />
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-default btn-default pull-left"
+                            data-dismiss="modal">Dismiss</button>
+                    <button type="button"
+                            class="btn btn-default btn-action possible_answers-perform-import"
+                            disabled>Import</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="warning-delete-question"
+         class="modal fade"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="warning-delete-question-label"
+         aria-hidden="true">
+        <div class="modal-dialog"
+             role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-center"
+                        id="warning-delete-question-label">Warning</h4>
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Are you sure you want to delete this question?</p>
+                    <p class="warning-well">This action cannot be undone!</p>
+                    <p class="text-danger"><strong>All data associated with this question will also be permanently
+                        deleted.</strong></p>
+                    <a href="https://docs.epicollect.net/formbuilder/edit-inputs#delete-questions"
+                       target="_blank"
+                       rel="noreferrer">
+                        <strong>Learn More</strong></a>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-default btn-danger btn-confirm-delete-question">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="js/vendor-formbuilder.js"
+        defer></script>
+<script src="js/formbuilder-ionic.js"
+        defer></script>
+<script src="js/legacy-formbuilder.js"
+        defer></script>
+
+</body>
+
+</html>

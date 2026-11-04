@@ -1,0 +1,25 @@
+{
+  "name": "formbuilder-ionic",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated Ionic UI prototype for the Epicollect5 formbuilder",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs --watch --serve",
+    "start": "npm run dev",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@ionic/core": "8.8.4",
+    "ionicons": "8.0.13"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "jquery": "3.7.1",
+    "jsdom": "29.1.1",
+    "sass": "1.67.0",
+    "vitest": "4.0.18"
+  }
+}

@@ -1,0 +1,183 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--ion-background-color, #ffffff);
+    color: var(--ion-text-color, #1f1b24);
+    font-family: var(--ion-font-family);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+p {
+    margin-top: 0;
+}
+
+a {
+    color: var(--ion-color-primary);
+}
+
+code {
+    background: var(--fb-surface-2);
+    border-radius: 5px;
+    padding: 1px 5px;
+    font-size: 0.9em;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid var(--fb-border);
+    margin: 14px 0;
+}
+
+/* Legacy utility hooks (previously supplied by Bootstrap). */
+.hidden {
+    display: none !important;
+}
+
+.invisible {
+    visibility: hidden !important;
+}
+
+.clearfix::after {
+    content: '';
+    display: block;
+    clear: both;
+}
+
+.pull-right {
+    float: right;
+}
+
+.pull-left {
+    float: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-warning {
+    color: var(--fb-amber);
+}
+
+.text-danger {
+    color: var(--ion-color-danger);
+}
+
+.text-underline {
+    text-decoration: underline;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.warning-well {
+    background: var(--fb-warning-bg);
+    border-left: 4px solid var(--fb-amber);
+    border-radius: 10px;
+    color: var(--fb-label);
+    padding: 10px 12px;
+}
+
+.screen-resolution {
+    display: none;
+}
+
+@media (max-width: 1023px) {
+    .screen-resolution {
+        display: block;
+        margin: 16px;
+    }
+}
+
+.caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+}
+
+.divider {
+    height: 1px;
+    margin: 6px 0;
+    overflow: hidden;
+    background: var(--fb-border);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    border-bottom: 1px solid var(--fb-border);
+    padding: 10px 8px;
+    text-align: left;
+    vertical-align: middle;
+    font-weight: 400;
+}
+
+.bg-warning {
+    background: var(--fb-warning-bg);
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.lead {
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Legacy overlay/loader primitives. */
+.loader {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ion-background-color, #ffffff);
+    color: var(--fb-muted);
+    font-size: 16px;
+}
+
+.wait-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    display: none;
+    background: rgba(30, 24, 38, 0.28);
+    cursor: wait;
+}
+
+.print-preview-wrapper {
+    display: none;
+}

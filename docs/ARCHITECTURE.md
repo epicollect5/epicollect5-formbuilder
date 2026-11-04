@@ -3,9 +3,9 @@
 Source of truth for the system's design. Read it before changing anything;
 cross-check any candidate finding against it.
 
-This repository holds the **legacy formbuilder** and, eventually, a **Vue port**.
-They are independent: different stacks, different architectures, different style
-rules. Never mix them.
+This repository holds the **legacy formbuilder**, an **isolated Ionic UI
+prototype**, and, eventually, a **Vue port**. They are independent: different
+stacks, different architectures, different style rules. Never mix them.
 
 | | Legacy formbuilder | Vue port |
 |---|---|---|
@@ -15,6 +15,28 @@ rules. Never mix them.
 | Tests | Mocha 2.5 + Chai + jsdom | Vitest (target) |
 | Style rules | frozen, see `AGENTS.md` | `docs/CODE-STYLE.md` |
 | Status | in production | greenfield — no source on `master` |
+
+## Ionic prototype (`formbuilder-ionic/`)
+
+A presentation-layer prototype that runs **next to** the legacy entry point
+against the same session and the same project-definition JSON. It does not fork
+behaviour: the frozen `js/app_modules/**` modules are bundled through esbuild
+aliases, so rendering, validation, jumps, possible answers, undo, save, import
+and export execute the legacy code. Only the presentation layer is replaced:
+
+- `src/views/**` re-authors the Bootstrap containers and partials; the
+  placeholder-only `public/views/properties/**` files are reused at build time.
+- `src/theme/**` styles the legacy hook classes on Ionic tokens; no Bootstrap
+  stylesheet is loaded.
+- `src/components/legacy-*` provides the Bootstrap JS replacements: `ion-modal`
+  hosts the legacy `.modal` element, tabs are ARIA controllers firing
+  `show/shown.bs.tab`, dropdowns are accessible menus, and Font Awesome classes
+  are upgraded in place with `<ion-icon>` children.
+
+jQuery 2.2.1 and jQuery UI stay in place for drag-and-drop and delegated events.
+The output is `formbuilder-ionic/dist/`, served with the legacy `public/` and the
+shared `project/` mount so both entries resolve `../project/project.json`
+identically. See `formbuilder-ionic/README.md` for the build and test commands.
 
 ---
 
