@@ -8,21 +8,25 @@
 }
 
 .legacy-icon > ion-icon {
-    font-size: 1.25em;
+    font-size: 1.45em;
     pointer-events: none;
 }
 
 .legacy-icon.fa-2x > ion-icon {
-    font-size: 1.9em;
+    font-size: 2.2em;
 }
 
 .legacy-icon.fa-fw {
-    width: 1.4em;
+    width: 1.6em;
+}
+
+.legacy-icon.fa-2x.fa-fw {
+    width: 2.4em;
 }
 
 button .legacy-icon > ion-icon,
 .btn .legacy-icon > ion-icon {
-    font-size: 1.3em;
+    font-size: 1.5em;
 }
 
 .question-state,
@@ -35,15 +39,16 @@ button .legacy-icon > ion-icon,
 }
 
 .question-state > ion-icon,
-.jump-state > ion-icon,
-.form-state > ion-icon,
-.project-state > ion-icon {
-    font-size: 1.1em;
+.jump-state > ion-icon {
+    font-size: 1.3em;
 }
 
 .question-state.fa-2x > ion-icon,
-.jump-state.fa-2x > ion-icon,
+.jump-state.fa-2x > ion-icon {
+    font-size: 1.6em;
+}
+
 .form-state > ion-icon,
 .project-state > ion-icon {
-    font-size: 1.25em;
+    font-size: 1.35em;
 }

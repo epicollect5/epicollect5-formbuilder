@@ -5,8 +5,9 @@ import { startIconBridge, upgradeIcon } from '@/components/legacy-icons/legacy-i
 describe('font awesome icon model', () => {
     it('maps validation state classes to Ionicons', () => {
         expect(resolveIconName(['fa', 'fa-check', 'fa-2x'])).toBe('checkmark');
-        expect(resolveIconName(['fa', 'fa-exclamation-triangle'])).toBe('warning-outline');
-        expect(resolveIconName(['fa', 'fa-clone'])).toBe('copy-outline');
+        expect(resolveIconName(['fa', 'fa-exclamation-triangle'])).toBe('warning');
+        expect(resolveIconName(['fa', 'fa-clone'])).toBe('copy');
+        expect(resolveIconName(['fa', 'fa-hashtag'])).toBe('calculator');
     });
 
     it('falls back for unknown icons', () => {
@@ -24,7 +25,7 @@ describe('legacy icon bridge', () => {
         expect(host.tagName).toBe('I');
         expect(host.classList.contains('fa-hashtag')).toBe(true);
         expect(host.classList.contains('legacy-icon')).toBe(true);
-        expect(icon.getAttribute('name')).toBe('calculator-outline');
+        expect(icon.getAttribute('name')).toBe('calculator');
     });
 
     it('refreshes the glyph when the state class changes', async () => {
@@ -32,7 +33,7 @@ describe('legacy icon bridge', () => {
 
         const host = document.querySelector('i.fa');
         startIconBridge(document.body);
-        expect(host.querySelector('ion-icon').getAttribute('name')).toBe('warning-outline');
+        expect(host.querySelector('ion-icon').getAttribute('name')).toBe('warning');
 
         host.classList.remove('fa-warning');
         host.classList.add('fa-check');
