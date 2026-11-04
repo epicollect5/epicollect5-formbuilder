@@ -33,6 +33,12 @@
     padding: 3px 6px;
 }
 
+/* The icon-only action groups get a wider hit area than the text buttons. */
+.panel-heading .inputs-collection__buttons .btn,
+.panel-heading .input-properties__buttons .btn {
+    padding: 3px 9px;
+}
+
 /* Keep the empty properties header as tall as the populated collection header. */
 .inputs-collection .panel-heading,
 .input-properties > .panel > .panel-heading {
