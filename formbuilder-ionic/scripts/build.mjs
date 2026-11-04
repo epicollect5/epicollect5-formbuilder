@@ -132,6 +132,8 @@ async function copyViews() {
 async function copyStaticAssets() {
     await fs.copyFile(path.join(root, 'src/index.html'), path.join(dist, 'index.html'));
 
+    await fs.cp(path.join(repo, 'public/favicons'), path.join(dist, 'favicons'), { recursive: true });
+
     await fs.mkdir(path.join(dist, 'vendor/ionic/css'), { recursive: true });
     await fs.copyFile(
         path.join(root, 'node_modules/@ionic/core/css/ionic.bundle.css'),
