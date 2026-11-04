@@ -495,6 +495,13 @@
     font-size: 14px;
 }
 
+/* Legacy shows the resolution warning instead of the builder below 1024px. */
+@media (max-width: 1023px) {
+    #builder {
+        display: none;
+    }
+}
+
 @media (max-width: 900px) {
     .builder {
         grid-template-columns: 1fr;
