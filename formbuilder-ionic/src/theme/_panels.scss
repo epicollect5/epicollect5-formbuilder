@@ -130,6 +130,32 @@
     color: var(--fb-muted);
 }
 
+/* The properties card must be the only card in the column: the legacy tab panes
+   are panels too, so their own border, radius and margin are flattened and the
+   card body carries no padding, letting the header sit on the content. */
+.input_properties__forms_wrapper {
+    padding: 0;
+}
+
+.input_properties__forms_wrapper .panel {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+}
+
+.input_properties__forms_wrapper .panel > .panel-heading {
+    padding: 10px 0;
+    background: transparent;
+    border-bottom: 1px solid var(--fb-border);
+    border-radius: 0;
+}
+
+.input_properties__forms_wrapper .panel > .panel-body {
+    padding: 10px 0 14px;
+}
+
 .input-properties__header {
     min-width: 0;
 }

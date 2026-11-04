@@ -133,5 +133,6 @@
 }
 
 .input-properties__tabs {
-    padding: 0;
+    /* the card body has no padding of its own, the tab area provides it */
+    padding: 14px;
 }
