@@ -15,7 +15,7 @@ body {
     background: var(--ion-background-color, #ffffff);
     color: var(--fb-text, #333333);
     font-family: var(--ion-font-family);
-    font-size: 14px;
+    font-size: 16px;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -161,7 +161,7 @@ hr {
 }
 
 .lead {
-    font-size: 15px;
+    font-size: 17px;
     line-height: 1.5;
 }
 
@@ -175,7 +175,7 @@ hr {
     justify-content: center;
     background: var(--ion-background-color, #ffffff);
     color: var(--fb-muted);
-    font-size: 16px;
+    font-size: 18px;
 }
 
 .wait-overlay {

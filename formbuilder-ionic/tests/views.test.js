@@ -171,10 +171,25 @@ describe('theme', () => {
         expect(layout).toContain('color: #ffffff;');
     });
 
+    it('uses the larger base typography', async () => {
+        const reset = await read('src/theme/_reset.scss');
+        const controls = await read('src/theme/_controls.scss');
+        const panels = await read('src/theme/_panels.scss');
+        const tabs = await read('src/theme/_tabs.scss');
+
+        expect(reset).toContain('font-size: 16px;');
+        expect(controls).toContain('font-size: 15px;');
+        expect(controls).toContain('font-size: 16px;');
+        expect(panels).toMatch(/\.panel\s*\{[^}]*font-size:\s*16px;/);
+        expect(panels).toContain('font-size: 16px;');
+        expect(tabs).toContain('font-size: 15px;');
+        expect(tabs).toContain('font-size: 14px;');
+    });
+
     it('uses larger uppercase labels for the toolbar actions', async () => {
         const layout = await read('src/theme/_layout.scss');
 
-        expect(layout).toMatch(/\.navbar-button-label\s*\{[^}]*font-size:\s*15px;[^}]*text-transform:\s*uppercase;/);
+        expect(layout).toMatch(/\.navbar-button-label\s*\{[^}]*font-size:\s*17px;[^}]*text-transform:\s*uppercase;/);
     });
 
     it('keeps dragged input tiles the same size as resting tiles', async () => {
@@ -202,8 +217,8 @@ describe('theme', () => {
         expect(tokens).toContain('--fb-text: var(--app-text, #333333);');
         expect(tokens).toContain('--fb-surface: var(--app-surface, #ffffff);');
         expect(tokens).toContain('--fb-muted: #777777;');
-        expect(tokens).toContain('--fb-border: #dddddd;');
-        expect(tokens).toContain('--fb-border-strong: #cccccc;');
+        expect(tokens).toContain('--fb-border: #333333;');
+        expect(tokens).toContain('--fb-border-strong: #333333;');
         expect(tokens).toContain('--ion-text-color: #333333;');
     });
 

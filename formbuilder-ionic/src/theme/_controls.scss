@@ -10,7 +10,7 @@
     background: var(--fb-surface);
     color: var(--fb-text);
     font: inherit;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 1.2;
     cursor: pointer;
     transition: background 120ms ease, border-color 120ms ease;
@@ -18,7 +18,7 @@
 
 .btn:hover {
     background: var(--fb-surface-2);
-    border-color: #adadad;
+    border-color: var(--fb-border-strong);
 }
 
 .btn:focus-visible {
@@ -35,7 +35,7 @@
 .btn-sm {
     min-height: 30px;
     padding: 6px 9px;
-    font-size: 12px;
+    font-size: 14px;
 }
 
 /* Action buttons use the app theme's secondary role, not primary. */
@@ -109,7 +109,7 @@ label {
     gap: 6px;
     margin-bottom: 6px;
     color: var(--fb-label);
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 500;
 }
 
@@ -123,7 +123,7 @@ label {
     background: var(--fb-surface);
     color: #555555;
     font: inherit;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .form-control:focus {
@@ -196,7 +196,7 @@ input[type='radio'] {
     display: block;
     margin-top: 4px;
     color: var(--ion-color-danger);
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .input-properties__form__error--branch-error,
@@ -204,7 +204,7 @@ input[type='radio'] {
     display: block;
     margin-top: 6px;
     color: var(--ion-color-danger);
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .form-control-feedback {
@@ -247,7 +247,7 @@ input[type='radio'] {
 .possible-answers__list_pager__current,
 .possible-answers__list_pager__total {
     display: inline;
-    font-size: 13px;
+    font-size: 15px;
     color: var(--fb-label);
 }
 
