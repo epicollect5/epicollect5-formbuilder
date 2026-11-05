@@ -30,6 +30,14 @@ describe('Ionic entry point', () => {
         expect(html).not.toContain('font-awesome.min.css');
     });
 
+    it('hosts the print preview and loads its print styles', async () => {
+        const html = await read('src/index.html');
+        const theme = await read('src/theme/ionic-formbuilder.scss');
+
+        expect(html).toContain('<div class="print-preview-wrapper"></div>');
+        expect(theme).toContain("@use 'print';");
+    });
+
     it('owns its markup instead of reproducing legacy hooks', async () => {
         const html = await read('src/index.html');
 
@@ -102,6 +110,12 @@ describe('fixed markup views', () => {
         const formats = [...html.matchAll(/data-format="([^"]+)"/g)].map((match) => match[1]);
 
         expect(formats).toEqual(['bold', 'italic', 'underline']);
+    });
+
+    it('keeps the print action in the form menu', async () => {
+        const html = await read('src/views/question-card.html');
+
+        expect(html).toContain('data-action="form-print"');
     });
 });
 

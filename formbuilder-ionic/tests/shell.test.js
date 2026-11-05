@@ -457,6 +457,35 @@ describe('form actions', () => {
         expect(getSession().current_form_index).toBe(0);
     });
 
+    it('prints the current form from the form menu', () => {
+        const print = vi.spyOn(window, 'print').mockImplementation(() => {});
+        const wrapper = document.createElement('div');
+
+        wrapper.className = 'print-preview-wrapper';
+        document.body.append(wrapper);
+
+        document.querySelector('#questions [data-action="form-print"]').click();
+
+        expect(wrapper.innerHTML).toContain('<h2>Test mapping issue</h2>');
+        expect(wrapper.innerHTML).toContain('Do you have children');
+        expect(print).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses to print an empty form', () => {
+        const print = vi.spyOn(window, 'print').mockImplementation(() => {});
+        const wrapper = document.createElement('div');
+
+        wrapper.className = 'print-preview-wrapper';
+        document.body.append(wrapper);
+
+        document.querySelectorAll('#form-tabs .builder__form-tab')[1].click();
+        document.querySelector('#questions [data-action="form-print"]').click();
+
+        expect(wrapper.innerHTML).toBe('');
+        expect(print).not.toHaveBeenCalled();
+        expect(document.querySelector('ion-toast').message).toBe('Form is invalid');
+    });
+
     it('deletes all questions of the active form after confirmation', () => {
         document.querySelector('#questions [data-action="form-delete-all"]').click();
 
