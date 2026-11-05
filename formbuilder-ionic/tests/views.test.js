@@ -1,7 +1,15 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 import { QUESTION_TYPES } from '@/models/question-types.js';
+import { DATE_FORMATS, REGEX_PRESETS, TIME_FORMATS } from '@/models/input-properties.js';
 import { getAdvancedFields } from '@/services/properties.js';
+
+function datetime_values(html, type) {
+    const group_start = html.indexOf('data-datetime-type="' + type + '"');
+    const group_end = html.indexOf('</ion-radio-group>', group_start);
+
+    return [...html.slice(group_start, group_end).matchAll(/value="([^"]+)"/g)].map((match) => match[1]);
+}
 
 function read(relative_path) {
     return readFile(new URL('../' + relative_path, import.meta.url), 'utf8');
@@ -70,6 +78,20 @@ describe('fixed markup views', () => {
                 expect(field_ids.has(field_id)).toBe(true);
             });
         });
+    });
+
+    it('keeps the regex presets in the properties view', async () => {
+        const html = await read('src/views/properties-card.html');
+        const keys = [...html.matchAll(/data-preset="([^"]+)"/g)].map((match) => match[1]);
+
+        expect(keys).toEqual(REGEX_PRESETS.map((preset) => preset.key));
+    });
+
+    it('keeps the date and time format choices in the properties view', async () => {
+        const html = await read('src/views/properties-card.html');
+
+        expect(datetime_values(html, 'date')).toEqual(DATE_FORMATS.map((format) => format.value));
+        expect(datetime_values(html, 'time')).toEqual(TIME_FORMATS.map((format) => format.value));
     });
 
     it('keeps the readme toolbar buttons in the view', async () => {
