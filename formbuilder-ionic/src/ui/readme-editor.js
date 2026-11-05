@@ -6,11 +6,11 @@ import StarterKit from '@tiptap/starter-kit';
 import { createView } from '@/ui/dom.js';
 import readme_editor_view from '@/views/readme-editor.html?raw';
 
-const README_MAX_LENGTH = 1000;
+export const README_MAX_LENGTH = 1000;
 const ALLOWED_TAGS = new Set(['p', 'br', 'b', 'strong', 'i', 'em', 'u']);
 const DISCARDED_TAGS = new Set(['script', 'style', 'iframe', 'object']);
 
-const ReadmeLength = Extension.create({
+export const ReadmeLength = Extension.create({
     name: 'readmeLength',
 
     addProseMirrorPlugins: function () {
@@ -107,7 +107,7 @@ function getDocumentTextLength(document) {
 }
 
 /* Persist only the readme tags supported by the project-definition contract. */
-function sanitizeEditorHTML(html) {
+export function sanitizeEditorHTML(html) {
     const parsed = new DOMParser().parseFromString(html, 'text/html');
     const safe_container = document.createElement('div');
 
