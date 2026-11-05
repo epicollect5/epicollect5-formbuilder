@@ -5,11 +5,23 @@ import { defineCustomElement as defineIonApp } from '@ionic/core/components/ion-
 import { defineCustomElement as defineIonHeader } from '@ionic/core/components/ion-header.js';
 import { defineCustomElement as defineIonToolbar } from '@ionic/core/components/ion-toolbar.js';
 import { defineCustomElement as defineIonContent } from '@ionic/core/components/ion-content.js';
+import { defineCustomElement as defineIonCard } from '@ionic/core/components/ion-card.js';
+import { defineCustomElement as defineIonCardHeader } from '@ionic/core/components/ion-card-header.js';
+import { defineCustomElement as defineIonCardTitle } from '@ionic/core/components/ion-card-title.js';
+import { defineCustomElement as defineIonCardContent } from '@ionic/core/components/ion-card-content.js';
 import { defineCustomElement as defineIonButton } from '@ionic/core/components/ion-button.js';
 import { defineCustomElement as defineIonIcon } from '@ionic/core/components/ion-icon.js';
 import { defineCustomElement as defineIonInput } from '@ionic/core/components/ion-input.js';
 import { defineCustomElement as defineIonCheckbox } from '@ionic/core/components/ion-checkbox.js';
 import { defineCustomElement as defineIonNote } from '@ionic/core/components/ion-note.js';
+import { defineCustomElement as defineIonSegment } from '@ionic/core/components/ion-segment.js';
+import { defineCustomElement as defineIonSegmentButton } from '@ionic/core/components/ion-segment-button.js';
+import { defineCustomElement as defineIonSegmentContent } from '@ionic/core/components/ion-segment-content.js';
+import { defineCustomElement as defineIonSegmentView } from '@ionic/core/components/ion-segment-view.js';
+import { defineCustomElement as defineIonSelect } from '@ionic/core/components/ion-select.js';
+import { defineCustomElement as defineIonSelectOption } from '@ionic/core/components/ion-select-option.js';
+import { defineCustomElement as defineIonRadio } from '@ionic/core/components/ion-radio.js';
+import { defineCustomElement as defineIonRadioGroup } from '@ionic/core/components/ion-radio-group.js';
 import { setAssetPath as setIoniconAssetPath } from 'ionicons/components';
 import { defineCustomElement as defineIoniconIcon } from 'ionicons/components/ion-icon.js';
 
@@ -18,11 +30,23 @@ const IONIC_COMPONENTS = [
     defineIonHeader,
     defineIonToolbar,
     defineIonContent,
+    defineIonCard,
+    defineIonCardHeader,
+    defineIonCardTitle,
+    defineIonCardContent,
     defineIonButton,
     defineIonIcon,
     defineIonInput,
     defineIonCheckbox,
     defineIonNote,
+    defineIonSegment,
+    defineIonSegmentButton,
+    defineIonSegmentContent,
+    defineIonSegmentView,
+    defineIonSelect,
+    defineIonSelectOption,
+    defineIonRadio,
+    defineIonRadioGroup,
     defineIoniconIcon
 ];
 
