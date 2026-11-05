@@ -1,9 +1,12 @@
 'use strict';
 
 import {
+    ANSWERS_PER_PAGE,
     createAnswer,
     getAnswerLimit,
-    isMultipleAnswerType
+    isMultipleAnswerType,
+    sanitizeAnswer,
+    sortAnswers
 } from '@/models/possible-answers.js';
 
 /*
@@ -63,7 +66,7 @@ export function renamePossibleAnswer(input, answer_ref, value) {
         return false;
     }
 
-    answer.answer = value;
+    answer.answer = sanitizeAnswer(value);
 
     return true;
 }
@@ -87,6 +90,27 @@ export function reorderPossibleAnswers(input, refs) {
     return true;
 }
 
+/* Paged lists sort one page at a time, so only that slice changes order. */
+export function reorderAnswerPage(input, refs, page) {
+    const answers = input ? input.possible_answers : [];
+    const start = (Math.max(page, 1) - 1) * ANSWERS_PER_PAGE;
+    const page_answers = answers.slice(start, start + ANSWERS_PER_PAGE);
+    const by_ref = new Map(page_answers.map(function (answer) {
+        return [answer.answer_ref, answer];
+    }));
+    const ordered = refs.map(function (ref) {
+        return by_ref.get(ref);
+    }).filter(Boolean);
+
+    if (ordered.length !== page_answers.length) {
+        return false;
+    }
+
+    answers.splice.apply(answers, [start, page_answers.length].concat(ordered));
+
+    return true;
+}
+
 export function movePossibleAnswer(input, from_index, to_index) {
     const answers = input ? input.possible_answers : [];
 
@@ -97,6 +121,31 @@ export function movePossibleAnswer(input, from_index, to_index) {
     const answer = answers.splice(from_index, 1)[0];
 
     answers.splice(to_index, 0, answer);
+
+    return true;
+}
+
+/* Alphabetical or shuffled in place; refs stay with their answer. */
+export function orderPossibleAnswers(input, order) {
+    if (!input || !isMultipleAnswerType(input.type)) {
+        return false;
+    }
+
+    const ordered = sortAnswers(input.possible_answers, order);
+
+    input.possible_answers.splice.apply(input.possible_answers, [0, ordered.length].concat(ordered));
+
+    return true;
+}
+
+/* One placeholder answer is the minimum the contract allows. */
+export function deleteAllAnswers(input) {
+    if (!input || !isMultipleAnswerType(input.type)) {
+        return false;
+    }
+
+    input.possible_answers = [createAnswer()];
+    input.default = null;
 
     return true;
 }

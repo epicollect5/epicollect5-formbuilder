@@ -158,6 +158,18 @@ export function addInput(type) {
     return insertInput(type, getActiveInputs().length);
 }
 
+/* Appends an already-built input (a duplicate) to the active list. */
+export function addInputObject(input) {
+    if (!input) {
+        return null;
+    }
+
+    getActiveInputs().push(input);
+    session.current_input_ref = input.ref;
+
+    return input;
+}
+
 export function insertInput(type, index) {
     const form = getCurrentForm();
 

@@ -1,7 +1,16 @@
 'use strict';
 
 import { getForms, getProject } from '@/models/project-definition.js';
-import { getAnswerLimit, isMultipleAnswerType } from '@/models/possible-answers.js';
+import {
+    ANSWERS_PER_PAGE,
+    MAX_ANSWER_LENGTH,
+    POSSIBLE_ANSWERS_ORDER,
+    getAnswerLimit,
+    getAnswerPage,
+    getAnswerPageCount,
+    isMultipleAnswerType,
+    sanitizeAnswer
+} from '@/models/possible-answers.js';
 import {
     allowsRequired,
     allowsTitle,
@@ -12,16 +21,24 @@ import {
     REGEX_PRESETS
 } from '@/models/input-properties.js';
 import { getContainerList } from '@/models/nesting.js';
-
-const NUMERIC_TYPES = new Set(['integer', 'decimal']);
+import { VALIDATION_MESSAGES } from '@/models/messages.js';
 import { getQuestionType } from '@/models/question-types.js';
 import { countTitles, getAdvancedFields } from '@/services/properties.js';
 import {
     addPossibleAnswer,
+    deleteAllAnswers,
+    orderPossibleAnswers,
     removePossibleAnswer,
     renamePossibleAnswer,
-    reorderPossibleAnswers
+    reorderAnswerPage
 } from '@/services/possible-answers.js';
+import {
+    exportCsv,
+    getCsvColumns,
+    getCsvFilename,
+    importAnswers,
+    parseCsv
+} from '@/services/possible-answers-csv.js';
 import {
     addJump,
     canAddJump,
@@ -52,6 +69,8 @@ import {
     selectInput,
     updateCurrentInput
 } from '@/services/session.js';
+import { duplicateInput } from '@/services/question-actions.js';
+import { getInputErrors, isInputValid } from '@/services/validation.js';
 import { button, createView, element, icon, parseView } from '@/ui/dom.js';
 import { createDropdown, populateDropdown } from '@/ui/dropdown.js';
 import { createReadmeEditor } from '@/ui/readme-editor.js';
@@ -67,6 +86,8 @@ const QUESTION_LIST = '#questions .builder__question-list';
 const TITLE_LIMIT = 3;
 
 let handlers = {};
+const answer_pages = new Map();
+const answer_notices = new Map();
 let active_readme_editor = null;
 let active_property_tab = 'basic';
 
@@ -430,122 +451,9 @@ function buildQuestionStatus(input) {
     return status;
 }
 
+/* Rows belong to the active list, so that list is the jump-validation context. */
 function isInputRowValid(input) {
-    if (!input) {
-        return false;
-    }
-
-    if (!hasValidQuestionText(input)) {
-        return false;
-    }
-
-    if (input.type === 'group') {
-        return Array.isArray(input.group) && input.group.length > 0;
-    }
-
-    if (input.type === 'branch') {
-        return Array.isArray(input.branch) && input.branch.length > 0;
-    }
-
-    if (isMultipleAnswerType(input.type)) {
-        if (!Array.isArray(input.possible_answers) || input.possible_answers.length === 0) {
-            return false;
-        }
-
-        if (!input.possible_answers.every(isPossibleAnswerRowValid)) {
-            return false;
-        }
-    }
-
-    if (NUMERIC_TYPES.has(input.type) && !hasValidNumericRange(input)) {
-        return false;
-    }
-
-    if (isDefaultInvalid(input)) {
-        return false;
-    }
-
-    return true;
-}
-
-function hasValidQuestionText(input) {
-    const question = input.question === null || input.question === undefined ? '' : String(input.question);
-
-    if (question.trim() === '') {
-        return false;
-    }
-
-    if (input.type !== 'readme') {
-        return true;
-    }
-
-    const plain = question.replace(/<[^>]*>/g, '').trim();
-
-    return plain.length > 0 && plain.length <= 1000;
-}
-
-function isPossibleAnswerRowValid(possible_answer) {
-    return !!(possible_answer && String(possible_answer.answer || '').trim() !== '');
-}
-
-function hasValidNumericRange(input) {
-    const min = toNumericValue(input.min);
-    const max = toNumericValue(input.max);
-
-    if (min !== null && isNaN(min)) {
-        return false;
-    }
-
-    if (max !== null && isNaN(max)) {
-        return false;
-    }
-
-    if (min !== null && max !== null && min > max) {
-        return false;
-    }
-
-    return true;
-}
-
-function isDefaultInvalid(input) {
-    if (input.default === null || input.default === undefined || String(input.default).trim() === '') {
-        return false;
-    }
-
-    if (NUMERIC_TYPES.has(input.type)) {
-        const value = toNumericValue(input.default);
-
-        if (value === null || isNaN(value)) {
-            return true;
-        }
-
-        if (input.type === 'integer' && !Number.isInteger(value)) {
-            return true;
-        }
-
-        const min = toNumericValue(input.min);
-        const max = toNumericValue(input.max);
-
-        if (min !== null && !isNaN(min) && value < min) {
-            return true;
-        }
-
-        if (max !== null && !isNaN(max) && value > max) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-function toNumericValue(value) {
-    if (value === null || value === undefined || String(value).trim() === '') {
-        return null;
-    }
-
-    const number = Number(value);
-
-    return Number.isFinite(number) ? number : NaN;
+    return isInputValid(input, getCurrentInputs());
 }
 
 /* Persists the order the sortable left in the DOM. */
@@ -618,7 +526,6 @@ function renderProperties() {
 
     title.textContent = label;
     title.setAttribute('title', label);
-    bindPropertyActions(card, input);
 
     if (active_property_tab === 'advanced' && !hasAdvancedTab(input.type)) {
         active_property_tab = 'basic';
@@ -628,15 +535,20 @@ function renderProperties() {
         active_property_tab = 'basic';
     }
 
+    // A custom element drops property writes made before it is upgraded, so
+    // the card has to be in the document before the panels set control values.
+    container.replaceChildren(card);
+
+    bindPropertyActions(card, input);
     bindPropertyTabs(tab_strip, input);
     buildBasicPanel(input, card.querySelector('#property-content-basic'));
     buildAdvancedPanel(input, card.querySelector('#property-content-advanced'));
     buildJumpsPanel(input, card.querySelector('#property-content-jumps'));
 
     tab_strip.value = active_property_tab;
-    container.replaceChildren(card);
 
     setActivePropertyContent(active_property_tab);
+    updatePropertyError(card, input);
 
     if (isMultipleAnswerType(input.type)) {
         installAnswersSortable(input);
@@ -653,7 +565,25 @@ function destroyReadmeEditor() {
 }
 
 function bindPropertyActions(card, input) {
-    const delete_button = card.querySelector('.builder__icon-btn--danger');
+    const copy_button = card.querySelector('[data-action="copy"]');
+    const validate_button = card.querySelector('[data-action="validate"]');
+    const delete_button = card.querySelector('[data-action="delete"]');
+
+    // Legacy keeps copy disabled until the question itself is valid.
+    copy_button.disabled = !isInputValid(input, getCurrentInputs());
+
+    copy_button.addEventListener('click', function () {
+        if (duplicateInput(input)) {
+            renderQuestions();
+            renderProperties();
+        }
+    });
+
+    validate_button.addEventListener('click', function () {
+        updatePropertyError(card, input, true);
+        copy_button.disabled = !isInputValid(input, getCurrentInputs());
+        updateCurrentQuestionStatus();
+    });
 
     delete_button.addEventListener('click', function () {
         removeInput(input.ref);
@@ -662,9 +592,34 @@ function bindPropertyActions(card, input) {
     });
 }
 
+/* Shows the first error under the header; `announce_valid` confirms a pass. */
+function updatePropertyError(card, input, announce_valid) {
+    const message = card.querySelector('[data-role="properties-error"]');
+
+    if (!message) {
+        return;
+    }
+
+    const errors = getInputErrors(input, getCurrentInputs());
+    const text = errors.length ? errors[0].message : (announce_valid ? VALIDATION_MESSAGES.INPUT_VALID : '');
+
+    if (!text) {
+        message.textContent = '';
+        message.classList.remove('is-valid');
+        message.setAttribute('hidden', 'hidden');
+        return;
+    }
+
+    message.textContent = text;
+    message.classList.toggle('is-valid', errors.length === 0);
+    message.removeAttribute('hidden');
+}
+
 function bindPropertyTabs(tab_strip, input) {
     const advanced_tab = tab_strip.querySelector('[value="advanced"]');
     const jumps_tab = tab_strip.querySelector('[value="jumps"]');
+
+    updateTabBadges(tab_strip, input);
 
     if (!hasAdvancedTab(input.type)) {
         advanced_tab.setAttribute('disabled', 'disabled');
@@ -696,6 +651,54 @@ function bindPropertyTabs(tab_strip, input) {
         active_property_tab = value;
         setActivePropertyContent(value);
     });
+}
+
+function updateTabBadges(tab_strip, input) {
+    const errors = getInputErrors(input, getCurrentInputs());
+    const has_error = function (tab) {
+        return errors.some(function (error) {
+            return error.tab === tab;
+        });
+    };
+
+    markTabInvalid(tab_strip.querySelector('[value="basic"]'), has_error('properties'));
+    markTabInvalid(tab_strip.querySelector('[value="jumps"]'), has_error('jumps'));
+}
+
+function markTabInvalid(tab, invalid) {
+    tab.classList.toggle('is-invalid', invalid);
+
+    if (invalid) {
+        tab.setAttribute('aria-invalid', 'true');
+    }
+    else {
+        tab.removeAttribute('aria-invalid');
+    }
+}
+
+/* Live edits change validity, so the message, badges and copy gate follow. */
+function refreshPropertyValidation(card, input) {
+    const tab_strip = card.querySelector('.builder__property-tabs');
+    const copy_button = card.querySelector('[data-action="copy"]');
+
+    if (tab_strip) {
+        updateTabBadges(tab_strip, input);
+    }
+
+    if (copy_button) {
+        copy_button.disabled = !isInputValid(input, getCurrentInputs());
+    }
+
+    updatePropertyError(card, input);
+}
+
+function refreshCurrentProperties() {
+    const card = document.querySelector('#properties ion-card');
+    const input = getCurrentInput();
+
+    if (card && input) {
+        refreshPropertyValidation(card, input);
+    }
 }
 
 function setActivePropertyContent(value) {
@@ -1055,6 +1058,7 @@ function bindQuestionField(field, input) {
         updateCurrentInput({ question: question });
         updateQuestionText(question);
         updateCurrentQuestionStatus();
+        refreshCurrentProperties();
     });
 }
 
@@ -1103,12 +1107,14 @@ function bindTitleToggle(toggle, input) {
 
     bindCheckboxToggle(toggle, checked, function (next_checked) {
         if (next_checked && !input.is_title && countTitles(getCurrentInputs(), input.ref) >= TITLE_LIMIT) {
-            renderProperties();
+            // Refused by the limit: put the box back without rebuilding the panel.
+            toggle.checked = input.is_title === true;
             return;
         }
 
+        // No re-render: the checkbox already shows its own state, and replacing
+        // the card would drop focus and reset the panel's scroll position.
         updateCurrentInput({ is_title: next_checked });
-        renderProperties();
     }, { disabled: limit_reached });
 }
 
@@ -1329,20 +1335,270 @@ function buildPossibleAnswers(input) {
     const card = createView(possible_answers_view);
     const list = card.querySelector('.builder__answer-list');
     const add_button = card.querySelector('.builder__add-answer');
+    const page = getAnswersPage(input);
+    const pages = getAnswerPageCount(answers);
+    const page_answers = getAnswerPage(answers, page);
     const at_limit = answers.length >= getAnswerLimit(input.type);
+    const notice = answer_notices.get(input.ref);
 
-    answers.forEach(function (answer, index) {
-        list.append(buildAnswerRow(input, answer, index, answers.length));
+    page_answers.forEach(function (answer, index) {
+        list.append(buildAnswerRow(input, answer, (page - 1) * ANSWERS_PER_PAGE + index, answers.length));
     });
 
     add_button.disabled = at_limit;
     add_button.addEventListener('click', function () {
-        if (addPossibleAnswer(input)) {
-            renderProperties();
+        if (!addPossibleAnswer(input)) {
+            return;
         }
+
+        setAnswersPage(input, getAnswerPageCount(input.possible_answers));
+        renderProperties();
+        updateCurrentQuestionStatus();
     });
 
+    if (notice) {
+        answer_notices.delete(input.ref);
+        showAnswersNote(card, notice, false);
+    }
+
+    installAnswersPager(card, input, page, pages, page_answers);
+    installAnswersMenu(card, input);
+
     return card;
+}
+
+/* The visible page is the unit the list sorts and saves. */
+function getAnswersPage(input) {
+    const pages = getAnswerPageCount(input.possible_answers);
+    const page = Math.min(Math.max(answer_pages.get(input.ref) || 1, 1), pages);
+
+    answer_pages.set(input.ref, page);
+
+    return page;
+}
+
+function setAnswersPage(input, page) {
+    answer_pages.set(input.ref, page);
+}
+
+function showAnswersNote(card, message, is_error) {
+    const note = card.querySelector('[data-role="answers-note"]');
+
+    if (!note) {
+        return;
+    }
+
+    note.textContent = message || '';
+    note.classList.toggle('is-error', is_error === true);
+    note.hidden = !message;
+}
+
+/* Paging is blocked while a visible answer is still empty. */
+function canLeaveAnswersPage(page_answers) {
+    return page_answers.every(function (answer) {
+        return String(answer.answer || '').trim() !== '';
+    });
+}
+
+function installAnswersPager(card, input, page, pages, page_answers) {
+    const pager = card.querySelector('[data-role="answers-pager"]');
+
+    if (!pager) {
+        return;
+    }
+
+    if (pages <= 1) {
+        pager.setAttribute('hidden', 'hidden');
+        return;
+    }
+
+    const label = pager.querySelector('[data-role="answers-page"]');
+    const total = pager.querySelector('[data-role="answers-pages"]');
+    const previous = pager.querySelector('[data-action="page-prev"]');
+    const next = pager.querySelector('[data-action="page-next"]');
+
+    pager.removeAttribute('hidden');
+    label.textContent = String(page);
+    total.textContent = String(pages);
+    previous.disabled = page <= 1;
+    next.disabled = page >= pages;
+
+    function go_to(target) {
+        if (!canLeaveAnswersPage(page_answers)) {
+            showAnswersNote(card, VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY, true);
+            return;
+        }
+
+        setAnswersPage(input, target);
+        renderProperties();
+    }
+
+    previous.addEventListener('click', function () {
+        go_to(page - 1);
+    });
+
+    next.addEventListener('click', function () {
+        go_to(page + 1);
+    });
+}
+
+function downloadCsv(filename, contents) {
+    const blob = new Blob([contents], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
+function installAnswersMenu(card, input) {
+    const actions = {
+        import: function () {
+            openAnswersCsv(card, input);
+        },
+        export: function () {
+            downloadCsv(getCsvFilename(input), exportCsv(input));
+        },
+        'order-az': function () {
+            if (orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.AZ)) {
+                setAnswersPage(input, 1);
+                renderProperties();
+                updateCurrentQuestionStatus();
+            }
+        },
+        'order-za': function () {
+            if (orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.ZA)) {
+                setAnswersPage(input, 1);
+                renderProperties();
+                updateCurrentQuestionStatus();
+            }
+        },
+        shuffle: function () {
+            if (orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.SHUFFLE)) {
+                setAnswersPage(input, 1);
+                renderProperties();
+                updateCurrentQuestionStatus();
+            }
+        },
+        'delete-all': function () {
+            if (deleteAllAnswers(input)) {
+                setAnswersPage(input, 1);
+                renderProperties();
+                updateCurrentQuestionStatus();
+            }
+        }
+    };
+
+    Object.keys(actions).forEach(function (action) {
+        const control = card.querySelector('[data-action="' + action + '"]');
+
+        if (control) {
+            control.addEventListener('click', function () {
+                actions[action]();
+            });
+        }
+    });
+}
+
+/* The CSV panel is inline: it stays inside the answers card it imports into. */
+function openAnswersCsv(card, input) {
+    const panel = card.querySelector('[data-role="answers-csv"]');
+    const file_field = panel.querySelector('[data-role="answers-csv-file"]');
+    const headers_toggle = panel.querySelector('[data-role="answers-csv-headers"]');
+    const column_select = panel.querySelector('[data-role="answers-csv-column"]');
+    const mode_group = panel.querySelector('[data-role="answers-csv-mode"]');
+    const import_button = panel.querySelector('[data-action="csv-import"]');
+    const cancel_button = panel.querySelector('[data-action="csv-cancel"]');
+    let parsed = null;
+
+    panel.removeAttribute('hidden');
+    file_field.value = '';
+    headers_toggle.checked = true;
+    mode_group.value = 'replace';
+    column_select.replaceChildren();
+    column_select.value = undefined;
+    import_button.disabled = true;
+    showAnswersNote(card, '', false);
+
+    function fill_columns() {
+        const columns = parsed ? getCsvColumns(parsed, headers_toggle.checked === true) : [];
+
+        column_select.replaceChildren();
+        columns.forEach(function (column) {
+            const option = element('ion-select-option', { value: column.value });
+
+            option.textContent = column.label;
+            column_select.append(option);
+        });
+
+        column_select.value = columns.length ? columns[0].value : undefined;
+        import_button.disabled = columns.length === 0;
+    }
+
+    headers_toggle.addEventListener('ionChange', fill_columns);
+
+    file_field.addEventListener('change', function () {
+        const file = file_field.files && file_field.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!/\.csv$/i.test(file.name)) {
+            parsed = null;
+            import_button.disabled = true;
+            showAnswersNote(card, VALIDATION_MESSAGES.CSV_FILE_INVALID, true);
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function () {
+            parsed = parseCsv(reader.result);
+
+            if (!parsed.rows.length) {
+                parsed = null;
+                import_button.disabled = true;
+                showAnswersNote(card, VALIDATION_MESSAGES.CSV_FILE_INVALID, true);
+                return;
+            }
+
+            showAnswersNote(card, '', false);
+            fill_columns();
+        };
+        reader.readAsText(file);
+    });
+
+    import_button.addEventListener('click', function () {
+        if (!parsed) {
+            showAnswersNote(card, VALIDATION_MESSAGES.CSV_FILE_INVALID, true);
+            return;
+        }
+
+        const result = importAnswers(input, parsed, {
+            column_index: column_select.value,
+            has_headers: headers_toggle.checked === true,
+            replace: mode_group.value !== 'append'
+        });
+
+        if (!result.ok) {
+            showAnswersNote(card, VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY, true);
+            return;
+        }
+
+        answer_notices.set(input.ref, VALIDATION_MESSAGES.POSSIBLE_ANSWERS_IMPORTED);
+        setAnswersPage(input, 1);
+        renderProperties();
+        updateCurrentQuestionStatus();
+    });
+
+    cancel_button.addEventListener('click', function () {
+        panel.setAttribute('hidden', 'hidden');
+    });
 }
 
 /* The list has to be in the document before jQuery UI can hold on to it. */
@@ -1357,8 +1613,9 @@ function installAnswersSortable(input) {
         const refs = [...answers_list.querySelectorAll('.builder__answer')].map(function (row) {
             return row.getAttribute('data-answer-ref');
         });
+        const page = answer_pages.get(input.ref) || 1;
 
-        if (!reorderPossibleAnswers(input, refs)) {
+        if (!reorderAnswerPage(input, refs, page)) {
             return;
         }
 
@@ -1377,14 +1634,23 @@ function buildAnswerRow(input, answer, index, total) {
     const field = element('ion-input', {
         class: 'builder__answer-field',
         'aria-label': 'Answer ' + (index + 1),
-        fill: 'outline'
+        fill: 'outline',
+        maxlength: String(MAX_ANSWER_LENGTH)
     });
 
     field.value = answer.answer;
     field.placeholder = '';
     field.setAttribute('placeholder', '');
     field.addEventListener('ionInput', function (event) {
-        renamePossibleAnswer(input, answer.answer_ref, event.detail.value || '');
+        const value = sanitizeAnswer(event.detail.value || '');
+
+        if (field.value !== value) {
+            field.value = value;
+        }
+
+        renamePossibleAnswer(input, answer.answer_ref, value);
+        updateCurrentQuestionStatus();
+        refreshCurrentProperties();
     });
 
     const remove_button = button({
@@ -1397,6 +1663,7 @@ function buildAnswerRow(input, answer, index, total) {
     remove_button.addEventListener('click', function () {
         if (removePossibleAnswer(input, answer.answer_ref)) {
             renderProperties();
+            updateCurrentQuestionStatus();
         }
     });
 

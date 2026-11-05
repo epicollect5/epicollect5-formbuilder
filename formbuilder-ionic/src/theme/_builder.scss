@@ -754,6 +754,28 @@ ion-item.builder__question[aria-current='true'] {
     font-weight: 600;
 }
 
+/* A tab holding an error keeps the danger colour even while it is selected. */
+.builder__property-tabs ion-segment-button.is-invalid {
+    --color: var(--ion-color-danger);
+    --color-checked: var(--ion-color-danger);
+    color: var(--ion-color-danger);
+}
+
+.builder__property-error {
+    margin: 0;
+    color: var(--ion-color-danger);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.builder__property-error[hidden] {
+    display: none;
+}
+
+.builder__property-error.is-valid {
+    color: var(--ion-color-success);
+}
+
 .builder__properties-body {
     display: block;
     flex: 1;
@@ -1291,4 +1313,103 @@ ion-item.builder__question[aria-current='true'] {
         flex: none;
         overflow-y: visible;
     }
+}
+
+.builder__answers-note {
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--fb-muted);
+}
+
+.builder__answers-note[hidden] {
+    display: none;
+}
+
+.builder__answers-note.is-error {
+    color: var(--ion-color-danger, #c5000f);
+}
+
+.builder__answers-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.builder__answers-pager[hidden] {
+    display: none;
+}
+
+.builder__answers-pager-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--fb-border-strong);
+    border-radius: 4px;
+    background: var(--fb-surface);
+    color: var(--fb-text);
+    cursor: pointer;
+}
+
+.builder__answers-pager-button:disabled {
+    color: var(--fb-muted);
+    cursor: not-allowed;
+}
+
+.builder__answers-pager-label {
+    font-size: 12px;
+    color: var(--fb-muted);
+}
+
+.builder__answers-csv {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px;
+    border: 1px solid var(--fb-border);
+    border-radius: 4px;
+    background: var(--fb-surface-2);
+}
+
+.builder__answers-csv[hidden] {
+    display: none;
+}
+
+.builder__answers-csv-hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--fb-muted);
+}
+
+.builder__answers-csv-file {
+    font: inherit;
+    font-size: 12px;
+}
+
+.builder__answers-csv-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.builder__answers-csv-button {
+    min-height: 30px;
+    padding: 4px 12px;
+    border: 1px solid var(--fb-border-strong);
+    border-radius: 4px;
+    background: var(--fb-surface);
+    color: var(--fb-text);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.builder__answers-csv-button:disabled {
+    color: var(--fb-muted);
+    cursor: not-allowed;
 }

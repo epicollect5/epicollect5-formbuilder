@@ -6,22 +6,24 @@
             <div class="builder__heading-actions builder__answers-btn-group builder__form-actions-group builder__properties-actions-group">
                 <button type="button"
                         class="builder__answers-more-btn builder__form-action-btn"
+                        data-action="copy"
                         aria-label="Copy question"
-                        title="Copy is not ported yet"
+                        title="Copy question"
                         disabled>
                     <ion-icon name="copy-outline"
                               aria-hidden="true"></ion-icon>
                 </button>
                 <button type="button"
                         class="builder__answers-more-btn builder__form-action-btn"
+                        data-action="validate"
                         aria-label="Validate question"
-                        title="Validation is not ported yet"
-                        disabled>
+                        title="Validate question">
                     <ion-icon name="checkmark-circle-outline"
                               aria-hidden="true"></ion-icon>
                 </button>
                 <button type="button"
                         class="builder__answers-more-btn builder__form-action-btn builder__icon-btn--danger"
+                        data-action="delete"
                         aria-label="Delete question"
                         title="Delete question">
                     <ion-icon name="trash-outline"
@@ -56,6 +58,11 @@
                                      class="builder__property-content is-active"
                                      aria-hidden="false">
                     <section class="builder__properties-panel">
+                        <p class="builder__property-error"
+                           data-role="properties-error"
+                           role="status"
+                           hidden></p>
+
                         <ion-input class="builder__field builder__question-field"
                                    aria-label="Question"
                                    label="Question"
