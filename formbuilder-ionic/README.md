@@ -13,7 +13,8 @@ formbuilder-ionic/
   src/
     app.js                 entry: boot the page
     pages/                 page composition
-    ui/                    native renderers (shell.js, dom.js)
+    ui/                    native renderers (shell.js, dom.js, readme-editor.js)
+    views/                 fixed Ionic markup (HTML), bundled as text
     services/              project loading, session, Ionic runtime
     models/                project-definition contract, question catalogue
     theme/                 SCSS (Ionic tokens + native builder styles)
