@@ -5,9 +5,7 @@ import { renderApp } from '@/ui/shell.js';
 
 function build_markup() {
     document.body.innerHTML = [
-        '<span id="project-name"><img id="project-logo" alt=""><span class="builder-bar__project-name"></span></span>',
-        '<button type="button" data-action="back"></button>',
-        '<button type="button" data-action="exit"></button>',
+        '<ion-toolbar><ion-buttons slot="start"><ion-button data-action="back">Back</ion-button></ion-buttons><ion-title><img id="project-logo" alt=""><span id="project-name"></span></ion-title><ion-buttons slot="end"><ion-button data-action="exit">Exit</ion-button></ion-buttons></ion-toolbar>',
         '<section id="tools"></section>',
         '<nav id="form-tabs" role="tablist"><ion-segment class="builder__forms-segment" value="0" scrollable="true"></ion-segment></nav>',
         '<button type="button" id="add-form">Add form</button>',
@@ -129,8 +127,12 @@ describe('properties panel', () => {
         open_tab('advanced');
 
         expect(checkbox_by_label('Required')).toBeUndefined();
-        expect(visible_property_panel().querySelector('ion-select.builder__select')).not.toBeNull();
-        expect(visible_property_panel().textContent).not.toContain('Uniqueness');
+        const default_choice = visible_property_panel().querySelector('[data-field="default_choice"]');
+        expect(default_choice).not.toBeNull();
+        expect(default_choice.hidden).toBe(false);
+        expect(default_choice.style.display).not.toBe('none');
+        const uniqueness = visible_property_panel().querySelector('[data-field="uniqueness"]');
+        expect(!uniqueness || uniqueness.hidden || uniqueness.style.display === 'none').toBe(true);
     });
 
     it('enforces the three-title limit per form', () => {
@@ -209,9 +211,17 @@ describe('properties panel', () => {
         select_first_question();
         open_tab('advanced');
 
-        const select = document.querySelector('#properties ion-select');
-        select.value = 'b1';
-        select.dispatchEvent(new CustomEvent('ionChange', { detail: { value: 'b1' } }));
+        const control = document.querySelector('#properties [data-field="default_choice"] .dropdown, #properties [data-field="default_choice"]');
+        if (!control) {
+            throw new Error('default_choice control not found');
+        }
+        const dropdown = control.classList.contains('dropdown') ? control : control.querySelector('.dropdown');
+        if (dropdown && typeof dropdown.setValue === 'function') {
+            dropdown.setValue('b1', true);
+        } else {
+            control.value = 'b1';
+            control.dispatchEvent(new CustomEvent('ionChange', { detail: { value: 'b1' } }));
+        }
 
         expect(getCurrentInput().default).toBe('b1');
     });

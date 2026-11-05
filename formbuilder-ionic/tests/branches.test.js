@@ -66,9 +66,7 @@ function project_definition() {
 
 function build_markup() {
     document.body.innerHTML = [
-        '<span id="project-name"><img id="project-logo" alt=""><span class="builder-bar__project-name"></span></span>',
-        '<button type="button" data-action="back"></button>',
-        '<button type="button" data-action="exit"></button>',
+        '<ion-toolbar><ion-buttons slot="start"><ion-button data-action="back">Back</ion-button></ion-buttons><ion-title><img id="project-logo" alt=""><span id="project-name"></span></ion-title><ion-buttons slot="end"><ion-button data-action="exit">Exit</ion-button></ion-buttons></ion-toolbar>',
         '<section id="tools"></section>',
         '<nav id="form-tabs" role="tablist"><ion-segment class="builder__forms-segment" value="0" scrollable="true"></ion-segment></nav>',
         '<button type="button" id="add-form">Add form</button>',
@@ -81,6 +79,12 @@ function build_markup() {
 
 function rows() {
     return [...document.querySelectorAll('#questions .builder__question')];
+}
+
+function open_tab(value) {
+    const segment = document.querySelector('#properties .builder__property-tabs');
+    segment.value = value;
+    segment.dispatchEvent(new CustomEvent('ionChange', { detail: { value: value } }));
 }
 
 describe('branch and group model', () => {
@@ -249,12 +253,17 @@ describe('branch and group rows', () => {
         expect(document.querySelector('#questions .builder__questions-exit').textContent).toContain('Back to branch');
     });
 
-    it('labels form uniqueness as branch-scoped inside a branch', () => {
+    it('labels form uniqueness as branch-scoped inside a branch', async () => {
         rows()[0].querySelector('.builder__question-enter').click();
         rows()[0].click();
 
         expect(getSession().current_input_ref).toBe('form_1_branch_1_a');
-        expect(document.querySelector('#properties ion-select-option[value="form"]').textContent)
+        open_tab('advanced');
+        const uniqueness = document.querySelector('#properties [data-field="uniqueness"] .dropdown');
+        expect(uniqueness).not.toBeNull();
+        const form_option = uniqueness.querySelector('.dropdown__option[data-value="form"]');
+        expect(form_option).not.toBeNull();
+        expect(form_option.textContent.trim())
             .toBe('Unique within this branch');
     });
 
