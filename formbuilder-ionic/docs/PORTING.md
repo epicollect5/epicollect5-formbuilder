@@ -22,7 +22,7 @@ session, so each slice can be compared side by side.
 | Question catalogue (types, labels, icons) | `config/consts.js`, `helpers/utils.getInputToolIcon` | `src/models/question-types.js` | ported |
 | Project loading (JSON + gzip/base64) | `loaders/load-project.js`, `helpers/utils.setProjectURL` | `src/services/project-source.js` | ported |
 | Current form / current question / edits | `config/formbuilder.js` singleton | `src/services/session.js` | ported |
-| Shell chrome (back, exit, add form, undo, save) | `ui-handlers/event-handler-callbacks/*`, `config/init.js`, `helpers/utils.goBack` | `src/ui/shell.js`, `src/services/navigation.js`, `src/services/session.js` | ported (undo, save and form naming disabled until their slice) |
+| Shell chrome (back, exit, add form, undo, save) | `ui-handlers/event-handler-callbacks/*`, `config/init.js`, `helpers/utils.goBack` | `src/ui/shell.js`, `src/services/navigation.js`, `src/services/session.js` | ported (phase 7) |
 | Shell, form switching, question list, selection | `loaders/load-containers.js`, `actions/parse/**`, `ui-handlers/*sortable*` | `src/ui/shell.js` | ported (slice 1) |
 | Basic question editing (text, required, title) | `actions/parse`, `actions/validation`, `inputs/**` | `src/ui/shell.js` | ported (slice 2, minimal) |
 | Drag and drop (tool to question list, question and answer reordering) | `ui-handlers/sortable.js`, `ui-handlers/possible-answers-sortable.js` | `src/ui/sortable.js` | ported (jQuery UI 1.14 on jQuery 4, vendored from node_modules) |
@@ -30,12 +30,12 @@ session, so each slice can be compared side by side.
 | Possible answers (add, rename, remove, sort) | `actions/possible-answers*.js`, `template/methods/getPossibleAnswers*` | `src/models/possible-answers.js`, `src/services/possible-answers.js`, `src/ui/shell.js` | ported (slice 3) |
 | Possible answers CSV import/export, pagination, ordering, delete all | `actions/possible-answers.js`, `actions/possible-answers-pager.js`, `ui-handlers/event-handler-callbacks/confirm-import-possible-answers-callback.js` | `src/services/possible-answers.js`, `src/services/possible-answers-csv.js`, `src/views/possible-answers-card.html`, `src/ui/shell.js` | ported (phase 5; inline CSV panel instead of a modal) |
 | Advanced properties, uniqueness, title rules | `template/methods/prepareAdvancedInputPropertiesHTML.js`, `getUniquenessHTML.js` | `src/services/properties.js`, `src/views/properties-card.html`, `src/ui/shell.js` | ported (phase 1) |
-| Form management (rename / delete form, name modal, child-form cap) | `ui-handlers/event-handler-callbacks/*form*`, `factory/form-factory.js` | — | pending |
+| Form management (rename / delete form, name prompt, child-form cap) | `ui-handlers/event-handler-callbacks/*form*`, `factory/form-factory.js` | `src/services/form-management.js`, `src/services/session.js`, `src/views/question-card.html`, `src/ui/shell.js` | ported (phase 7; inline panels instead of modals) |
 | Branches and groups | `inputs/branch.js`, `inputs/group.js`, `ui-handlers/*branch*`, `ui-handlers/*group*` | `src/models/nesting.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 4, phase 2) |
 | Jumps | `actions/jumps.js`, `helpers/utils.getJumpAvailableDestinations` | `src/models/jumps.js`, `src/services/jumps.js`, `src/views/jump-row*.html`, `src/ui/shell.js` | ported (phase 3) |
 | Validation and question copy | `actions/validation.js`, `actions/input-duplicator.js`, `ui-handlers/event-handler-callbacks/*` | `src/models/validation.js`, `src/services/validation.js`, `src/services/question-actions.js`, `src/ui/shell.js` | ported (phase 4) |
 | Undo | `actions/undo.js` | `src/services/undo.js`, `src/ui/shell.js` | ported (phase 6) |
-| Save / export / import | `actions/save/**`, `helpers/import-form-validation.js` | `src/services/import-form-validation.js` (schema half only) | pending |
+| Save / export / import | `actions/save/**`, `helpers/import-form-validation.js`, `ui-handlers/event-handler-callbacks/{save-project,export-form,import-form}-click-callback.js` | `src/services/save.js`, `src/services/form-import.js`, `src/services/import-form-validation.js`, `src/ui/shell.js` | ported (phase 7) |
 | Readme editor | Summernote rich-text field | Tiptap 3 rich-text field | ported |
 | Modals, menus, tooltips | Bootstrap JS | Ionic components per slice | pending |
 
@@ -66,7 +66,7 @@ from project data such as forms, questions and answers.
 4. Branches and groups (ported).
 5. Jumps, validation and question copy (ported).
 6. Undo (ported).
-7. Save, import, export.
+7. Save, import, export, form management (ported).
 
 Each slice is compared against the legacy page with the same `project/project.json`,
 and the legacy Mocha suite stays the gate for shared behaviour.

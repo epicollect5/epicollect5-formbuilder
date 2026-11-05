@@ -71,11 +71,15 @@ import/export, 150-char cap and `<` / `>` sanitisation), branches and groups
 (enter/exit, nesting rules, breadcrumbs), jumps (rows, destinations, the always
 variant) and validation with question copy (row and tab badges, Validate
 button, duplicate with ref and answer-ref remap, duplicate answer-ref check),
-and undo (ten states, throttled typing, data-only restore).
+undo (ten states, throttled typing, data-only restore), save / export / import
+(deep-copy cleaning, `base64(gzip)` POST, plain-JSON envelope, structural ref
+remap on import) and form management (rename with duplicate check, delete the
+last child form, the five-form cap, delete all questions).
 
-Pending: save/export/import, form rename/delete, and the remaining
-modals/menus/toasts (the CSV panel is inline for now). The full breakdown and
-the phase order are in `docs/ROADMAP.md`.
+Pending: print as PDF, the `beforeunload` guard, per-form tab validity icons,
+and the remaining modals/menus/toasts (the CSV, name and confirm panels are
+inline for now). The full breakdown and the phase order are in
+`docs/ROADMAP.md`.
 
 ## Tests
 

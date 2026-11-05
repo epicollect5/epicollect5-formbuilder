@@ -9,7 +9,7 @@ This register is a working list, not a defect log: a risk can be accepted
 or more work). Reconstructed from the code as of phase 5, so line-level detail
 lives in the named functions, not in line numbers that will drift.
 
-Updated: 2026-11-05 (phase 5 complete).
+Updated: 2026-11-05 (phase 7 complete).
 
 Status legend: **open** — not addressed; **watch** — accepted or fixed but easy
 to regress; **fixed** — the concrete case found during the port is handled.
@@ -369,3 +369,87 @@ The phase-5 report claimed validation does not cross-check that a jump's
 `answer_ref` still exists. It does: `getJumpErrors` flags `JUMP_ANSWER_NOT_SELECTED`
 when the ref is missing from `possible_answers`. The real gap is presentation —
 the jump row shows a fallback answer (R-30, R-33).
+
+## Phase 7 — save, export, import, form management
+
+### R-65 The save endpoint is derived from the page path
+- **Where:** `services/save.js` `getSaveUrl` drops the last two path segments.
+- **Risk:** the builder page and project slug are assumed to be the last two
+  segments. A different mount depth, a trailing slash or a hash-only URL builds
+  a different endpoint, and the failure surfaces as a generic save error.
+- **Impact:** saving silently posts nowhere useful; the project stays unsaved.
+- **Status:** watch.
+- **Revisit when:** the builder route or the Laravel endpoint changes; compare
+  the built URL with the legacy `config/consts.PROJECT_URL`.
+
+### R-66 Saving needs `CompressionStream`
+- **Where:** `services/save.js` `encodeProject`.
+- **Risk:** the browser has to provide `CompressionStream` (Safari 16.4+).
+  Otherwise the save throws before the request and only the status line
+  explains it. Export and import are unaffected.
+- **Impact:** older browsers cannot save at all.
+- **Status:** open (accepted: no polyfill is bundled).
+- **Revisit when:** the supported browser matrix changes.
+
+### R-67 Import does not repair jumps that point at replaced inputs
+- **Where:** `services/form-import.js` `prepareImportedForm`, `ui/shell.js`
+  `importFormFile`.
+- **Risk:** the import replaces the current form's `inputs`. Any jump in another
+  question that targeted one of the removed refs becomes invalid, and imported
+  refs are rewritten onto the current form ref, so a suffix that already exists
+  produces duplicate refs with ambiguous jump targets.
+- **Impact:** the form imports "successfully" with broken or misdirected jumps.
+- **Status:** open.
+- **Revisit when:** adding ref uniqueness checks or post-import jump repair;
+  validate the whole project after an import, not just the imported list.
+
+### R-68 Rename regenerates the slug
+- **Where:** `services/session.js` `renameForm`, `services/save.js`
+  `getFormExportFilename`.
+- **Risk:** renaming rebuilds the slug from the name, so two names can slugify
+  to the same value (`Form A` and `Form-A`), and the export filename or a server
+  lookup keyed by slug can collide. Name uniqueness is checked; slug uniqueness
+  is not.
+- **Impact:** ambiguous export filenames, or a server-side lookup that returns
+  the wrong form.
+- **Status:** open.
+- **Revisit when:** slugs are used as keys anywhere in the save/export path.
+
+### R-69 Undo restores the project but not the selection
+- **Where:** `services/undo.js`, `ui/shell.js` `performUndo`.
+- **Risk:** an undo restores the previous definition while the form index and
+  question ref point into the newer one. The form index is now clamped, but a
+  restored question ref can still select a different question than before.
+- **Impact:** the panel shows another question after undo, or an empty panel.
+- **Status:** watch (form index clamped, question ref still data-driven).
+- **Revisit when:** undo is touched; keep a shell case for add-form + undo.
+
+### R-70 The form menu is `ion-popover`, the rest are inline panels
+- **Where:** `src/views/question-card.html`, `ui/shell.js` `openFormRename`,
+  `askFormConfirm`, `importFormFile`.
+- **Risk:** the menu is an Ionic popover but rename, confirm and file picking are
+  inline panels re-created on every render. A re-render (undo, save, name change)
+  throws away an open confirmation, and phase 8 has to replace these panels with
+  modals without losing the status line contract.
+- **Impact:** a confirm can disappear mid-flow; the phase-8 migration can strand
+  the file input or the status target.
+- **Status:** watch.
+- **Revisit when:** adding the Ionic modals; keep the `data-role` hooks stable.
+
+### R-71 Import reads the whole file on the main thread
+- **Where:** `ui/shell.js` `importFormFile` (`FileReader.readAsText`).
+- **Risk:** only the `.json` extension is checked; a large or hostile file is
+  parsed and schema-validated synchronously, blocking the UI. There is no size
+  cap and no MIME check.
+- **Impact:** a slow or frozen builder while the import runs.
+- **Status:** open.
+- **Revisit when:** imports become common or large exports are expected.
+
+### R-72 The save status is a single line per page
+- **Where:** `ui/shell.js` `showSaveStatus`, `recordChange`.
+- **Risk:** the status is cleared on the next recorded change, but a save in
+  flight followed by a mutation can finish and overwrite a newer status with
+  "Project saved!", and a second save is only guarded by the `saving` flag.
+- **Impact:** a misleading success message after a later unsaved edit.
+- **Status:** watch.
+- **Revisit when:** adding autosave or retries; track a save revision.

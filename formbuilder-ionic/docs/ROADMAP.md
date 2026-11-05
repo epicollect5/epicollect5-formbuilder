@@ -31,20 +31,22 @@ Ported today:
 - Undo: ten snapshots of the project definition at the legacy push points, a
   500ms throttled push for typing, and a data-only restore.
 - Parent validity badges that reflect branch / group child validation.
+- Save / export / import: cleaning on a deep copy, the `base64(gzip(JSON))`
+  POST, the plain-JSON form envelope, and an import that validates against the
+  schema and rewrites refs structurally.
+- Form management: add (five-form cap and name prompt), rename (duplicate
+  checked), delete the last child form, delete all questions, and a per-form
+  status line.
 
 ## Gap vs legacy
 
 ### Chrome and shell actions
 
-- Save project — `base64(gzip(JSON))` POST to the project URL.
-- Export form — plain JSON envelope via FileSaver.
-- Import form — parse, structure check, ref remap, render.
 - Print as PDF.
-- Save / Undo enable-disable gates and per-form valid/invalid tab icons.
-- Form management: rename form, delete form, form "more" menu, the add-form
-  name modal, and the `MAX_NUMBER_OF_NESTED_CHILD_FORMS = 5` cap. `addForm()`
-  currently hard-codes `"New form"`.
-- Delete all questions; `beforeunload` guard.
+- Per-form valid / invalid tab icons (the tab strip shows names only).
+- `beforeunload` guard.
+- The add-form, rename and delete confirmations are inline panels for now;
+  phase 8 replaces them with the Ionic modal components.
 
 ### Properties panel
 
@@ -101,8 +103,8 @@ badges. Each error carries the tab it belongs to.
 
 Remaining:
 
-- Save-time gate: `INPUTS_MAX_ALLOWED = 300`, titles <= 3,
-  `search_inputs_max = 5`, jump destinations across the whole form.
+- Project-level caps on save: 300 inputs, 3 titles per list and 5 search
+  questions are enforced when importing a form, not yet when saving.
 
 ### Modals, menus, toasts
 
@@ -139,7 +141,7 @@ container and each dynamic collection's empty-state markup in the view.
 
 ## Phases
 
-Phases 1–6 are ported; 7–8 are pending. Risks carried by the port are tracked in
+Phases 1–7 are ported; 8 is pending. Risks carried by the port are tracked in
 `docs/risks.md`.
 
 1. **Properties panel, full.** Port each existing Bootstrap panel to the
@@ -159,10 +161,12 @@ Phases 1–6 are ported; 7–8 are pending. Risks carried by the port are tracke
 6. **Undo.** Ported: ten-state deep snapshot with the same push points, a
    throttled push for typing and a data-only restore (selection resets, the
    form index is kept). Save / export can now push state.
-7. **Save, export, import and form management.** Save pipeline (cleaning, trim,
-   `base64(gzip)` POST), export envelope, import flow on the existing Ajv
-   validator, form rename / delete plus name modal and the 5-form cap, delete
-   all questions.
+7. **Save, export, import and form management.** Ported: save pipeline (deep
+   copy, `replaceWordChars`, jump rebuild, `base64(gzip)` POST), export envelope
+   and filename, import flow on the existing Ajv validator with a structural
+   ref remap, form rename / delete and the 5-form cap, delete all questions,
+   and a status line per card. The name prompt and delete confirmation are
+   inline panels until phase 8.
 8. **Chrome polish.** Ionic modals / menus / tooltips / toasts, busy overlay,
    print as PDF, `beforeunload`.
 
