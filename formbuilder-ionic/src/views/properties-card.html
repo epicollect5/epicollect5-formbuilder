@@ -1,0 +1,219 @@
+<ion-card class="builder__properties-card">
+    <ion-card-header class="builder__panel-heading builder__properties-header">
+        <div class="builder__properties-heading">
+            <span class="builder__panel-title builder__properties-title">Question properties</span>
+
+            <div class="builder__heading-actions builder__answers-btn-group builder__form-actions-group builder__properties-actions-group">
+                <button type="button"
+                        class="builder__answers-more-btn builder__form-action-btn"
+                        aria-label="Copy question"
+                        title="Copy is not ported yet"
+                        disabled>
+                    <ion-icon name="copy-outline"
+                              aria-hidden="true"></ion-icon>
+                </button>
+                <button type="button"
+                        class="builder__answers-more-btn builder__form-action-btn"
+                        aria-label="Validate question"
+                        title="Validation is not ported yet"
+                        disabled>
+                    <ion-icon name="checkmark-circle-outline"
+                              aria-hidden="true"></ion-icon>
+                </button>
+                <button type="button"
+                        class="builder__answers-more-btn builder__form-action-btn builder__icon-btn--danger"
+                        aria-label="Delete question"
+                        title="Delete question">
+                    <ion-icon name="trash-outline"
+                              aria-hidden="true"></ion-icon>
+                </button>
+            </div>
+        </div>
+    </ion-card-header>
+
+    <ion-card-content class="builder__properties-content">
+        <div class="builder__empty"
+             data-role="properties-empty"
+             hidden>Select a question to edit it.</div>
+
+        <ion-segment class="builder__property-tabs"
+                     value="basic">
+            <ion-segment-button value="basic">
+                <ion-label>Properties</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="advanced">
+                <ion-label>Advanced</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="jumps">
+                <ion-label>Jumps</ion-label>
+            </ion-segment-button>
+        </ion-segment>
+
+        <div class="builder__properties-body">
+            <ion-segment-view class="builder__property-view"
+                              swipe-gesture="false">
+                <ion-segment-content id="property-content-basic"
+                                     class="builder__property-content is-active"
+                                     aria-hidden="false">
+                    <section class="builder__properties-panel">
+                        <ion-input class="builder__field builder__question-field"
+                                   aria-label="Question"
+                                   label="Question"
+                                   label-placement="stacked"
+                                   fill="outline"
+                                   placeholder="Question"
+                                   maxlength="255"
+                                   size="small"></ion-input>
+
+                        <ion-checkbox class="builder__checkbox"
+                                      label-placement="end"
+                                      data-field="required">
+                            <span>Required</span>
+                        </ion-checkbox>
+
+                        <ion-checkbox class="builder__checkbox builder__title-toggle"
+                                      label-placement="end"
+                                      data-field="title">
+                            <span class="builder__title-label">Use answer as title</span>
+                        </ion-checkbox>
+                    </section>
+                </ion-segment-content>
+
+                <ion-segment-content id="property-content-advanced"
+                                     class="builder__property-content"
+                                     hidden
+                                     aria-hidden="true">
+                    <section class="builder__properties-panel builder__properties-panel--advanced">
+                        <p class="builder__empty"
+                           data-role="advanced-empty"
+                           hidden>No advanced properties for this question type.</p>
+
+                        <div class="builder__field-group"
+                             data-field="numeric_type">
+                            <div class="builder__field-label">Number type</div>
+                            <ion-radio-group class="builder__radio-group"
+                                             value="integer">
+                                <ion-radio value="integer"
+                                           label-placement="end">
+                                    <span>Integer</span>
+                                </ion-radio>
+                                <ion-radio value="decimal"
+                                           label-placement="end">
+                                    <span>Decimal</span>
+                                </ion-radio>
+                            </ion-radio-group>
+                        </div>
+
+                        <ion-input class="builder__field"
+                                   data-field="default_number"
+                                   label="Initial answer"
+                                   label-placement="stacked"
+                                   fill="outline"
+                                   type="text"
+                                   inputmode="decimal"
+                                   placeholder="Initial answer"
+                                   maxlength="255"></ion-input>
+
+                        <ion-input class="builder__field"
+                                   data-field="min"
+                                   label="Min value"
+                                   label-placement="stacked"
+                                   fill="outline"
+                                   type="text"
+                                   inputmode="decimal"
+                                   placeholder="Min value"
+                                   maxlength="50"></ion-input>
+
+                        <ion-input class="builder__field"
+                                   data-field="max"
+                                   label="Max value"
+                                   label-placement="stacked"
+                                   fill="outline"
+                                   type="text"
+                                   inputmode="decimal"
+                                   placeholder="Max value"
+                                   maxlength="50"></ion-input>
+
+                        <ion-input class="builder__field"
+                                   data-field="default_text"
+                                   label="Initial answer"
+                                   label-placement="stacked"
+                                   fill="outline"
+                                   placeholder="Initial answer"
+                                   maxlength="255"></ion-input>
+
+                        <div class="builder__regex-field"
+                             data-field="regex">
+                            <ion-input class="builder__field"
+                                       label="Match REGEX"
+                                       label-placement="stacked"
+                                       fill="outline"
+                                       placeholder="Match REGEX"
+                                       maxlength="50"></ion-input>
+                            <div class="builder__regex-presets">
+                                <span class="builder__hint">Presets:</span>
+                            </div>
+                        </div>
+
+                        <ion-checkbox class="builder__checkbox"
+                                      label-placement="end"
+                                      data-field="verify">
+                            <span>Require double entry</span>
+                        </ion-checkbox>
+
+                        <div class="builder__field-group"
+                             data-field="datetime_format">
+                            <div class="builder__field-label"
+                                 data-role="datetime-format-label">Date format</div>
+                            <ion-radio-group class="builder__radio-group"></ion-radio-group>
+                        </div>
+
+                        <ion-checkbox class="builder__checkbox"
+                                      label-placement="end"
+                                      data-field="set_to_current_datetime">
+                            <span data-role="datetime-label">Set initial answer to current date</span>
+                        </ion-checkbox>
+
+                        <ion-select class="builder__select"
+                                    data-field="uniqueness"
+                                    label="Uniqueness"
+                                    label-placement="stacked"
+                                    interface="popover"></ion-select>
+
+                        <ion-select class="builder__select"
+                                    data-field="default_choice"
+                                    label="Initial answer"
+                                    label-placement="stacked"
+                                    interface="popover"
+                                    placeholder="None"></ion-select>
+
+                        <div class="builder__field-group"
+                             data-field="search_type">
+                            <div class="builder__field-label">Search type</div>
+                            <ion-radio-group class="builder__radio-group"
+                                             value="searchsingle">
+                                <ion-radio value="searchsingle"
+                                           label-placement="end">
+                                    <span>Single answer</span>
+                                </ion-radio>
+                                <ion-radio value="searchmultiple"
+                                           label-placement="end">
+                                    <span>Multiple answers</span>
+                                </ion-radio>
+                            </ion-radio-group>
+                        </div>
+                    </section>
+                </ion-segment-content>
+
+                <ion-segment-content id="property-content-jumps"
+                                     class="builder__property-content"
+                                     hidden
+                                     aria-hidden="true">
+                    <section class="builder__properties-panel">
+                        <p class="builder__empty">Jumps are not ported yet.</p>
+                    </section>
+                </ion-segment-content>
+            </ion-segment-view>
+        </div>
+    </ion-card-content>
+</ion-card>

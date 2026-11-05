@@ -1,5 +1,21 @@
 'use strict';
 
+/*
+ * Fixed markup lives in src/views/*.html. These helpers turn a view into
+ * nodes; the views never carry project data, which is always set afterwards.
+ */
+export function parseView(html) {
+    const template = document.createElement('template');
+
+    template.innerHTML = html.trim();
+
+    return template.content;
+}
+
+export function createView(html) {
+    return parseView(html).firstElementChild;
+}
+
 export function element(tag, attributes, children) {
     const node = document.createElement(tag);
 

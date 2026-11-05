@@ -5,7 +5,6 @@ import { getAnswerLimit, isMultipleAnswerType } from '@/models/possible-answers.
 import {
     allowsRequired,
     allowsTitle,
-    allowsUniqueness,
     DATE_FORMATS,
     getDefaultDatetimeFormat,
     hasAdvancedTab,
@@ -15,8 +14,8 @@ import {
 } from '@/models/input-properties.js';
 
 const NUMERIC_TYPES = new Set(['integer', 'decimal']);
-import { QUESTION_TYPES, getQuestionType } from '@/models/question-types.js';
-import { countTitles } from '@/services/properties.js';
+import { getQuestionType } from '@/models/question-types.js';
+import { countTitles, getAdvancedFields } from '@/services/properties.js';
 import {
     addPossibleAnswer,
     removePossibleAnswer,
@@ -38,11 +37,16 @@ import {
     selectInput,
     updateCurrentInput
 } from '@/services/session.js';
-import { button, element, icon } from '@/ui/dom.js';
+import { button, createView, element, icon, parseView } from '@/ui/dom.js';
 import { createReadmeEditor } from '@/ui/readme-editor.js';
 import { installAnswerSortable, installQuestionSortable, installToolDrag } from '@/ui/sortable.js';
+import tools_view from '@/views/tools.html?raw';
+import question_card_view from '@/views/question-card.html?raw';
+import properties_card_view from '@/views/properties-card.html?raw';
+import possible_answers_view from '@/views/possible-answers-card.html?raw';
 
 const QUESTION_LIST = '#questions .builder__question-list';
+const TITLE_LIMIT = 3;
 
 let handlers = {};
 let active_readme_editor = null;
@@ -132,6 +136,7 @@ function bindChrome() {
     }
 }
 
+/* The tool catalogue is static markup; only the click and drag wiring changes. */
 function renderTools() {
     const container = document.getElementById('tools');
 
@@ -139,24 +144,12 @@ function renderTools() {
         return;
     }
 
-    container.replaceChildren();
+    container.replaceChildren(parseView(tools_view));
 
-    QUESTION_TYPES.forEach(function (question_type) {
-        const tool = button({
-            type: 'button',
-            class: 'builder__tool',
-            'data-type': question_type.type,
-            'aria-label': 'Add a ' + question_type.label + ' question'
-        }, [
-            icon(question_type.icon),
-            element('span', { class: 'builder__tool-label' }, [question_type.label])
-        ]);
-
-        tool.addEventListener('click', function () {
-            addQuestion(question_type.type);
-        });
-
-        container.append(tool);
+    container.querySelectorAll('.builder__tool').forEach(function (tool) {
+        tool.onclick = function () {
+            addQuestion(tool.getAttribute('data-type'));
+        };
     });
 
     installToolDrag('#tools .builder__tool', QUESTION_LIST, function (type, index) {
@@ -240,76 +233,28 @@ function renderQuestions() {
 
     const inputs = getCurrentInputs();
     const current_ref = getSession().current_input_ref;
-    const list = element('ul', { class: 'builder__question-list' });
-
     const form = getCurrentForm();
     const form_name = form && form.name ? form.name : 'Form';
-    const card = element('ion-card', { class: 'builder__questions-card' });
-    const header = element('ion-card-header', { class: 'builder__panel-heading builder__questions-header' });
-    const heading = element('div', { class: 'builder__questions-heading' });
-    const title = element('ion-card-title', { class: 'builder__panel-title builder__questions-title', title: 'Form > ' + form_name });
-    const content = element('ion-card-content', { class: 'builder__questions-content' });
+    const card = createView(question_card_view);
+    const title = card.querySelector('.builder__questions-title');
+    const title_name = card.querySelector('.builder__questions-title-name');
+    const list = card.querySelector('.builder__question-list');
+    const empty = card.querySelector('.builder__empty');
 
-    title.append(
-        element('span', { class: 'builder__questions-title-prefix' }, ['Form']),
-        element('span', { class: 'builder__questions-title-sep', 'aria-hidden': 'true' }, [' > ']),
-        element('span', { class: 'builder__questions-title-name' }, [form_name])
-    );
+    title.setAttribute('title', 'Form > ' + form_name);
+    title_name.textContent = form_name;
 
-    heading.append(title, buildFormActions());
-    header.append(heading);
-    content.append(list);
-    card.append(header, content);
+    if (inputs.length) {
+        empty.remove();
 
-    container.replaceChildren(card);
-
-    if (!inputs.length) {
-        list.append(element('li', { class: 'builder__empty' }, ['No questions in this form yet.']));
-    }
-    else {
         inputs.forEach(function (input) {
             list.append(buildQuestionRow(input, input.ref === current_ref));
         });
     }
 
+    container.replaceChildren(card);
+
     installQuestionSortable(QUESTION_LIST, syncAfterDrop);
-}
-
-/* Legacy form-level actions: remove form, edit form name, more. */
-function buildFormActions() {
-    const group = element('div', { class: 'builder__heading-actions builder__answers-btn-group builder__form-actions-group' });
-
-    [
-        {
-            icon_name: 'trash-outline',
-            label: 'Delete form',
-            title: 'Deleting a form is not ported yet',
-            class_name: 'builder__form-action-btn builder__form-action-btn--delete'
-        },
-        {
-            icon_name: 'create-outline',
-            label: 'Edit form name',
-            title: 'Renaming a form is not ported yet',
-            class_name: 'builder__form-action-btn builder__form-action-btn--edit'
-        },
-        {
-            icon_name: 'chevron-down-outline',
-            label: 'Form actions',
-            title: 'Form actions are not ported yet',
-            class_name: 'builder__form-action-btn builder__form-action-btn--more',
-            use_caret: false
-        }
-    ].forEach(function (config) {
-        group.append(iconButton({
-            class: 'builder__answers-more-btn ' + config.class_name,
-            icon_name: config.icon_name,
-            label: config.label,
-            title: config.title,
-            disabled: true
-        }));
-    });
-
-    return group;
 }
 
 function buildQuestionRow(input, is_current) {
@@ -532,73 +477,50 @@ function renderProperties() {
         return;
     }
 
-    if (active_readme_editor) {
-        active_readme_editor.destroy();
-        active_readme_editor = null;
-    }
+    destroyReadmeEditor();
 
     const previous_body = container.querySelector('.builder__properties-body');
     const previous_scroll = previous_body ? previous_body.scrollTop : 0;
-    const card = element('ion-card', { class: 'builder__properties-card' });
-    const header = element('ion-card-header', { class: 'builder__panel-heading builder__properties-header' });
-    const content = element('ion-card-content', { class: 'builder__properties-content' });
-
-    header.append(buildPropertiesHeading(input));
-    card.append(header, content);
+    const card = createView(properties_card_view);
+    const title = card.querySelector('.builder__properties-title');
+    const tab_strip = card.querySelector('.builder__property-tabs');
+    const body = card.querySelector('.builder__properties-body');
+    const empty = card.querySelector('[data-role="properties-empty"]');
 
     if (!input) {
         active_property_tab = 'basic';
-        content.append(element('div', { class: 'builder__empty' }, ['Select a question to edit it.']));
+        card.querySelector('.builder__properties-actions-group').remove();
+        tab_strip.remove();
+        body.remove();
+        empty.removeAttribute('hidden');
         container.replaceChildren(card);
         return;
     }
 
-    const can_advanced = hasAdvancedTab(input.type);
-    const can_jumps = hasJumpsTab(input.type);
+    empty.remove();
 
-    if (active_property_tab === 'advanced' && !can_advanced) {
+    const label = getQuestionLabel(input);
+
+    title.textContent = label;
+    title.setAttribute('title', label);
+    bindPropertyActions(card, input);
+
+    if (active_property_tab === 'advanced' && !hasAdvancedTab(input.type)) {
         active_property_tab = 'basic';
     }
 
-    if (active_property_tab === 'jumps' && !can_jumps) {
+    if (active_property_tab === 'jumps' && !hasJumpsTab(input.type)) {
         active_property_tab = 'basic';
     }
 
-    content.append(buildPropertyTabs(input, can_advanced, can_jumps));
+    bindPropertyTabs(tab_strip, input);
+    buildBasicPanel(input, card.querySelector('#property-content-basic'));
+    buildAdvancedPanel(input, card.querySelector('#property-content-advanced'));
 
-    const body = element('div', { class: 'builder__properties-body' });
-    const view = element('ion-segment-view', {
-        class: 'builder__property-view',
-        'swipe-gesture': 'false'
-    });
-    const panes = {
-        basic: buildBasicPanel(input),
-        advanced: buildAdvancedPanel(input),
-        jumps: buildJumpsPanel(input)
-    };
-
-    Object.keys(panes).forEach(function (key) {
-        const is_active = key === active_property_tab;
-        const pane = element('ion-segment-content', {
-            id: 'property-content-' + key,
-            class: 'builder__property-content' + (is_active ? ' is-active' : '')
-        });
-
-        if (!is_active) {
-            pane.setAttribute('hidden', 'hidden');
-            pane.setAttribute('aria-hidden', 'true');
-        }
-        else {
-            pane.setAttribute('aria-hidden', 'false');
-        }
-
-        pane.append(panes[key]);
-        view.append(pane);
-    });
-
-    body.append(view);
-    content.append(body);
+    tab_strip.value = active_property_tab;
     container.replaceChildren(card);
+
+    setActivePropertyContent(active_property_tab);
 
     if (isMultipleAnswerType(input.type)) {
         installAnswersSortable(input);
@@ -607,17 +529,36 @@ function renderProperties() {
     body.scrollTop = previous_scroll;
 }
 
-function buildPropertyTabs(input, can_advanced, can_jumps) {
-    const segment = element('ion-segment', {
-        class: 'builder__property-tabs',
-        value: active_property_tab
+function destroyReadmeEditor() {
+    if (active_readme_editor) {
+        active_readme_editor.destroy();
+        active_readme_editor = null;
+    }
+}
+
+function bindPropertyActions(card, input) {
+    const delete_button = card.querySelector('.builder__icon-btn--danger');
+
+    delete_button.addEventListener('click', function () {
+        removeInput(input.ref);
+        renderQuestions();
+        renderProperties();
     });
+}
 
-    segment.append(buildPropertyTab('basic', 'Properties', 'property-content-basic', true));
-    segment.append(buildPropertyTab('advanced', 'Advanced', 'property-content-advanced', can_advanced));
-    segment.append(buildPropertyTab('jumps', 'Jumps', 'property-content-jumps', can_jumps));
+function bindPropertyTabs(tab_strip, input) {
+    const advanced_tab = tab_strip.querySelector('[value="advanced"]');
+    const jumps_tab = tab_strip.querySelector('[value="jumps"]');
 
-    segment.addEventListener('ionChange', function (event) {
+    if (!hasAdvancedTab(input.type)) {
+        advanced_tab.setAttribute('disabled', 'disabled');
+    }
+
+    if (!hasJumpsTab(input.type)) {
+        jumps_tab.setAttribute('disabled', 'disabled');
+    }
+
+    tab_strip.addEventListener('ionChange', function (event) {
         const value = event.detail.value;
 
         if (!value) {
@@ -639,10 +580,6 @@ function buildPropertyTabs(input, can_advanced, can_jumps) {
         active_property_tab = value;
         setActivePropertyContent(value);
     });
-
-    setActivePropertyContent(active_property_tab);
-
-    return segment;
 }
 
 function setActivePropertyContent(value) {
@@ -662,25 +599,17 @@ function setActivePropertyContent(value) {
     });
 }
 
-function buildPropertyTab(value, label, content_id, enabled) {
-    const attributes = {
-        value: value,
-        content_id: content_id
-    };
-
-    if (!enabled) {
-        attributes.disabled = 'disabled';
-    }
-
-    return element('ion-segment-button', attributes, [
-        element('ion-label', {}, [label])
-    ]);
-}
-
-function buildBasicPanel(input) {
-    const panel = element('section', { class: 'builder__properties-panel' });
+function buildBasicPanel(input, pane) {
+    const panel = pane.querySelector('.builder__properties-panel');
+    const question_field = panel.querySelector('.builder__question-field');
+    const required_toggle = panel.querySelector('[data-field="required"]');
+    const title_toggle = panel.querySelector('[data-field="title"]');
 
     if (input.type === 'readme') {
+        question_field.remove();
+        required_toggle.remove();
+        title_toggle.remove();
+
         active_readme_editor = createReadmeEditor(input.question || '', function (question, plain_text) {
             if (getSession().current_input_ref !== input.ref) {
                 return;
@@ -691,162 +620,99 @@ function buildBasicPanel(input) {
         });
         panel.append(active_readme_editor.element);
 
-        return panel;
+        return;
     }
 
-    panel.append(buildQuestionField(input.question || '', getQuestionLabelText(input.type), 255));
+    bindQuestionField(question_field, input);
 
     if (allowsRequired(input.type)) {
-        panel.append(buildCheckboxToggle('Required', input.is_required === true, function (checked) {
+        bindCheckboxToggle(required_toggle, input.is_required === true, function (checked) {
             updateCurrentInput({ is_required: checked });
-        }));
+        });
+    }
+    else {
+        required_toggle.remove();
     }
 
     if (allowsTitle(input.type)) {
-        panel.append(buildTitleToggle(input));
+        bindTitleToggle(title_toggle, input);
+    }
+    else {
+        title_toggle.remove();
     }
 
     if (isMultipleAnswerType(input.type)) {
         panel.append(buildPossibleAnswers(input));
     }
-
-    return panel;
 }
 
-function buildAdvancedPanel(input) {
-    const panel = element('section', { class: 'builder__properties-panel builder__properties-panel--advanced' });
+function buildAdvancedPanel(input, pane) {
+    const panel = pane.querySelector('.builder__properties-panel');
+    const empty = panel.querySelector('[data-role="advanced-empty"]');
+    const fields = getAdvancedFields(input.type);
 
-    if (!hasAdvancedTab(input.type)) {
-        panel.append(element('p', { class: 'builder__empty' }, ['No advanced properties for this question type.']));
-
-        return panel;
-    }
-
-    if (input.type === 'integer' || input.type === 'decimal') {
-        panel.append(buildNumericTypeControl(input));
-        panel.append(buildNumberField('Initial answer', input.default, 'default', 255));
-        panel.append(buildNumberField('Min value', input.min, 'min', 50));
-        panel.append(buildNumberField('Max value', input.max, 'max', 50));
-        panel.append(buildRegexField(input));
-        panel.append(buildCheckboxToggle('Require double entry', input.verify === true, function (checked) {
-            updateCurrentInput({ verify: checked });
-        }));
-        panel.append(buildUniquenessControl(input));
-
-        return panel;
-    }
-
-    if (input.type === 'date' || input.type === 'time') {
-        panel.append(buildDatetimeFormatControl(input));
-        panel.append(buildCheckboxToggle(
-            input.type === 'date' ? 'Set initial answer to current date' : 'Set initial answer to current time',
-            input.set_to_current_datetime === true,
-            function (checked) {
-                updateCurrentInput({ set_to_current_datetime: checked });
-            }
-        ));
-        panel.append(buildUniquenessControl(input));
-
-        return panel;
-    }
-
-    if (isMultipleAnswerType(input.type)) {
-        panel.append(buildDefaultChoiceControl(input));
-
-        if (input.type === 'searchsingle' || input.type === 'searchmultiple') {
-            panel.append(buildSearchTypeControl(input));
+    panel.querySelectorAll('[data-field]').forEach(function (field) {
+        if (fields.indexOf(field.getAttribute('data-field')) === -1) {
+            field.remove();
         }
+    });
 
-        return panel;
+    if (!fields.length) {
+        empty.removeAttribute('hidden');
+        return;
     }
 
-    panel.append(buildTextField('Initial answer', input.default, 'default', 255));
-    panel.append(buildRegexField(input));
+    empty.remove();
 
-    if (input.type !== 'barcode') {
-        panel.append(buildCheckboxToggle('Require double entry', input.verify === true, function (checked) {
+    if (fields.indexOf('numeric_type') !== -1) {
+        bindNumericTypeControl(panel.querySelector('[data-field="numeric_type"]'), input);
+    }
+
+    if (fields.indexOf('default_number') !== -1) {
+        bindNumberField(panel.querySelector('[data-field="default_number"]'), input.default, 'default');
+    }
+
+    if (fields.indexOf('min') !== -1) {
+        bindNumberField(panel.querySelector('[data-field="min"]'), input.min, 'min');
+    }
+
+    if (fields.indexOf('max') !== -1) {
+        bindNumberField(panel.querySelector('[data-field="max"]'), input.max, 'max');
+    }
+
+    if (fields.indexOf('default_text') !== -1) {
+        bindTextField(panel.querySelector('[data-field="default_text"]'), input.default, 'default');
+    }
+
+    if (fields.indexOf('regex') !== -1) {
+        bindRegexField(panel.querySelector('[data-field="regex"]'), input);
+    }
+
+    if (fields.indexOf('verify') !== -1) {
+        bindCheckboxToggle(panel.querySelector('[data-field="verify"]'), input.verify === true, function (checked) {
             updateCurrentInput({ verify: checked });
-        }));
+        });
     }
 
-    panel.append(buildUniquenessControl(input));
-
-    return panel;
-}
-
-function buildJumpsPanel() {
-    return element('section', { class: 'builder__properties-panel' }, [
-        element('p', { class: 'builder__empty' }, ['Jumps are not ported yet.'])
-    ]);
-}
-
-function buildPropertiesHeading(input) {
-    const heading = element('div', { class: 'builder__properties-heading' }, [
-        element('span', { class: 'builder__panel-title builder__properties-title', title: input ? getQuestionLabel(input) : 'Question properties' }, [
-            input ? getQuestionLabel(input) : 'Question properties'
-        ])
-    ]);
-
-    if (!input) {
-        return heading;
+    if (fields.indexOf('datetime_format') !== -1) {
+        bindDatetimeFormatControl(panel.querySelector('[data-field="datetime_format"]'), input);
     }
 
-    const actions = element('div', { class: 'builder__heading-actions builder__answers-btn-group builder__form-actions-group builder__properties-actions-group' });
-
-    [
-        {
-            icon_name: 'copy-outline',
-            label: 'Copy question',
-            title: 'Copy is not ported yet',
-            class_name: 'builder__form-action-btn'
-        },
-        {
-            icon_name: 'checkmark-circle-outline',
-            label: 'Validate question',
-            title: 'Validation is not ported yet',
-            class_name: 'builder__form-action-btn'
-        }
-    ].forEach(function (config) {
-        actions.append(iconButton({
-            class: 'builder__answers-more-btn ' + config.class_name,
-            icon_name: config.icon_name,
-            label: config.label,
-            title: config.title,
-            disabled: true
-        }));
-    });
-
-    const delete_button = iconButton({
-        class: 'builder__answers-more-btn builder__form-action-btn builder__icon-btn--danger',
-        icon_name: 'trash-outline',
-        label: 'Delete question'
-    });
-
-    delete_button.addEventListener('click', function () {
-        removeInput(input.ref);
-        renderQuestions();
-        renderProperties();
-    });
-
-    actions.append(delete_button);
-    heading.append(actions);
-
-    return heading;
-}
-
-function iconButton(options) {
-    const attributes = {
-        type: 'button',
-        class: options.class,
-        'aria-label': options.label,
-        title: options.title || options.label
-    };
-
-    if (options.disabled) {
-        attributes.disabled = 'disabled';
+    if (fields.indexOf('set_to_current_datetime') !== -1) {
+        bindCurrentDatetimeToggle(panel.querySelector('[data-field="set_to_current_datetime"]'), input);
     }
 
-    return button(attributes, [icon(options.icon_name)]);
+    if (fields.indexOf('uniqueness') !== -1) {
+        bindUniquenessControl(panel.querySelector('[data-field="uniqueness"]'), input);
+    }
+
+    if (fields.indexOf('default_choice') !== -1) {
+        bindDefaultChoiceControl(panel.querySelector('[data-field="default_choice"]'), input);
+    }
+
+    if (fields.indexOf('search_type') !== -1) {
+        bindSearchTypeControl(panel.querySelector('[data-field="search_type"]'), input);
+    }
 }
 
 function getQuestionLabelText(type) {
@@ -861,19 +727,13 @@ function getQuestionLabelText(type) {
     return 'Question';
 }
 
-function buildQuestionField(value, label, maxlength) {
-    const field = element('ion-input', {
-        class: 'builder__field builder__question-field',
-        'aria-label': label || 'Question text',
-        'label-placement': 'stacked',
-        fill: 'outline',
-        maxlength: String(maxlength || 255)
-    });
+function bindQuestionField(field, input) {
+    const label = getQuestionLabelText(input.type);
 
-    field.label = label || 'Question';
-    field.value = value;
-    field.placeholder = label || 'Type question here...';
-    field.setAttribute('size', 'small');
+    field.label = label;
+    field.placeholder = label;
+    field.setAttribute('aria-label', label);
+    field.value = input.question || '';
 
     field.addEventListener('ionInput', function (event) {
         const question = sanitizeQuestion(getCurrentInput(), event.detail.value || '');
@@ -886,8 +746,6 @@ function buildQuestionField(value, label, maxlength) {
         updateQuestionText(question);
         updateCurrentQuestionStatus();
     });
-
-    return field;
 }
 
 function sanitizeQuestion(input, value) {
@@ -911,56 +769,42 @@ function getQuestionLabel(input) {
     return parsed.body.textContent.trim() || 'Readme';
 }
 
-function buildCheckboxToggle(label, checked, on_change, options) {
+function bindCheckboxToggle(toggle, checked, on_change, options) {
     const config = options || {};
-    const toggle = element('ion-checkbox', {
-        class: 'builder__checkbox' + (config.class_name ? ' ' + config.class_name : ''),
-        'label-placement': 'end'
-    });
 
     if (config.disabled) {
         toggle.disabled = true;
     }
 
-    toggle.append(element('span', {}, [label]));
     toggle.checked = checked;
     toggle.addEventListener('ionChange', function (event) {
         on_change(event.detail.checked);
     });
-
-    return toggle;
 }
 
-function buildTitleToggle(input) {
+function bindTitleToggle(toggle, input) {
     const form = getCurrentForm();
     const inputs = getInputs(form);
     const other_titles = countTitles(inputs, input.ref);
     const checked = input.is_title === true;
-    const limit_reached = !checked && other_titles >= 3;
-    const label = limit_reached ? 'Limit of 3 titles reached' : 'Use answer as title';
+    const limit_reached = !checked && other_titles >= TITLE_LIMIT;
+    const label = toggle.querySelector('.builder__title-label');
 
-    return buildCheckboxToggle(label, checked, function (next_checked) {
-        if (next_checked && !input.is_title && countTitles(getInputs(getCurrentForm()), input.ref) >= 3) {
+    label.textContent = limit_reached ? 'Limit of ' + TITLE_LIMIT + ' titles reached' : 'Use answer as title';
+
+    bindCheckboxToggle(toggle, checked, function (next_checked) {
+        if (next_checked && !input.is_title && countTitles(getInputs(getCurrentForm()), input.ref) >= TITLE_LIMIT) {
             renderProperties();
             return;
         }
 
         updateCurrentInput({ is_title: next_checked });
         renderProperties();
-    }, { disabled: limit_reached, class_name: 'builder__title-toggle' });
+    }, { disabled: limit_reached });
 }
 
-function buildTextField(label, value, property, maxlength) {
-    const field = element('ion-input', {
-        class: 'builder__field',
-        'label-placement': 'stacked',
-        fill: 'outline',
-        maxlength: String(maxlength || 255)
-    });
-
-    field.label = label;
+function bindTextField(field, value, property) {
     field.value = value || '';
-    field.placeholder = label;
 
     field.addEventListener('ionInput', function (event) {
         const next = {};
@@ -969,23 +813,10 @@ function buildTextField(label, value, property, maxlength) {
         next[property] = text === '' ? null : text;
         updateCurrentInput(next);
     });
-
-    return field;
 }
 
-function buildNumberField(label, value, property, maxlength) {
-    const field = element('ion-input', {
-        class: 'builder__field',
-        'label-placement': 'stacked',
-        fill: 'outline',
-        type: 'text',
-        inputmode: 'decimal',
-        maxlength: String(maxlength || 50)
-    });
-
-    field.label = label;
+function bindNumberField(field, value, property) {
     field.value = value === null || value === undefined ? '' : String(value);
-    field.placeholder = label;
 
     field.addEventListener('ionInput', function (event) {
         const next = {};
@@ -994,20 +825,12 @@ function buildNumberField(label, value, property, maxlength) {
         next[property] = text === '' ? null : text;
         updateCurrentInput(next);
     });
-
-    return field;
 }
 
-function buildRegexField(input) {
-    const wrapper = element('div', { class: 'builder__regex-field' });
-    const field = element('ion-input', {
-        class: 'builder__field',
-        'label-placement': 'stacked',
-        fill: 'outline',
-        maxlength: '50'
-    });
+function bindRegexField(wrapper, input) {
+    const field = wrapper.querySelector('ion-input');
+    const presets = wrapper.querySelector('.builder__regex-presets');
 
-    field.label = 'Match REGEX';
     field.value = input.regex || '';
 
     field.addEventListener('ionInput', function (event) {
@@ -1015,10 +838,6 @@ function buildRegexField(input) {
 
         updateCurrentInput({ regex: text === '' ? null : text });
     });
-
-    const presets = element('div', { class: 'builder__regex-presets' }, [
-        element('span', { class: 'builder__hint' }, ['Presets:'])
-    ]);
 
     REGEX_PRESETS.forEach(function (preset) {
         const preset_button = button({
@@ -1033,21 +852,13 @@ function buildRegexField(input) {
 
         presets.append(preset_button);
     });
-
-    wrapper.append(field, presets);
-
-    return wrapper;
 }
 
-function buildNumericTypeControl(input) {
+function bindNumericTypeControl(field_group, input) {
     const current = input.type === 'decimal' ? 'decimal' : 'integer';
-    const group = element('ion-radio-group', {
-        class: 'builder__radio-group',
-        value: current
-    });
+    const group = field_group.querySelector('ion-radio-group');
 
-    group.append(buildRadioOption('integer', 'Integer'));
-    group.append(buildRadioOption('decimal', 'Decimal'));
+    group.value = current;
     group.addEventListener('ionChange', function (event) {
         const next_type = event.detail.value;
 
@@ -1059,18 +870,12 @@ function buildNumericTypeControl(input) {
         renderQuestions();
         renderProperties();
     });
-
-    return buildLabeledSection('Number type', group);
 }
 
-function buildSearchTypeControl(input) {
-    const group = element('ion-radio-group', {
-        class: 'builder__radio-group',
-        value: input.type
-    });
+function bindSearchTypeControl(field_group, input) {
+    const group = field_group.querySelector('ion-radio-group');
 
-    group.append(buildRadioOption('searchsingle', 'Single answer'));
-    group.append(buildRadioOption('searchmultiple', 'Multiple answers'));
+    group.value = input.type;
     group.addEventListener('ionChange', function (event) {
         const next_type = event.detail.value;
 
@@ -1082,27 +887,36 @@ function buildSearchTypeControl(input) {
         renderQuestions();
         renderProperties();
     });
-
-    return buildLabeledSection('Search type', group);
 }
 
-function buildDatetimeFormatControl(input) {
+function bindDatetimeFormatControl(field_group, input) {
     const formats = input.type === 'time' ? TIME_FORMATS : DATE_FORMATS;
     const current = input.datetime_format || getDefaultDatetimeFormat(input.type) || formats[0].value;
-    const group = element('ion-radio-group', {
-        class: 'builder__radio-group',
-        value: current
-    });
+    const label = field_group.querySelector('.builder__field-label');
+    const group = field_group.querySelector('ion-radio-group');
+
+    label.textContent = input.type === 'time' ? 'Time format' : 'Date format';
 
     formats.forEach(function (format) {
         group.append(buildRadioOption(format.value, format.label));
     });
 
+    group.value = current;
     group.addEventListener('ionChange', function (event) {
         updateCurrentInput({ datetime_format: event.detail.value });
     });
+}
 
-    return buildLabeledSection(input.type === 'time' ? 'Time format' : 'Date format', group);
+function bindCurrentDatetimeToggle(toggle, input) {
+    const label = toggle.querySelector('[data-role="datetime-label"]');
+
+    label.textContent = input.type === 'date' ?
+        'Set initial answer to current date' :
+        'Set initial answer to current time';
+
+    bindCheckboxToggle(toggle, input.set_to_current_datetime === true, function (checked) {
+        updateCurrentInput({ set_to_current_datetime: checked });
+    });
 }
 
 function buildRadioOption(value, label) {
@@ -1113,25 +927,11 @@ function buildRadioOption(value, label) {
     return radio;
 }
 
-function buildLabeledSection(label, content) {
-    return element('div', { class: 'builder__field-group' }, [
-        element('div', { class: 'builder__field-label' }, [label]),
-        content
-    ]);
-}
-
-function buildDefaultChoiceControl(input) {
-    const select = element('ion-select', {
-        class: 'builder__select',
-        'label-placement': 'stacked',
-        interface: 'popover',
-        placeholder: 'None'
-    });
+function bindDefaultChoiceControl(select, input) {
     const has_default = (input.possible_answers || []).some(function (answer) {
         return answer.answer_ref === input.default;
     });
 
-    select.label = 'Initial answer';
     select.value = has_default ? input.default : '';
     select.append(buildSelectOption('', 'None'));
 
@@ -1144,8 +944,6 @@ function buildDefaultChoiceControl(input) {
 
         updateCurrentInput({ default: value ? value : null });
     });
-
-    return select;
 }
 
 function buildSelectOption(value, label) {
@@ -1156,20 +954,10 @@ function buildSelectOption(value, label) {
     return option;
 }
 
-function buildUniquenessControl(input) {
-    if (!allowsUniqueness(input.type)) {
-        return element('div');
-    }
-
+function bindUniquenessControl(select, input) {
     const form = getCurrentForm();
     const form_name = form ? form.name : 'this form';
-    const select = element('ion-select', {
-        class: 'builder__select',
-        'label-placement': 'stacked',
-        interface: 'popover'
-    });
 
-    select.label = 'Uniqueness';
     select.value = input.uniqueness || 'none';
     select.append(buildSelectOption('none', 'No uniqueness'));
     select.append(buildSelectOption('form', 'Unique to all ' + form_name + ' entries'));
@@ -1177,73 +965,29 @@ function buildUniquenessControl(input) {
     select.addEventListener('ionChange', function (event) {
         updateCurrentInput({ uniqueness: event.detail.value || 'none' });
     });
-
-    return select;
 }
 
 function buildPossibleAnswers(input) {
     const answers = input.possible_answers;
-    const card = element('ion-card', { class: 'builder__answers-card' });
-    const header = element('ion-card-header', { class: 'builder__answers-header' });
-    const heading = element('div', { class: 'builder__answers-heading' });
-    const actions = buildAnswersActions(input);
-    const content = element('ion-card-content', { class: 'builder__answers-content' });
-    const list = element('ul', { class: 'builder__answer-list' });
-
-    heading.append(element('ion-card-title', { class: 'builder__answers-title' }, ['Possible answers']));
-    heading.append(actions);
-    header.append(heading);
+    const card = createView(possible_answers_view);
+    const list = card.querySelector('.builder__answer-list');
+    const add_button = card.querySelector('.builder__add-answer');
+    const menu_toggle = card.querySelector('.builder__answers-more-btn');
+    const dropdown = card.querySelector('.builder__answers-dropdown');
+    const at_limit = answers.length >= getAnswerLimit(input.type);
 
     answers.forEach(function (answer, index) {
         list.append(buildAnswerRow(input, answer, index, answers.length));
     });
 
-    content.append(list);
-    card.append(header, content);
-
-    return card;
-}
-
-function buildAnswersActions(input) {
-    const group = element('div', { class: 'builder__answers-btn-group' });
-    const add_button = buildAddAnswerButton(input);
-    const menu = element('div', { class: 'builder__answers-menu' });
-    const toggle = button({
-        type: 'button',
-        class: 'builder__answers-more-btn',
-        'aria-label': 'More possible answer actions',
-        'aria-haspopup': 'true',
-        'aria-expanded': 'false'
-    }, [icon('chevron-down-outline')]);
-    const dropdown = element('div', { class: 'builder__answers-dropdown', hidden: 'hidden' });
-
-    add_button.classList.add('builder__answers-add-btn');
-
-    [
-        'Import CSV',
-        'Export CSV',
-        '---',
-        'Order ascending',
-        'Order descending',
-        'Shuffle',
-        '---',
-        'Delete all answers'
-    ].forEach(function (label) {
-        if (label === '---') {
-            dropdown.append(element('div', { class: 'builder__answers-dropdown-divider' }));
-            return;
+    add_button.disabled = at_limit;
+    add_button.addEventListener('click', function () {
+        if (addPossibleAnswer(input)) {
+            renderProperties();
         }
-
-        const item = button({
-            type: 'button',
-            class: 'builder__answers-dropdown-item',
-            disabled: 'disabled'
-        }, [label]);
-
-        dropdown.append(item);
     });
 
-    toggle.addEventListener('click', function (event) {
+    menu_toggle.addEventListener('click', function (event) {
         event.stopPropagation();
         const open = dropdown.hasAttribute('hidden');
 
@@ -1251,14 +995,11 @@ function buildAnswersActions(input) {
 
         if (open) {
             dropdown.removeAttribute('hidden');
-            toggle.setAttribute('aria-expanded', 'true');
+            menu_toggle.setAttribute('aria-expanded', 'true');
         }
     });
 
-    menu.append(toggle, dropdown);
-    group.append(add_button, menu);
-
-    return group;
+    return card;
 }
 
 function closeAnswersMenus() {
@@ -1332,23 +1073,6 @@ function buildAnswerRow(input, answer, index, total) {
     row.append(remove_button);
 
     return row;
-}
-
-function buildAddAnswerButton(input) {
-    const at_limit = input.possible_answers.length >= getAnswerLimit(input.type);
-    const add_button = button({
-        type: 'button',
-        class: 'builder__add-answer',
-        disabled: at_limit ? 'disabled' : undefined
-    }, ['Add answer']);
-
-    add_button.addEventListener('click', function () {
-        if (addPossibleAnswer(input)) {
-            renderProperties();
-        }
-    });
-
-    return add_button;
 }
 
 /*

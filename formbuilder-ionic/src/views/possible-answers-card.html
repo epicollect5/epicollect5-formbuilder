@@ -1,0 +1,53 @@
+<ion-card class="builder__answers-card">
+    <ion-card-header class="builder__answers-header">
+        <div class="builder__answers-heading">
+            <ion-card-title class="builder__answers-title">Possible answers</ion-card-title>
+
+            <div class="builder__answers-btn-group">
+                <button type="button"
+                        class="builder__add-answer builder__answers-add-btn">
+                    Add answer
+                </button>
+
+                <div class="builder__answers-menu">
+                    <button type="button"
+                            class="builder__answers-more-btn"
+                            aria-label="More possible answer actions"
+                            aria-haspopup="true"
+                            aria-expanded="false">
+                        <ion-icon name="chevron-down-outline"
+                                  aria-hidden="true"></ion-icon>
+                    </button>
+
+                    <div class="builder__answers-dropdown"
+                         hidden>
+                        <button type="button"
+                                class="builder__answers-dropdown-item"
+                                disabled>Import CSV</button>
+                        <button type="button"
+                                class="builder__answers-dropdown-item"
+                                disabled>Export CSV</button>
+                        <div class="builder__answers-dropdown-divider"></div>
+                        <button type="button"
+                                class="builder__answers-dropdown-item"
+                                disabled>Order ascending</button>
+                        <button type="button"
+                                class="builder__answers-dropdown-item"
+                                disabled>Order descending</button>
+                        <button type="button"
+                                class="builder__answers-dropdown-item"
+                                disabled>Shuffle</button>
+                        <div class="builder__answers-dropdown-divider"></div>
+                        <button type="button"
+                                class="builder__answers-dropdown-item"
+                                disabled>Delete all answers</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ion-card-header>
+
+    <ion-card-content class="builder__answers-content">
+        <ul class="builder__answer-list"></ul>
+    </ion-card-content>
+</ion-card>

@@ -3,15 +3,12 @@
 import { Editor, Extension } from '@tiptap/core';
 import { Plugin } from '@tiptap/pm/state';
 import StarterKit from '@tiptap/starter-kit';
+import { createView } from '@/ui/dom.js';
+import readme_editor_view from '@/views/readme-editor.html?raw';
 
 const README_MAX_LENGTH = 1000;
 const ALLOWED_TAGS = new Set(['p', 'br', 'b', 'strong', 'i', 'em', 'u']);
 const DISCARDED_TAGS = new Set(['script', 'style', 'iframe', 'object']);
-const FORMATS = [
-    { name: 'bold', label: 'Bold', text: 'B' },
-    { name: 'italic', label: 'Italic', text: 'I' },
-    { name: 'underline', label: 'Underline', text: 'U' }
-];
 
 const ReadmeLength = Extension.create({
     name: 'readmeLength',
@@ -33,18 +30,9 @@ const ReadmeLength = Extension.create({
 });
 
 export function createReadmeEditor(value, on_change) {
-    const container = document.createElement('div');
-    const toolbar = document.createElement('div');
-    const content = document.createElement('div');
-
-    container.className = 'builder__readme-editor';
-    toolbar.className = 'builder__readme-toolbar';
-    toolbar.setAttribute('role', 'toolbar');
-    toolbar.setAttribute('aria-label', 'Readme formatting');
-    content.className = 'builder__readme-content';
-    content.setAttribute('data-placeholder', 'Type here...');
-
-    container.append(toolbar, content);
+    const element = createView(readme_editor_view);
+    const content = element.querySelector('.builder__readme-content');
+    const toolbar_buttons = [...element.querySelectorAll('.builder__readme-toolbar-button')];
 
     const editor = new Editor({
         element: content,
@@ -78,34 +66,23 @@ export function createReadmeEditor(value, on_change) {
         }
     });
 
-    FORMATS.forEach(function (format) {
-        const toolbar_button = document.createElement('button');
-
-        toolbar_button.type = 'button';
-        toolbar_button.className = 'builder__readme-toolbar-button';
-        toolbar_button.setAttribute('aria-label', format.label);
-        toolbar_button.setAttribute('aria-pressed', 'false');
-        toolbar_button.setAttribute('title', format.label);
-        toolbar_button.textContent = format.text;
+    toolbar_buttons.forEach(function (toolbar_button) {
+        const format = toolbar_button.getAttribute('data-format');
 
         toolbar_button.addEventListener('mousedown', function (mouse_event) {
             mouse_event.preventDefault();
         });
 
         toolbar_button.addEventListener('click', function () {
-            editor.chain().focus()['toggle' + format.name[0].toUpperCase() + format.name.slice(1)]().run();
+            editor.chain().focus()['toggle' + format[0].toUpperCase() + format.slice(1)]().run();
         });
-
-        toolbar.appendChild(toolbar_button);
     });
 
     function updateToolbarState() {
-        FORMATS.forEach(function (format) {
-            const toolbar_button = toolbar.querySelector('[aria-label="' + format.label + '"]');
+        toolbar_buttons.forEach(function (toolbar_button) {
+            const format = toolbar_button.getAttribute('data-format');
 
-            if (toolbar_button) {
-                toolbar_button.setAttribute('aria-pressed', String(editor.isActive(format.name)));
-            }
+            toolbar_button.setAttribute('aria-pressed', String(editor.isActive(format)));
         });
     }
 
@@ -118,7 +95,7 @@ export function createReadmeEditor(value, on_change) {
     });
 
     return {
-        element: container,
+        element: element,
         destroy: function () {
             editor.destroy();
         }
