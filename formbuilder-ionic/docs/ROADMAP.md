@@ -137,7 +137,8 @@ container and each dynamic collection's empty-state markup in the view.
 
 ## Phases
 
-Phases 1–5 are ported; 6–8 are pending.
+Phases 1–5 are ported; 6–8 are pending. Risks carried by the port are tracked in
+`docs/risks.md`.
 
 1. **Properties panel, full.** Port each existing Bootstrap panel to the
    equivalent Ionic card shell and reuse its property fragments in HTML views.
