@@ -240,7 +240,7 @@ consts.LIMITS = {
     titles_max: 3,
     max_states: 10,
     possible_answer_ref_length: 13,
-    possible_answer_max_length: 150,
+    possible_answer_max_length: 250,
     possible_answers_per_page: 100,
     search_inputs_max: 5,
     question_preview_length: 80
