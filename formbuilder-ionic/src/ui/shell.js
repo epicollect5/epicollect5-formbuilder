@@ -21,7 +21,7 @@ import {
     REGEX_PRESETS
 } from '@/models/input-properties.js';
 import { getContainerList } from '@/models/nesting.js';
-import { VALIDATION_MESSAGES } from '@/models/messages.js';
+import { FORM_MESSAGES, VALIDATION_MESSAGES } from '@/models/messages.js';
 import { getQuestionType } from '@/models/question-types.js';
 import { countTitles, getAdvancedFields } from '@/services/properties.js';
 import {
@@ -53,6 +53,7 @@ import {
     addForm,
     addInput,
     canAddInput,
+    deleteForm,
     enterInput,
     exitEditing,
     getCurrentForm,
@@ -63,14 +64,19 @@ import {
     getSession,
     insertInput,
     isEditing,
+    removeAllInputs,
     removeInput,
+    renameForm,
     reorderInputs,
     selectForm,
     selectInput,
     updateCurrentInput
 } from '@/services/session.js';
 import { duplicateInput } from '@/services/question-actions.js';
-import { getInputErrors, isInputValid } from '@/services/validation.js';
+import { getFormNameError, MAX_FORMS } from '@/services/form-management.js';
+import { prepareImportedForm } from '@/services/form-import.js';
+import { buildFormExport, getFormExportFilename, saveProject } from '@/services/save.js';
+import { areAllInputsValid, getInputErrors, isInputValid } from '@/services/validation.js';
 import { canUndo, ensureUndoBaseline, pushUndoState, undo } from '@/services/undo.js';
 import { button, createView, element, icon, parseView } from '@/ui/dom.js';
 import { createDropdown, populateDropdown } from '@/ui/dropdown.js';
@@ -91,6 +97,9 @@ const answer_pages = new Map();
 const answer_notices = new Map();
 let active_readme_editor = null;
 let active_property_tab = 'basic';
+let saving = false;
+let pending_form_status = null;
+let pending_rename = false;
 
 export function renderApp(app_handlers) {
     handlers = app_handlers || {};
@@ -172,17 +181,35 @@ function bindChrome() {
         };
     }
 
+    const save_button = document.getElementById('save');
+
+    if (save_button) {
+        save_button.onclick = function () {
+            performSave();
+        };
+    }
+
     const add_form = document.getElementById('add-form');
+    const forms = getForms(getSession().project_definition);
+    const at_form_cap = forms.length >= MAX_FORMS;
 
     if (add_form) {
+        add_form.disabled = at_form_cap;
+        add_form.title = at_form_cap ? 'A project can have at most ' + MAX_FORMS + ' forms' : 'Add form';
         add_form.onclick = function () {
-            addForm();
+            if (!addForm()) {
+                return;
+            }
+
+            // The legacy flow asks for the new form's name straight away.
+            pending_rename = true;
             recordChange();
             renderApp(handlers);
         };
     }
 
     updateUndoButton();
+    updateSaveButton();
 }
 
 /* Snapshots are taken after a mutation, matching the legacy push points. */
@@ -190,8 +217,11 @@ function recordChange(options) {
     // The throttled push lands later, so the button gate has to follow it.
     pushUndoState(Object.assign({ on_change: updateUndoButton }, options || {}));
     updateUndoButton();
-}
+    updateSaveButton();
 
+    // A change makes the last save result stale.
+    showSaveStatus('', false);
+}
 function updateUndoButton() {
     const undo_button = document.getElementById('undo');
 
@@ -211,8 +241,277 @@ function performUndo() {
         return;
     }
 
+    // Undoing an added form leaves the index past the end of the restored list.
+    if (getSession().current_form_index >= getForms(getSession().project_definition).length) {
+        selectForm(Math.max(getForms(getSession().project_definition).length - 1, 0));
+    }
+
     active_property_tab = 'basic';
     renderApp(handlers);
+}
+
+function showSaveStatus(text, is_error) {
+    const status = document.querySelector('[data-role="save-status"]');
+
+    if (!status) {
+        return;
+    }
+
+    status.textContent = text || '';
+    status.classList.toggle('is-error', is_error === true);
+    status.hidden = !text;
+}
+
+function updateSaveButton() {
+    const button = document.getElementById('save');
+
+    if (!button) {
+        return;
+    }
+
+    const valid = areAllInputsValid(getSession().project_definition);
+
+    button.disabled = saving || !valid;
+    button.title = saving ? FORM_MESSAGES.PROJECT_SAVING : (valid ? 'Save project' : 'Fix the validation errors before saving');
+}
+
+async function performSave() {
+    if (saving) {
+        return;
+    }
+
+    const project_definition = getSession().project_definition;
+
+    saving = true;
+    updateSaveButton();
+    showSaveStatus(FORM_MESSAGES.PROJECT_SAVING, false);
+
+    try {
+        await saveProject(project_definition);
+        showSaveStatus(FORM_MESSAGES.PROJECT_SAVED, false);
+    }
+    catch (error) {
+        const message = error && error.message ? error.message : '';
+
+        showSaveStatus(FORM_MESSAGES.PROJECT_NOT_SAVED + (message ? ' ' + message : ''), true);
+    }
+    finally {
+        saving = false;
+        updateSaveButton();
+    }
+}
+
+function showFormStatus(card, text, is_error) {
+    const status = card.querySelector('[data-role="form-status"]');
+
+    if (!status) {
+        return;
+    }
+
+    status.textContent = text || '';
+    status.classList.toggle('is-error', is_error === true);
+    status.hidden = !text;
+}
+
+/* A status set before a re-render (after an import) is shown by the new card. */
+function showPendingFormStatus(card, form) {
+    if (!pending_form_status || !form || pending_form_status.form_ref !== form.ref) {
+        return;
+    }
+
+    const status = pending_form_status;
+
+    pending_form_status = null;
+    showFormStatus(card, status.text, status.error);
+}
+
+function installFormActions(card, form) {
+    if (!form) {
+        return;
+    }
+
+    const forms = getForms(getSession().project_definition);
+    const form_index = getSession().current_form_index;
+    const deletable = !isEditing() && form_index > 0 && form_index === forms.length - 1;
+    const delete_button = card.querySelector('.builder__form-action-btn--delete');
+    const edit_button = card.querySelector('.builder__form-action-btn--edit');
+    const import_button = card.querySelector('[data-action="form-import"]');
+
+    if (delete_button) {
+        delete_button.disabled = !deletable;
+        delete_button.title = deletable ? 'Delete form' : FORM_MESSAGES.FORM_CANNOT_BE_DELETED;
+        delete_button.onclick = function () {
+            askFormConfirm(card, FORM_MESSAGES.FORM_DELETE_CONFIRM, function () {
+                if (deleteForm(form_index)) {
+                    recordChange();
+                    renderApp(handlers);
+                }
+            });
+        };
+    }
+
+    if (edit_button) {
+        edit_button.onclick = function () {
+            openFormRename(card, form);
+        };
+    }
+
+    if (import_button) {
+        import_button.disabled = isEditing();
+        import_button.title = isEditing() ? 'Return to the form to import' : 'Import form';
+    }
+
+    const actions = {
+        'form-rename': function () {
+            openFormRename(card, form);
+        },
+        'form-export': function () {
+            const payload = buildFormExport(getSession().project_definition, form_index);
+
+            if (!payload) {
+                showFormStatus(card, FORM_MESSAGES.FORM_IS_INVALID, true);
+                return;
+            }
+
+            downloadFile(getFormExportFilename(getSession().project_definition, form_index), JSON.stringify(payload), 'application/json');
+            showFormStatus(card, '', false);
+        },
+        'form-import': function () {
+            if (!isEditing()) {
+                importFormFile(card, form);
+            }
+        },
+        'form-delete-all': function () {
+            askFormConfirm(card, FORM_MESSAGES.DELETE_ALL_CONFIRM, function () {
+                if (removeAllInputs()) {
+                    recordChange();
+                    renderApp(handlers);
+                }
+            });
+        }
+    };
+
+    Object.keys(actions).forEach(function (action) {
+        const control = card.querySelector('[data-action="' + action + '"]');
+
+        if (control) {
+            control.onclick = function () {
+                actions[action]();
+            };
+        }
+    });
+}
+
+function openFormRename(card, form) {
+    const panel = card.querySelector('[data-role="form-rename"]');
+    const confirm_panel = card.querySelector('[data-role="form-confirm"]');
+    const field = card.querySelector('[data-role="form-name-input"]');
+    const save_button = card.querySelector('[data-action="form-rename-save"]');
+    const cancel_button = card.querySelector('[data-action="form-rename-cancel"]');
+
+    if (!panel || !field) {
+        return;
+    }
+
+    if (confirm_panel) {
+        confirm_panel.hidden = true;
+    }
+
+    panel.hidden = false;
+    field.value = form.name || '';
+
+    save_button.onclick = function () {
+        const form_index = getSession().current_form_index;
+        const error = getFormNameError(getForms(getSession().project_definition), field.value, form_index);
+
+        if (error) {
+            showFormStatus(card, error, true);
+            return;
+        }
+
+        renameForm(form_index, field.value);
+        recordChange();
+        renderApp(handlers);
+    };
+
+    cancel_button.onclick = function () {
+        panel.hidden = true;
+    };
+}
+
+function askFormConfirm(card, message, on_confirm) {
+    const panel = card.querySelector('[data-role="form-confirm"]');
+    const rename_panel = card.querySelector('[data-role="form-rename"]');
+    const message_node = card.querySelector('[data-role="form-confirm-message"]');
+    const yes = card.querySelector('[data-action="form-confirm-yes"]');
+    const no = card.querySelector('[data-action="form-confirm-no"]');
+
+    if (!panel) {
+        return;
+    }
+
+    if (rename_panel) {
+        rename_panel.hidden = true;
+    }
+
+    message_node.textContent = message;
+    panel.hidden = false;
+
+    yes.onclick = function () {
+        panel.hidden = true;
+        on_confirm();
+    };
+
+    no.onclick = function () {
+        panel.hidden = true;
+    };
+}
+
+function importFormFile(card, form) {
+    const field = card.querySelector('[data-role="form-file"]');
+
+    if (!field) {
+        return;
+    }
+
+    field.value = '';
+    field.onchange = function () {
+        const file = field.files && field.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!/\.json$/i.test(file.name)) {
+            showFormStatus(card, FORM_MESSAGES.FORM_FILE_INVALID, true);
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function () {
+            const result = prepareImportedForm(reader.result, getSession().project_definition, getSession().current_form_index);
+
+            if (!result.ok) {
+                showFormStatus(card, result.error, true);
+                return;
+            }
+
+            getCurrentForm().inputs = result.inputs;
+            getSession().current_input_ref = null;
+            recordChange();
+            pending_form_status = { form_ref: form.ref, text: FORM_MESSAGES.FORM_IMPORTED, error: false };
+            renderApp(handlers);
+        };
+
+        reader.onerror = function () {
+            showFormStatus(card, FORM_MESSAGES.FORM_FILE_INVALID, true);
+        };
+
+        reader.readAsText(file);
+    };
+
+    field.click();
 }
 
 /* The tool catalogue is static markup; only the click and drag wiring changes. */
@@ -374,6 +673,14 @@ function renderQuestions() {
     }
 
     container.replaceChildren(card);
+
+    installFormActions(card, form);
+    showPendingFormStatus(card, form);
+
+    if (pending_rename && form) {
+        pending_rename = false;
+        openFormRename(card, form);
+    }
 
     installQuestionSortable(QUESTION_LIST, syncAfterDrop);
 }
@@ -1517,8 +1824,8 @@ function installAnswersPager(card, input, page, pages, page_answers) {
     });
 }
 
-function downloadCsv(filename, contents) {
-    const blob = new Blob([contents], { type: 'text/csv;charset=utf-8;' });
+function downloadFile(filename, contents, type) {
+    const blob = new Blob([contents], { type: type });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
 
@@ -1536,7 +1843,7 @@ function installAnswersMenu(card, input) {
             openAnswersCsv(card, input);
         },
         export: function () {
-            downloadCsv(getCsvFilename(input), exportCsv(input));
+            downloadFile(getCsvFilename(input), exportCsv(input), 'text/csv;charset=utf-8;');
         },
         'order-az': function () {
             if (orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.AZ)) {

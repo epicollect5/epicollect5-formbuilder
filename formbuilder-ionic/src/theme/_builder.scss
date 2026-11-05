@@ -1413,3 +1413,81 @@ ion-item.builder__question[aria-current='true'] {
     color: var(--fb-muted);
     cursor: not-allowed;
 }
+
+.builder__action-status {
+    align-self: center;
+    max-width: 220px;
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--fb-muted);
+}
+
+.builder__action-status[hidden] {
+    display: none;
+}
+
+.builder__action-status.is-error {
+    color: var(--ion-color-danger, #c5000f);
+}
+
+.builder__form-edit {
+    display: grid;
+    gap: 8px;
+    margin: 0 0 12px;
+    padding: 10px;
+    border: 1px solid var(--fb-border);
+    border-radius: 4px;
+    background: var(--fb-surface-2);
+}
+
+.builder__form-edit[hidden] {
+    display: none;
+}
+
+.builder__form-edit-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.builder__form-button {
+    min-height: 30px;
+    padding: 4px 12px;
+    border: 1px solid var(--fb-border-strong);
+    border-radius: 4px;
+    background: var(--fb-surface);
+    color: var(--fb-text);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.builder__form-button--danger {
+    border-color: var(--ion-color-danger, #c5000f);
+    color: var(--ion-color-danger, #c5000f);
+}
+
+.builder__form-confirm-message {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--fb-text);
+}
+
+.builder__form-status {
+    margin: 8px 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--fb-muted);
+}
+
+.builder__form-status[hidden] {
+    display: none;
+}
+
+.builder__form-status.is-error {
+    color: var(--ion-color-danger, #c5000f);
+}
+
+.builder__form-file {
+    display: none;
+}

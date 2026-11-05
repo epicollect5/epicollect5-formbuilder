@@ -9,7 +9,7 @@
                 <button type="button"
                         class="builder__answers-more-btn builder__form-action-btn builder__form-action-btn--delete"
                         aria-label="Delete form"
-                        title="Deleting a form is not ported yet"
+                        title="Delete form"
                         disabled>
                     <ion-icon name="trash-outline"
                               aria-hidden="true"></ion-icon>
@@ -17,19 +17,40 @@
                 <button type="button"
                         class="builder__answers-more-btn builder__form-action-btn builder__form-action-btn--edit"
                         aria-label="Edit form name"
-                        title="Renaming a form is not ported yet"
-                        disabled>
+                        title="Edit form name">
                     <ion-icon name="create-outline"
                               aria-hidden="true"></ion-icon>
                 </button>
                 <button type="button"
                         class="builder__answers-more-btn builder__form-action-btn builder__form-action-btn--more"
+                        id="form-actions-trigger"
                         aria-label="Form actions"
-                        title="Form actions are not ported yet"
-                        disabled>
+                        title="Form actions">
                     <ion-icon name="chevron-down-outline"
                               aria-hidden="true"></ion-icon>
                 </button>
+
+                <ion-popover trigger="form-actions-trigger"
+                             trigger-action="click"
+                             side="bottom"
+                             alignment="end"
+                             class="builder__answers-popover">
+                    <div class="builder__answers-dropdown">
+                        <button type="button"
+                                class="builder__answers-dropdown-item"
+                                data-action="form-rename">Rename form</button>
+                        <button type="button"
+                                class="builder__answers-dropdown-item"
+                                data-action="form-export">Export form</button>
+                        <button type="button"
+                                class="builder__answers-dropdown-item"
+                                data-action="form-import">Import form</button>
+                        <div class="builder__answers-dropdown-divider"></div>
+                        <button type="button"
+                                class="builder__answers-dropdown-item"
+                                data-action="form-delete-all">Delete all questions</button>
+                    </div>
+                </ion-popover>
             </div>
         </div>
     </ion-card-header>
@@ -40,6 +61,53 @@
                       aria-hidden="true"></ion-icon>
             <span class="builder__questions-exit-label">Back to form</span>
         </button>
+
+        <div class="builder__form-edit"
+             data-role="form-rename"
+             hidden>
+            <ion-input class="builder__field"
+                       data-role="form-name-input"
+                       label="Form name"
+                       label-placement="stacked"
+                       fill="outline"
+                       maxlength="50"></ion-input>
+
+            <div class="builder__form-edit-actions">
+                <button type="button"
+                        class="builder__form-button"
+                        data-action="form-rename-save">Save</button>
+                <button type="button"
+                        class="builder__form-button"
+                        data-action="form-rename-cancel">Cancel</button>
+            </div>
+        </div>
+
+        <div class="builder__form-edit"
+             data-role="form-confirm"
+             hidden>
+            <p class="builder__form-confirm-message"
+               data-role="form-confirm-message"></p>
+
+            <div class="builder__form-edit-actions">
+                <button type="button"
+                        class="builder__form-button builder__form-button--danger"
+                        data-action="form-confirm-yes">Confirm</button>
+                <button type="button"
+                        class="builder__form-button"
+                        data-action="form-confirm-no">Cancel</button>
+            </div>
+        </div>
+
+        <p class="builder__form-status"
+           data-role="form-status"
+           role="status"
+           hidden></p>
+
+        <input type="file"
+               class="builder__form-file"
+               data-role="form-file"
+               accept=".json,application/json"
+               hidden>
 
         <ion-list class="builder__question-list">
             <div class="builder__empty">No questions in this form yet.</div>

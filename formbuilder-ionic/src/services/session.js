@@ -4,6 +4,7 @@ import { findInput, getForm, getForms, getInputs, getProject } from '@/models/pr
 import { createInput } from '@/models/input-factory.js';
 import { canContainInput, getContainerList } from '@/models/nesting.js';
 import { generateFormRef } from '@/models/refs.js';
+import { FORM_NAME_MAX_LENGTH, MAX_FORMS } from '@/services/form-management.js';
 
 /*
  * The project definition is the state. This module only holds the reference to
@@ -213,18 +214,20 @@ export function reorderInputs(refs) {
     return true;
 }
 
-export function addForm() {
+export function addForm(name) {
     const project = getProject(session.project_definition);
 
-    if (!project) {
+    if (!project || project.forms.length >= MAX_FORMS) {
         return null;
     }
 
-    const name = 'New form';
+    const form_name = String(name === undefined || name === null || String(name).trim() === '' ? 'New form' : name)
+        .trim()
+        .slice(0, FORM_NAME_MAX_LENGTH);
     const form = {
         ref: generateFormRef(project.ref),
-        name: name,
-        slug: slugify(name + '-' + (project.forms.length + 1)),
+        name: form_name,
+        slug: slugify(form_name + '-' + (project.forms.length + 1)),
         type: 'hierarchy',
         inputs: []
     };
@@ -239,6 +242,48 @@ export function addForm() {
 
 function slugify(text) {
     return String(text).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+}
+
+export function renameForm(form_index, name) {
+    const form = getForms(session.project_definition)[form_index];
+    const trimmed = String(name === undefined || name === null ? '' : name).trim().slice(0, FORM_NAME_MAX_LENGTH);
+
+    if (!form || !trimmed) {
+        return null;
+    }
+
+    form.name = trimmed;
+    form.slug = slugify(trimmed);
+
+    return form;
+}
+
+/* Legacy deletes only the last child form; the first form is the root. */
+export function deleteForm(form_index) {
+    const forms = getForms(session.project_definition);
+
+    if (form_index <= 0 || form_index !== forms.length - 1) {
+        return false;
+    }
+
+    forms.splice(form_index, 1);
+    selectForm(form_index - 1);
+
+    return true;
+}
+
+/* Delete all questions of the active list (form inputs or a container). */
+export function removeAllInputs() {
+    const inputs = getActiveInputs();
+
+    if (!inputs.length) {
+        return false;
+    }
+
+    inputs.splice(0, inputs.length);
+    session.current_input_ref = null;
+
+    return true;
 }
 
 export function removeInput(input_ref) {

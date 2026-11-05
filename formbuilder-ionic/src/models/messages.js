@@ -4,6 +4,23 @@
  * Validation copy ported from the legacy `config/messages.js`. The texts are
  * part of the builder's behaviour, so they are kept verbatim.
  */
+/* Save / export / import and form management copy. */
+export const FORM_MESSAGES = {
+    PROJECT_SAVED: 'Project saved!',
+    PROJECT_NOT_SAVED: 'Project error!',
+    PROJECT_SAVING: 'Saving…',
+    FORM_IMPORTED: 'Form import succeeded!',
+    FORM_FILE_INVALID: 'Form file is invalid',
+    FORM_IS_INVALID: 'Form is invalid',
+    FORM_CANNOT_BE_DELETED: 'Form cannot be deleted',
+    FORM_DELETE_CONFIRM: 'Delete this form and all its questions?',
+    DELETE_ALL_CONFIRM: 'Delete all questions?',
+    FORM_NAME_EMPTY: 'Form name cannot be empty',
+    FORM_NAME_INVALID: 'Form name is invalid',
+    FORM_NAME_EXISTS: 'Form name exists',
+    FORM_NAME_LENGTH: 'Form name is too long (50 characters max)'
+};
+
 export const VALIDATION_MESSAGES = {
     QUESTION_TEXT_EMPTY: 'This field cannot be empty',
     QUESTION_LENGTH_LIMIT_EXCEEDED: 'Characters limit exceeded',
