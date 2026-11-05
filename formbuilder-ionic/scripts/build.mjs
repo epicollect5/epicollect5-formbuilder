@@ -21,11 +21,33 @@ const alias = {
     '@': path.join(root, 'src')
 };
 
+/* `import view from '@/views/x.html?raw'` is a text import; Vite serves it
+   natively for the tests, esbuild needs this resolver. */
+const raw_text_plugin = {
+    name: 'raw-text',
+    setup(build) {
+        build.onResolve({ filter: /\?raw$/ }, function (args) {
+            const requested = args.path.replace(/\?raw$/, '');
+
+            if (requested.startsWith('@/')) {
+                return { path: path.join(root, 'src', requested.slice(2)), namespace: 'raw-text' };
+            }
+
+            return { path: path.resolve(args.resolveDir, requested), namespace: 'raw-text' };
+        });
+
+        build.onLoad({ filter: /.*/, namespace: 'raw-text' }, async function (args) {
+            return { contents: await fs.readFile(args.path, 'utf8'), loader: 'text' };
+        });
+    }
+};
+
 const esbuild_common = {
     bundle: true,
     format: 'iife',
     target: ['es2019'],
     alias: alias,
+    plugins: [raw_text_plugin],
     define: {
         'process.env.NODE_ENV': '"development"'
     },
