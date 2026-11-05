@@ -37,8 +37,8 @@ Ported today:
 - Form management: add (five-form cap and name prompt), rename (duplicate
   checked), delete the last child form and delete all questions.
 - Chrome feedback: `ion-toast` notifications at the top of the page, the
-  `ion-loading` busy overlay during save and import, `ion-tooltip` on the
-  question actions, and docs links instead of the info modals.
+  legacy `.wait-overlay` busy overlay during save and import, `ion-tooltip` on
+  the question actions, and docs links instead of the info modals.
 - Form tab validity icons, the `beforeunload` guard for unsaved changes, an
   `ion-alert` confirmation before deleting a question, and the project-level
   limits enforced when saving.
@@ -116,8 +116,8 @@ same counters.
   placeholder URLs until the docs pages are confirmed). The regex presets
   (`only_letters`, `only_digits`, `limit_length_20`) were dropped.
 - Toasts are `ion-toast` at the top of the page (`ui/toast.js`), the busy
-  overlay is `ion-loading` (`ui/loading.js`), and the question action buttons
-  use `ion-tooltip`.
+  overlay is the legacy `.wait-overlay` sheet (`ui/loading.js`), and the question
+  action buttons use `ion-tooltip`.
 - The question delete warning is an `ion-alert`. Still pending: `ion-modal` for
   the CSV import options and the form rename / delete panels (those stay inline
   for now).

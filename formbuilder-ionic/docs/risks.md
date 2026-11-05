@@ -480,15 +480,13 @@ the jump row shows a fallback answer (R-30, R-33).
 - **Status:** watch.
 - **Revisit when:** adding more notification points or long messages.
 
-### R-75 The busy overlay has no cursor change by default
-- **Where:** `src/ui/loading.js`, `ion-loading.fb-loading` in `_builder.scss`.
-- **Risk:** `ion-loading` covers the viewport with a backdrop (`showBackdrop`
-  default true, `backdropDismiss` default false) and a spinner, but it does not
-  set a wait cursor; the `cursor: progress` rule only helps where the host's
-  cursor is inherited. A thrown error between `showLoading` and `hideLoading`
-  leaves the overlay blocking the page.
-- **Impact:** the port looks stuck rather than busy on some platforms.
-- **Status:** watch (save hides in `finally`, import has a guarded hide).
+### R-75 The wait overlay can stay up if an action throws
+- **Where:** `src/ui/loading.js`, `.wait-overlay` in `_reset.scss`.
+- **Risk:** the overlay is the legacy full-viewport sheet with `cursor: wait`.
+  It is shown synchronously and hidden from the action's `setTimeout`, so an
+  exception between `showLoading` and `hideLoading` leaves it blocking the page.
+- **Impact:** the builder looks stuck rather than busy.
+- **Status:** watch (save hides in both branches, import guards its errors).
 - **Revisit when:** adding another long-running action.
 
 ### R-76 Help is no longer context-preserving

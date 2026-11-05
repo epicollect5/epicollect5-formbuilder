@@ -76,8 +76,8 @@ undo (ten states, throttled typing, data-only restore), save / export / import
 remap on import) and form management (rename with duplicate check, delete the
 last child form, the five-form cap, delete all questions).
 
-Notifications are `ion-toast` at the top of the page, the busy overlay is
-`ion-loading`, and the info help is an external docs link (placeholder URLs)
+Notifications are `ion-toast` at the top of the page, the busy overlay is the
+legacy `.wait-overlay` sheet (`ui/loading.js`), and the info help is an external docs link (placeholder URLs)
 rather than a modal; the regex presets were dropped.
 
 The tab strip flags invalid forms, question deletion asks with `ion-alert`, the
