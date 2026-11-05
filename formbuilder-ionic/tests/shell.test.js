@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCurrentInput, getCurrentInputs, getSession, setProject } from '@/services/session.js';
+import { UNDO_THROTTLE_MS } from '@/services/undo.js';
 import { renderApp } from '@/ui/shell.js';
 
 function build_markup() {
@@ -229,5 +230,76 @@ describe('possible answers', () => {
         expect(remove_button.disabled).toBe(true);
         remove_button.click();
         expect(getCurrentInput().possible_answers).toHaveLength(1);
+    });
+});
+
+describe('undo', () => {
+    beforeEach(() => {
+        build_markup();
+        setProject(project_definition());
+        renderApp();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('starts disabled and restores the question list after an add', () => {
+        const undo_button = document.getElementById('undo');
+
+        expect(undo_button.disabled).toBe(true);
+
+        [...document.querySelectorAll('#tools .builder__tool')]
+            .find((tool) => tool.getAttribute('data-type') === 'text')
+            .click();
+
+        expect(getCurrentInputs()).toHaveLength(3);
+        expect(undo_button.disabled).toBe(false);
+
+        undo_button.click();
+
+        expect(getCurrentInputs()).toHaveLength(2);
+        expect(document.querySelectorAll('#questions .builder__question')).toHaveLength(2);
+        expect(undo_button.disabled).toBe(true);
+    });
+
+    it('restores a deleted question', () => {
+        select_first_question();
+        document.querySelector('#properties .builder__icon-btn--danger').click();
+
+        expect(getCurrentInputs()).toHaveLength(1);
+
+        document.getElementById('undo').click();
+
+        expect(getCurrentInputs()).toHaveLength(2);
+        expect(getCurrentInputs()[0].question).toBe('Do you have children');
+    });
+
+    it('undoes an answer addition', () => {
+        select_first_question();
+        document.querySelector('#properties .builder__add-answer').click();
+
+        expect(getCurrentInput().possible_answers).toHaveLength(3);
+
+        document.getElementById('undo').click();
+        select_first_question();
+
+        expect(getCurrentInput().possible_answers).toHaveLength(2);
+    });
+
+    it('enables undo after typing once the throttled snapshot lands', () => {
+        vi.useFakeTimers();
+        select_first_question();
+
+        const field = document.querySelector('#properties .builder__question-field');
+
+        field.value = 'Changed';
+        field.dispatchEvent(new CustomEvent('ionInput', { detail: { value: 'Changed' } }));
+
+        expect(document.getElementById('undo').disabled).toBe(true);
+
+        vi.advanceTimersByTime(UNDO_THROTTLE_MS);
+
+        expect(document.getElementById('undo').disabled).toBe(false);
     });
 });
