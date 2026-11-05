@@ -34,7 +34,7 @@ session, so each slice can be compared side by side.
 | Branches and groups | `inputs/branch.js`, `inputs/group.js`, `ui-handlers/*branch*`, `ui-handlers/*group*` | `src/models/nesting.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 4, phase 2) |
 | Jumps | `actions/jumps.js`, `helpers/utils.getJumpAvailableDestinations` | `src/models/jumps.js`, `src/services/jumps.js`, `src/views/jump-row*.html`, `src/ui/shell.js` | ported (phase 3) |
 | Validation and question copy | `actions/validation.js`, `actions/input-duplicator.js`, `ui-handlers/event-handler-callbacks/*` | `src/models/validation.js`, `src/services/validation.js`, `src/services/question-actions.js`, `src/ui/shell.js` | ported (phase 4) |
-| Undo | `actions/undo.js` | — | pending |
+| Undo | `actions/undo.js` | `src/services/undo.js`, `src/ui/shell.js` | ported (phase 6) |
 | Save / export / import | `actions/save/**`, `helpers/import-form-validation.js` | `src/services/import-form-validation.js` (schema half only) | pending |
 | Readme editor | Summernote rich-text field | Tiptap 3 rich-text field | ported |
 | Modals, menus, tooltips | Bootstrap JS | Ionic components per slice | pending |
@@ -65,7 +65,7 @@ from project data such as forms, questions and answers.
 3. Possible answers (add, rename, remove, reorder; phase 5 added paging, CSV, ordering and delete all).
 4. Branches and groups (ported).
 5. Jumps, validation and question copy (ported).
-6. Undo.
+6. Undo (ported).
 7. Save, import, export.
 
 Each slice is compared against the legacy page with the same `project/project.json`,

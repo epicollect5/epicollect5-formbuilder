@@ -70,9 +70,10 @@ uniqueness and per-type gating), readme editor (Tiptap), possible answers
 import/export, 150-char cap and `<` / `>` sanitisation), branches and groups
 (enter/exit, nesting rules, breadcrumbs), jumps (rows, destinations, the always
 variant) and validation with question copy (row and tab badges, Validate
-button, duplicate with ref and answer-ref remap, duplicate answer-ref check).
+button, duplicate with ref and answer-ref remap, duplicate answer-ref check),
+and undo (ten states, throttled typing, data-only restore).
 
-Pending: undo, save/export/import, form rename/delete, and the remaining
+Pending: save/export/import, form rename/delete, and the remaining
 modals/menus/toasts (the CSV panel is inline for now). The full breakdown and
 the phase order are in `docs/ROADMAP.md`.
 

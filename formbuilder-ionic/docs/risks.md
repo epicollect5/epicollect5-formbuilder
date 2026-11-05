@@ -304,6 +304,65 @@ to regress; **fixed** — the concrete case found during the port is handled.
 - **Revisit when:** first manual export check, or when adding a download helper
   for other exports (phase 7).
 
+## Phase 6 — undo
+
+### R-60 A snapshot is data only
+- **Where:** `services/undo.js` `capture` / `undo`.
+- **Risk:** the project definition and the form index are restored; selection,
+  branch/group editing, the active property tab, answer pages and scroll are
+  not. Undo therefore drops the user out of the question they were editing.
+- **Impact:** the edit is undone correctly, but the user has to reselect the
+  question and the tab to continue.
+- **Status:** watch (legacy also lost the selection; keeping the form index is
+  already a deliberate improvement).
+- **Revisit when:** restoring selection is requested, or phase 7 needs the undo
+  state to carry more UI context.
+
+### R-61 Typing undone within the throttle window is skipped
+- **Where:** `pushUndoState({ throttle: true })` — the snapshot is taken when the
+  500ms timer fires.
+- **Risk:** pressing Undo before the timer fires clears the pending push, so the
+  keystrokes that had not been captured are removed along with the previous
+  action.
+- **Impact:** one undo can revert more than the user expects right after typing.
+- **Status:** open for the data window (matches legacy debounce); fixed for the
+  UI gate — the Undo button now refreshes when the deferred snapshot lands
+  (`on_change`), covered by a shell test.
+- **Revisit when:** undo UX is refined; capture on blur as well as on the timer.
+
+### R-62 Every push deep-clones the whole project
+- **Where:** `capture` — `JSON.parse(JSON.stringify(project_definition))`, up to
+  ten states.
+- **Risk:** a 300-question project is cloned on every action (typing coalesced to
+  one per pause), and undo itself clones again. Memory and CPU grow with project
+  size; nothing is measured yet.
+- **Impact:** lag on large projects, especially while typing across many edits.
+- **Status:** open, low priority.
+- **Revisit when:** large projects feel slow; measure before optimising.
+
+### R-63 The baseline follows project identity
+- **Where:** `ensureUndoBaseline` compares the `project_definition` object to the
+  recorded baseline; `undo` updates the marker after `setProject`.
+- **Risk:** any future flow that replaces the project object must go through
+  `setProject` (which triggers a reset) or history will mix two projects. Any
+  flow that mutates the current object *without* pushing leaves no undo entry.
+- **Impact:** undo restores data from another project, or a change cannot be
+  undone.
+- **Status:** watch — import / load in phase 7 must replace the object, not
+  patch it in place.
+- **Revisit when:** implementing save / import.
+
+### R-64 Dedupe hides no-op pushes
+- **Where:** `store` compares the serialized state with the top of the stack.
+- **Risk:** an action that changes nothing (opening the CSV panel, exporting,
+  a refused title toggle) records no undo step, which is intended. But a change
+  that a handler *fails* to apply also looks like a no-op, so a broken handler
+  will not be visible as a missing undo step.
+- **Impact:** none on its own; it removes a signal that could have exposed a
+  mutation bug.
+- **Status:** watch.
+- **Revisit when:** a mutation silently does nothing.
+
 ## Corrected earlier note
 
 The phase-5 report claimed validation does not cross-check that a jump's

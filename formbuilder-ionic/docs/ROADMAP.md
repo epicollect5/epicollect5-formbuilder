@@ -28,6 +28,8 @@ Ported today:
   Properties / Jumps tab badges and the Validate button.
 - Question copy: duplicate at the end of the active list with new refs and
   answer refs, remapped default and jumps that stay inside the copy.
+- Undo: ten snapshots of the project definition at the legacy push points, a
+  500ms throttled push for typing, and a data-only restore.
 - Parent validity badges that reflect branch / group child validation.
 
 ## Gap vs legacy
@@ -137,7 +139,7 @@ container and each dynamic collection's empty-state markup in the view.
 
 ## Phases
 
-Phases 1–5 are ported; 6–8 are pending. Risks carried by the port are tracked in
+Phases 1–6 are ported; 7–8 are pending. Risks carried by the port are tracked in
 `docs/risks.md`.
 
 1. **Properties panel, full.** Port each existing Bootstrap panel to the
@@ -154,8 +156,9 @@ Phases 1–5 are ported; 6–8 are pending. Risks carried by the port are tracke
    Validate button and the error badges; port copy / duplicate question.
 5. **Possible answers completion.** Default select, ordering, delete all,
    pagination, CSV import / export, limits and per-answer validation.
-6. **Undo.** Ten-state deep snapshot with the same push points. Must precede
-   save / export, which push state.
+6. **Undo.** Ported: ten-state deep snapshot with the same push points, a
+   throttled push for typing and a data-only restore (selection resets, the
+   form index is kept). Save / export can now push state.
 7. **Save, export, import and form management.** Save pipeline (cleaning, trim,
    `base64(gzip)` POST), export envelope, import flow on the existing Ajv
    validator, form rename / delete plus name modal and the 5-form cap, delete
