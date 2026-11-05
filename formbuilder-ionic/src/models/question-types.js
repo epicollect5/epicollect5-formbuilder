@@ -26,8 +26,16 @@ export const QUESTION_TYPES = [
     { type: 'group', label: 'Group', icon: 'list-outline' }
 ];
 
+/* A numeric/search question can switch its contract type; the row keeps the icon. */
+const TYPE_ALIASES = {
+    decimal: 'integer',
+    searchmultiple: 'searchsingle'
+};
+
 export function getQuestionType(type) {
+    const resolved_type = TYPE_ALIASES[type] || type;
+
     return QUESTION_TYPES.find(function (question_type) {
-        return question_type.type === type;
+        return question_type.type === resolved_type;
     }) || null;
 }

@@ -122,8 +122,14 @@ export function sanitizeJump(jump, input) {
     return normalizeJump(jump, input);
 }
 
-export function canAddJump(input) {
+export function canAddJump(input, inputs) {
     if (!input || !hasJumpsTab(input.type)) {
+        return false;
+    }
+
+    // A jump always has to skip at least one question, so the last question of
+    // a list has nowhere to go and cannot take a new jump.
+    if (getJumpAvailableDestinations(input, inputs).length === 0) {
         return false;
     }
 
@@ -135,11 +141,12 @@ export function canAddJump(input) {
         return possible_answers.length > 0 && jumps.length < possible_answers.length;
     }
 
-    return true;
+    // A single-answer question can only follow one unconditional jump.
+    return jumps.length === 0;
 }
 
-export function addJump(input) {
-    if (!canAddJump(input)) {
+export function addJump(input, inputs) {
+    if (!canAddJump(input, inputs)) {
         return null;
     }
 

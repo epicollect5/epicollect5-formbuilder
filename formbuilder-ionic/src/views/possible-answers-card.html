@@ -12,40 +12,11 @@
                 <div class="builder__answers-menu">
                     <button type="button"
                             class="builder__answers-more-btn"
-                            id="answers-actions-trigger"
+                            data-role="answers-actions-trigger"
                             aria-label="More possible answer actions">
                         <ion-icon name="chevron-down-outline"
                                   aria-hidden="true"></ion-icon>
                     </button>
-
-                    <ion-popover trigger="answers-actions-trigger"
-                                 trigger-action="click"
-                                 side="bottom"
-                                 alignment="end"
-                                 class="builder__answers-popover">
-                        <div class="builder__answers-dropdown">
-                            <button type="button"
-                                    class="builder__answers-dropdown-item"
-                                    data-action="import">Import CSV</button>
-                            <button type="button"
-                                    class="builder__answers-dropdown-item"
-                                    data-action="export">Export CSV</button>
-                            <div class="builder__answers-dropdown-divider"></div>
-                            <button type="button"
-                                    class="builder__answers-dropdown-item"
-                                    data-action="order-az">Order ascending</button>
-                            <button type="button"
-                                    class="builder__answers-dropdown-item"
-                                    data-action="order-za">Order descending</button>
-                            <button type="button"
-                                    class="builder__answers-dropdown-item"
-                                    data-action="shuffle">Shuffle</button>
-                            <div class="builder__answers-dropdown-divider"></div>
-                            <button type="button"
-                                    class="builder__answers-dropdown-item"
-                                    data-action="delete-all">Delete all answers</button>
-                        </div>
-                    </ion-popover>
                 </div>
             </div>
         </div>
@@ -84,56 +55,6 @@
                 <ion-icon name="chevron-forward-outline"
                           aria-hidden="true"></ion-icon>
             </button>
-        </div>
-
-        <div class="builder__answers-csv"
-             data-role="answers-csv"
-             hidden>
-            <p class="builder__answers-csv-hint">
-                Choose a CSV file, then the column that holds the answers.
-            </p>
-
-            <input type="file"
-                   class="builder__answers-csv-file"
-                   data-role="answers-csv-file"
-                   accept=".csv,text/csv"
-                   aria-label="CSV file">
-
-            <ion-checkbox class="builder__checkbox"
-                          label-placement="end"
-                          data-role="answers-csv-headers">
-                <span>First row contains headers</span>
-            </ion-checkbox>
-
-            <ion-select class="builder__field"
-                        label="Answer column"
-                        label-placement="stacked"
-                        fill="outline"
-                        interface="popover"
-                        data-role="answers-csv-column"></ion-select>
-
-            <ion-radio-group class="builder__radio-group"
-                             data-role="answers-csv-mode"
-                             value="replace">
-                <ion-radio value="replace"
-                           label-placement="end">
-                    <span>Replace answers</span>
-                </ion-radio>
-                <ion-radio value="append"
-                           label-placement="end">
-                    <span>Append answers</span>
-                </ion-radio>
-            </ion-radio-group>
-
-            <div class="builder__answers-csv-actions">
-                <button type="button"
-                        class="builder__answers-csv-button"
-                        data-action="csv-import"
-                        disabled>Import</button>
-                <button type="button"
-                        class="builder__answers-csv-button"
-                        data-action="csv-cancel">Cancel</button>
-            </div>
         </div>
     </ion-card-content>
 </ion-card>

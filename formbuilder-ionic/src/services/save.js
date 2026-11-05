@@ -161,6 +161,11 @@ export function getSaveUrl(project_definition, base_url) {
     return url.origin + '/' + segments.concat(['api', 'internal', 'formbuilder', project ? project.slug : '']).join('/');
 }
 
+/* Local development saves straight to the comparison server's project file. */
+export function getDevSaveUrl(base_url) {
+    return new URL('../project/project.json', base_url || document.baseURI).href;
+}
+
 export async function saveProject(project_definition, options) {
     const config = options || {};
 
@@ -178,6 +183,22 @@ export async function saveProject(project_definition, options) {
 
     if (!cleaned.all_jumps_valid) {
         throw new Error('Invalid jump on question: ' + cleaned.invalid_jumps_question);
+    }
+
+    if (config.dev === true) {
+        const fetcher = config.fetch_project || window.fetch.bind(window);
+        const response = await fetcher(config.dev_url || getDevSaveUrl(), {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(cleaned.project_definition)
+        });
+
+        if (!response.ok) {
+            throw new Error('The project could not be saved (HTTP ' + response.status + ')');
+        }
+
+        return cleaned.project_definition;
     }
 
     const payload = await encodeProject(cleaned.project_definition);

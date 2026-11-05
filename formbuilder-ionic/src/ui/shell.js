@@ -17,9 +17,9 @@ import {
     getDefaultDatetimeFormat,
     hasAdvancedTab,
     hasJumpsTab,
-    isBranchOrGroup
+    isBranchOrGroup,
+    isMediaType
 } from '@/models/input-properties.js';
-import { getContainerList } from '@/models/nesting.js';
 import { FORM_MESSAGES, VALIDATION_MESSAGES } from '@/models/messages.js';
 import { getQuestionType } from '@/models/question-types.js';
 import { countTitles, getAdvancedFields } from '@/services/properties.js';
@@ -77,11 +77,11 @@ import { prepareImportedForm } from '@/services/form-import.js';
 import { buildFormExport, getFormExportFilename, saveProject } from '@/services/save.js';
 import { areAllInputsValid, areFormInputsValid, getInputErrors, isInputValid } from '@/services/validation.js';
 import { canUndo, ensureUndoBaseline, pushUndoState, undo } from '@/services/undo.js';
-import { confirmAlert } from '@/ui/alert.js';
 import { button, createView, element, icon, parseView } from '@/ui/dom.js';
 import { hideLoading, showLoading } from '@/ui/loading.js';
+import { openModal } from '@/ui/modal.js';
 import { showToast } from '@/ui/toast.js';
-import { createDropdown, populateDropdown } from '@/ui/dropdown.js';
+import { createDropdown, createMenu, populateDropdown } from '@/ui/dropdown.js';
 import { printForm } from '@/ui/print.js';
 import { createReadmeEditor } from '@/ui/readme-editor.js';
 import { installAnswerSortable, installQuestionSortable, installToolDrag } from '@/ui/sortable.js';
@@ -91,9 +91,14 @@ import properties_card_view from '@/views/properties-card.html?raw';
 import possible_answers_view from '@/views/possible-answers-card.html?raw';
 import jump_row_view from '@/views/jump-row.html?raw';
 import jump_row_always_view from '@/views/jump-row-always.html?raw';
+import form_name_modal_body_view from '@/views/form-name-modal-body.html?raw';
+import csv_import_modal_body_view from '@/views/csv-import-modal-body.html?raw';
+import title_info_body_view from '@/views/title-info-body.html?raw';
+import delete_question_modal_body_view from '@/views/delete-question-modal-body.html?raw';
 
 const QUESTION_LIST = '#questions .builder__question-list';
 const TITLE_LIMIT = 3;
+const DOUBLE_ENTRY_VERIFICATION_TYPES = ['text', 'phone'];
 
 let handlers = {};
 const answer_pages = new Map();
@@ -101,7 +106,6 @@ const answer_notices = new Map();
 let active_readme_editor = null;
 let active_property_tab = 'basic';
 let saving = false;
-let pending_rename = false;
 let unsaved_changes = false;
 let tracked_project = null;
 let unload_guard_bound = false;
@@ -208,14 +212,12 @@ function bindChrome() {
         add_form.disabled = at_form_cap;
         add_form.title = at_form_cap ? 'A project can have at most ' + MAX_FORMS + ' forms' : 'Add form';
         add_form.onclick = function () {
-            if (!addForm()) {
+            if (at_form_cap) {
                 return;
             }
 
-            // The legacy flow asks for the new form's name straight away.
-            pending_rename = true;
-            recordChange();
-            renderApp(handlers);
+            // The legacy flow asks for the new form's name before adding it.
+            openFormNameModal(null);
         };
     }
 
@@ -230,6 +232,8 @@ function recordChange(options) {
     unsaved_changes = true;
     updateUndoButton();
     updateSaveButton();
+    // Validity changes while editing, not only on select or sort.
+    refreshFormTabs();
 }
 function updateUndoButton() {
     const undo_button = document.getElementById('undo');
@@ -262,7 +266,10 @@ function installUnloadGuard() {
 }
 
 function performUndo() {
+    showLoading();
+
     if (!undo()) {
+        hideLoading();
         updateUndoButton();
         return;
     }
@@ -274,6 +281,8 @@ function performUndo() {
 
     active_property_tab = 'basic';
     renderApp(handlers);
+    // Legacy drops the overlay ANIMATION_SLOW after re-rendering the state.
+    hideLoading(500);
 }
 
 function updateSaveButton() {
@@ -298,20 +307,22 @@ async function performSave() {
 
     saving = true;
     updateSaveButton();
-    showLoading(FORM_MESSAGES.PROJECT_SAVING);
+    showLoading();
 
     try {
-        await saveProject(project_definition);
+        await saveProject(project_definition, { dev: isDevMode() });
         unsaved_changes = false;
+        // Legacy keeps the overlay up for ANIMATION_SLOW after the response.
+        hideLoading(500);
         showToast(FORM_MESSAGES.PROJECT_SAVED, 'success');
     }
     catch (error) {
         const message = error && error.message ? error.message : '';
 
+        hideLoading();
         showToast(FORM_MESSAGES.PROJECT_NOT_SAVED + (message ? ' ' + message : ''), 'error');
     }
     finally {
-        hideLoading();
         saving = false;
         updateSaveButton();
     }
@@ -327,35 +338,34 @@ function installFormActions(card, form) {
     const deletable = !isEditing() && form_index > 0 && form_index === forms.length - 1;
     const delete_button = card.querySelector('.builder__form-action-btn--delete');
     const edit_button = card.querySelector('.builder__form-action-btn--edit');
-    const import_button = card.querySelector('[data-action="form-import"]');
+    const import_buttons = [...card.querySelectorAll('[data-action="form-import"]')];
 
     if (delete_button) {
         delete_button.disabled = !deletable;
         delete_button.title = deletable ? 'Delete form' : FORM_MESSAGES.FORM_CANNOT_BE_DELETED;
         delete_button.onclick = function () {
-            askFormConfirm(card, FORM_MESSAGES.FORM_DELETE_CONFIRM, function () {
-                if (deleteForm(form_index)) {
-                    recordChange();
-                    renderApp(handlers);
-                }
-            });
+            if (deleteForm(form_index)) {
+                recordChange();
+                renderApp(handlers);
+                showToast(FORM_MESSAGES.FORM_DELETED, 'warning');
+            }
         };
     }
 
     if (edit_button) {
         edit_button.onclick = function () {
-            openFormRename(card, form);
+            openFormNameModal(form);
         };
     }
 
-    if (import_button) {
+    import_buttons.forEach(function (import_button) {
         import_button.disabled = isEditing();
         import_button.title = isEditing() ? 'Return to the form to import' : 'Import form';
-    }
+    });
 
     const actions = {
         'form-rename': function () {
-            openFormRename(card, form);
+            openFormNameModal(form);
         },
         'form-export': function () {
             const payload = buildFormExport(getSession().project_definition, form_index);
@@ -374,93 +384,154 @@ function installFormActions(card, form) {
         },
         'form-import': function () {
             if (!isEditing()) {
-                importFormFile(card, form);
+                importFormFile(card);
             }
         },
         'form-delete-all': function () {
-            askFormConfirm(card, FORM_MESSAGES.DELETE_ALL_CONFIRM, function () {
-                if (removeAllInputs()) {
-                    recordChange();
-                    renderApp(handlers);
-                }
-            });
+            if (!removeAllInputs()) {
+                return;
+            }
+
+            recordChange();
+            renderApp(handlers);
+            // Legacy deletes behind the busy overlay and drops it after 1s.
+            showLoading();
+            hideLoading(1000);
         }
     };
 
     Object.keys(actions).forEach(function (action) {
-        const control = card.querySelector('[data-action="' + action + '"]');
-
-        if (control) {
-            control.onclick = function () {
+        card.querySelectorAll('[data-action="' + action + '"]').forEach(function (control) {
+            control.onclick = function (event) {
+                event.preventDefault();
                 actions[action]();
             };
-        }
+        });
+    });
+
+    const menu_trigger = card.querySelector('[data-role="form-actions-trigger"]');
+
+    if (menu_trigger) {
+        createMenu(menu_trigger, [
+            { label: 'Rename form', data_action: 'form-rename', action: actions['form-rename'] },
+            { label: 'Export form', data_action: 'form-export', action: actions['form-export'] },
+            { label: 'Print form', data_action: 'form-print', action: actions['form-print'] },
+            { label: 'Import form', data_action: 'form-import', action: actions['form-import'], disabled: isEditing() },
+            { divider: true },
+            { label: 'Delete all questions', data_action: 'form-delete-all', action: actions['form-delete-all'] }
+        ], function (item) {
+            item.action();
+        });
+    }
+}
+
+function isDevMode() {
+    return typeof __FORMBUILDER_DEV__ !== 'undefined' && __FORMBUILDER_DEV__ === true;
+}
+
+function openFormNameModal(form) {
+    const adding = !form;
+    const body = createView(form_name_modal_body_view);
+    const field = body.querySelector('input');
+    const error = body.querySelector('[data-role="form-name-error"]');
+
+    field.value = form ? form.name || '' : '';
+    field.addEventListener('input', function () {
+        error.hidden = true;
+    });
+
+    const modal = openModal({
+        title: 'Form name',
+        body: body,
+        buttons: [
+            { text: 'Close', class_name: 'btn-default' },
+            {
+                text: 'Save changes',
+                class_name: 'btn-primary',
+                on_click: function (close) {
+                    const forms = getForms(getSession().project_definition);
+                    const form_index = getSession().current_form_index;
+                    const validation_error = getFormNameError(forms, field.value, adding ? -1 : form_index);
+
+                    if (validation_error) {
+                        error.textContent = validation_error;
+                        error.removeAttribute('hidden');
+                        return;
+                    }
+
+                    if (adding) {
+                        if (!addForm(field.value)) {
+                            return;
+                        }
+                    }
+                    else {
+                        renameForm(form_index, field.value);
+                    }
+
+                    recordChange();
+                    close();
+                    renderApp(handlers);
+                }
+            }
+        ]
+    });
+
+    field.focus();
+
+    return modal;
+}
+
+function openTitleInfo() {
+    openModal({
+        title: 'What do you mean by title?',
+        body: createView(title_info_body_view),
+        buttons: [{ text: 'Close', class_name: 'btn-primary' }]
     });
 }
 
-function openFormRename(card, form) {
-    const panel = card.querySelector('[data-role="form-rename"]');
-    const confirm_panel = card.querySelector('[data-role="form-confirm"]');
-    const field = card.querySelector('[data-role="form-name-input"]');
-    const save_button = card.querySelector('[data-action="form-rename-save"]');
-    const cancel_button = card.querySelector('[data-action="form-rename-cancel"]');
+function getTotalEntries() {
+    const legacy_counter = document.querySelector('.total-entries');
+    const data_value = legacy_counter ? legacy_counter.getAttribute('data-total-entries') : null;
 
-    if (!panel || !field) {
-        return;
+    if (data_value !== null && data_value !== undefined) {
+        return parseInt(data_value, 10) || 0;
     }
 
-    if (confirm_panel) {
-        confirm_panel.hidden = true;
-    }
+    const project = getProject(getSession().project_definition);
 
-    panel.hidden = false;
-    field.value = form.name || '';
-
-    save_button.onclick = function () {
-        const form_index = getSession().current_form_index;
-        const error = getFormNameError(getForms(getSession().project_definition), field.value, form_index);
-
-        if (error) {
-            showToast(error, 'error');
-            return;
-        }
-
-        renameForm(form_index, field.value);
-        recordChange();
-        renderApp(handlers);
-    };
-
-    cancel_button.onclick = function () {
-        panel.hidden = true;
-    };
+    return Number(project && (project.total_entries || project.entries) || 0);
 }
 
-function askFormConfirm(card, message, on_confirm) {
-    const panel = card.querySelector('[data-role="form-confirm"]');
-    const rename_panel = card.querySelector('[data-role="form-rename"]');
-    const message_node = card.querySelector('[data-role="form-confirm-message"]');
-    const yes = card.querySelector('[data-action="form-confirm-yes"]');
-    const no = card.querySelector('[data-action="form-confirm-no"]');
-
-    if (!panel) {
+function deleteQuestion(input) {
+    if (!removeInput(input.ref)) {
         return;
     }
 
-    if (rename_panel) {
-        rename_panel.hidden = true;
+    recordChange();
+    renderApp(handlers);
+    showToast(FORM_MESSAGES.INPUT_DELETED, 'warning');
+}
+
+function openDeleteQuestion(input) {
+    // With entries on the server, legacy warns before dropping their data.
+    if (getTotalEntries() === 0) {
+        deleteQuestion(input);
+        return;
     }
 
-    message_node.textContent = message;
-    panel.hidden = false;
-
-    yes.onclick = function () {
-        panel.hidden = true;
-        on_confirm();
-    };
-
-    no.onclick = function () {
-        panel.hidden = true;
-    };
+    openModal({
+        title: 'Warning',
+        class_name: 'builder__delete-question-modal',
+        body: createView(delete_question_modal_body_view),
+        buttons: [{
+            text: 'Confirm',
+            class_name: 'btn-danger',
+            on_click: function (close) {
+                close();
+                deleteQuestion(input);
+            }
+        }]
+    });
 }
 
 function importFormFile(card, form) {
@@ -485,7 +556,7 @@ function importFormFile(card, form) {
 
         const reader = new FileReader();
 
-        showLoading(FORM_MESSAGES.FORM_IMPORTING);
+        showLoading();
 
         reader.onload = function () {
             let result;
@@ -498,9 +569,8 @@ function importFormFile(card, form) {
                 result = { ok: false, error: FORM_MESSAGES.FORM_FILE_INVALID };
             }
 
-            hideLoading();
-
             if (!result.ok) {
+                hideLoading();
                 showToast(result.error, 'error');
                 return;
             }
@@ -509,6 +579,8 @@ function importFormFile(card, form) {
             getSession().current_input_ref = null;
             recordChange();
             renderApp(handlers);
+            // Legacy hides the overlay ANIMATION_SLOW after the import.
+            hideLoading(500);
             showToast(FORM_MESSAGES.FORM_IMPORTED, 'success');
         };
 
@@ -609,7 +681,7 @@ function buildFormTabLabel(form) {
     if (!areFormInputsValid(form)) {
         label.append(element('ion-icon', {
             class: 'builder__form-tab-state',
-            name: 'warning-outline',
+            name: 'warning',
             'aria-label': 'Form has validation errors'
         }));
     }
@@ -681,8 +753,23 @@ function renderQuestions() {
     title.setAttribute('title', [form_name].concat(trail.map(getQuestionLabel)).join(' > '));
 
     if (active_container) {
-        bindExitEditing(card, trail.length > 1);
         empty.textContent = 'No questions in this ' + active_container.type + ' yet.';
+    }
+
+    const branch_active = active_container && active_container.type === 'branch';
+    // Legacy warns on entering an empty branch, but only for a form with inputs.
+    const show_title_warning = countTitles(inputs) === 0 && (branch_active || (!active_container && inputs.length > 0));
+
+    if (show_title_warning) {
+        const warning = card.querySelector('[data-role="title-warning"]');
+
+        if (warning) {
+            warning.hidden = false;
+            warning.querySelector('[data-role="title-warning-text"]').textContent = branch_active ?
+                'No title set for this branch yet' :
+                'No title set for this form yet';
+            warning.querySelector('[data-role="title-info"]').onclick = openTitleInfo;
+        }
     }
 
     if (inputs.length) {
@@ -697,33 +784,13 @@ function renderQuestions() {
 
     installFormActions(card, form);
 
-    if (pending_rename && form) {
-        pending_rename = false;
-        openFormRename(card, form);
-    }
-
     installQuestionSortable(QUESTION_LIST, syncAfterDrop);
-}
-
-function bindExitEditing(card, nested) {
-    const exit_button = card.querySelector('.builder__questions-exit');
-    const label = exit_button.querySelector('.builder__questions-exit-label');
-
-    exit_button.removeAttribute('hidden');
-    label.textContent = nested ? 'Back to branch' : 'Back to form';
-
-    exit_button.addEventListener('click', function () {
-        exitEditing();
-        active_property_tab = 'basic';
-        renderApp(handlers);
-    });
 }
 
 /* ion-item with `button` supplies the button role and keyboard activation, so
    the row only needs the selection click. */
 function buildQuestionRow(input, is_current) {
     const question_type = getQuestionType(input.type);
-    const container_input = isBranchOrGroup(input.type);
     const row = element('ion-item', {
         class: 'builder__question',
         'data-input-ref': input.ref,
@@ -737,21 +804,7 @@ function buildQuestionRow(input, is_current) {
         buildQuestionTail(input)
     ]);
 
-    if (container_input) {
-        // The row holds its own "edit" button, and an ion-item in button mode
-        // cannot contain another button, so the row keeps the button role.
-        row.setAttribute('role', 'button');
-        row.setAttribute('tabindex', '0');
-        row.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                chooseInput(input.ref);
-            }
-        });
-    }
-    else {
-        row.button = true;
-    }
+    row.button = true;
 
     row.addEventListener('click', function () {
         chooseInput(input.ref);
@@ -761,42 +814,7 @@ function buildQuestionRow(input, is_current) {
 }
 
 function buildQuestionTail(input) {
-    const status = buildQuestionStatus(input);
-
-    if (isBranchOrGroup(input.type)) {
-        status.append(buildChildCount(input));
-        status.append(buildEnterButton(input));
-    }
-
-    return status;
-}
-
-function buildChildCount(input) {
-    const count = getContainerList(input).length;
-
-    return element('span', {
-        class: 'builder__question-count',
-        title: count + (count === 1 ? ' question' : ' questions')
-    }, [String(count)]);
-}
-
-function buildEnterButton(input) {
-    const label = input.type === 'branch' ? 'Edit branch' : 'Edit group';
-    const open = button({
-        type: 'button',
-        class: 'builder__question-enter',
-        'aria-label': label + ': ' + getQuestionLabel(input),
-        title: label
-    }, [icon('chevron-forward-outline')]);
-
-    open.addEventListener('click', function (event) {
-        event.stopPropagation();
-        enterInput(input.ref);
-        active_property_tab = 'basic';
-        renderApp(handlers);
-    });
-
-    return open;
+    return buildQuestionStatus(input);
 }
 
 function buildQuestionStatus(input) {
@@ -852,6 +870,7 @@ function syncAfterDrop() {
     setTimeout(function () {
         renderQuestions();
         renderProperties();
+        runBackgroundValidation();
     }, 0);
 }
 
@@ -860,6 +879,7 @@ function chooseInput(input_ref) {
     active_property_tab = 'basic';
     updateSelection();
     renderProperties();
+    runBackgroundValidation();
 }
 
 /* Only the selected row changes, so the list and its scroll position stay put. */
@@ -868,6 +888,17 @@ function updateSelection() {
 
     document.querySelectorAll('#questions .builder__question').forEach(function (row) {
         row.setAttribute('aria-current', row.getAttribute('data-input-ref') === current_ref ? 'true' : 'false');
+    });
+}
+
+/* Legacy disables Jumps for anything edited inside a group. */
+function canUseJumpsTab(input) {
+    return hasJumpsTab(input.type) && !isEditingInsideGroup();
+}
+
+function isEditingInsideGroup() {
+    return getEditingTrail().some(function (node) {
+        return node.type === 'group';
     });
 }
 
@@ -888,6 +919,21 @@ function renderProperties() {
     const tab_strip = card.querySelector('.builder__property-tabs');
     const body = card.querySelector('.builder__properties-body');
     const empty = card.querySelector('[data-role="properties-empty"]');
+    const editing_bar = card.querySelector('[data-role="editing-bar"]');
+
+    if (editing_bar) {
+        if (isEditing()) {
+            editing_bar.hidden = false;
+            editing_bar.querySelector('[data-role="exit-editing"]').onclick = function () {
+                exitEditing();
+                active_property_tab = 'basic';
+                renderApp(handlers);
+            };
+        }
+        else {
+            editing_bar.remove();
+        }
+    }
 
     if (!input) {
         active_property_tab = 'basic';
@@ -910,7 +956,7 @@ function renderProperties() {
         active_property_tab = 'basic';
     }
 
-    if (active_property_tab === 'jumps' && !hasJumpsTab(input.type)) {
+    if (active_property_tab === 'jumps' && !canUseJumpsTab(input)) {
         active_property_tab = 'basic';
     }
 
@@ -952,36 +998,51 @@ function bindPropertyActions(card, input) {
     copy_button.disabled = !isInputValid(input, getCurrentInputs());
 
     copy_button.addEventListener('click', function () {
-        if (duplicateInput(input)) {
-            recordChange();
-            renderQuestions();
-            renderProperties();
+        // Legacy covers the copy and drops the overlay ANIMATION_SLOW later.
+        showLoading();
+
+        if (!duplicateInput(input)) {
+            hideLoading();
+            return;
         }
+
+        recordChange();
+        renderQuestions();
+        renderProperties();
+        hideLoading(500);
     });
 
     validate_button.addEventListener('click', function () {
-        updatePropertyError(card, input, true);
-        copy_button.disabled = !isInputValid(input, getCurrentInputs());
-        updateCurrentQuestionStatus();
+        performInputValidation();
     });
 
     delete_button.addEventListener('click', function () {
-        confirmAlert({
-            header: 'Warning',
-            message: FORM_MESSAGES.INPUT_DELETE_CONFIRM + ' ' + FORM_MESSAGES.INPUT_DELETE_WARNING,
-            confirm_text: 'Confirm',
-            on_confirm: function () {
-                removeInput(input.ref);
-                recordChange();
-                renderQuestions();
-                renderProperties();
-            }
-        });
+        openDeleteQuestion(input);
     });
 }
 
-/* Shows the first error under the header; `announce_valid` confirms a pass. */
-function updatePropertyError(card, input, announce_valid) {
+/* Legacy validates the selected question and toasts the result. */
+function performInputValidation() {
+    if (!getCurrentInput()) {
+        return;
+    }
+
+    showLoading();
+
+    // The overlay makes the pass, and the icons it refreshes, visible.
+    setTimeout(function () {
+        hideLoading();
+        renderApp(handlers);
+
+        const input = getCurrentInput();
+        const valid = input ? isInputValid(input, getCurrentInputs()) : false;
+
+        showToast(valid ? VALIDATION_MESSAGES.INPUT_VALID : VALIDATION_MESSAGES.INPUT_NOT_VALID, valid ? 'success' : 'error');
+    }, 600);
+}
+
+/* Shows the first error for the selected question, under the question field. */
+function updatePropertyError(card, input) {
     const message = card.querySelector('[data-role="properties-error"]');
 
     if (!message) {
@@ -989,17 +1050,14 @@ function updatePropertyError(card, input, announce_valid) {
     }
 
     const errors = getInputErrors(input, getCurrentInputs());
-    const text = errors.length ? errors[0].message : (announce_valid ? VALIDATION_MESSAGES.INPUT_VALID : '');
 
-    if (!text) {
+    if (!errors.length) {
         message.textContent = '';
-        message.classList.remove('is-valid');
         message.setAttribute('hidden', 'hidden');
         return;
     }
 
-    message.textContent = text;
-    message.classList.toggle('is-valid', errors.length === 0);
+    message.textContent = errors[0].message;
     message.removeAttribute('hidden');
 }
 
@@ -1013,7 +1071,7 @@ function bindPropertyTabs(tab_strip, input) {
         advanced_tab.setAttribute('disabled', 'disabled');
     }
 
-    if (!hasJumpsTab(input.type)) {
+    if (!canUseJumpsTab(input)) {
         jumps_tab.setAttribute('disabled', 'disabled');
     }
 
@@ -1028,7 +1086,7 @@ function bindPropertyTabs(tab_strip, input) {
             return;
         }
 
-        if (value === 'jumps' && !hasJumpsTab(input.type)) {
+        if (value === 'jumps' && !canUseJumpsTab(input)) {
             return;
         }
 
@@ -1089,6 +1147,76 @@ function refreshCurrentProperties() {
     }
 }
 
+/*
+ * Background pass: reordering changes jump validity and selecting another
+ * question must show the result of edits made since the last render. It
+ * updates the icons and gates in place and never toasts, so only the explicit
+ * Validate action reports a result.
+ */
+function runBackgroundValidation() {
+    refreshQuestionRows();
+    refreshFormTabs();
+    updateSaveButton();
+    refreshCurrentProperties();
+}
+
+function refreshQuestionRows() {
+    const inputs = getCurrentInputs();
+
+    document.querySelectorAll(QUESTION_LIST + ' > .builder__question').forEach(function (row) {
+        const input = inputs.find(function (candidate) {
+            return candidate.ref === row.getAttribute('data-input-ref');
+        });
+
+        if (!input) {
+            return;
+        }
+
+        const valid = isInputRowValid(input);
+
+        row.setAttribute('data-valid', valid ? 'true' : 'false');
+
+        const status = row.querySelector('.builder__question-status');
+        const replacement = buildQuestionTail(input);
+
+        if (status) {
+            status.replaceWith(replacement);
+        }
+        else {
+            row.append(replacement);
+        }
+    });
+}
+
+/* The form tabs live in the page shell and outlive question re-renders. */
+function refreshFormTabs() {
+    const forms = getForms(getSession().project_definition);
+    const tabs = document.querySelectorAll('#form-tabs .builder__form-tab');
+
+    tabs.forEach(function (tab, index) {
+        const form = forms[index];
+        const label = tab.querySelector('ion-label');
+
+        if (!form || !label) {
+            return;
+        }
+
+        const invalid = !areFormInputsValid(form);
+        const warning = label.querySelector('.builder__form-tab-state');
+
+        if (invalid && !warning) {
+            label.append(element('ion-icon', {
+                class: 'builder__form-tab-state',
+                name: 'warning',
+                'aria-label': 'Form has validation errors'
+            }));
+        }
+        else if (!invalid && warning) {
+            warning.remove();
+        }
+    });
+}
+
 function setActivePropertyContent(value) {
     document.querySelectorAll('#properties .builder__property-content').forEach(function (content) {
         const active = content.id === 'property-content-' + value;
@@ -1108,14 +1236,18 @@ function setActivePropertyContent(value) {
 
 function buildBasicPanel(input, pane) {
     const panel = pane.querySelector('.builder__properties-panel');
+    const question_group = panel.querySelector('.builder__question-field-group');
     const question_field = panel.querySelector('.builder__question-field');
+    const question_label = panel.querySelector('[data-role="question-label"]');
     const required_toggle = panel.querySelector('[data-field="required"]');
-    const title_toggle = panel.querySelector('[data-field="title"]');
+    const title_row = panel.querySelector('[data-field="title"]');
+    const edit_container = panel.querySelector('[data-role="edit-container"]');
 
     if (input.type === 'readme') {
-        question_field.remove();
+        question_group.remove();
         required_toggle.remove();
-        title_toggle.remove();
+        title_row.remove();
+        edit_container.remove();
 
         active_readme_editor = createReadmeEditor(input.question || '', function (question, plain_text) {
             if (getSession().current_input_ref !== input.ref) {
@@ -1131,6 +1263,7 @@ function buildBasicPanel(input, pane) {
         return;
     }
 
+    question_label.textContent = getQuestionLabelText(input.type);
     bindQuestionField(question_field, input);
 
     if (allowsRequired(input.type)) {
@@ -1143,10 +1276,25 @@ function buildBasicPanel(input, pane) {
     }
 
     if (allowsTitle(input.type)) {
-        bindTitleToggle(title_toggle, input);
+        bindTitleToggle(title_row, input);
+        title_row.querySelector('[data-role="title-info"]').onclick = openTitleInfo;
     }
     else {
-        title_toggle.remove();
+        title_row.remove();
+    }
+
+    if (isBranchOrGroup(input.type)) {
+        edit_container.hidden = false;
+        edit_container.textContent = input.type === 'branch' ? 'Edit Branch' : 'Edit Group';
+        edit_container.disabled = String(input.question || '').trim() === '';
+        edit_container.onclick = function () {
+            enterInput(input.ref);
+            active_property_tab = 'basic';
+            renderApp(handlers);
+        };
+    }
+    else {
+        edit_container.remove();
     }
 
     if (isMultipleAnswerType(input.type)) {
@@ -1197,12 +1345,26 @@ function buildAdvancedPanel(input, pane) {
     }
 
     if (fields.indexOf('verify') !== -1) {
+        const verify_label = panel.querySelector('[data-field="verify"] [data-role="verify-label"]');
+
+        if (verify_label) {
+            verify_label.textContent = DOUBLE_ENTRY_VERIFICATION_TYPES.indexOf(input.type) !== -1 ?
+                'Require double entry verification' :
+                'Require double entry';
+        }
+
         bindCheckboxToggle(panel.querySelector('[data-field="verify"]'), input.verify === true, function (checked) {
             updateCurrentInput({ verify: checked });
         });
     }
 
     if (fields.indexOf('datetime_format') !== -1) {
+        // Imported date/time questions can arrive with a null format; legacy
+        // checks its default radio, so the definition must carry it too.
+        if (!input.datetime_format) {
+            updateCurrentInput({ datetime_format: getDefaultDatetimeFormat(input.type) });
+        }
+
         bindDatetimeFormatControl(panel.querySelector('[data-field="datetime_format"]'), input);
     }
 
@@ -1232,9 +1394,13 @@ function buildJumpsPanel(input, pane) {
     const destinations = getJumpAvailableDestinations(input, getCurrentInputs());
 
     list.replaceChildren();
-    add_button.disabled = !canAddJump(input);
+
+    const can_add = canAddJump(input, getCurrentInputs());
+
+    add_button.disabled = !can_add;
+    add_button.title = can_add ? 'Add jump' : 'No jump destinations available';
     add_button.addEventListener('click', function () {
-        if (addJump(input)) {
+        if (addJump(input, getCurrentInputs())) {
             recordChange();
             renderProperties();
             renderQuestions();
@@ -1422,34 +1588,56 @@ function populateSelect(select, options, value, on_change) {
 }
 
 function getQuestionLabelText(type) {
-    if (type === 'branch') {
+    if (isBranchOrGroup(type)) {
         return 'Header';
     }
 
-    if (type === 'group') {
-        return 'Header';
+    // Legacy labels the media text field differently from the other questions.
+    if (isMediaType(type)) {
+        return 'Question Text';
     }
 
     return 'Question';
 }
 
-function bindQuestionField(field, input) {
-    const label = getQuestionLabelText(input.type);
+/* Legacy disables Edit while a branch/group header is empty. */
+function updateEditButtonState(input) {
+    if (!isBranchOrGroup(input.type)) {
+        return;
+    }
 
-    field.label = label;
-    field.placeholder = '';
-    field.setAttribute('placeholder', '');
+    const edit_container = document.querySelector('#properties [data-role="edit-container"]');
+
+    if (edit_container) {
+        edit_container.disabled = String(input.question || '').trim() === '';
+    }
+}function bindQuestionField(field, input) {
+    const label = getQuestionLabelText(input.type);
+    const placeholder = isBranchOrGroup(input.type) ? 'Type header here...' : 'Type question here...';
+
+    field.placeholder = placeholder;
+    field.setAttribute('placeholder', placeholder);
     field.setAttribute('aria-label', label);
     field.value = input.question || '';
+
+    // Legacy media text fields have no maxlength; every other question does.
+    if (isMediaType(input.type)) {
+        field.removeAttribute('maxlength');
+    }
+    else {
+        field.setAttribute('maxlength', '255');
+    }
 
     field.addEventListener('ionInput', function (event) {
         const question = sanitizeQuestion(getCurrentInput(), event.detail.value || '');
 
         if (field.value !== question) {
+
             field.value = question;
         }
 
         updateCurrentInput({ question: question });
+        updateEditButtonState(input);
         updateQuestionText(question);
         updateCurrentQuestionStatus();
         refreshCurrentProperties();
@@ -1460,8 +1648,10 @@ function bindQuestionField(field, input) {
 function sanitizeQuestion(input, value) {
     const text = value === undefined || value === null ? '' : String(value);
     const limit = input && input.type === 'readme' ? 1000 : 255;
+    // Legacy stores angle brackets as look-alike Unicode instead of markup.
+    const sanitized = input && input.type === 'readme' ? text : text.replace(/>/g, '\ufe65').replace(/</g, '\ufe64');
 
-    return text.slice(0, limit);
+    return sanitized.slice(0, limit);
 }
 
 function getQuestionLabel(input) {
@@ -1493,12 +1683,13 @@ function bindCheckboxToggle(toggle, checked, on_change, options) {
     });
 }
 
-function bindTitleToggle(toggle, input) {
+function bindTitleToggle(row, input) {
+    const toggle = row.querySelector('.builder__title-toggle');
     const inputs = getCurrentInputs();
     const other_titles = countTitles(inputs, input.ref);
     const checked = input.is_title === true;
     const limit_reached = !checked && other_titles >= TITLE_LIMIT;
-    const label = toggle.querySelector('.builder__title-label');
+    const label = row.querySelector('.builder__title-label');
 
     label.textContent = limit_reached ? 'Limit of ' + TITLE_LIMIT + ' titles reached' : 'Use answer as title';
 
@@ -1679,22 +1870,28 @@ function bindUniquenessControl(control, input) {
     const project = getSession().project_definition && getSession().project_definition.data && getSession().project_definition.data.project;
     const forms = project && project.forms ? project.forms : [];
     const form_index = form ? forms.indexOf(form) : 0;
-    const container = getEditingContainer();
-    const is_editing_branch = !!(container && container.type === 'branch');
+    const branch_container = getEditingTrail().find(function (node) {
+        return node.type === 'branch';
+    });
+    const is_editing_branch = !!branch_container;
+    const branch_header = branch_container && branch_container.question ? branch_container.question : 'branch';
 
     let options = [{ value: 'none', label: 'No uniqueness' }];
 
     if (is_editing_branch) {
         // Legacy branch uniqueness: contract value is 'form', label is branch-scoped.
-        options.push({ value: 'form', label: 'Unique within this branch' });
+        options.push({
+            value: 'form',
+            label: 'Make answer unique to all ' + branch_header + ' entries of a ' + form_name + ' entry'
+        });
     }
     else if (form_index > 0) {
         const parent_name = forms[form_index - 1] ? forms[form_index - 1].name : 'parent form';
-        options.push({ value: 'form', label: 'Unique to all ' + form_name + ' entries' });
-        options.push({ value: 'hierarchy', label: 'Unique to all ' + parent_name + ' entries' });
+        options.push({ value: 'form', label: 'All ' + form_name + ' entries' });
+        options.push({ value: 'hierarchy', label: 'Only ' + form_name + ' children of a ' + parent_name + ' parent entry' });
     }
     else {
-        options.push({ value: 'form', label: 'Unique to all ' + form_name + ' entries' });
+        options.push({ value: 'form', label: 'Make answer unique to all ' + form_name + ' entries' });
     }
 
     const value = options.some(function (option) { return option.value === (input.uniqueness || 'none'); }) ?
@@ -1854,153 +2051,189 @@ function downloadFile(filename, contents, type) {
 }
 
 function installAnswersMenu(card, input) {
-    const actions = {
-        import: function () {
-            openAnswersCsv(card, input);
-        },
-        export: function () {
+    const trigger = card.querySelector('[data-role="answers-actions-trigger"]');
+
+    if (!trigger) {
+        return;
+    }
+
+    createMenu(trigger, [
+        { label: 'Import CSV', data_action: 'import', action: function () { pickAnswersCsv(input); } },
+        { label: 'Export CSV', data_action: 'export', action: function () {
             downloadFile(getCsvFilename(input), exportCsv(input), 'text/csv;charset=utf-8;');
-        },
-        'order-az': function () {
-            if (orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.AZ)) {
-                setAnswersPage(input, 1);
-                renderProperties();
-                updateCurrentQuestionStatus();
-            }
-        },
-        'order-za': function () {
-            if (orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.ZA)) {
-                setAnswersPage(input, 1);
-                renderProperties();
-                updateCurrentQuestionStatus();
-            }
-        },
-        shuffle: function () {
-            if (orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.SHUFFLE)) {
-                setAnswersPage(input, 1);
-                renderProperties();
-                updateCurrentQuestionStatus();
-            }
-        },
-        'delete-all': function () {
+        } },
+        { divider: true },
+        { label: 'Order ascending', data_action: 'order-az', action: function () { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.AZ); } },
+        { label: 'Order descending', data_action: 'order-za', action: function () { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.ZA); } },
+        { label: 'Shuffle', data_action: 'shuffle', action: function () { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.SHUFFLE); } },
+        { divider: true },
+        { label: 'Delete all answers', data_action: 'delete-all', action: function () {
+            showLoading();
+
             if (deleteAllAnswers(input)) {
                 setAnswersPage(input, 1);
+                recordChange();
                 renderProperties();
                 updateCurrentQuestionStatus();
             }
-        }
-    };
 
-    Object.keys(actions).forEach(function (action) {
-        const control = card.querySelector('[data-action="' + action + '"]');
-
-        if (control) {
-            control.addEventListener('click', function () {
-                actions[action]();
-                // Opening the panel or exporting leaves the state unchanged and
-                // is skipped by the dedupe in the undo service.
-                recordChange();
-            });
-        }
+            // Legacy keeps the overlay up for ANIMATION_SUPER_SLOW.
+            hideLoading(1000);
+        } }
+    ], function (item) {
+        item.action();
     });
 }
 
-/* The CSV panel is inline: it stays inside the answers card it imports into. */
-function openAnswersCsv(card, input) {
-    const panel = card.querySelector('[data-role="answers-csv"]');
-    const file_field = panel.querySelector('[data-role="answers-csv-file"]');
-    const headers_toggle = panel.querySelector('[data-role="answers-csv-headers"]');
-    const column_select = panel.querySelector('[data-role="answers-csv-column"]');
-    const mode_group = panel.querySelector('[data-role="answers-csv-mode"]');
-    const import_button = panel.querySelector('[data-action="csv-import"]');
-    const cancel_button = panel.querySelector('[data-action="csv-cancel"]');
-    let parsed = null;
+function orderAnswers(input, order) {
+    // Legacy reorders behind the overlay and hides it after ANIMATION_SUPER_SLOW.
+    showLoading();
 
-    panel.removeAttribute('hidden');
-    file_field.value = '';
-    headers_toggle.checked = true;
-    mode_group.value = 'replace';
-    column_select.replaceChildren();
-    column_select.value = undefined;
-    import_button.disabled = true;
-    showAnswersNote(card, '', false);
-
-    function fill_columns() {
-        const columns = parsed ? getCsvColumns(parsed, headers_toggle.checked === true) : [];
-
-        column_select.replaceChildren();
-        columns.forEach(function (column) {
-            const option = element('ion-select-option', { value: column.value });
-
-            option.textContent = column.label;
-            column_select.append(option);
-        });
-
-        column_select.value = columns.length ? columns[0].value : undefined;
-        import_button.disabled = columns.length === 0;
+    if (!orderPossibleAnswers(input, order)) {
+        hideLoading();
+        return;
     }
 
-    headers_toggle.addEventListener('ionChange', fill_columns);
+    setAnswersPage(input, 1);
+    recordChange();
+    renderProperties();
+    updateCurrentQuestionStatus();
+    hideLoading(1000);
+}
 
-    file_field.addEventListener('change', function () {
-        const file = file_field.files && file_field.files[0];
+function pickAnswersCsv(input) {
+    const field = document.createElement('input');
+
+    field.type = 'file';
+    field.accept = '.csv,text/csv';
+    field.hidden = true;
+
+    field.addEventListener('change', function () {
+        const file = field.files && field.files[0];
 
         if (!file) {
+            field.remove();
             return;
         }
 
         if (!/\.csv$/i.test(file.name)) {
-            parsed = null;
-            import_button.disabled = true;
-            showAnswersNote(card, VALIDATION_MESSAGES.CSV_FILE_INVALID, true);
+            field.remove();
+            showToast(VALIDATION_MESSAGES.CSV_FILE_INVALID, 'error');
             return;
         }
 
         const reader = new FileReader();
 
         reader.onload = function () {
-            parsed = parseCsv(reader.result);
+            const parsed = parseCsv(reader.result);
+
+            field.remove();
 
             if (!parsed.rows.length) {
-                parsed = null;
-                import_button.disabled = true;
-                showAnswersNote(card, VALIDATION_MESSAGES.CSV_FILE_INVALID, true);
+                showToast(VALIDATION_MESSAGES.CSV_FILE_INVALID, 'error');
                 return;
             }
 
-            showAnswersNote(card, '', false);
-            fill_columns();
+            openAnswersCsvModal(input, parsed);
         };
+
+        reader.onerror = function () {
+            field.remove();
+            showToast(VALIDATION_MESSAGES.CSV_FILE_INVALID, 'error');
+        };
+
         reader.readAsText(file);
     });
 
-    import_button.addEventListener('click', function () {
-        if (!parsed) {
-            showAnswersNote(card, VALIDATION_MESSAGES.CSV_FILE_INVALID, true);
-            return;
+    document.body.append(field);
+    field.click();
+}
+
+function openAnswersCsvModal(input, parsed) {
+    const body = createView(csv_import_modal_body_view);
+    const headers = body.querySelector('[data-role="csv-headers"]');
+    const mode = body.querySelector('[data-role="csv-mode"]');
+    const column_placeholder = body.querySelector('[data-role="csv-column"]');
+    let selected_column = '';
+    let import_button = null;
+
+    headers.checked = true;
+    mode.value = 'replace';
+
+    const column_dropdown = createDropdown({
+        class_name: 'builder__csv-column-select',
+        aria_label: 'Column to import',
+        placeholder: 'Pick column',
+        options: [{ value: '', label: 'Pick column' }].concat(getCsvColumns(parsed, true)),
+        value: '',
+        on_change: function (detail) {
+            selected_column = detail.value;
+
+            if (import_button) {
+                import_button.disabled = !selected_column;
+            }
         }
-
-        const result = importAnswers(input, parsed, {
-            column_index: column_select.value,
-            has_headers: headers_toggle.checked === true,
-            replace: mode_group.value !== 'append'
-        });
-
-        if (!result.ok) {
-            showAnswersNote(card, VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY, true);
-            return;
-        }
-
-        answer_notices.set(input.ref, VALIDATION_MESSAGES.POSSIBLE_ANSWERS_IMPORTED);
-        setAnswersPage(input, 1);
-        recordChange();
-        renderProperties();
-        updateCurrentQuestionStatus();
     });
 
-    cancel_button.addEventListener('click', function () {
-        panel.setAttribute('hidden', 'hidden');
+    column_dropdown.setAttribute('data-role', 'csv-column');
+    column_placeholder.replaceWith(column_dropdown);
+
+    headers.addEventListener('ionChange', function () {
+        selected_column = '';
+        column_dropdown.setOptions(
+            [{ value: '', label: 'Pick column' }].concat(getCsvColumns(parsed, headers.checked === true)),
+            ''
+        );
+
+        if (import_button) {
+            import_button.disabled = true;
+        }
     });
+
+    const modal = openModal({
+        title: 'Possible answers csv import options',
+        body: body,
+        buttons: [
+            { text: 'Dismiss', class_name: 'btn-default' },
+            {
+                text: 'Import',
+                class_name: 'btn-primary',
+                disabled: true,
+                on_click: function (close) {
+                    if (!selected_column) {
+                        return;
+                    }
+
+                    // Legacy imports the answers behind the wait overlay.
+                    showLoading();
+
+                    const result = importAnswers(input, parsed, {
+                        column_index: Number(selected_column),
+                        has_headers: headers.checked === true,
+                        replace: mode.value !== 'append'
+                    });
+
+                    if (!result.ok) {
+                        hideLoading();
+                        showToast(VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY, 'error');
+                        return;
+                    }
+
+                    close();
+                    answer_notices.delete(input.ref);
+                    setAnswersPage(input, 1);
+                    recordChange();
+                    renderProperties();
+                    updateCurrentQuestionStatus();
+                    // Legacy hides the overlay after ANIMATION_SUPER_SLOW.
+                    hideLoading(1000);
+                    showToast(VALIDATION_MESSAGES.POSSIBLE_ANSWERS_IMPORTED, 'success');
+                }
+            }
+        ]
+    });
+
+    import_button = modal.footer.querySelectorAll('button')[1];
 }
 
 /* The list has to be in the document before jQuery UI can hold on to it. */

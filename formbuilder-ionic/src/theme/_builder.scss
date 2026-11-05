@@ -1443,14 +1443,107 @@ ion-item.builder__question[aria-current='true'] {
     text-decoration: underline;
 }
 
-/* ion-loading draws the full-viewport backdrop; the wait cursor is ours. */
-ion-loading.fb-loading {
-    cursor: progress;
-}
-
+/* The form tab warning is the same filled icon and size as the question row. */
 .builder__form-tab-state {
     margin-left: 6px;
-    color: var(--ion-color-warning);
-    font-size: 14px;
+    color: var(--fb-amber);
+    font-size: 20px;
     vertical-align: middle;
+}
+
+.builder__form-tab ion-label {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Unchecked boxes need the same readable grey as the input tools. */
+ion-checkbox:not(.checkbox-checked) {
+    --border-color: #999999;
+    --checkbox-background: transparent;
+    color: #999999;
+}
+
+ion-checkbox:not(.checkbox-checked)::part(label) {
+    color: #999999;
+}
+
+.builder__info-button {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--fb-muted);
+    cursor: pointer;
+}
+
+.builder__info-button:hover {
+    color: var(--ion-color-primary);
+}
+
+.builder__info-button ion-icon {
+    font-size: 20px;
+}
+
+.builder__title-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.builder__title-row .builder__checkbox {
+    flex: 0 1 auto;
+}
+
+.builder__title-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 0 0;
+    padding: 10px;
+}
+
+.builder__title-warning[hidden] {
+    display: none;
+}
+
+.builder__editing-bar {
+    padding: 10px 16px 0;
+}
+
+.builder__editing-bar[hidden] {
+    display: none;
+}
+
+.builder__editing-bar .builder__form-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.builder__question-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.builder__question-field-group .builder__property-error {
+    margin: 0;
+}
+
+.builder__import-form {
+    margin-top: 4px;
+}
+
+.builder__action-popover {
+    --width: 220px;
+}
+
+.builder__delete-question-modal .warning-well {
+    color: var(--ion-color-danger);
 }

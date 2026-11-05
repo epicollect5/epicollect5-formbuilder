@@ -51,11 +51,11 @@ export const DATE_FORMATS = [
 ];
 
 export const TIME_FORMATS = [
-    { value: 'HH:mm:ss', label: 'HH:mm:ss' },
-    { value: 'hh:mm:ss', label: 'hh:mm:ss' },
-    { value: 'HH:mm', label: 'HH:mm' },
-    { value: 'hh:mm', label: 'hh:mm' },
-    { value: 'mm:ss', label: 'mm:ss' }
+    { value: 'HH:mm:ss', label: 'Hours:Minutes:Seconds (24 hours)' },
+    { value: 'hh:mm:ss', label: 'Hours:Minutes:Seconds (12 hours)' },
+    { value: 'HH:mm', label: 'Hours:Minutes (24 hours)' },
+    { value: 'hh:mm', label: 'Hours:Minutes (12 hours)' },
+    { value: 'mm:ss', label: 'Minutes:Seconds' }
 ];
 
 export function allowsRequired(type) {

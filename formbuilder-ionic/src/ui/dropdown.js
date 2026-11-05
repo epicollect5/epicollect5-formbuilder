@@ -204,6 +204,92 @@ export function createDropdown(options) {
     return root;
 }
 
+/*
+ * Action menu sharing the dropdown list surface: same popover, option padding
+ * and hover state as the selection dropdowns, but without a selected value.
+ */
+export function createMenu(trigger, items, on_select) {
+    if (!trigger) {
+        return null;
+    }
+
+    const id = trigger.id || 'fb-menu-' + (dropdown_id += 1);
+    const list = element('div', { class: 'dropdown__list', role: 'menu' });
+    const popover = element('ion-popover', {
+        class: 'dropdown-popover builder__action-popover',
+        'no-router': '',
+        tabindex: '-1',
+        trigger: id,
+        reference: 'trigger',
+        side: 'bottom',
+        alignment: 'end',
+        'show-backdrop': 'true',
+        'dismiss-on-select': 'true'
+    }, [list]);
+
+    trigger.id = id;
+    trigger.setAttribute('aria-haspopup', 'menu');
+    trigger.setAttribute('aria-expanded', 'false');
+
+    (items || []).forEach(function (item) {
+        if (item.divider) {
+            list.append(element('div', { class: 'builder__answers-dropdown-divider' }));
+            return;
+        }
+
+        const option = element('button', {
+            type: 'button',
+            class: 'dropdown__option',
+            role: 'menuitem',
+            'data-action': item.data_action,
+            disabled: item.disabled ? 'disabled' : undefined
+        }, [item.label]);
+
+        option.addEventListener('click', function () {
+            if (item.disabled) {
+                return;
+            }
+
+            if (popover.dismiss) {
+                popover.dismiss();
+            }
+
+            if (typeof on_select === 'function') {
+                on_select(item);
+            }
+        });
+
+        list.append(option);
+    });
+
+    if (!trigger.parentNode) {
+        return popover;
+    }
+
+    trigger.parentNode.append(popover);
+    popover.trigger = id;
+    popover.reference = 'trigger';
+    popover.side = 'bottom';
+    popover.alignment = 'end';
+
+    trigger.addEventListener('click', async function (event) {
+        event.preventDefault();
+        trigger.setAttribute('aria-expanded', 'true');
+        popover.trigger = id;
+        popover.style.setProperty('--width', Math.max(trigger.offsetWidth, 200) + 'px');
+
+        if (popover.present) {
+            await popover.present();
+        }
+    });
+
+    popover.addEventListener('didDismiss', function () {
+        trigger.setAttribute('aria-expanded', 'false');
+    });
+
+    return popover;
+}
+
 export function populateDropdown(dropdown, options, value, on_change) {
     if (!dropdown) {
         return;

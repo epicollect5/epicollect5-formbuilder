@@ -177,13 +177,18 @@ hr {
     font-size: 18px;
 }
 
+/* Legacy overlay mixin: half-white sheet, wait cursor, above the builder. */
 .wait-overlay {
     position: fixed;
     inset: 0;
-    z-index: 9998;
+    z-index: 9999;
     display: none;
-    background: rgba(30, 24, 38, 0.28);
+    background: rgba(255, 255, 255, 0.5);
     cursor: wait;
+}
+
+.wait-overlay.is-visible {
+    display: block;
 }
 
 .print-preview-wrapper {

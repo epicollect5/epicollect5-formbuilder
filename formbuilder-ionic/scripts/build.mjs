@@ -49,7 +49,8 @@ const esbuild_common = {
     alias: alias,
     plugins: [raw_text_plugin],
     define: {
-        'process.env.NODE_ENV': '"development"'
+        'process.env.NODE_ENV': '"development"',
+        __FORMBUILDER_DEV__: 'true'
     },
     legalComments: 'none',
     logLevel: 'silent'
@@ -215,6 +216,38 @@ function startServer() {
     const server = http.createServer(async function (request, response) {
         const url = new URL(request.url, 'http://localhost');
         const pathname = decodeURIComponent(url.pathname);
+
+        // Local development save: write the project definition back to the
+        // file both comparison entries read, if the request came from the
+        // local comparison server.
+        if (request.method === 'POST' && pathname === '/epicollect5-formbuilder/project/project.json') {
+            const chunks = [];
+
+            request.on('data', (chunk) => {
+                chunks.push(chunk);
+            });
+
+            request.on('end', async () => {
+                try {
+                    const body = Buffer.concat(chunks).toString('utf8');
+                    const project = JSON.parse(body);
+
+                    await fs.writeFile(
+                        path.join(repo, 'project/project.json'),
+                        JSON.stringify(project, null, 2) + '\n'
+                    );
+
+                    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+                    response.end('{"ok":true}');
+                }
+                catch (error) {
+                    response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+                    response.end('{"ok":false}');
+                }
+            });
+
+            return;
+        }
 
         if (pathname === '/' || pathname === '/epicollect5-formbuilder' || pathname === '/epicollect5-formbuilder/') {
             response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });

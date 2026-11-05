@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"]
+        },
+        "allowJs": true,
+        "checkJs": false
+    },
+    "include": [
+        "src/**/*.js",
+        "tests/**/*.js"
+    ]
+}

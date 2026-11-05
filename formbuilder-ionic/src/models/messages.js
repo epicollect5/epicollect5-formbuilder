@@ -9,6 +9,11 @@ export const FORM_MESSAGES = {
     PROJECT_SAVED: 'Project saved!',
     PROJECT_NOT_SAVED: 'Project error!',
     PROJECT_SAVING: 'Saving…',
+    PROJECT_VALIDATING: 'Validating…',
+    PROJECT_VALID: 'Project is valid!',
+    PROJECT_INVALID: 'Project has validation errors',
+    INPUT_DELETED: 'Question deleted',
+    FORM_DELETED: 'Form deleted',
     FORM_IMPORTED: 'Form import succeeded!',
     FORM_IMPORTING: 'Importing form…',
     FORM_FILE_INVALID: 'Form file is invalid',
@@ -48,5 +53,6 @@ export const VALIDATION_MESSAGES = {
     JUMP_ANSWER_NOT_SELECTED: 'You must choose an answer',
     JUMP_DESTINATION_NOT_SELECTED: 'You must choose a valid destination',
     JUMP_DESTINATION_INVALID: 'Invalid destination',
-    INPUT_VALID: 'Question valid!'
+    INPUT_VALID: 'Question valid!',
+    INPUT_NOT_VALID: 'Question NOT valid!'
 };

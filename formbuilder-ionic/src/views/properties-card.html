@@ -14,14 +14,6 @@
                               aria-hidden="true"></ion-icon>
                 </button>
                 <button type="button"
-                        class="builder__answers-more-btn builder__form-action-btn"
-                        id="properties-validate"
-                        data-action="validate"
-                        aria-label="Validate question">
-                    <ion-icon name="checkmark-circle-outline"
-                              aria-hidden="true"></ion-icon>
-                </button>
-                <button type="button"
                         class="builder__answers-more-btn builder__form-action-btn builder__icon-btn--danger"
                         id="properties-delete"
                         data-action="delete"
@@ -29,18 +21,33 @@
                     <ion-icon name="trash-outline"
                               aria-hidden="true"></ion-icon>
                 </button>
+                <button type="button"
+                        class="builder__answers-more-btn builder__form-action-btn"
+                        id="properties-validate"
+                        data-action="validate"
+                        aria-label="Validate question">
+                    <ion-icon name="checkmark-circle-outline"
+                              aria-hidden="true"></ion-icon>
+                </button>
 
-                <ion-tooltip trigger="properties-copy"
-                             position="top">Copy question</ion-tooltip>
-                <ion-tooltip trigger="properties-validate"
-                             position="top">Validate question</ion-tooltip>
-                <ion-tooltip trigger="properties-delete"
-                             position="top">Delete question</ion-tooltip>
+
             </div>
         </div>
     </ion-card-header>
 
     <ion-card-content class="builder__properties-content">
+        <div class="builder__editing-bar"
+             data-role="editing-bar"
+             hidden>
+            <button type="button"
+                    class="builder__form-button"
+                    data-role="exit-editing">
+                <ion-icon name="chevron-back-outline"
+                          aria-hidden="true"></ion-icon>
+                Exit Editing
+            </button>
+        </div>
+
         <div class="builder__empty"
              data-role="properties-empty"
              hidden>Select a question to edit it.</div>
@@ -65,37 +72,46 @@
                                      class="builder__property-content is-active"
                                      aria-hidden="false">
                     <section class="builder__properties-panel">
-                        <p class="builder__property-error"
-                           data-role="properties-error"
-                           role="status"
-                           hidden></p>
+                        <div class="builder__question-field-group">
+                            <label class="builder__field-label"
+                                   data-role="question-label">Question</label>
 
-                        <ion-input class="builder__field builder__question-field"
-                                   aria-label="Question"
-                                   label="Question"
-                                   label-placement="stacked"
-                                   fill="outline"
-                                   maxlength="255"
-                                   size="small"></ion-input>
+                            <ion-input class="builder__field builder__question-field"
+                                       aria-label="Question"
+                                       fill="outline"
+                                       maxlength="255"></ion-input>
+
+                            <p class="builder__property-error"
+                               data-role="properties-error"
+                               role="status"
+                               hidden></p>
+                        </div>
+
+                        <button type="button"
+                                class="builder__form-button builder__edit-container"
+                                data-role="edit-container"
+                                hidden>Edit Branch</button>
 
                         <ion-checkbox class="builder__checkbox"
                                       label-placement="end"
                                       data-field="required">
-                            <span>Required</span>
+                            <span>Answer is required</span>
                         </ion-checkbox>
 
-                        <ion-checkbox class="builder__checkbox builder__title-toggle"
-                                      label-placement="end"
-                                      data-field="title">
-                            <span class="builder__title-label">Use answer as title</span>
-                        </ion-checkbox>
-
-                        <p class="builder__hint">
-                            <a class="builder__docs-link"
-                               href="https://docs.epicollect.net/formbuilder/PLACEHOLDER-titles"
-                               target="_blank"
-                               rel="noopener noreferrer">What is a title?</a>
-                        </p>
+                        <div class="builder__title-row"
+                             data-field="title">
+                            <ion-checkbox class="builder__checkbox builder__title-toggle"
+                                          label-placement="end">
+                                <span class="builder__title-label">Use answer as title</span>
+                            </ion-checkbox>
+                            <button type="button"
+                                    class="builder__info-button"
+                                    data-role="title-info"
+                                    aria-label="What is a title?">
+                                <ion-icon name="help-circle-outline"
+                                          aria-hidden="true"></ion-icon>
+                            </button>
+                        </div>
                     </section>
                 </ion-segment-content>
 
@@ -165,6 +181,7 @@
                                        label-placement="stacked"
                                        fill="outline"
                                        maxlength="50"></ion-input>
+                            <ion-icon name="help-circle-outline"></ion-icon>
                             <p class="builder__hint">
                                 <a class="builder__docs-link"
                                    href="https://docs.epicollect.net/formbuilder/PLACEHOLDER-regex"
@@ -176,7 +193,7 @@
                         <ion-checkbox class="builder__checkbox"
                                       label-placement="end"
                                       data-field="verify">
-                            <span>Require double entry</span>
+                            <span data-role="verify-label">Require double entry</span>
                         </ion-checkbox>
 
                         <div class="builder__field-group"
@@ -210,23 +227,23 @@
                                              data-datetime-type="time">
                                 <ion-radio value="HH:mm:ss"
                                            label-placement="end">
-                                    <span>HH:mm:ss</span>
+                                    <span>Hours:Minutes:Seconds (24 hours)</span>
                                 </ion-radio>
                                 <ion-radio value="hh:mm:ss"
                                            label-placement="end">
-                                    <span>hh:mm:ss</span>
+                                    <span>Hours:Minutes:Seconds (12 hours)</span>
                                 </ion-radio>
                                 <ion-radio value="HH:mm"
                                            label-placement="end">
-                                    <span>HH:mm</span>
+                                    <span>Hours:Minutes (24 hours)</span>
                                 </ion-radio>
                                 <ion-radio value="hh:mm"
                                            label-placement="end">
-                                    <span>hh:mm</span>
+                                    <span>Hours:Minutes (12 hours)</span>
                                 </ion-radio>
                                 <ion-radio value="mm:ss"
                                            label-placement="end">
-                                    <span>mm:ss</span>
+                                    <span>Minutes:Seconds</span>
                                 </ion-radio>
                             </ion-radio-group>
                         </div>

@@ -100,7 +100,7 @@ function getNumericErrors(input) {
         }
     }
 
-    if (!errors.length && min_value !== null && max_value !== null && min_value > max_value) {
+    if (!errors.length && min_value !== null && max_value !== null && min_value >= max_value) {
         errors.push(M.MIN_MUST_BE_SMALLER_THAN_MAX);
     }
 
@@ -123,7 +123,8 @@ function getNumericErrors(input) {
 }
 
 function getDefaultErrors(input) {
-    if (NUMERIC_TYPES.indexOf(input.type) !== -1 || isBlank(input.regex) || isBlank(input.default)) {
+    // Legacy applies the regex to numeric defaults as well.
+    if (isBlank(input.regex) || isBlank(input.default)) {
         return [];
     }
 

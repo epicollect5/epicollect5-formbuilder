@@ -1,0 +1,32 @@
+<div class="builder__csv-import">
+    <div class="form-group possible_answers__selected-column">
+        <label>Select which dataset to import</label>
+        <div class="dropdown builder__csv-column"
+             data-role="csv-column"
+             aria-label="Column to import"></div>
+    </div>
+
+    <hr>
+
+    <ion-checkbox class="builder__checkbox"
+                  label-placement="end"
+                  data-role="csv-headers"
+                  checked>
+        <span>First row contains headers</span>
+    </ion-checkbox>
+
+    <hr>
+
+    <ion-radio-group class="builder__radio-group builder__csv-mode"
+                     data-role="csv-mode"
+                     value="replace">
+        <ion-radio value="replace"
+                   label-placement="end">
+            <span>Replace all existing possible answers</span>
+        </ion-radio>
+        <ion-radio value="append"
+                   label-placement="end">
+            <span>Append to existing possible answers</span>
+        </ion-radio>
+    </ion-radio-group>
+</div>
