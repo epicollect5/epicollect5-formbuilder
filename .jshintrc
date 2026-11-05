@@ -1,4 +1,4 @@
-{ // Custom Globals
+{
     "globals": {
         "$": true,
         "toastr": true,
@@ -9,6 +9,7 @@
         "module": true,
         "console": true
     },
+    "browser": true,
     "node": true,
     "esversion": 8
 }

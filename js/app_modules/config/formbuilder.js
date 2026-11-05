@@ -1,7 +1,7 @@
 /* global $*/
 'use strict';
 
-var formbuilder = {
+const formbuilder = {
     current_form_ref: '',
     current_form_index: '',
     current_input_ref: '',
