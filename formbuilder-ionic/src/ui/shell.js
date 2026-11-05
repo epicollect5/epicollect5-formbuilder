@@ -71,6 +71,7 @@ import {
 } from '@/services/session.js';
 import { duplicateInput } from '@/services/question-actions.js';
 import { getInputErrors, isInputValid } from '@/services/validation.js';
+import { canUndo, ensureUndoBaseline, pushUndoState, undo } from '@/services/undo.js';
 import { button, createView, element, icon, parseView } from '@/ui/dom.js';
 import { createDropdown, populateDropdown } from '@/ui/dropdown.js';
 import { createReadmeEditor } from '@/ui/readme-editor.js';
@@ -94,6 +95,7 @@ let active_property_tab = 'basic';
 export function renderApp(app_handlers) {
     handlers = app_handlers || {};
 
+    ensureUndoBaseline();
     renderProjectName();
     revealBuilder();
     bindChrome();
@@ -162,14 +164,55 @@ function bindChrome() {
         };
     });
 
+    const undo_button = document.getElementById('undo');
+
+    if (undo_button) {
+        undo_button.onclick = function () {
+            performUndo();
+        };
+    }
+
     const add_form = document.getElementById('add-form');
 
     if (add_form) {
         add_form.onclick = function () {
             addForm();
+            recordChange();
             renderApp(handlers);
         };
     }
+
+    updateUndoButton();
+}
+
+/* Snapshots are taken after a mutation, matching the legacy push points. */
+function recordChange(options) {
+    // The throttled push lands later, so the button gate has to follow it.
+    pushUndoState(Object.assign({ on_change: updateUndoButton }, options || {}));
+    updateUndoButton();
+}
+
+function updateUndoButton() {
+    const undo_button = document.getElementById('undo');
+
+    if (!undo_button) {
+        return;
+    }
+
+    const available = canUndo();
+
+    undo_button.disabled = !available;
+    undo_button.title = available ? 'Undo the last change' : 'Nothing to undo';
+}
+
+function performUndo() {
+    if (!undo()) {
+        updateUndoButton();
+        return;
+    }
+
+    active_property_tab = 'basic';
+    renderApp(handlers);
 }
 
 /* The tool catalogue is static markup; only the click and drag wiring changes. */
@@ -196,7 +239,11 @@ function renderTools() {
     });
 
     installToolDrag('#tools .builder__tool', QUESTION_LIST, function (type, index) {
-        insertInput(type, index);
+        if (!insertInput(type, index)) {
+            return;
+        }
+
+        recordChange();
         renderQuestions();
         renderProperties();
     });
@@ -207,6 +254,7 @@ function addQuestion(type) {
         return;
     }
 
+    recordChange();
     renderQuestions();
     renderProperties();
 }
@@ -464,9 +512,13 @@ function syncAfterDrop() {
         return;
     }
 
-    reorderInputs([...list.querySelectorAll('.builder__question')].map(function (row) {
+    const reordered = reorderInputs([...list.querySelectorAll('.builder__question')].map(function (row) {
         return row.getAttribute('data-input-ref');
     }));
+
+    if (reordered) {
+        recordChange();
+    }
 
     // jQuery UI is still unwinding its own drop when stop fires, so the
     // re-render waits for the next task.
@@ -574,6 +626,7 @@ function bindPropertyActions(card, input) {
 
     copy_button.addEventListener('click', function () {
         if (duplicateInput(input)) {
+            recordChange();
             renderQuestions();
             renderProperties();
         }
@@ -587,6 +640,7 @@ function bindPropertyActions(card, input) {
 
     delete_button.addEventListener('click', function () {
         removeInput(input.ref);
+        recordChange();
         renderQuestions();
         renderProperties();
     });
@@ -736,6 +790,7 @@ function buildBasicPanel(input, pane) {
 
             updateCurrentInput({ question: question });
             updateQuestionText(plain_text);
+            recordChange({ throttle: true });
         });
         panel.append(active_readme_editor.element);
 
@@ -846,6 +901,7 @@ function buildJumpsPanel(input, pane) {
     add_button.disabled = !canAddJump(input);
     add_button.addEventListener('click', function () {
         if (addJump(input)) {
+            recordChange();
             renderProperties();
             renderQuestions();
             updateCurrentQuestionStatus();
@@ -931,6 +987,7 @@ function buildJumpRow(input, jump, index, destinations) {
             return { value: condition.key, label: condition.label };
         }), jump.when || 'IS', function (detail) {
             updateJump(input, index, { when: detail.value });
+            recordChange();
             renderProperties();
             renderQuestions();
             updateCurrentQuestionStatus();
@@ -950,6 +1007,7 @@ function buildJumpRow(input, jump, index, destinations) {
 
             initDropdown(answer_placeholder, answer_options, answer_value, !jumpNeedsAnswer(jump.when) ? null : function (detail) {
                 updateJump(input, index, { answer_ref: detail.value || '' });
+                recordChange();
                 renderProperties();
                 renderQuestions();
                 updateCurrentQuestionStatus();
@@ -980,12 +1038,14 @@ function buildJumpRow(input, jump, index, destinations) {
 
     initDropdown(goto_placeholder, destination_options, jump.to || '', function (detail) {
         updateJump(input, index, { to: detail.value || '' });
+        recordChange();
         renderQuestions();
         updateCurrentQuestionStatus();
     }, false);
 
     remove_button.addEventListener('click', function () {
         if (removeJump(input, index)) {
+            recordChange();
             renderProperties();
             renderQuestions();
             updateCurrentQuestionStatus();
@@ -1059,6 +1119,7 @@ function bindQuestionField(field, input) {
         updateQuestionText(question);
         updateCurrentQuestionStatus();
         refreshCurrentProperties();
+        recordChange({ throttle: true });
     });
 }
 
@@ -1093,6 +1154,8 @@ function bindCheckboxToggle(toggle, checked, on_change, options) {
     toggle.checked = checked;
     toggle.addEventListener('ionChange', function (event) {
         on_change(event.detail.checked);
+        // A refused change leaves the state identical and is skipped by dedupe.
+        recordChange();
     });
 }
 
@@ -1129,6 +1192,7 @@ function bindTextField(field, value, property) {
 
         next[property] = text === '' ? null : text;
         updateCurrentInput(next);
+        recordChange({ throttle: true });
     });
 }
 
@@ -1143,6 +1207,7 @@ function bindNumberField(field, value, property) {
 
         next[property] = text === '' ? null : text;
         updateCurrentInput(next);
+        recordChange({ throttle: true });
     });
 }
 
@@ -1157,6 +1222,7 @@ function bindRegexField(wrapper, input) {
         const text = event.detail.value || '';
 
         updateCurrentInput({ regex: text === '' ? null : text });
+        recordChange({ throttle: true });
     });
 
     wrapper.querySelectorAll('.builder__preset-btn').forEach(function (preset_button) {
@@ -1167,6 +1233,7 @@ function bindRegexField(wrapper, input) {
         preset_button.addEventListener('click', function () {
             field.value = preset.pattern;
             updateCurrentInput({ regex: preset.pattern });
+            recordChange();
         });
     });
 }
@@ -1184,6 +1251,7 @@ function bindNumericTypeControl(field_group, input) {
         }
 
         updateCurrentInput({ type: next_type });
+        recordChange();
         renderQuestions();
         renderProperties();
     });
@@ -1201,6 +1269,7 @@ function bindSearchTypeControl(field_group, input) {
         }
 
         updateCurrentInput({ type: next_type });
+        recordChange();
         renderQuestions();
         renderProperties();
     });
@@ -1220,6 +1289,7 @@ function bindDatetimeFormatControl(field_group, input) {
         group.value = input.datetime_format || getDefaultDatetimeFormat(input.type);
         group.addEventListener('ionChange', function (event) {
             updateCurrentInput({ datetime_format: event.detail.value });
+            recordChange();
         });
     });
 }
@@ -1259,6 +1329,7 @@ function bindDefaultChoiceControl(control, input) {
     if (dropdown_control) {
         initDropdown(dropdown_control, options, value, function (detail) {
             updateCurrentInput({ default: detail.value ? detail.value : null });
+            recordChange();
         }, false);
         return;
     }
@@ -1271,6 +1342,7 @@ function bindDefaultChoiceControl(control, input) {
     control.addEventListener('ionChange', function (event) {
         const next = event.detail.value;
         updateCurrentInput({ default: next ? next : null });
+        recordChange();
     });
 }
 
@@ -1312,6 +1384,7 @@ function bindUniquenessControl(control, input) {
     if (dropdown_control) {
         const dropdown = initDropdown(dropdown_control, options, value, function (detail) {
             updateCurrentInput({ uniqueness: detail.value || 'none' });
+            recordChange();
         }, false);
 
         if (dropdown) {
@@ -1327,6 +1400,7 @@ function bindUniquenessControl(control, input) {
     control.value = value;
     control.addEventListener('ionChange', function (event) {
         updateCurrentInput({ uniqueness: event.detail.value || 'none' });
+        recordChange();
     });
 }
 
@@ -1352,6 +1426,7 @@ function buildPossibleAnswers(input) {
         }
 
         setAnswersPage(input, getAnswerPageCount(input.possible_answers));
+        recordChange();
         renderProperties();
         updateCurrentQuestionStatus();
     });
@@ -1499,6 +1574,9 @@ function installAnswersMenu(card, input) {
         if (control) {
             control.addEventListener('click', function () {
                 actions[action]();
+                // Opening the panel or exporting leaves the state unchanged and
+                // is skipped by the dedupe in the undo service.
+                recordChange();
             });
         }
     });
@@ -1592,6 +1670,7 @@ function openAnswersCsv(card, input) {
 
         answer_notices.set(input.ref, VALIDATION_MESSAGES.POSSIBLE_ANSWERS_IMPORTED);
         setAnswersPage(input, 1);
+        recordChange();
         renderProperties();
         updateCurrentQuestionStatus();
     });
@@ -1618,6 +1697,8 @@ function installAnswersSortable(input) {
         if (!reorderAnswerPage(input, refs, page)) {
             return;
         }
+
+        recordChange();
 
         setTimeout(function () {
             renderProperties();
@@ -1651,6 +1732,7 @@ function buildAnswerRow(input, answer, index, total) {
         renamePossibleAnswer(input, answer.answer_ref, value);
         updateCurrentQuestionStatus();
         refreshCurrentProperties();
+        recordChange({ throttle: true });
     });
 
     const remove_button = button({
@@ -1662,6 +1744,7 @@ function buildAnswerRow(input, answer, index, total) {
 
     remove_button.addEventListener('click', function () {
         if (removePossibleAnswer(input, answer.answer_ref)) {
+            recordChange();
             renderProperties();
             updateCurrentQuestionStatus();
         }
