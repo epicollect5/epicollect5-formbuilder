@@ -28,12 +28,12 @@ session, so each slice can be compared side by side.
 | Drag and drop (tool to question list, question and answer reordering) | `ui-handlers/sortable.js`, `ui-handlers/possible-answers-sortable.js` | `src/ui/sortable.js` | ported (jQuery UI 1.14 on jQuery 4, vendored from node_modules) |
 | Adding / reordering / deleting questions | `ui-handlers/sortable.js`, `actions/input-collection*`, `factory/input-factory.js` | `src/models/input-factory.js`, `src/models/refs.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 2) |
 | Possible answers (add, rename, remove, sort) | `actions/possible-answers*.js`, `template/methods/getPossibleAnswers*` | `src/models/possible-answers.js`, `src/services/possible-answers.js`, `src/ui/shell.js` | ported (slice 3) |
-| Possible answers CSV import and pagination | `actions/possible-answers.js`, `possible-answers-pager.js` | — | pending |
+| Possible answers CSV import/export, pagination, ordering, delete all | `actions/possible-answers.js`, `actions/possible-answers-pager.js`, `ui-handlers/event-handler-callbacks/confirm-import-possible-answers-callback.js` | `src/services/possible-answers.js`, `src/services/possible-answers-csv.js`, `src/views/possible-answers-card.html`, `src/ui/shell.js` | ported (phase 5; inline CSV panel instead of a modal) |
 | Advanced properties, uniqueness, title rules | `template/methods/prepareAdvancedInputPropertiesHTML.js`, `getUniquenessHTML.js` | `src/services/properties.js`, `src/views/properties-card.html`, `src/ui/shell.js` | ported (phase 1) |
 | Form management (rename / delete form, name modal, child-form cap) | `ui-handlers/event-handler-callbacks/*form*`, `factory/form-factory.js` | — | pending |
 | Branches and groups | `inputs/branch.js`, `inputs/group.js`, `ui-handlers/*branch*`, `ui-handlers/*group*` | `src/models/nesting.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 4, phase 2) |
-| Jumps | `actions/jumps.js`, `helpers/utils.getJumpAvailableDestinations` | — | pending |
-| Validation and question copy | `actions/validation.js`, `ui-handlers/event-handler-callbacks/*` | — | pending (buttons present, disabled) |
+| Jumps | `actions/jumps.js`, `helpers/utils.getJumpAvailableDestinations` | `src/models/jumps.js`, `src/services/jumps.js`, `src/views/jump-row*.html`, `src/ui/shell.js` | ported (phase 3) |
+| Validation and question copy | `actions/validation.js`, `actions/input-duplicator.js`, `ui-handlers/event-handler-callbacks/*` | `src/models/validation.js`, `src/services/validation.js`, `src/services/question-actions.js`, `src/ui/shell.js` | ported (phase 4) |
 | Undo | `actions/undo.js` | — | pending |
 | Save / export / import | `actions/save/**`, `helpers/import-form-validation.js` | `src/services/import-form-validation.js` (schema half only) | pending |
 | Readme editor | Summernote rich-text field | Tiptap 3 rich-text field | ported |
@@ -62,9 +62,9 @@ from project data such as forms, questions and answers.
 
 1. Boundary and project loading: own entry, own DOM, form switching, question list, selection.
 2. Basic question editing, adding, reordering and deleting questions.
-3. Possible answers (add, rename, remove, reorder).
-4. Branches and groups.
-5. Validation.
+3. Possible answers (add, rename, remove, reorder; phase 5 added paging, CSV, ordering and delete all).
+4. Branches and groups (ported).
+5. Jumps, validation and question copy (ported).
 6. Undo.
 7. Save, import, export.
 

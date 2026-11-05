@@ -66,12 +66,15 @@ npm run dev
 Ported: project loading, form switching and adding, question list
 (add/reorder/delete/select), basic and advanced question editing (including
 uniqueness and per-type gating), readme editor (Tiptap), possible answers
-(add/rename/remove/reorder), and branches and groups (enter/exit, nesting rules,
-breadcrumbs).
+(add/rename/remove/reorder, ordering, delete all, 100-per-page pagination, CSV
+import/export, 150-char cap and `<` / `>` sanitisation), branches and groups
+(enter/exit, nesting rules, breadcrumbs), jumps (rows, destinations, the always
+variant) and validation with question copy (row and tab badges, Validate
+button, duplicate with ref and answer-ref remap, duplicate answer-ref check).
 
-Pending: jumps, full validation, possible-answers default/CSV/pagination, undo,
-save/export/import, form rename/delete, and the modals/menus/toasts. The full
-breakdown and the phase order are in `docs/ROADMAP.md`.
+Pending: undo, save/export/import, form rename/delete, and the remaining
+modals/menus/toasts (the CSV panel is inline for now). The full breakdown and
+the phase order are in `docs/ROADMAP.md`.
 
 ## Tests
 

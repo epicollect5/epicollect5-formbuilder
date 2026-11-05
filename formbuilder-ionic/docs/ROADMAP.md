@@ -20,6 +20,15 @@ Ported today:
 - Branches and groups: enter / exit editing, container sortables, nesting rules
   (no branch-in-branch, group-in-group or branch-in-group), child counts,
   breadcrumbs, per-level refs and branch-scoped titles / uniqueness label.
+- Jumps: rows, the single-answer "always" variant, destinations limited to the
+  active list, the jump icon and jump validity in the Jumps tab badge.
+- Validation (`models/validation.js`, `services/validation.js`): question text
+  and readme length, answers, numeric bounds and initial answer, default vs
+  regex, branch / group children and jump destinations, with the row badge, the
+  Properties / Jumps tab badges and the Validate button.
+- Question copy: duplicate at the end of the active list with new refs and
+  answer refs, remapped default and jumps that stay inside the copy.
+- Parent validity badges that reflect branch / group child validation.
 
 ## Gap vs legacy
 
@@ -46,42 +55,52 @@ Ported today:
 - Title rules: `LIMITS.titles_max = 3` and the info-title modal.
 - Per-type gating: required only on `REQUIRED_ALLOWED_TYPES`, no required/title
   on media / branch / group / readme (the port shows both everywhere).
-- Copy / duplicate question (`input-duplicator`: ref and answer_ref
-  regeneration, default remap, jump drop) and the Validate button.
 - Text caps: 255 for question and header, 1000 for readme.
 
 ### Branches and groups
 
 Ported: `branch[]` / `group[]` child arrays, enter and exit editing, the container
 sortables, a nested group inside a branch, breadcrumbs, child counts, the nesting
-rules, refs with one more `_` segment per level, and the branch-scoped titles and
-uniqueness label (`form` means the branch there, as in the legacy builder).
-
-Remaining:
-
-- Branch-scoped jumps (destinations limited to later inputs in the same branch).
-- Parent validity badges that reflect branch / group child validation.
+rules, refs with one more `_` segment per level, the branch-scoped titles,
+uniqueness and jumps (`form` means the branch there, as in the legacy builder),
+and parent validity badges that reflect the children.
 
 ### Jumps
 
-- Jump rows: When (`NO_ANSWER_GIVEN` / `IS` / `IS_NOT` / `ALL`), Answer,
-  destination.
-- The single-answer "always" variant, jump limits, and the row jump icon.
+Ported: rows with When (`NO_ANSWER_GIVEN` / `IS` / `IS_NOT` / `ALL`), Answer and
+destination, the single-answer "always" variant, the one-jump-per-answer limit,
+the row jump icon, destinations limited to the active list (a branch can only
+jump inside itself) and jump validity in the Jumps tab badge.
 
-### Possible answers (beyond add / rename / remove / reorder)
+Remaining:
 
-- Default / initial answer selection.
-- CSV import (column picker, headers toggle, replace / append) and CSV export.
-- Pagination (100 per page), ordering A-Z / Z-A / shuffle, delete all.
-- Duplicate `answer_ref` detection, 150-char answer cap, `<` / `>` sanitisation.
+- Marking the offending jump row itself, rather than the tab and the panel
+  message.
+
+### Possible answers
+
+Ported: add / rename / remove / reorder, default (initial answer) selection,
+CSV import (column picker, headers toggle, replace / append) and export,
+pagination at 100 per page, ordering A-Z / Z-A / shuffle, delete all, duplicate
+`answer_ref` detection, the 300 / 1000 answer limits, the 150-char cap and
+`<` / `>` sanitisation on every write.
+
+The CSV panel is inline inside the answers card rather than a Bootstrap modal;
+Ionic modals arrive with phase 8.
 
 ### Validation
 
-- `actions/validation.js` port: question text, default vs regex, numeric
-  min/max, per-object, branch / group, jump validity, `areAllInputsValid` /
-  `areFormInputsValid`.
+Ported (`models/validation.js` + `services/validation.js`): question text and
+readme length, possible answers, integer / decimal min, max and initial answer,
+default vs regex, branch / group children (recursive, so a nested group
+invalidates its branch), jump destinations and conditions, `areFormInputsValid`
+/ `areAllInputsValid`, the per-row validity badge and the Properties / Jumps tab
+badges. Each error carries the tab it belongs to.
+
+Remaining:
+
 - Save-time gate: `INPUTS_MAX_ALLOWED = 300`, titles <= 3,
-  `search_inputs_max = 5`, jump destinations.
+  `search_inputs_max = 5`, jump destinations across the whole form.
 
 ### Modals, menus, toasts
 
@@ -117,6 +136,8 @@ from project data (questions, answers, forms) is appropriate. Keep the static
 container and each dynamic collection's empty-state markup in the view.
 
 ## Phases
+
+Phases 1–5 are ported; 6–8 are pending.
 
 1. **Properties panel, full.** Port each existing Bootstrap panel to the
    equivalent Ionic card shell and reuse its property fragments in HTML views.
