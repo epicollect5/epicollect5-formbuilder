@@ -4,15 +4,16 @@ import { FORM_MESSAGES } from '@/models/messages.js';
 import { getContainerList } from '@/models/nesting.js';
 import { isSearchType } from '@/models/possible-answers.js';
 import { getForms, getInputs } from '@/models/project-definition.js';
+import { PARAMETERS } from '@/models/parameters.js';
 
 /*
  * The limits the JSON schema cannot express (see `schemas/project.schema.json`):
  * total questions across nesting levels, titles per form / branch, and search
  * questions across the project. They gate both saving and form import.
  */
-export const INPUTS_MAX_ALLOWED = 300;
-export const TITLES_MAX = 3;
-export const SEARCH_INPUTS_MAX = 5;
+export const INPUTS_MAX_ALLOWED = PARAMETERS.INPUTS_MAX_ALLOWED;
+export const TITLES_MAX = PARAMETERS.TITLES_MAX;
+export const SEARCH_INPUTS_MAX = PARAMETERS.SEARCH_INPUTS_MAX;
 
 export function eachInput(inputs, visit) {
     (inputs || []).forEach(function (input) {

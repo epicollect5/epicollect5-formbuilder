@@ -1,6 +1,7 @@
 'use strict';
 
 import { getForms } from '@/models/project-definition.js';
+import { PARAMETERS } from '@/models/parameters.js';
 import { getSession, selectForm, setProject } from '@/services/session.js';
 
 /*
@@ -21,8 +22,8 @@ import { getSession, selectForm, setProject } from '@/services/session.js';
  * restores keep the current one.
  */
 
-export const MAX_UNDO_STATES = 10;
-export const UNDO_THROTTLE_MS = 500;
+export const MAX_UNDO_STATES = PARAMETERS.MAX_UNDO_STATES;
+export const UNDO_THROTTLE_MS = PARAMETERS.UNDO_THROTTLE_MS;
 
 let states = [];
 let keys = [];

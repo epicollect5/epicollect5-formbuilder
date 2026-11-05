@@ -1,11 +1,12 @@
 'use strict';
 
 import { FORM_MESSAGES } from '@/models/messages.js';
+import { PARAMETERS } from '@/models/parameters.js';
 
 /* consts.MAX_NUMBER_OF_NESTED_CHILD_FORMS / FORM_NAME_MAX_LENGHT / FORM_NAME_REGEX. */
-export const MAX_FORMS = 5;
-export const FORM_NAME_MAX_LENGTH = 50;
-export const FORM_NAME_REGEX = /^[\w\-\s]+$/;
+export const MAX_FORMS = PARAMETERS.MAX_FORMS;
+export const FORM_NAME_MAX_LENGTH = PARAMETERS.FORM_NAME_MAX_LENGTH;
+export const FORM_NAME_REGEX = PARAMETERS.FORM_NAME_REGEX;
 
 /*
  * Ported from `validation.isFormNameValid`: not empty, only word characters,

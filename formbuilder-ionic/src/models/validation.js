@@ -4,6 +4,7 @@ import { hasDuplicateAnswerRefs, isMultipleAnswerType } from '@/models/possible-
 import { getContainerList } from '@/models/nesting.js';
 import { isBranchOrGroup } from '@/models/input-properties.js';
 import { VALIDATION_MESSAGES as M } from '@/models/messages.js';
+import { PARAMETERS } from '@/models/parameters.js';
 
 /*
  * Per-input validation, ported from `actions/validation.js` without the legacy
@@ -48,10 +49,10 @@ export function getQuestionTextErrors(input) {
     }
 
     if (input.type === 'readme') {
-        return plainTextLength(question) > 1000 ? [M.QUESTION_LENGTH_LIMIT_EXCEEDED] : [];
+        return plainTextLength(question) > PARAMETERS.README_MAX_LENGTH ? [M.QUESTION_LENGTH_LIMIT_EXCEEDED] : [];
     }
 
-    return question.length > 255 ? [M.QUESTION_LENGTH_LIMIT_EXCEEDED] : [];
+    return question.length > PARAMETERS.QUESTION_MAX_LENGTH ? [M.QUESTION_LENGTH_LIMIT_EXCEEDED] : [];
 }
 
 function getPossibleAnswerErrors(input) {

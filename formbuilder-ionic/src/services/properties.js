@@ -1,6 +1,7 @@
 'use strict';
 
 import { getInputs } from '@/models/project-definition.js';
+import { PARAMETERS } from '@/models/parameters.js';
 import { isMultipleAnswerType } from '@/models/possible-answers.js';
 import {
     allowsRequired,
@@ -39,14 +40,14 @@ export function getTitleLimitState(form, input) {
         return { disabled: false, limit_reached: false };
     }
 
-    const reached = countTitles(getInputs(form), input.ref) >= 3;
+    const reached = countTitles(getInputs(form), input.ref) >= PARAMETERS.TITLES_MAX;
 
     return { disabled: false, limit_reached: reached };
 }
 
 export function sanitizeQuestion(input, value) {
     const text = value === undefined || value === null ? '' : String(value);
-    const limit = input && input.type === 'readme' ? 1000 : 255;
+    const limit = input && input.type === 'readme' ? PARAMETERS.README_MAX_LENGTH : PARAMETERS.QUESTION_MAX_LENGTH;
 
     return text.slice(0, limit);
 }

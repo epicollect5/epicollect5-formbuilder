@@ -3,6 +3,7 @@
 import { createJump, jumpNeedsAnswer, JUMP_TO_END_OF_FORM_LABEL, JUMP_WHEN, usesAlwaysJump } from '@/models/jumps.js';
 import { hasJumpsTab } from '@/models/input-properties.js';
 import { isMultipleAnswerType } from '@/models/possible-answers.js';
+import { PARAMETERS } from '@/models/parameters.js';
 import { JUMP_TO_END_OF_FORM_REF } from '@/services/import-form-validation.js';
 
 /*
@@ -49,10 +50,10 @@ function destinationLabel(input) {
     }
 
     if (input.type === 'readme') {
-        return trunc(stripTags(decodeHtml(input.question)).trim(), 50) || 'Readme';
+        return trunc(stripTags(decodeHtml(input.question)).trim(), PARAMETERS.QUESTION_PREVIEW_LENGTH) || 'Readme';
     }
 
-    return trunc(input.question, 50);
+    return trunc(input.question, PARAMETERS.QUESTION_PREVIEW_LENGTH);
 }
 
 export function getJumpAvailableDestinations(input, inputs) {

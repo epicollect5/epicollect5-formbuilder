@@ -1,5 +1,7 @@
 'use strict';
 
+import { PARAMETERS } from '@/models/parameters.js';
+
 /*
  * Validation copy ported from the legacy `config/messages.js`. The texts are
  * part of the builder's behaviour, so they are kept verbatim.
@@ -24,12 +26,12 @@ export const FORM_MESSAGES = {
     FORM_NAME_EMPTY: 'Form name cannot be empty',
     FORM_NAME_INVALID: 'Form name is invalid',
     FORM_NAME_EXISTS: 'Form name exists',
-    FORM_NAME_LENGTH: 'Form name is too long (50 characters max)',
+    FORM_NAME_LENGTH: 'Form name is too long (' + PARAMETERS.FORM_NAME_MAX_LENGTH + ' characters max)',
     INPUT_DELETE_CONFIRM: 'Are you sure you want to delete this question?',
     INPUT_DELETE_WARNING: 'This action cannot be undone!',
-    TOO_MANY_QUESTIONS: 'Too many questions, only 300 per project are allowed!',
+    TOO_MANY_QUESTIONS: 'Too many questions, only ' + PARAMETERS.INPUTS_MAX_ALLOWED + ' per project are allowed!',
     TOO_MANY_TITLES: 'Too many titles',
-    TOO_MANY_SEARCH_QUESTIONS: 'Too many search questions, only 5 per project are allowed!'
+    TOO_MANY_SEARCH_QUESTIONS: 'Too many search questions, only ' + PARAMETERS.SEARCH_INPUTS_MAX + ' per project are allowed!'
 };
 
 export const VALIDATION_MESSAGES = {

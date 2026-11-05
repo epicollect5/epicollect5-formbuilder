@@ -3,10 +3,11 @@
 import { Editor, Extension } from '@tiptap/core';
 import { Plugin } from '@tiptap/pm/state';
 import StarterKit from '@tiptap/starter-kit';
+import { PARAMETERS } from '@/models/parameters.js';
 import { createView } from '@/ui/dom.js';
 import readme_editor_view from '@/views/readme-editor.html?raw';
 
-export const README_MAX_LENGTH = 1000;
+export const README_MAX_LENGTH = PARAMETERS.README_MAX_LENGTH;
 const ALLOWED_TAGS = new Set(['p', 'br', 'b', 'strong', 'i', 'em', 'u']);
 const DISCARDED_TAGS = new Set(['script', 'style', 'iframe', 'object']);
 

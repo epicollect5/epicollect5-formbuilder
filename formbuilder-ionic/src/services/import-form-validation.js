@@ -3,13 +3,12 @@
 import Ajv2020 from 'ajv/dist/2020';
 import addFormats from 'ajv-formats';
 import project_schema from '../../schemas/project.schema.json';
+import { PARAMETERS } from '@/models/parameters.js';
 
 const PROJECT_SCHEMA_ID = 'epicollect5-project';
 export const JUMP_TO_END_OF_FORM_REF = 'END';
 const CHOICE_TYPES = ['dropdown', 'radio', 'checkbox', 'searchsingle', 'searchmultiple'];
 const SEARCH_TYPES = ['searchsingle', 'searchmultiple'];
-const POSSIBLE_ANSWERS_MAX = 300;
-const POSSIBLE_ANSWERS_MAX_SEARCH = 1000;
 
 const ajv = new Ajv2020({
     allErrors: true,
@@ -192,8 +191,8 @@ export function arePossibleAnswersValid(possible_answers, input_type) {
     }
 
     const max_answers = SEARCH_TYPES.indexOf(input_type) > -1
-        ? POSSIBLE_ANSWERS_MAX_SEARCH
-        : POSSIBLE_ANSWERS_MAX;
+        ? PARAMETERS.MAX_SEARCH_ANSWERS
+        : PARAMETERS.MAX_ANSWERS;
 
     if (possible_answers.length > max_answers) {
         return false;

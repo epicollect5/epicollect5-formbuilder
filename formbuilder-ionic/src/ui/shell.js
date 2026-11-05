@@ -1,6 +1,7 @@
 'use strict';
 
 import { getForms, getProject } from '@/models/project-definition.js';
+import { PARAMETERS } from '@/models/parameters.js';
 import {
     ANSWERS_PER_PAGE,
     MAX_ANSWER_LENGTH,
@@ -58,7 +59,6 @@ import {
     getCurrentForm,
     getCurrentInput,
     getCurrentInputs,
-    getEditingContainer,
     getEditingTrail,
     getSession,
     insertInput,
@@ -81,7 +81,7 @@ import { button, createView, element, icon, parseView } from '@/ui/dom.js';
 import { hideLoading, showLoading } from '@/ui/loading.js';
 import { openModal } from '@/ui/modal.js';
 import { showToast } from '@/ui/toast.js';
-import { createDropdown, createMenu, populateDropdown } from '@/ui/dropdown.js';
+import { createDropdown, createMenu } from '@/ui/dropdown.js';
 import { printForm } from '@/ui/print.js';
 import { createReadmeEditor } from '@/ui/readme-editor.js';
 import { installAnswerSortable, installQuestionSortable, installToolDrag } from '@/ui/sortable.js';
@@ -97,7 +97,6 @@ import title_info_body_view from '@/views/title-info-body.html?raw';
 import delete_question_modal_body_view from '@/views/delete-question-modal-body.html?raw';
 
 const QUESTION_LIST = '#questions .builder__question-list';
-const TITLE_LIMIT = 3;
 const DOUBLE_ENTRY_VERIFICATION_TYPES = ['text', 'phone'];
 
 let handlers = {};
@@ -200,7 +199,9 @@ function bindChrome() {
 
     if (save_button) {
         save_button.onclick = function () {
-            performSave();
+            performSave().catch(function (error) {
+                console.error('[formbuilder-ionic] unexpected save error', error);
+            });
         };
     }
 
@@ -261,7 +262,6 @@ function installUnloadGuard() {
         }
 
         event.preventDefault();
-        event.returnValue = 'Are you sure you want to leave?';
     });
 }
 
@@ -426,7 +426,7 @@ function installFormActions(card, form) {
 }
 
 function isDevMode() {
-    return typeof __FORMBUILDER_DEV__ !== 'undefined' && __FORMBUILDER_DEV__ === true;
+    return window.__FORMBUILDER_DEV__ === true;
 }
 
 function openFormNameModal(form) {
@@ -435,6 +435,7 @@ function openFormNameModal(form) {
     const field = body.querySelector('input');
     const error = body.querySelector('[data-role="form-name-error"]');
 
+    field.maxLength = PARAMETERS.FORM_NAME_MAX_LENGTH;
     field.value = form ? form.name || '' : '';
     field.addEventListener('input', function () {
         error.hidden = true;
@@ -534,7 +535,7 @@ function openDeleteQuestion(input) {
     });
 }
 
-function importFormFile(card, form) {
+function importFormFile(card) {
     const field = card.querySelector('[data-role="form-file"]');
 
     if (!field) {
@@ -1555,38 +1556,6 @@ function buildJumpRow(input, jump, index, destinations) {
     return row;
 }
 
-function populateSelect(select, options, value, on_change) {
-    if (select && typeof select.setOptions === 'function') {
-        populateDropdown(select, options, value, on_change);
-        return;
-    }
-
-    if (!select) {
-        return;
-    }
-
-    select.replaceChildren();
-
-    if (select.tagName && select.tagName.toLowerCase() === 'ion-select') {
-        select.justify = 'space-between';
-        select.setAttribute('justify', 'space-between');
-        options.forEach(function (option_data) {
-            const option = element('ion-select-option', { value: option_data.value });
-            option.textContent = option_data.label;
-            select.append(option);
-        });
-        select.value = value;
-        return;
-    }
-
-    options.forEach(function (option_data) {
-        const option = element('option', { value: option_data.value });
-        option.textContent = option_data.label;
-        select.append(option);
-    });
-    select.value = value;
-}
-
 function getQuestionLabelText(type) {
     if (isBranchOrGroup(type)) {
         return 'Header';
@@ -1625,7 +1594,7 @@ function updateEditButtonState(input) {
         field.removeAttribute('maxlength');
     }
     else {
-        field.setAttribute('maxlength', '255');
+        field.setAttribute('maxlength', String(PARAMETERS.QUESTION_MAX_LENGTH));
     }
 
     field.addEventListener('ionInput', function (event) {
@@ -1647,7 +1616,7 @@ function updateEditButtonState(input) {
 
 function sanitizeQuestion(input, value) {
     const text = value === undefined || value === null ? '' : String(value);
-    const limit = input && input.type === 'readme' ? 1000 : 255;
+    const limit = input && input.type === 'readme' ? PARAMETERS.README_MAX_LENGTH : PARAMETERS.QUESTION_MAX_LENGTH;
     // Legacy stores angle brackets as look-alike Unicode instead of markup.
     const sanitized = input && input.type === 'readme' ? text : text.replace(/>/g, '\ufe65').replace(/</g, '\ufe64');
 
@@ -1688,13 +1657,13 @@ function bindTitleToggle(row, input) {
     const inputs = getCurrentInputs();
     const other_titles = countTitles(inputs, input.ref);
     const checked = input.is_title === true;
-    const limit_reached = !checked && other_titles >= TITLE_LIMIT;
+    const limit_reached = !checked && other_titles >= PARAMETERS.TITLES_MAX;
     const label = row.querySelector('.builder__title-label');
 
-    label.textContent = limit_reached ? 'Limit of ' + TITLE_LIMIT + ' titles reached' : 'Use answer as title';
+    label.textContent = limit_reached ? 'Limit of ' + PARAMETERS.TITLES_MAX + ' titles reached' : 'Use answer as title';
 
     bindCheckboxToggle(toggle, checked, function (next_checked) {
-        if (next_checked && !input.is_title && countTitles(getCurrentInputs(), input.ref) >= TITLE_LIMIT) {
+        if (next_checked && !input.is_title && countTitles(getCurrentInputs(), input.ref) >= PARAMETERS.TITLES_MAX) {
             // Refused by the limit: put the box back without rebuilding the panel.
             toggle.checked = input.is_title === true;
             return;
@@ -1707,6 +1676,7 @@ function bindTitleToggle(row, input) {
 }
 
 function bindTextField(field, value, property) {
+    field.setAttribute('maxlength', String(PARAMETERS.QUESTION_MAX_LENGTH));
     field.value = value || '';
     field.placeholder = '';
     field.setAttribute('placeholder', '');
@@ -1722,6 +1692,11 @@ function bindTextField(field, value, property) {
 }
 
 function bindNumberField(field, value, property) {
+    const max_length = property === 'min' || property === 'max' ?
+        PARAMETERS.MIN_MAX_LENGTH :
+        PARAMETERS.QUESTION_MAX_LENGTH;
+
+    field.setAttribute('maxlength', String(max_length));
     field.value = value === null || value === undefined ? '' : String(value);
     field.placeholder = '';
     field.setAttribute('placeholder', '');
@@ -1739,6 +1714,7 @@ function bindNumberField(field, value, property) {
 function bindRegexField(wrapper, input) {
     const field = wrapper.querySelector('ion-input');
 
+    field.setAttribute('maxlength', String(PARAMETERS.REGEX_MAX_LENGTH));
     field.value = input.regex || '';
     field.placeholder = '';
     field.setAttribute('placeholder', '');

@@ -1,16 +1,17 @@
 'use strict';
 
 import { generateUniqID } from '@/models/refs.js';
+import { PARAMETERS } from '@/models/parameters.js';
 
 export const PLACEHOLDER_ANSWER = 'I am a placeholder answer';
 
 /* Mirrors consts.LIMITS.possible_answers_max / _max_search. */
-export const MAX_ANSWERS = 300;
-export const MAX_SEARCH_ANSWERS = 1000;
+export const MAX_ANSWERS = PARAMETERS.MAX_ANSWERS;
+export const MAX_SEARCH_ANSWERS = PARAMETERS.MAX_SEARCH_ANSWERS;
 
 /* consts.LIMITS.possible_answer_max_length / possible_answers_per_page. */
-export const MAX_ANSWER_LENGTH = 150;
-export const ANSWERS_PER_PAGE = 100;
+export const MAX_ANSWER_LENGTH = PARAMETERS.MAX_ANSWER_LENGTH;
+export const ANSWERS_PER_PAGE = PARAMETERS.ANSWERS_PER_PAGE;
 
 export const POSSIBLE_ANSWERS_ORDER = {
     AZ: 'az',
@@ -46,7 +47,7 @@ export function createAnswer(answer) {
 }
 
 /*
- * Answer text is capped at 150 characters, and angle brackets become the
+ * Answer text is capped at 250 characters, and angle brackets become the
  * private-use characters the legacy builder used, so an answer can never turn
  * into markup in the mobile app or the dataviewer.
  */
