@@ -44,6 +44,9 @@
                                 data-action="form-export">Export form</button>
                         <button type="button"
                                 class="builder__answers-dropdown-item"
+                                data-action="form-print">Print form</button>
+                        <button type="button"
+                                class="builder__answers-dropdown-item"
                                 data-action="form-import">Import form</button>
                         <div class="builder__answers-dropdown-divider"></div>
                         <button type="button"
@@ -98,11 +101,6 @@
             </div>
         </div>
 
-        <p class="builder__form-status"
-           data-role="form-status"
-           role="status"
-           hidden></p>
-
         <input type="file"
                class="builder__form-file"
                data-role="form-file"
@@ -110,7 +108,13 @@
                hidden>
 
         <ion-list class="builder__question-list">
-            <div class="builder__empty">No questions in this form yet.</div>
+            <div class="builder__empty">
+                No questions in this form yet.
+                <a class="builder__docs-link"
+                   href="https://docs.epicollect.net/formbuilder/PLACEHOLDER-import"
+                   target="_blank"
+                   rel="noopener noreferrer">About importing forms</a>
+            </div>
         </ion-list>
     </ion-card-content>
 </ion-card>

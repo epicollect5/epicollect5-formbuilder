@@ -1,0 +1,104 @@
+'use strict';
+
+import { FORM_MESSAGES } from '@/models/messages.js';
+import { getContainerList } from '@/models/nesting.js';
+import { isSearchType } from '@/models/possible-answers.js';
+import { getForms, getInputs } from '@/models/project-definition.js';
+
+/*
+ * The limits the JSON schema cannot express (see `schemas/project.schema.json`):
+ * total questions across nesting levels, titles per form / branch, and search
+ * questions across the project. They gate both saving and form import.
+ */
+export const INPUTS_MAX_ALLOWED = 300;
+export const TITLES_MAX = 3;
+export const SEARCH_INPUTS_MAX = 5;
+
+export function eachInput(inputs, visit) {
+    (inputs || []).forEach(function (input) {
+        visit(input);
+
+        if (input.type === 'branch' || input.type === 'group') {
+            eachInput(getContainerList(input), visit);
+        }
+    });
+}
+
+export function countInputs(inputs) {
+    let total = 0;
+
+    eachInput(inputs, function () {
+        total += 1;
+    });
+
+    return total;
+}
+
+/* Titles are per list: form inputs and each branch have their own cap. */
+export function countTitles(inputs) {
+    return (inputs || []).reduce(function (total, input) {
+        const own = input.is_title === true ? 1 : 0;
+        const nested = input.type === 'group' ? countTitles(getContainerList(input)) : 0;
+
+        return total + own + nested;
+    }, 0);
+}
+
+export function countSearchInputs(inputs) {
+    let total = 0;
+
+    eachInput(inputs, function (input) {
+        if (isSearchType(input.type)) {
+            total += 1;
+        }
+    });
+
+    return total;
+}
+
+function branchTitlesExceeded(inputs) {
+    return (inputs || []).some(function (input) {
+        if (input.type !== 'branch') {
+            return false;
+        }
+
+        const children = getContainerList(input);
+
+        return countTitles(children) > TITLES_MAX || branchTitlesExceeded(children);
+    });
+}
+
+/* Returns the first limit error, or null when the project is inside them. */
+export function getProjectLimitsError(project_definition) {
+    const forms = getForms(project_definition);
+
+    const inputs_total = forms.reduce(function (total, form) {
+        return total + countInputs(getInputs(form));
+    }, 0);
+
+    if (inputs_total > INPUTS_MAX_ALLOWED) {
+        return FORM_MESSAGES.TOO_MANY_QUESTIONS;
+    }
+
+    if (forms.some(function (form) {
+        return countTitles(getInputs(form)) > TITLES_MAX;
+    })) {
+        return FORM_MESSAGES.TOO_MANY_TITLES;
+    }
+
+    if (forms.some(function (form) {
+        return branchTitlesExceeded(getInputs(form));
+    })) {
+        return FORM_MESSAGES.TOO_MANY_TITLES;
+    }
+
+    const search_total = forms.reduce(function (total, form) {
+        return total + countSearchInputs(getInputs(form));
+    }, 0);
+
+    if (search_total > SEARCH_INPUTS_MAX) {
+        return FORM_MESSAGES.TOO_MANY_SEARCH_QUESTIONS;
+    }
+
+    return null;
+}

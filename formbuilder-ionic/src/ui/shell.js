@@ -17,8 +17,7 @@ import {
     getDefaultDatetimeFormat,
     hasAdvancedTab,
     hasJumpsTab,
-    isBranchOrGroup,
-    REGEX_PRESETS
+    isBranchOrGroup
 } from '@/models/input-properties.js';
 import { getContainerList } from '@/models/nesting.js';
 import { FORM_MESSAGES, VALIDATION_MESSAGES } from '@/models/messages.js';
@@ -76,10 +75,14 @@ import { duplicateInput } from '@/services/question-actions.js';
 import { getFormNameError, MAX_FORMS } from '@/services/form-management.js';
 import { prepareImportedForm } from '@/services/form-import.js';
 import { buildFormExport, getFormExportFilename, saveProject } from '@/services/save.js';
-import { areAllInputsValid, getInputErrors, isInputValid } from '@/services/validation.js';
+import { areAllInputsValid, areFormInputsValid, getInputErrors, isInputValid } from '@/services/validation.js';
 import { canUndo, ensureUndoBaseline, pushUndoState, undo } from '@/services/undo.js';
+import { confirmAlert } from '@/ui/alert.js';
 import { button, createView, element, icon, parseView } from '@/ui/dom.js';
+import { hideLoading, showLoading } from '@/ui/loading.js';
+import { showToast } from '@/ui/toast.js';
 import { createDropdown, populateDropdown } from '@/ui/dropdown.js';
+import { printForm } from '@/ui/print.js';
 import { createReadmeEditor } from '@/ui/readme-editor.js';
 import { installAnswerSortable, installQuestionSortable, installToolDrag } from '@/ui/sortable.js';
 import tools_view from '@/views/tools.html?raw';
@@ -98,12 +101,20 @@ const answer_notices = new Map();
 let active_readme_editor = null;
 let active_property_tab = 'basic';
 let saving = false;
-let pending_form_status = null;
 let pending_rename = false;
+let unsaved_changes = false;
+let tracked_project = null;
+let unload_guard_bound = false;
 
 export function renderApp(app_handlers) {
     handlers = app_handlers || {};
 
+    if (getSession().project_definition !== tracked_project) {
+        tracked_project = getSession().project_definition;
+        unsaved_changes = false;
+    }
+
+    installUnloadGuard();
     ensureUndoBaseline();
     renderProjectName();
     revealBuilder();
@@ -216,11 +227,9 @@ function bindChrome() {
 function recordChange(options) {
     // The throttled push lands later, so the button gate has to follow it.
     pushUndoState(Object.assign({ on_change: updateUndoButton }, options || {}));
+    unsaved_changes = true;
     updateUndoButton();
     updateSaveButton();
-
-    // A change makes the last save result stale.
-    showSaveStatus('', false);
 }
 function updateUndoButton() {
     const undo_button = document.getElementById('undo');
@@ -233,6 +242,23 @@ function updateUndoButton() {
 
     undo_button.disabled = !available;
     undo_button.title = available ? 'Undo the last change' : 'Nothing to undo';
+}
+
+function installUnloadGuard() {
+    if (unload_guard_bound) {
+        return;
+    }
+
+    unload_guard_bound = true;
+
+    window.addEventListener('beforeunload', function (event) {
+        if (!unsaved_changes) {
+            return;
+        }
+
+        event.preventDefault();
+        event.returnValue = 'Are you sure you want to leave?';
+    });
 }
 
 function performUndo() {
@@ -248,18 +274,6 @@ function performUndo() {
 
     active_property_tab = 'basic';
     renderApp(handlers);
-}
-
-function showSaveStatus(text, is_error) {
-    const status = document.querySelector('[data-role="save-status"]');
-
-    if (!status) {
-        return;
-    }
-
-    status.textContent = text || '';
-    status.classList.toggle('is-error', is_error === true);
-    status.hidden = !text;
 }
 
 function updateSaveButton() {
@@ -284,45 +298,23 @@ async function performSave() {
 
     saving = true;
     updateSaveButton();
-    showSaveStatus(FORM_MESSAGES.PROJECT_SAVING, false);
+    showLoading(FORM_MESSAGES.PROJECT_SAVING);
 
     try {
         await saveProject(project_definition);
-        showSaveStatus(FORM_MESSAGES.PROJECT_SAVED, false);
+        unsaved_changes = false;
+        showToast(FORM_MESSAGES.PROJECT_SAVED, 'success');
     }
     catch (error) {
         const message = error && error.message ? error.message : '';
 
-        showSaveStatus(FORM_MESSAGES.PROJECT_NOT_SAVED + (message ? ' ' + message : ''), true);
+        showToast(FORM_MESSAGES.PROJECT_NOT_SAVED + (message ? ' ' + message : ''), 'error');
     }
     finally {
+        hideLoading();
         saving = false;
         updateSaveButton();
     }
-}
-
-function showFormStatus(card, text, is_error) {
-    const status = card.querySelector('[data-role="form-status"]');
-
-    if (!status) {
-        return;
-    }
-
-    status.textContent = text || '';
-    status.classList.toggle('is-error', is_error === true);
-    status.hidden = !text;
-}
-
-/* A status set before a re-render (after an import) is shown by the new card. */
-function showPendingFormStatus(card, form) {
-    if (!pending_form_status || !form || pending_form_status.form_ref !== form.ref) {
-        return;
-    }
-
-    const status = pending_form_status;
-
-    pending_form_status = null;
-    showFormStatus(card, status.text, status.error);
 }
 
 function installFormActions(card, form) {
@@ -369,12 +361,16 @@ function installFormActions(card, form) {
             const payload = buildFormExport(getSession().project_definition, form_index);
 
             if (!payload) {
-                showFormStatus(card, FORM_MESSAGES.FORM_IS_INVALID, true);
+                showToast(FORM_MESSAGES.FORM_IS_INVALID, 'error');
                 return;
             }
 
             downloadFile(getFormExportFilename(getSession().project_definition, form_index), JSON.stringify(payload), 'application/json');
-            showFormStatus(card, '', false);
+        },
+        'form-print': function () {
+            if (!printForm(getSession().project_definition, form_index)) {
+                showToast(FORM_MESSAGES.FORM_IS_INVALID, 'error');
+            }
         },
         'form-import': function () {
             if (!isEditing()) {
@@ -425,7 +421,7 @@ function openFormRename(card, form) {
         const error = getFormNameError(getForms(getSession().project_definition), field.value, form_index);
 
         if (error) {
-            showFormStatus(card, error, true);
+            showToast(error, 'error');
             return;
         }
 
@@ -483,29 +479,42 @@ function importFormFile(card, form) {
         }
 
         if (!/\.json$/i.test(file.name)) {
-            showFormStatus(card, FORM_MESSAGES.FORM_FILE_INVALID, true);
+            showToast(FORM_MESSAGES.FORM_FILE_INVALID, 'error');
             return;
         }
 
         const reader = new FileReader();
 
+        showLoading(FORM_MESSAGES.FORM_IMPORTING);
+
         reader.onload = function () {
-            const result = prepareImportedForm(reader.result, getSession().project_definition, getSession().current_form_index);
+            let result;
+
+            try {
+                result = prepareImportedForm(reader.result, getSession().project_definition, getSession().current_form_index);
+            }
+            catch (error) {
+                // Never leave the overlay up if the parser itself throws.
+                result = { ok: false, error: FORM_MESSAGES.FORM_FILE_INVALID };
+            }
+
+            hideLoading();
 
             if (!result.ok) {
-                showFormStatus(card, result.error, true);
+                showToast(result.error, 'error');
                 return;
             }
 
             getCurrentForm().inputs = result.inputs;
             getSession().current_input_ref = null;
             recordChange();
-            pending_form_status = { form_ref: form.ref, text: FORM_MESSAGES.FORM_IMPORTED, error: false };
             renderApp(handlers);
+            showToast(FORM_MESSAGES.FORM_IMPORTED, 'success');
         };
 
         reader.onerror = function () {
-            showFormStatus(card, FORM_MESSAGES.FORM_FILE_INVALID, true);
+            hideLoading();
+            showToast(FORM_MESSAGES.FORM_FILE_INVALID, 'error');
         };
 
         reader.readAsText(file);
@@ -586,14 +595,26 @@ function renderForms() {
             value: String(form_index),
             role: 'tab',
             'aria-selected': is_selected ? 'true' : 'false'
-        }, [
-            element('ion-label', {}, [form.name])
-        ]);
+        }, [buildFormTabLabel(form)]);
 
         segment.append(tab);
     });
 
     bindFormSegment(segment);
+}
+
+function buildFormTabLabel(form) {
+    const label = element('ion-label', {}, [form.name]);
+
+    if (!areFormInputsValid(form)) {
+        label.append(element('ion-icon', {
+            class: 'builder__form-tab-state',
+            name: 'warning-outline',
+            'aria-label': 'Form has validation errors'
+        }));
+    }
+
+    return label;
 }
 
 /* The segment lives in the page shell, so its listeners are bound once. */
@@ -675,7 +696,6 @@ function renderQuestions() {
     container.replaceChildren(card);
 
     installFormActions(card, form);
-    showPendingFormStatus(card, form);
 
     if (pending_rename && form) {
         pending_rename = false;
@@ -946,10 +966,17 @@ function bindPropertyActions(card, input) {
     });
 
     delete_button.addEventListener('click', function () {
-        removeInput(input.ref);
-        recordChange();
-        renderQuestions();
-        renderProperties();
+        confirmAlert({
+            header: 'Warning',
+            message: FORM_MESSAGES.INPUT_DELETE_CONFIRM + ' ' + FORM_MESSAGES.INPUT_DELETE_WARNING,
+            confirm_text: 'Confirm',
+            on_confirm: function () {
+                removeInput(input.ref);
+                recordChange();
+                renderQuestions();
+                renderProperties();
+            }
+        });
     });
 }
 
@@ -1532,17 +1559,6 @@ function bindRegexField(wrapper, input) {
         recordChange({ throttle: true });
     });
 
-    wrapper.querySelectorAll('.builder__preset-btn').forEach(function (preset_button) {
-        const preset = REGEX_PRESETS.find(function (candidate) {
-            return candidate.key === preset_button.getAttribute('data-preset');
-        });
-
-        preset_button.addEventListener('click', function () {
-            field.value = preset.pattern;
-            updateCurrentInput({ regex: preset.pattern });
-            recordChange();
-        });
-    });
 }
 
 function bindNumericTypeControl(field_group, input) {

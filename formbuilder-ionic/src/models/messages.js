@@ -10,6 +10,7 @@ export const FORM_MESSAGES = {
     PROJECT_NOT_SAVED: 'Project error!',
     PROJECT_SAVING: 'Saving…',
     FORM_IMPORTED: 'Form import succeeded!',
+    FORM_IMPORTING: 'Importing form…',
     FORM_FILE_INVALID: 'Form file is invalid',
     FORM_IS_INVALID: 'Form is invalid',
     FORM_CANNOT_BE_DELETED: 'Form cannot be deleted',
@@ -18,7 +19,12 @@ export const FORM_MESSAGES = {
     FORM_NAME_EMPTY: 'Form name cannot be empty',
     FORM_NAME_INVALID: 'Form name is invalid',
     FORM_NAME_EXISTS: 'Form name exists',
-    FORM_NAME_LENGTH: 'Form name is too long (50 characters max)'
+    FORM_NAME_LENGTH: 'Form name is too long (50 characters max)',
+    INPUT_DELETE_CONFIRM: 'Are you sure you want to delete this question?',
+    INPUT_DELETE_WARNING: 'This action cannot be undone!',
+    TOO_MANY_QUESTIONS: 'Too many questions, only 300 per project are allowed!',
+    TOO_MANY_TITLES: 'Too many titles',
+    TOO_MANY_SEARCH_QUESTIONS: 'Too many search questions, only 5 per project are allowed!'
 };
 
 export const VALIDATION_MESSAGES = {

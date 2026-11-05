@@ -2,8 +2,16 @@
 
 import { FORM_MESSAGES } from '@/models/messages.js';
 import { getContainerList } from '@/models/nesting.js';
-import { isSearchType } from '@/models/possible-answers.js';
 import { getForms } from '@/models/project-definition.js';
+import {
+    countInputs,
+    countSearchInputs,
+    countTitles,
+    eachInput,
+    INPUTS_MAX_ALLOWED,
+    SEARCH_INPUTS_MAX,
+    TITLES_MAX
+} from '@/services/project-limits.js';
 import {
     areJumpsDestinationsValid,
     hasValidFormStructure,
@@ -20,51 +28,15 @@ import {
  * refs instead, so a question containing the imported ref as text is untouched.
  */
 
-export const INPUTS_MAX_ALLOWED = 300;
-export const TITLES_MAX = 3;
-export const SEARCH_INPUTS_MAX = 5;
-
-function eachInput(inputs, visit) {
-    (inputs || []).forEach(function (input) {
-        visit(input);
-
-        if (input.type === 'branch' || input.type === 'group') {
-            eachInput(getContainerList(input), visit);
-        }
-    });
-}
-
-export function countInputs(inputs) {
-    let total = 0;
-
-    eachInput(inputs, function () {
-        total += 1;
-    });
-
-    return total;
-}
-
-/* Titles are per list: form inputs and each branch have their own cap. */
-export function countTitles(inputs) {
-    return (inputs || []).reduce(function (total, input) {
-        const own = input.is_title === true ? 1 : 0;
-        const nested = input.type === 'group' ? countTitles(getContainerList(input)) : 0;
-
-        return total + own + nested;
-    }, 0);
-}
-
-export function countSearchInputs(inputs) {
-    let total = 0;
-
-    eachInput(inputs, function (input) {
-        if (isSearchType(input.type)) {
-            total += 1;
-        }
-    });
-
-    return total;
-}
+/* Re-exported so callers and tests keep one import point for the limits. */
+export {
+    countInputs,
+    countSearchInputs,
+    countTitles,
+    INPUTS_MAX_ALLOWED,
+    SEARCH_INPUTS_MAX,
+    TITLES_MAX
+};
 
 function remapRefs(inputs, imported_ref, current_ref) {
     const remap = function (value) {

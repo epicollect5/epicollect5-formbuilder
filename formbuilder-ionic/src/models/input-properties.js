@@ -58,12 +58,6 @@ export const TIME_FORMATS = [
     { value: 'mm:ss', label: 'mm:ss' }
 ];
 
-export const REGEX_PRESETS = [
-    { key: 'only_letters', label: 'Only letters', pattern: '^[a-zA-Z]*$' },
-    { key: 'only_digits', label: 'Only digits', pattern: '^[0-9]+$' },
-    { key: 'limit_length_20', label: 'Limit to 20 characters', pattern: '^.{1,20}$' }
-];
-
 export function allowsRequired(type) {
     return REQUIRED_ALLOWED_TYPES.indexOf(type) !== -1;
 }

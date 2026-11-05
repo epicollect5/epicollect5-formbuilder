@@ -3,6 +3,7 @@
 import { getForms, getProject } from '@/models/project-definition.js';
 import { areAllInputsValid } from '@/services/validation.js';
 import { getJumpAvailableDestinations } from '@/services/jumps.js';
+import { getProjectLimitsError } from '@/services/project-limits.js';
 
 /*
  * Port of `actions/save/**` plus the export half of the form callbacks.
@@ -165,6 +166,12 @@ export async function saveProject(project_definition, options) {
 
     if (!areAllInputsValid(project_definition)) {
         throw new Error('The project is invalid');
+    }
+
+    const limits_error = getProjectLimitsError(project_definition);
+
+    if (limits_error) {
+        throw new Error(limits_error);
     }
 
     const cleaned = cleanProject(project_definition);

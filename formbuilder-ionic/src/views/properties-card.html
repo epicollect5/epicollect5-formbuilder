@@ -6,29 +6,36 @@
             <div class="builder__heading-actions builder__answers-btn-group builder__form-actions-group builder__properties-actions-group">
                 <button type="button"
                         class="builder__answers-more-btn builder__form-action-btn"
+                        id="properties-copy"
                         data-action="copy"
                         aria-label="Copy question"
-                        title="Copy question"
                         disabled>
                     <ion-icon name="copy-outline"
                               aria-hidden="true"></ion-icon>
                 </button>
                 <button type="button"
                         class="builder__answers-more-btn builder__form-action-btn"
+                        id="properties-validate"
                         data-action="validate"
-                        aria-label="Validate question"
-                        title="Validate question">
+                        aria-label="Validate question">
                     <ion-icon name="checkmark-circle-outline"
                               aria-hidden="true"></ion-icon>
                 </button>
                 <button type="button"
                         class="builder__answers-more-btn builder__form-action-btn builder__icon-btn--danger"
+                        id="properties-delete"
                         data-action="delete"
-                        aria-label="Delete question"
-                        title="Delete question">
+                        aria-label="Delete question">
                     <ion-icon name="trash-outline"
                               aria-hidden="true"></ion-icon>
                 </button>
+
+                <ion-tooltip trigger="properties-copy"
+                             position="top">Copy question</ion-tooltip>
+                <ion-tooltip trigger="properties-validate"
+                             position="top">Validate question</ion-tooltip>
+                <ion-tooltip trigger="properties-delete"
+                             position="top">Delete question</ion-tooltip>
             </div>
         </div>
     </ion-card-header>
@@ -82,6 +89,13 @@
                                       data-field="title">
                             <span class="builder__title-label">Use answer as title</span>
                         </ion-checkbox>
+
+                        <p class="builder__hint">
+                            <a class="builder__docs-link"
+                               href="https://docs.epicollect.net/formbuilder/PLACEHOLDER-titles"
+                               target="_blank"
+                               rel="noopener noreferrer">What is a title?</a>
+                        </p>
                     </section>
                 </ion-segment-content>
 
@@ -151,18 +165,12 @@
                                        label-placement="stacked"
                                        fill="outline"
                                        maxlength="50"></ion-input>
-                            <div class="builder__regex-presets">
-                                <span class="builder__hint">Presets:</span>
-                                <button type="button"
-                                        class="builder__preset-btn"
-                                        data-preset="only_letters">Only letters</button>
-                                <button type="button"
-                                        class="builder__preset-btn"
-                                        data-preset="only_digits">Only digits</button>
-                                <button type="button"
-                                        class="builder__preset-btn"
-                                        data-preset="limit_length_20">Limit to 20 characters</button>
-                            </div>
+                            <p class="builder__hint">
+                                <a class="builder__docs-link"
+                                   href="https://docs.epicollect.net/formbuilder/PLACEHOLDER-regex"
+                                   target="_blank"
+                                   rel="noopener noreferrer">What is a regex?</a>
+                            </p>
                         </div>
 
                         <ion-checkbox class="builder__checkbox"

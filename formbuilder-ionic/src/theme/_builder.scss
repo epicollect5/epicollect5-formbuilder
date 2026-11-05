@@ -999,30 +999,6 @@ ion-item.builder__question[aria-current='true'] {
     gap: 6px;
 }
 
-.builder__regex-presets {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-}
-
-.builder__preset-btn {
-    min-height: 24px;
-    padding: 2px 8px;
-    border: 1px solid var(--fb-border-strong);
-    border-radius: 4px;
-    background: var(--fb-surface-2);
-    color: var(--fb-text);
-    font: inherit;
-    font-size: 12px;
-    line-height: 1.3;
-    cursor: pointer;
-}
-
-.builder__preset-btn:hover {
-    background: #ececf1;
-}
-
 .builder__properties-panel .builder__hint {
     font-size: 13px;
     line-height: 1.3;
@@ -1414,22 +1390,6 @@ ion-item.builder__question[aria-current='true'] {
     cursor: not-allowed;
 }
 
-.builder__action-status {
-    align-self: center;
-    max-width: 220px;
-    font-size: 12px;
-    line-height: 1.3;
-    color: var(--fb-muted);
-}
-
-.builder__action-status[hidden] {
-    display: none;
-}
-
-.builder__action-status.is-error {
-    color: var(--ion-color-danger, #c5000f);
-}
-
 .builder__form-edit {
     display: grid;
     gap: 8px;
@@ -1473,21 +1433,24 @@ ion-item.builder__question[aria-current='true'] {
     color: var(--fb-text);
 }
 
-.builder__form-status {
-    margin: 8px 0;
-    font-size: 12px;
-    line-height: 1.4;
-    color: var(--fb-muted);
-}
-
-.builder__form-status[hidden] {
-    display: none;
-}
-
-.builder__form-status.is-error {
-    color: var(--ion-color-danger, #c5000f);
-}
-
 .builder__form-file {
     display: none;
+}
+
+.builder__docs-link {
+    color: var(--ion-color-primary);
+    font-size: 12px;
+    text-decoration: underline;
+}
+
+/* ion-loading draws the full-viewport backdrop; the wait cursor is ours. */
+ion-loading.fb-loading {
+    cursor: progress;
+}
+
+.builder__form-tab-state {
+    margin-left: 6px;
+    color: var(--ion-color-warning);
+    font-size: 14px;
+    vertical-align: middle;
 }
