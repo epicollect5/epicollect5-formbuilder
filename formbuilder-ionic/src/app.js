@@ -8,6 +8,9 @@ bootFormbuilder().catch(function (error) {
     const loader = document.querySelector('.loader');
 
     if (loader) {
-        loader.textContent = 'The formbuilder could not be loaded.';
+        loader.replaceChildren();
+        const message = document.createElement('div');
+        message.textContent = 'The formbuilder could not be loaded.';
+        loader.append(message);
     }
 });

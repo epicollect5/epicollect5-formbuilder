@@ -16,6 +16,21 @@ ion-header ion-toolbar[color='primary'] ion-icon {
     overflow: hidden;
 }
 
+.loader {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ion-background-color, #ffffff);
+}
+
+.loader ion-spinner {
+    width: 40px;
+    height: 40px;
+}
+
 .container-fluid {
     flex: 1;
     min-height: 0;

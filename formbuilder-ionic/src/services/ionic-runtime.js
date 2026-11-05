@@ -30,6 +30,7 @@ import { defineCustomElement as defineIonSelect } from '@ionic/core/components/i
 import { defineCustomElement as defineIonSelectOption } from '@ionic/core/components/ion-select-option.js';
 import { defineCustomElement as defineIonRadio } from '@ionic/core/components/ion-radio.js';
 import { defineCustomElement as defineIonRadioGroup } from '@ionic/core/components/ion-radio-group.js';
+import { defineCustomElement as defineIonSpinner } from '@ionic/core/components/ion-spinner.js';
 import { setAssetPath as setIoniconAssetPath } from 'ionicons/components';
 import { defineCustomElement as defineIoniconIcon } from 'ionicons/components/ion-icon.js';
 
@@ -63,6 +64,7 @@ const IONIC_COMPONENTS = [
     defineIonSelectOption,
     defineIonRadio,
     defineIonRadioGroup,
+    defineIonSpinner,
     defineIoniconIcon
 ];
 
