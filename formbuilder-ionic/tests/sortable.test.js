@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import jQuery from 'jquery';
 import { getCurrentInputs, setProject } from '@/services/session.js';
 import { renderApp } from '@/ui/shell.js';
@@ -17,6 +17,10 @@ beforeAll(async () => {
     const source = await readFile(resolve(process.cwd(), 'node_modules/jquery-ui/dist/jquery-ui.min.js'), 'utf8');
 
     new Function('jQuery', 'define', 'module', 'exports', source)(jQuery, undefined, undefined, undefined);
+});
+
+afterAll(() => {
+    vi.useRealTimers();
 });
 
 function build_markup() {
@@ -56,6 +60,87 @@ function project_definition() {
 
 function question_list() {
     return jQuery('#questions .builder__question-list');
+}
+
+/* A forward jump that a reorder invalidates. */
+function jump_project() {
+    return {
+        data: {
+            project: {
+                name: 'Jump test',
+                slug: 'jump-test',
+                forms: [
+                    {
+                        ref: 'form_1',
+                        name: 'Jump form',
+                        type: 'hierarchy',
+                        inputs: [
+                            {
+                                ref: 'input_1',
+                                type: 'radio',
+                                question: 'Pick one',
+                                is_required: false,
+                                is_title: false,
+                                uniqueness: 'none',
+                                regex: null,
+                                default: null,
+                                verify: false,
+                                max: null,
+                                min: null,
+                                datetime_format: null,
+                                set_to_current_datetime: false,
+                                possible_answers: [
+                                    { answer: 'Yes', answer_ref: 'answer_1' },
+                                    { answer: 'No', answer_ref: 'answer_2' }
+                                ],
+                                jumps: [{ to: 'input_3', when: 'ALL', answer_ref: null }],
+                                branch: [],
+                                group: []
+                            },
+                            {
+                                ref: 'input_2',
+                                type: 'text',
+                                question: 'Explain',
+                                is_required: false,
+                                is_title: false,
+                                uniqueness: 'none',
+                                regex: null,
+                                default: null,
+                                verify: false,
+                                max: null,
+                                min: null,
+                                datetime_format: null,
+                                set_to_current_datetime: false,
+                                possible_answers: [],
+                                jumps: [],
+                                branch: [],
+                                group: []
+                            },
+                            {
+                                ref: 'input_3',
+                                type: 'text',
+                                question: 'Notes',
+                                is_required: false,
+                                is_title: false,
+                                uniqueness: 'none',
+                                regex: null,
+                                default: null,
+                                verify: false,
+                                max: null,
+                                min: null,
+                                datetime_format: null,
+                                set_to_current_datetime: false,
+                                possible_answers: [],
+                                jumps: [],
+                                branch: [],
+                                group: []
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    };
 }
 
 describe('question sortable', () => {
@@ -107,5 +192,29 @@ describe('question sortable', () => {
         expect(tools).toHaveLength(18);
         expect(tools.hasClass('ui-draggable')).toBe(true);
         expect(tools.first().attr('data-type')).toBe('text');
+    });
+
+    it('refreshes validity after a reorder without a toast', () => {
+        vi.useFakeTimers();
+        setProject(jump_project());
+        renderApp();
+
+        expect(document.getElementById('save').disabled).toBe(false);
+
+        const list = document.querySelector('#questions .builder__question-list');
+        const first_row = list.querySelector('.builder__question');
+
+        // The sortable leaves the DOM in its new order; its stop persists it.
+        list.append(first_row);
+        question_list().sortable('instance').options.stop();
+        vi.advanceTimersByTime(1);
+
+        const moved = document.querySelector('.builder__question[data-input-ref="input_1"]');
+
+        expect(moved.getAttribute('data-valid')).toBe('false');
+        expect(moved.querySelector('.question-state').classList.contains('is-invalid')).toBe(true);
+        expect(document.querySelector('#form-tabs .builder__form-tab .builder__form-tab-state')).not.toBeNull();
+        expect(document.getElementById('save').disabled).toBe(true);
+        expect(document.querySelector('ion-toast')).toBeNull();
     });
 });

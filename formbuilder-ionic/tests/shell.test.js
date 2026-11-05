@@ -81,6 +81,20 @@ function savable_project() {
     return project;
 }
 
+function savable_choice_project() {
+    const project = savable_project();
+    const radio = valid_text_input('form_1', 'input_1', 'Pick one');
+
+    radio.type = 'radio';
+    radio.possible_answers = [
+        { answer: 'Yes', answer_ref: 'answer_1' },
+        { answer: 'No', answer_ref: 'answer_2' }
+    ];
+    project.data.project.forms[0].inputs = [radio];
+
+    return project;
+}
+
 function select_first_question() {
     document.querySelectorAll('#questions .builder__question')[0].click();
 }
@@ -94,6 +108,10 @@ describe('builder shell', () => {
         build_markup();
         setProject(project_definition());
         renderApp();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
     });
 
     it('shows the project name and one tab per form', () => {
@@ -163,7 +181,120 @@ describe('builder shell', () => {
         expect(buttons[0].disabled).toBe(false);
         expect(buttons[1].disabled).toBe(false);
         expect(buttons[2].disabled).toBe(false);
-        expect(buttons[2].classList.contains('builder__icon-btn--danger')).toBe(true);
+        // Legacy order: copy, remove, validate.
+        expect(buttons[1].classList.contains('builder__icon-btn--danger')).toBe(true);
+        expect(buttons[2].getAttribute('data-action')).toBe('validate');
+    });
+
+    it('refreshes icons and gates when selecting another question, without a toast', () => {
+        setProject(savable_project());
+        renderApp();
+        select_first_question();
+
+        expect(document.getElementById('save').disabled).toBe(false);
+        expect(document.querySelector('#form-tabs .builder__form-tab .builder__form-tab-state')).toBeNull();
+
+        // Simulate an edit the last render has not seen, then select again.
+        getCurrentInputs()[0].question = '';
+        select_first_question();
+
+        const row = document.querySelector('.builder__question[data-input-ref="form_1_input_1"]');
+
+        expect(row.getAttribute('data-valid')).toBe('false');
+        expect(row.querySelector('.question-state').classList.contains('is-invalid')).toBe(true);
+        expect(document.querySelector('#form-tabs .builder__form-tab .builder__form-tab-state')).not.toBeNull();
+        expect(document.getElementById('save').disabled).toBe(true);
+        expect(document.querySelector('#properties [data-action="copy"]').disabled).toBe(true);
+        expect(document.querySelector('ion-toast')).toBeNull();
+    });
+
+    it('flags the form tab and save gate as soon as a question edit invalidates it', () => {
+        setProject(savable_project());
+        renderApp();
+        select_first_question();
+
+        expect(document.getElementById('save').disabled).toBe(false);
+
+        const field = document.querySelector('#properties .builder__question-field');
+
+        field.value = '';
+        field.dispatchEvent(new CustomEvent('ionInput', { detail: { value: '' } }));
+
+        expect(document.querySelector('#form-tabs .builder__form-tab .builder__form-tab-state')).not.toBeNull();
+        expect(document.getElementById('save').disabled).toBe(true);
+        expect(document.querySelector('ion-toast')).toBeNull();
+    });
+
+    it('flags the form tab and save gate when a possible answer loses its text', () => {
+        setProject(savable_choice_project());
+        renderApp();
+        select_first_question();
+
+        expect(document.getElementById('save').disabled).toBe(false);
+
+        const field = document.querySelector('#properties .builder__answer ion-input');
+
+        field.value = '';
+        field.dispatchEvent(new CustomEvent('ionInput', { detail: { value: '' } }));
+
+        expect(document.querySelector('#form-tabs .builder__form-tab .builder__form-tab-state')).not.toBeNull();
+        expect(document.getElementById('save').disabled).toBe(true);
+        expect(document.querySelector('ion-toast')).toBeNull();
+    });
+
+    it('limits a single-answer question to one jump', () => {
+        const project = savable_project();
+
+        project.data.project.forms[0].inputs = [
+            valid_text_input('form_1', 'a', 'One'),
+            valid_text_input('form_1', 'b', 'Two'),
+            valid_text_input('form_1', 'c', 'Three')
+        ];
+        setProject(project);
+        renderApp();
+        select_first_question();
+
+        const segment = document.querySelector('#properties .builder__property-tabs');
+
+        segment.value = 'jumps';
+        segment.dispatchEvent(new CustomEvent('ionChange', { detail: { value: 'jumps' } }));
+
+        document.querySelector('#properties .builder__add-jump').click();
+
+        expect(getCurrentInput().jumps).toHaveLength(1);
+        expect(document.querySelector('#properties .builder__add-jump').disabled).toBe(true);
+    });
+
+    it('toasts that the selected question is valid', () => {
+        vi.useFakeTimers();
+        select_first_question();
+
+        document.querySelector('#properties [data-action="validate"]').click();
+
+        expect(document.querySelector('.wait-overlay.is-visible')).not.toBeNull();
+
+        vi.advanceTimersByTime(600);
+
+        const toast = document.querySelector('ion-toast');
+
+        expect(toast.message).toBe('Question valid!');
+        expect(toast.cssClass).toContain('fb-toast--success');
+        expect(document.querySelector('.wait-overlay.is-visible')).toBeNull();
+    });
+
+    it('toasts that the selected question is not valid', () => {
+        vi.useFakeTimers();
+        select_first_question();
+        getCurrentInput().question = '';
+
+        document.querySelector('#properties [data-action="validate"]').click();
+        vi.advanceTimersByTime(600);
+
+        const toast = document.querySelector('ion-toast');
+
+        expect(toast.message).toBe('Question NOT valid!');
+        expect(toast.cssClass).toContain('fb-toast--danger');
+        expect(document.querySelector('.builder__question[data-input-ref="input_1"]').getAttribute('data-valid')).toBe('false');
     });
 
     it('adds a question from the tools and selects it', () => {
@@ -180,18 +311,57 @@ describe('builder shell', () => {
         expect(document.querySelector('#questions .builder__question[aria-current="true"] .builder__question-text').textContent).toBe('Untitled question');
     });
 
-    it('deletes the selected question after confirmation', () => {
+    it('deletes the selected question immediately, with undo as the safety net', () => {
         select_first_question();
         document.querySelector('#properties .builder__icon-btn--danger').click();
-
-        expect(getCurrentInputs()).toHaveLength(2);
-
-        document.querySelector('ion-alert').buttons[1].handler();
 
         expect(getCurrentInputs()).toHaveLength(1);
         expect(getSession().current_input_ref).toBeNull();
         expect(document.querySelectorAll('#questions .builder__question')).toHaveLength(1);
         expect(document.querySelector('#properties .builder__empty')).not.toBeNull();
+        expect(document.querySelector('ion-toast').message).toBe('Question deleted');
+    });
+
+    it('warns before deleting a question when the project has entries', () => {
+        const project = project_definition();
+
+        project.data.project.total_entries = 4;
+        setProject(project);
+        renderApp();
+        select_first_question();
+        document.querySelector('#properties .builder__icon-btn--danger').click();
+
+        expect(getCurrentInputs()).toHaveLength(2);
+
+        const modal = document.querySelector('ion-modal.legacy-modal-host');
+
+        expect(modal.querySelector('.modal-title').textContent).toBe('Warning');
+        modal.querySelector('.modal-footer .btn-danger').click();
+
+        expect(getCurrentInputs()).toHaveLength(1);
+        expect(getSession().current_input_ref).toBeNull();
+    });
+
+    it('shows the no-title warning only while the form has no title', () => {
+        const warning = document.querySelector('#questions [data-role="title-warning"]');
+
+        expect(warning.hidden).toBe(false);
+        expect(warning.textContent).toContain('No title set for this form yet');
+
+        select_first_question();
+        getCurrentInput().is_title = true;
+        renderApp();
+
+        expect(document.querySelector('#questions [data-role="title-warning"]').hidden).toBe(true);
+    });
+
+    it('disables adding a jump on the last question', () => {
+        document.querySelectorAll('#questions .builder__question')[1].click();
+
+        const add = document.querySelector('#properties .builder__add-jump');
+
+        expect(add.disabled).toBe(true);
+        expect(add.title).toBe('No jump destinations available');
     });
 
     it('enables save only when every form is valid and filled', () => {
@@ -227,8 +397,16 @@ describe('builder shell', () => {
         expect(tabs[1].getAttribute('aria-label')).toBeNull();
     });
 
-    it('adds a form and switches to it', () => {
+    it('adds a form through the name modal and switches to it', () => {
         document.getElementById('add-form').click();
+
+        const modal = document.querySelector('ion-modal.legacy-modal-host');
+        const field = modal.querySelector('.modal-body input');
+
+        field.value = 'Third form';
+        [...modal.querySelectorAll('.modal-footer button')]
+            .find((button) => button.textContent === 'Save changes')
+            .click();
 
         expect(getSession().current_form_index).toBe(2);
         expect(document.querySelectorAll('#form-tabs .builder__form-tab')).toHaveLength(3);
@@ -336,7 +514,6 @@ describe('undo', () => {
     it('restores a deleted question', () => {
         select_first_question();
         document.querySelector('#properties .builder__icon-btn--danger').click();
-        document.querySelector('ion-alert').buttons[1].handler();
 
         expect(getCurrentInputs()).toHaveLength(1);
 
@@ -348,6 +525,14 @@ describe('undo', () => {
 
     it('clamps the form index when an added form is undone', () => {
         document.getElementById('add-form').click();
+
+        const modal = document.querySelector('ion-modal.legacy-modal-host');
+        const field = modal.querySelector('.modal-body input');
+
+        field.value = 'Third form';
+        [...modal.querySelectorAll('.modal-footer button')]
+            .find((button) => button.textContent === 'Save changes')
+            .click();
 
         expect(getSession().current_form_index).toBe(2);
 
@@ -402,39 +587,40 @@ describe('form actions', () => {
     it('renames the current form from the edit button', () => {
         document.querySelector('#questions .builder__form-action-btn--edit').click();
 
-        const panel = document.querySelector('#questions [data-role="form-rename"]');
-
-        expect(panel.hidden).toBe(false);
-
-        const field = panel.querySelector('[data-role="form-name-input"]');
+        const modal = document.querySelector('ion-modal.legacy-modal-host');
+        const field = modal.querySelector('.modal-body input');
 
         expect(field.value).toBe('Screening form');
 
         field.value = 'Renamed form';
-        panel.querySelector('[data-action="form-rename-save"]').click();
+        [...modal.querySelectorAll('.modal-footer button')]
+            .find((button) => button.textContent === 'Save changes')
+            .click();
 
         expect(getCurrentForm().name).toBe('Renamed form');
         expect(document.querySelectorAll('#form-tabs .builder__form-tab')[0].textContent).toBe('Renamed form');
-        expect(document.querySelector('#questions [data-role="form-rename"]').hidden).toBe(true);
+        expect(document.querySelector('ion-modal.legacy-modal-host')).toBeNull();
     });
 
-    it('refuses a duplicate form name and shows why', () => {
+    it('refuses a duplicate form name in the modal', () => {
         document.querySelector('#questions .builder__form-action-btn--edit').click();
 
-        const panel = document.querySelector('#questions [data-role="form-rename"]');
-        const field = panel.querySelector('[data-role="form-name-input"]');
+        const modal = document.querySelector('ion-modal.legacy-modal-host');
+        const field = modal.querySelector('.modal-body input');
+        const error = modal.querySelector('[data-role="form-name-error"]');
 
         field.value = 'Second form';
-        panel.querySelector('[data-action="form-rename-save"]').click();
-
-        const toast = document.querySelector('ion-toast');
+        [...modal.querySelectorAll('.modal-footer button')]
+            .find((button) => button.textContent === 'Save changes')
+            .click();
 
         expect(getCurrentForm().name).toBe('Screening form');
-        expect(toast.message).toBe('Form name exists');
-        expect(toast.cssClass).toContain('fb-toast--danger');
+        expect(error.textContent).toBe('Form name exists');
+        expect(error.hidden).toBe(false);
+        expect(document.querySelector('ion-modal.legacy-modal-host')).not.toBeNull();
     });
 
-    it('deletes only the last child form, after confirmation', () => {
+    it('deletes only the last child form, without a confirmation', () => {
         const delete_button = document.querySelector('#questions .builder__form-action-btn--delete');
 
         expect(delete_button.disabled).toBe(true);
@@ -447,14 +633,9 @@ describe('form actions', () => {
 
         last_delete.click();
 
-        const confirm_panel = document.querySelector('#questions [data-role="form-confirm"]');
-
-        expect(confirm_panel.hidden).toBe(false);
-
-        confirm_panel.querySelector('[data-action="form-confirm-yes"]').click();
-
         expect(document.querySelectorAll('#form-tabs .builder__form-tab')).toHaveLength(1);
         expect(getSession().current_form_index).toBe(0);
+        expect(document.querySelector('ion-toast').message).toBe('Form deleted');
     });
 
     it('prints the current form from the form menu', () => {
@@ -486,28 +667,28 @@ describe('form actions', () => {
         expect(document.querySelector('ion-toast').message).toBe('Form is invalid');
     });
 
-    it('deletes all questions of the active form after confirmation', () => {
+    it('deletes all questions without a confirmation', () => {
         document.querySelector('#questions [data-action="form-delete-all"]').click();
-
-        const confirm_panel = document.querySelector('#questions [data-role="form-confirm"]');
-
-        expect(confirm_panel.hidden).toBe(false);
-        expect(confirm_panel.querySelector('[data-role="form-confirm-message"]').textContent).toBe('Delete all questions?');
-
-        confirm_panel.querySelector('[data-action="form-confirm-yes"]').click();
 
         expect(getCurrentInputs()).toHaveLength(0);
         expect(document.querySelector('#questions .builder__empty')).not.toBeNull();
     });
 
-    it('caps the project at five forms and asks for the new name', () => {
+    it('caps the project at five forms', () => {
         for (let index = 0; index < 3; index += 1) {
             document.getElementById('add-form').click();
+
+            const modal = document.querySelector('ion-modal.legacy-modal-host');
+            const field = modal.querySelector('.modal-body input');
+
+            field.value = 'Extra form ' + index;
+            [...modal.querySelectorAll('.modal-footer button')]
+                .find((button) => button.textContent === 'Save changes')
+                .click();
         }
 
         expect(document.querySelectorAll('#form-tabs .builder__form-tab')).toHaveLength(5);
         expect(getSession().current_form_index).toBe(4);
-        expect(document.querySelector('#questions [data-role="form-rename"]').hidden).toBe(false);
         expect(document.getElementById('add-form').disabled).toBe(true);
     });
 

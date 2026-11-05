@@ -85,11 +85,13 @@ describe('validation', () => {
     it('validates integer bounds and the initial answer', () => {
         const decimal_bound = input('form_1_a', { type: 'integer', min: '1.5' });
         const reversed = input('form_1_a', { type: 'integer', min: '10', max: '2' });
+        const equal_bounds = input('form_1_a', { type: 'integer', min: '5', max: '5' });
         const out_of_range = input('form_1_a', { type: 'integer', min: null, max: '5', default: '10' });
         const valid = input('form_1_a', { type: 'integer', min: '1', max: '5', default: '5' });
 
         expect(messages(decimal_bound, [decimal_bound])).toEqual(['Value must be an integer']);
         expect(messages(reversed, [reversed])).toEqual(['Min value must be smaller than Max']);
+        expect(messages(equal_bounds, [equal_bounds])).toEqual(['Min value must be smaller than Max']);
         // The legacy check only looked at max when min was set.
         expect(messages(out_of_range, [out_of_range])).toEqual(['Value is out of range']);
         expect(messages(valid, [valid])).toEqual([]);
@@ -99,10 +101,13 @@ describe('validation', () => {
         const invalid = input('form_1_a', { type: 'decimal', min: 'a' });
         const out_of_range = input('form_1_a', { type: 'decimal', min: '1', max: '2', default: '2.5' });
         const valid = input('form_1_a', { type: 'decimal', min: '1', max: '2', default: '1.5' });
+        const regex_default = input('form_1_a', { type: 'decimal', regex: '^[0-9]+$', default: 'abc' });
 
         expect(messages(invalid, [invalid])).toEqual(['Value must be a number']);
         expect(messages(out_of_range, [out_of_range])).toEqual(['Value is out of range']);
         expect(messages(valid, [valid])).toEqual([]);
+        // Legacy applies the regex to numeric defaults too.
+        expect(messages(regex_default, [regex_default])).toContain('Value does not match regex');
     });
 
     it('reports a default that does not match the regex, even a malformed one', () => {

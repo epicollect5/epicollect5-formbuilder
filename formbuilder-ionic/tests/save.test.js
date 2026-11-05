@@ -208,6 +208,20 @@ describe('saving', () => {
         await expect(saveProject(project_definition(), { fetch_project })).rejects.toThrow('HTTP 500');
     });
 
+    it('posts plain JSON to the dev endpoint', async () => {
+        const project = project_definition();
+        const fetch_project = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+        const dev_url = 'http://localhost:5183/epicollect5-formbuilder/project/project.json';
+        const saved = await saveProject(project, { fetch_project, dev: true, dev_url });
+
+        const [url, init] = fetch_project.mock.calls[0];
+
+        expect(url).toBe(dev_url);
+        expect(init.headers['content-type']).toBe('application/json');
+        expect(JSON.parse(init.body).data.project.name).toBe('Save test');
+        expect(saved.data.project.name).toBe('Save test');
+    });
+
     it('builds the endpoint from the builder url', () => {
         const url = getSaveUrl(project_definition(), 'https://epicollect.test/my-project/formbuilder');
 

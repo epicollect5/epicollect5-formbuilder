@@ -182,6 +182,10 @@ describe('properties panel', () => {
         group.dispatchEvent(new CustomEvent('ionChange', { detail: { value: 'decimal' } }));
 
         expect(getCurrentInput().type).toBe('decimal');
+
+        const row_icon = document.querySelector('.builder__question .builder__question-type-icon ion-icon');
+
+        expect(row_icon.getAttribute('name')).toBe('calculator-outline');
     });
 
     it('sets the default answer for a multiple-choice question', () => {
@@ -210,6 +214,93 @@ describe('properties panel', () => {
         }
 
         expect(getCurrentInput().default).toBe('b1');
+    });
+
+    it('labels media text as Question Text and leaves it uncapped like legacy', () => {
+        setProject(project_definition([base_input({ type: 'photo', question: 'Photo' })]));
+        renderApp();
+        select_first_question();
+
+        const label = document.querySelector('#properties [data-role="question-label"]');
+        const field = document.querySelector('#properties .builder__question-field');
+
+        expect(label.textContent).toBe('Question Text');
+        expect(field.hasAttribute('maxlength')).toBe(false);
+        expect(field.getAttribute('placeholder')).toBe('Type question here...');
+    });
+
+    it('uses the legacy required and double-entry labels', () => {
+        setProject(project_definition([base_input({ type: 'text', question: 'Name' })]));
+        renderApp();
+        select_first_question();
+
+        expect(checkbox_by_label('Answer is required')).not.toBeUndefined();
+
+        open_tab('advanced');
+
+        expect(checkbox_by_label('Require double entry verification')).not.toBeUndefined();
+
+        setProject(project_definition([base_input({ type: 'textarea', question: 'Notes' })]));
+        renderApp();
+        select_first_question();
+        open_tab('advanced');
+
+        const verify = checkbox_by_label('Require double entry');
+
+        expect(verify).not.toBeUndefined();
+        expect(verify.textContent).not.toContain('verification');
+    });
+
+    it('uses the legacy descriptive time format labels', () => {
+        setProject(project_definition([base_input({ type: 'time', question: 'When' })]));
+        renderApp();
+        select_first_question();
+        open_tab('advanced');
+
+        const group = document.querySelector('#properties [data-datetime-type="time"]');
+        const labels = [...group.querySelectorAll('ion-radio')].map(function (radio) {
+            return radio.textContent.trim();
+        });
+
+        expect(labels).toEqual([
+            'Hours:Minutes:Seconds (24 hours)',
+            'Hours:Minutes:Seconds (12 hours)',
+            'Hours:Minutes (24 hours)',
+            'Hours:Minutes (12 hours)',
+            'Minutes:Seconds'
+        ]);
+    });
+
+    it('fills a missing date format when the panel opens', () => {
+        setProject(project_definition([base_input({ type: 'date', question: 'When', datetime_format: null })]));
+        renderApp();
+        select_first_question();
+
+        expect(getCurrentInput().datetime_format).toBe('dd/MM/YYYY');
+    });
+
+    it('sanitises angle brackets in question text like legacy', () => {
+        setProject(project_definition([base_input({ type: 'text', question: 'Name' })]));
+        renderApp();
+        select_first_question();
+
+        const field = document.querySelector('#properties .builder__question-field');
+
+        field.value = '<b>';
+        field.dispatchEvent(new CustomEvent('ionInput', { detail: { value: '<b>' } }));
+
+        expect(getCurrentInput().question).toBe('\ufe64b\ufe65');
+    });
+
+    it('labels root-form uniqueness with the legacy wording', () => {
+        setProject(project_definition([base_input({ type: 'text', question: 'Name' })]));
+        renderApp();
+        select_first_question();
+        open_tab('advanced');
+
+        const option = document.querySelector('#properties [data-field="uniqueness"] .dropdown__option[data-value="form"]');
+
+        expect(option.textContent.trim()).toBe('Make answer unique to all Form entries');
     });
 
     it('caps the question text at 255 characters', () => {

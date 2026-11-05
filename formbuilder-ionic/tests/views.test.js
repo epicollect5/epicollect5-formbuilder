@@ -88,13 +88,13 @@ describe('fixed markup views', () => {
         });
     });
 
-    it('links the help to the docs instead of info modals', async () => {
+    it('keeps the title help in an info button instead of a docs link', async () => {
         const properties = await read('src/views/properties-card.html');
         const questions = await read('src/views/question-card.html');
-        const links = [...(properties + questions).matchAll(/href="([^"]+)"[^>]*target="_blank"/g)];
 
-        expect(links.length).toBeGreaterThanOrEqual(3);
-        expect(links.every((link) => link[1].includes('docs.epicollect.net'))).toBe(true);
+        expect(properties).toContain('data-role="title-info"');
+        expect(questions).toContain('data-role="title-info"');
+        expect(properties).not.toContain('PLACEHOLDER-titles');
         expect(properties).not.toContain('data-toggle="modal"');
     });
 
@@ -112,10 +112,28 @@ describe('fixed markup views', () => {
         expect(formats).toEqual(['bold', 'italic', 'underline']);
     });
 
-    it('keeps the print action in the form menu', async () => {
-        const html = await read('src/views/question-card.html');
+    it('gives every modal body a single root element', async () => {
+        const bodies = [
+            'src/views/form-name-modal-body.html',
+            'src/views/csv-import-modal-body.html',
+            'src/views/title-info-body.html',
+            'src/views/delete-question-modal-body.html'
+        ];
 
-        expect(html).toContain('data-action="form-print"');
+        for (const path of bodies) {
+            const template = document.createElement('template');
+
+            template.innerHTML = (await read(path)).trim();
+            expect(template.content.children, path).toHaveLength(1);
+        }
+    });
+
+    it('keeps the form menu trigger in the view and its actions in the shell', async () => {
+        const html = await read('src/views/question-card.html');
+        const shell = await read('src/ui/shell.js');
+
+        expect(html).toContain('data-role="form-actions-trigger"');
+        expect(shell).toContain("label: 'Print form'");
     });
 });
 

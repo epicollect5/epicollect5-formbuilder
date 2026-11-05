@@ -209,18 +209,49 @@ describe('branch and group rows', () => {
         renderApp();
     });
 
-    it('labels a container row with its child count and an edit control', () => {
-        expect(rows()[0].querySelector('.builder__question-count').textContent).toBe('2');
-        expect(rows()[1].querySelector('.builder__question-count').textContent).toBe('1');
-        expect(rows()[0].querySelector('.builder__question-enter').getAttribute('aria-label'))
-            .toBe('Edit branch: Household');
-        expect(rows()[1].querySelector('.builder__question-enter').getAttribute('aria-label'))
-            .toBe('Edit group: Visit');
-        expect(rows()[2].querySelector('.builder__question-enter')).toBeNull();
+    it('keeps container editing in the properties panel, not the row', () => {
+        expect(rows()[0].querySelector('.builder__question-count')).toBeNull();
+        expect(rows()[0].querySelector('.builder__question-enter')).toBeNull();
+
+        rows()[0].click();
+
+        const branch_edit = document.querySelector('#properties [data-role="edit-container"]');
+
+        expect(branch_edit.hidden).toBe(false);
+        expect(branch_edit.disabled).toBe(false);
+        expect(branch_edit.textContent).toBe('Edit Branch');
+
+        rows()[1].click();
+
+        const group_edit = document.querySelector('#properties [data-role="edit-container"]');
+
+        expect(group_edit.textContent).toBe('Edit Group');
+
+        rows()[2].click();
+
+        expect(document.querySelector('#properties [data-role="edit-container"]')).toBeNull();
+    });
+
+    it('disables Edit while a branch or group header is empty', () => {
+        rows()[0].click();
+
+        const field = document.querySelector('#properties .builder__question-field');
+        const edit = document.querySelector('#properties [data-role="edit-container"]');
+
+        field.value = '';
+        field.dispatchEvent(new CustomEvent('ionInput', { detail: { value: '' } }));
+
+        expect(edit.disabled).toBe(true);
+
+        field.value = 'Household';
+        field.dispatchEvent(new CustomEvent('ionInput', { detail: { value: 'Household' } }));
+
+        expect(edit.disabled).toBe(false);
     });
 
     it('enters a branch and shows its children plus a breadcrumb', () => {
-        rows()[0].querySelector('.builder__question-enter').click();
+        rows()[0].click();
+        document.querySelector('#properties [data-role="edit-container"]').click();
 
         expect(isEditing()).toBe(true);
         expect(rows()).toHaveLength(2);
@@ -231,10 +262,10 @@ describe('branch and group rows', () => {
         expect(title.textContent).toContain('Screening form');
         expect(title.querySelector('.builder__questions-title-crumb.is-current').textContent).toBe('Household');
 
-        const exit = document.querySelector('#questions .builder__questions-exit');
+        const exit = document.querySelector('#properties [data-role="exit-editing"]');
 
-        expect(exit.hidden).toBe(false);
-        expect(exit.textContent).toContain('Back to form');
+        expect(exit).not.toBeNull();
+        expect(exit.textContent).toContain('Exit Editing');
 
         const branch_tool = [...document.querySelectorAll('#tools .builder__tool')]
             .find((tool) => tool.getAttribute('data-type') === 'branch');
@@ -244,17 +275,20 @@ describe('branch and group rows', () => {
     });
 
     it('edits a nested group inside its branch', () => {
-        rows()[0].querySelector('.builder__question-enter').click();
-        rows()[1].querySelector('.builder__question-enter').click();
+        rows()[0].click();
+        document.querySelector('#properties [data-role="edit-container"]').click();
+        rows()[1].click();
+        document.querySelector('#properties [data-role="edit-container"]').click();
 
         expect(getEditingTrail().map((node) => node.question)).toEqual(['Household', 'Members']);
         expect(rows()).toHaveLength(1);
         expect(document.querySelector('#questions .builder__questions-title-crumb.is-current').textContent).toBe('Members');
-        expect(document.querySelector('#questions .builder__questions-exit').textContent).toContain('Back to branch');
+        expect(document.querySelector('#properties [data-role="exit-editing"]')).not.toBeNull();
     });
 
     it('labels form uniqueness as branch-scoped inside a branch', async () => {
-        rows()[0].querySelector('.builder__question-enter').click();
+        rows()[0].click();
+        document.querySelector('#properties [data-role="edit-container"]').click();
         rows()[0].click();
 
         expect(getSession().current_input_ref).toBe('form_1_branch_1_a');
@@ -264,19 +298,36 @@ describe('branch and group rows', () => {
         const form_option = uniqueness.querySelector('.dropdown__option[data-value="form"]');
         expect(form_option).not.toBeNull();
         expect(form_option.textContent.trim())
-            .toBe('Unique within this branch');
+            .toBe('Make answer unique to all Household entries of a Screening form entry');
+    });
+
+    it('disables the Jumps tab for questions inside a group', () => {
+        rows()[1].click();
+        document.querySelector('#properties [data-role="edit-container"]').click();
+        rows()[0].click();
+
+        const jumps_tab = document.querySelector('#properties .builder__property-tabs ion-segment-button[value="jumps"]');
+
+        expect(jumps_tab.hasAttribute('disabled')).toBe(true);
+
+        const segment = document.querySelector('#properties .builder__property-tabs');
+
+        segment.dispatchEvent(new CustomEvent('ionChange', { detail: { value: 'jumps' } }));
+
+        expect(document.querySelector('#property-content-jumps').getAttribute('aria-hidden')).toBe('true');
     });
 
     it('exits back to the form list and reselects the branch', () => {
         const branch_ref = rows()[0].getAttribute('data-input-ref');
 
-        rows()[0].querySelector('.builder__question-enter').click();
-        document.querySelector('#questions .builder__questions-exit').click();
+        rows()[0].click();
+        document.querySelector('#properties [data-role="edit-container"]').click();
+        document.querySelector('#properties [data-role="exit-editing"]').click();
 
         expect(isEditing()).toBe(false);
         expect(rows()).toHaveLength(3);
         expect(getSession().current_input_ref).toBe(branch_ref);
-        expect(document.querySelector('#questions .builder__questions-exit').hidden).toBe(true);
+        expect(document.querySelector('#properties [data-role="exit-editing"]')).toBeNull();
         expect(document.querySelector('#properties .builder__properties-title').textContent).toBe('Household');
     });
 
@@ -289,5 +340,10 @@ describe('branch and group rows', () => {
         expect(document.querySelector('#questions .builder__empty').textContent)
             .toBe('No questions in this branch yet.');
         expect(document.querySelectorAll('#questions .builder__question')).toHaveLength(0);
+
+        const warning = document.querySelector('#questions [data-role="title-warning"]');
+
+        expect(warning.hidden).toBe(false);
+        expect(warning.textContent).toContain('No title set for this branch yet');
     });
 });
