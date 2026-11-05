@@ -5,7 +5,7 @@ import addFormats from 'ajv-formats';
 import project_schema from '../../schemas/project.schema.json';
 
 const PROJECT_SCHEMA_ID = 'epicollect5-project';
-const JUMP_TO_END_OF_FORM_REF = 'END';
+export const JUMP_TO_END_OF_FORM_REF = 'END';
 const CHOICE_TYPES = ['dropdown', 'radio', 'checkbox', 'searchsingle', 'searchmultiple'];
 const SEARCH_TYPES = ['searchsingle', 'searchmultiple'];
 const POSSIBLE_ANSWERS_MAX = 300;

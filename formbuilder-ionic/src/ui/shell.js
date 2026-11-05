@@ -22,6 +22,15 @@ import {
     renamePossibleAnswer,
     reorderPossibleAnswers
 } from '@/services/possible-answers.js';
+import {
+    addJump,
+    canAddJump,
+    getJumpAvailableDestinations,
+    JUMP_TO_END_OF_FORM_REF,
+    removeJump,
+    updateJump
+} from '@/services/jumps.js';
+import { JUMP_CONDITIONS, jumpNeedsAnswer, usesAlwaysJump } from '@/models/jumps.js';
 import { goBack } from '@/services/navigation.js';
 import {
     addForm,
@@ -44,12 +53,15 @@ import {
     updateCurrentInput
 } from '@/services/session.js';
 import { button, createView, element, icon, parseView } from '@/ui/dom.js';
+import { createDropdown, populateDropdown } from '@/ui/dropdown.js';
 import { createReadmeEditor } from '@/ui/readme-editor.js';
 import { installAnswerSortable, installQuestionSortable, installToolDrag } from '@/ui/sortable.js';
 import tools_view from '@/views/tools.html?raw';
 import question_card_view from '@/views/question-card.html?raw';
 import properties_card_view from '@/views/properties-card.html?raw';
 import possible_answers_view from '@/views/possible-answers-card.html?raw';
+import jump_row_view from '@/views/jump-row.html?raw';
+import jump_row_always_view from '@/views/jump-row-always.html?raw';
 
 const QUESTION_LIST = '#questions .builder__question-list';
 const TITLE_LIMIT = 3;
@@ -72,18 +84,15 @@ export function renderApp(app_handlers) {
 
 function renderProjectName() {
     const project = getProject(getSession().project_definition);
-    const container = document.getElementById('project-name');
+    const title = document.querySelector('ion-title #project-name, ion-title') || document.getElementById('project-name');
+    const name = document.getElementById('project-name');
     const logo = document.getElementById('project-logo');
 
-    if (container) {
-        const label = container.querySelector('.builder-bar__project-name');
-
-        if (label) {
-            label.textContent = project ? project.name : '';
-        }
-        else {
-            container.textContent = project ? project.name : '';
-        }
+    if (name) {
+        name.textContent = project ? project.name : '';
+    }
+    else if (title && title.tagName && title.tagName.toLowerCase() === 'ion-title') {
+        title.textContent = project ? project.name : '';
     }
 
     if (logo) {
@@ -622,6 +631,7 @@ function renderProperties() {
     bindPropertyTabs(tab_strip, input);
     buildBasicPanel(input, card.querySelector('#property-content-basic'));
     buildAdvancedPanel(input, card.querySelector('#property-content-advanced'));
+    buildJumpsPanel(input, card.querySelector('#property-content-jumps'));
 
     tab_strip.value = active_property_tab;
     container.replaceChildren(card);
@@ -819,6 +829,199 @@ function buildAdvancedPanel(input, pane) {
     if (fields.indexOf('search_type') !== -1) {
         bindSearchTypeControl(panel.querySelector('[data-field="search_type"]'), input);
     }
+}
+
+function buildJumpsPanel(input, pane) {
+    const panel = pane.querySelector('.builder__jumps-panel');
+    const add_button = panel.querySelector('.builder__add-jump');
+    const no_jumps = panel.querySelector('[data-role="no-jumps"]');
+    const list = panel.querySelector('.builder__jumps-list');
+    const jumps = Array.isArray(input.jumps) ? input.jumps : [];
+    const destinations = getJumpAvailableDestinations(input, getCurrentInputs());
+
+    list.replaceChildren();
+    add_button.disabled = !canAddJump(input);
+    add_button.addEventListener('click', function () {
+        if (addJump(input)) {
+            renderProperties();
+            renderQuestions();
+            updateCurrentQuestionStatus();
+        }
+    });
+
+    if (jumps.length === 0) {
+        no_jumps.removeAttribute('hidden');
+        return;
+    }
+
+    no_jumps.setAttribute('hidden', 'hidden');
+
+    jumps.forEach(function (jump, index) {
+        list.append(buildJumpRow(input, jump, index, destinations));
+    });
+}
+
+function initDropdown(control, options, value, on_change, disabled) {
+    if (!control) {
+        return null;
+    }
+
+    const is_dropdown = typeof control.setOptions === 'function' || control.classList && control.classList.contains('dropdown') && !control.hasAttribute('data-dropdown');
+    if (is_dropdown && typeof control.setOptions === 'function') {
+        if (on_change) {
+            control.onChange(on_change);
+        }
+        control.setOptions(options, value);
+        control.setDisabled(!!disabled);
+        return control;
+    }
+
+    const placeholder = control.hasAttribute('data-dropdown') ?
+        control :
+        control.querySelector('[data-dropdown]');
+
+    if (!placeholder) {
+        return null;
+    }
+
+    if (typeof placeholder.setOptions === 'function') {
+        if (on_change) {
+            placeholder.onChange(on_change);
+        }
+        placeholder.setOptions(options, value);
+        placeholder.setDisabled(!!disabled);
+        return placeholder;
+    }
+
+    const dropdown = createDropdown({
+        class_name: placeholder.className.replace(/\bdropdown\b/g, '').trim(),
+        aria_label: placeholder.getAttribute('aria-label') || control.getAttribute('aria-label') || 'Select option',
+        placeholder: placeholder.getAttribute('data-dropdown-placeholder') || 'Select',
+        options: options,
+        value: value,
+        disabled: !!disabled,
+        on_change: on_change
+    });
+
+    if (placeholder.parentNode) {
+        placeholder.replaceWith(dropdown);
+    }
+
+    return dropdown;
+}
+
+function buildJumpRow(input, jump, index, destinations) {
+    const always = usesAlwaysJump(input.type);
+    const row = createView(always ? jump_row_always_view : jump_row_view);
+    const when_placeholder = row.querySelector('.builder__jump-when');
+    const answer_placeholder = row.querySelector('.builder__jump-answer');
+    const goto_placeholder = row.querySelector('.builder__jump-goto');
+    const remove_button = row.querySelector('.builder__jump-remove');
+
+    row.setAttribute('data-jump-index', String(index));
+
+    if (always) {
+        initDropdown(when_placeholder, [{ value: 'ALL', label: 'always' }], 'ALL', null, true);
+    }
+    else {
+        initDropdown(when_placeholder, JUMP_CONDITIONS.map(function (condition) {
+            return { value: condition.key, label: condition.label };
+        }), jump.when || 'IS', function (detail) {
+            updateJump(input, index, { when: detail.value });
+            renderProperties();
+            renderQuestions();
+            updateCurrentQuestionStatus();
+        }, false);
+
+        if (answer_placeholder) {
+            const answer_options = (input.possible_answers || []).map(function (answer) {
+                return {
+                    value: answer.answer_ref,
+                    label: answer.answer || 'Untitled answer'
+                };
+            });
+            const has_value = answer_options.some(function (option) {
+                return String(option.value) === String(jump.answer_ref);
+            });
+            const answer_value = has_value ? jump.answer_ref : (answer_options[0] ? answer_options[0].value : '');
+
+            initDropdown(answer_placeholder, answer_options, answer_value, !jumpNeedsAnswer(jump.when) ? null : function (detail) {
+                updateJump(input, index, { answer_ref: detail.value || '' });
+                renderProperties();
+                renderQuestions();
+                updateCurrentQuestionStatus();
+            }, !jumpNeedsAnswer(jump.when));
+        }
+    }
+
+    const destination_options = destinations.map(function (destination) {
+        return {
+            value: destination.ref,
+            label: destination.question
+        };
+    });
+    const has_destination = destination_options.some(function (option) {
+        return String(option.value) === String(jump.to);
+    });
+
+    if (jump.to && !has_destination) {
+        destination_options.unshift({
+            value: jump.to,
+            label: jump.to === JUMP_TO_END_OF_FORM_REF ? 'End of form' : 'Unavailable destination'
+        });
+    }
+
+    if (!jump.to || !destination_options.some(function (option) { return String(option.value) === String(jump.to); })) {
+        destination_options.unshift({ value: '', label: 'Select destination' });
+    }
+
+    initDropdown(goto_placeholder, destination_options, jump.to || '', function (detail) {
+        updateJump(input, index, { to: detail.value || '' });
+        renderQuestions();
+        updateCurrentQuestionStatus();
+    }, false);
+
+    remove_button.addEventListener('click', function () {
+        if (removeJump(input, index)) {
+            renderProperties();
+            renderQuestions();
+            updateCurrentQuestionStatus();
+        }
+    });
+
+    return row;
+}
+
+function populateSelect(select, options, value, on_change) {
+    if (select && typeof select.setOptions === 'function') {
+        populateDropdown(select, options, value, on_change);
+        return;
+    }
+
+    if (!select) {
+        return;
+    }
+
+    select.replaceChildren();
+
+    if (select.tagName && select.tagName.toLowerCase() === 'ion-select') {
+        select.justify = 'space-between';
+        select.setAttribute('justify', 'space-between');
+        options.forEach(function (option_data) {
+            const option = element('ion-select-option', { value: option_data.value });
+            option.textContent = option_data.label;
+            select.append(option);
+        });
+        select.value = value;
+        return;
+    }
+
+    options.forEach(function (option_data) {
+        const option = element('option', { value: option_data.value });
+        option.textContent = option_data.label;
+        select.append(option);
+    });
+    select.value = value;
 }
 
 function getQuestionLabelText(type) {
@@ -1020,47 +1223,81 @@ function bindCurrentDatetimeToggle(toggle, input) {
     });
 }
 
-function bindDefaultChoiceControl(select, input) {
+function bindDefaultChoiceControl(control, input) {
+    if (!control) {
+        return;
+    }
+
+    const options = [{ value: '', label: 'None' }].concat((input.possible_answers || []).map(function (answer) {
+        return {
+            value: answer.answer_ref,
+            label: answer.answer || 'Untitled answer'
+        };
+    }));
     const has_default = (input.possible_answers || []).some(function (answer) {
-        return answer.answer_ref === input.default;
+        return String(answer.answer_ref) === String(input.default);
     });
+    const value = has_default ? input.default : '';
 
-    select.value = has_default ? input.default : '';
-    select.append(buildSelectOption('', 'None'));
+    const dropdown_control = (typeof control.setOptions === 'function' || control.hasAttribute('data-dropdown')) ?
+        control :
+        control.querySelector('[data-dropdown], .dropdown');
 
-    (input.possible_answers || []).forEach(function (answer) {
-        select.append(buildSelectOption(answer.answer_ref, answer.answer || 'Untitled answer'));
+    if (dropdown_control) {
+        initDropdown(dropdown_control, options, value, function (detail) {
+            updateCurrentInput({ default: detail.value ? detail.value : null });
+        }, false);
+        return;
+    }
+
+    control.replaceChildren();
+    options.forEach(function (option_data) {
+        control.append(element('ion-select-option', { value: option_data.value }, [option_data.label]));
     });
-
-    select.addEventListener('ionChange', function (event) {
-        const value = event.detail.value;
-
-        updateCurrentInput({ default: value ? value : null });
+    control.value = value;
+    control.addEventListener('ionChange', function (event) {
+        const next = event.detail.value;
+        updateCurrentInput({ default: next ? next : null });
     });
 }
 
-function buildSelectOption(value, label) {
-    const option = element('ion-select-option', { value: value });
+function bindUniquenessControl(control, input) {
+    if (!control) {
+        return;
+    }
 
-    option.textContent = label;
-
-    return option;
-}
-
-function bindUniquenessControl(select, input) {
     const form = getCurrentForm();
     const form_name = form ? form.name : 'this form';
     const container = getEditingContainer();
-    const scoped_option = select.querySelector('ion-select-option[value="form"]');
-
-    // The contract keeps `form` for both scopes: inside a branch the legacy
-    // builder labels the same value as branch-scoped uniqueness.
-    scoped_option.textContent = container && container.type === 'branch' ?
+    const scoped_label = container && container.type === 'branch' ?
         'Unique within this branch' :
         'Unique to all ' + form_name + ' entries';
-    select.value = input.uniqueness || 'none';
+    const options = [
+        { value: 'none', label: 'No uniqueness' },
+        { value: 'form', label: scoped_label }
+    ];
 
-    select.addEventListener('ionChange', function (event) {
+    const dropdown_control = (typeof control.setOptions === 'function' || control.hasAttribute('data-dropdown')) ?
+        control :
+        control.querySelector('[data-dropdown], .dropdown');
+
+    if (dropdown_control) {
+        const dropdown = initDropdown(dropdown_control, options, input.uniqueness || 'none', function (detail) {
+            updateCurrentInput({ uniqueness: detail.value || 'none' });
+        }, false);
+
+        if (dropdown) {
+            dropdown.setOptions(options, input.uniqueness || 'none');
+        }
+        return;
+    }
+
+    const scoped_option = control.querySelector('ion-select-option[value="form"]');
+    if (scoped_option) {
+        scoped_option.textContent = scoped_label;
+    }
+    control.value = input.uniqueness || 'none';
+    control.addEventListener('ionChange', function (event) {
         updateCurrentInput({ uniqueness: event.detail.value || 'none' });
     });
 }

@@ -1,76 +1,13 @@
-.formbuilder-toolbar {
-    --background: var(--ion-color-primary);
-    --color: var(--ion-color-primary-contrast);
-    --min-height: 60px;
-}
-
-.formbuilder-toolbar .navbar {
-    display: block;
-    width: 100%;
-    opacity: 1;
-}
-
-.navbar-inner {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    align-items: center;
-    width: 100%;
-    gap: 10px;
-}
-
-.navbar-inner > ion-buttons:first-child {
-    justify-self: start;
-}
-
-.navbar-inner > ion-buttons:last-child {
-    justify-self: end;
-}
-
-.navbar-brand {
-    display: flex;
-    align-items: center;
-    justify-self: center;
-    min-width: 0;
-    gap: 10px;
-    margin: 0;
-    font-size: 17px;
-    font-weight: 600;
-    color: #ffffff;
-}
-
-.formbuilder-toolbar,
-.formbuilder-toolbar .navbar,
-.navbar-brand,
-.navbar-brand span,
-.navbar-back-button,
-.navbar-back-button .fa,
-.navbar-back-button span {
-    color: #ffffff;
-}
-
-.navbar-project-name img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    background: rgba(255, 255, 255, 0.16);
-}
-
-.navbar-back-button {
-    --color: #ffffff;
-    --background-hover: rgba(255, 255, 255, 0.12);
-    --padding-start: 8px;
-    --padding-end: 8px;
-    font-size: 15px;
-    text-transform: none;
-}
-
-.navbar-button-label {
-    margin-left: 6px;
-    font-size: 14px;
+ion-header ion-toolbar[color='primary'] ion-button,
+ion-header ion-toolbar[color='primary'] ion-title,
+ion-header ion-toolbar[color='primary'] #project-name {
     font-weight: 700;
-    letter-spacing: 0;
-    text-transform: uppercase;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+ion-header ion-toolbar[color='primary'] ion-icon {
+    font-size: 24px;
 }
 
 .formbuilder-content::part(scroll) {

@@ -33,37 +33,26 @@
 <ion-app>
     <div class="loader">Loading...</div>
 
-    <ion-header class="ion-no-border">
-        <ion-toolbar class="formbuilder-toolbar">
-            <div class="builder-bar">
-                <button type="button"
-                        class="builder-bar__link"
-                        data-action="back"
-                        aria-label="Back to project">
-                    <ion-icon name="chevron-back-outline"
-                              aria-hidden="true"></ion-icon>
-                    <span>Back</span>
-                </button>
-
-                <span class="builder-bar__project"
-                      id="project-name">
-                    <img class="builder-bar__logo"
-                         id="project-logo"
-                         alt=""
-                         width="32"
-                         height="32">
-                    <span class="builder-bar__project-name"></span>
+    <ion-header>
+        <ion-toolbar color="primary">
+            <ion-buttons slot="start">
+                <ion-button data-action="back">
+                    <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+                    Back
+                </ion-button>
+            </ion-buttons>
+            <ion-title>
+                <span style="display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;">
+                    <img id="project-logo" alt="" width="32" height="32" style="border-radius:50%;object-fit:cover;">
+                    <span id="project-name"></span>
                 </span>
-
-                <button type="button"
-                        class="builder-bar__link"
-                        data-action="exit"
-                        aria-label="Exit the formbuilder">
-                    <ion-icon name="power-outline"
-                              aria-hidden="true"></ion-icon>
-                    <span>Exit</span>
-                </button>
-            </div>
+            </ion-title>
+            <ion-buttons slot="end">
+                <ion-button data-action="exit">
+                    <ion-icon slot="start" name="power-outline"></ion-icon>
+                    Exit
+                </ion-button>
+            </ion-buttons>
         </ion-toolbar>
     </ion-header>
 

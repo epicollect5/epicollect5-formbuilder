@@ -359,13 +359,17 @@
 
 .builder__questions-content {
     display: flex;
+    flex-direction: column;
     flex: 1 1 auto;
     min-height: 0;
     padding: 0;
 }
 
 .builder__questions-content .builder__question-list {
-    flex: 1;
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-height: 100%;
+    box-sizing: border-box;
 }
 
 .builder__form-actions-group {
@@ -848,16 +852,28 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 .builder__properties-body ion-select.builder__select::part(container) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     width: 100%;
+    min-width: 0;
 }
 
 .builder__properties-body ion-select.builder__select::part(text),
 .builder__properties-body ion-select.builder__select::part(placeholder) {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-inline-end: 8px;
+    overflow: hidden;
     font-size: 14px;
     line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .builder__properties-body ion-select.builder__select::part(icon) {
+    flex: 0 0 auto;
+    margin-inline-start: auto;
     color: var(--fb-muted);
     opacity: 1;
 }

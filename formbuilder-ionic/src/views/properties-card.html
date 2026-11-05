@@ -228,21 +228,23 @@
                             <span data-role="datetime-label">Set initial answer to current date</span>
                         </ion-checkbox>
 
-                        <ion-select class="builder__select"
-                                    data-field="uniqueness"
-                                    label="Uniqueness"
-                                    label-placement="stacked"
-                                    interface="popover">
-                            <ion-select-option value="none">No uniqueness</ion-select-option>
-                            <ion-select-option value="form">Unique to all this form entries</ion-select-option>
-                        </ion-select>
+                        <div class="builder__field-group builder__select-group"
+                             data-field="uniqueness">
+                            <label class="builder__field-label">Uniqueness</label>
+                            <div class="dropdown builder__select"
+                                 data-dropdown
+                                 data-dropdown-placeholder="No uniqueness"
+                                 aria-label="Uniqueness"></div>
+                        </div>
 
-                        <ion-select class="builder__select"
-                                    data-field="default_choice"
-                                    label="Initial answer"
-                                    label-placement="stacked"
-                                    interface="popover"
-                                    placeholder="None"></ion-select>
+                        <div class="builder__field-group builder__select-group"
+                             data-field="default_choice">
+                            <label class="builder__field-label">Initial answer</label>
+                            <div class="dropdown builder__select"
+                                 data-dropdown
+                                 data-dropdown-placeholder="None"
+                                 aria-label="Initial answer"></div>
+                        </div>
 
                         <div class="builder__field-group"
                              data-field="search_type">
@@ -263,11 +265,24 @@
                 </ion-segment-content>
 
                 <ion-segment-content id="property-content-jumps"
-                                     class="builder__property-content"
+                                     class="builder__property-content input-properties__form__jumps"
                                      hidden
                                      aria-hidden="true">
-                    <section class="builder__properties-panel">
-                        <p class="builder__empty">Jumps are not ported yet.</p>
+                    <section class="builder__properties-panel builder__jumps-panel">
+                        <div class="builder__jumps-actions">
+                            <button type="button"
+                                    class="input-properties__form__jumps__add-jump builder__add-jump"
+                                    aria-label="Add jump">
+                                <ion-icon name="add-outline"
+                                          aria-hidden="true"></ion-icon>
+                                <span>Add jump</span>
+                            </button>
+                        </div>
+
+                        <p class="input-properties__form__jumps__no-jumps-message builder__empty"
+                           data-role="no-jumps">No jumps set yet</p>
+
+                        <ul class="input-properties__form__jumps__list builder__jumps-list"></ul>
                     </section>
                 </ion-segment-content>
             </ion-segment-view>

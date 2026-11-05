@@ -2,15 +2,20 @@
 
 import { initialize, setAssetPath } from '@ionic/core/components';
 import { defineCustomElement as defineIonApp } from '@ionic/core/components/ion-app.js';
+import { defineCustomElement as defineIonButtons } from '@ionic/core/components/ion-buttons.js';
 import { defineCustomElement as defineIonHeader } from '@ionic/core/components/ion-header.js';
+import { defineCustomElement as defineIonTitle } from '@ionic/core/components/ion-title.js';
 import { defineCustomElement as defineIonToolbar } from '@ionic/core/components/ion-toolbar.js';
 import { defineCustomElement as defineIonContent } from '@ionic/core/components/ion-content.js';
 import { defineCustomElement as defineIonCard } from '@ionic/core/components/ion-card.js';
 import { defineCustomElement as defineIonCardHeader } from '@ionic/core/components/ion-card-header.js';
 import { defineCustomElement as defineIonCardTitle } from '@ionic/core/components/ion-card-title.js';
 import { defineCustomElement as defineIonCardContent } from '@ionic/core/components/ion-card-content.js';
+import { defineCustomElement as defineIonCol } from '@ionic/core/components/ion-col.js';
+import { defineCustomElement as defineIonGrid } from '@ionic/core/components/ion-grid.js';
 import { defineCustomElement as defineIonItem } from '@ionic/core/components/ion-item.js';
 import { defineCustomElement as defineIonList } from '@ionic/core/components/ion-list.js';
+import { defineCustomElement as defineIonRow } from '@ionic/core/components/ion-row.js';
 import { defineCustomElement as defineIonButton } from '@ionic/core/components/ion-button.js';
 import { defineCustomElement as defineIonIcon } from '@ionic/core/components/ion-icon.js';
 import { defineCustomElement as defineIonInput } from '@ionic/core/components/ion-input.js';
@@ -30,15 +35,20 @@ import { defineCustomElement as defineIoniconIcon } from 'ionicons/components/io
 
 const IONIC_COMPONENTS = [
     defineIonApp,
+    defineIonButtons,
     defineIonHeader,
+    defineIonTitle,
     defineIonToolbar,
     defineIonContent,
     defineIonCard,
     defineIonCardHeader,
     defineIonCardTitle,
     defineIonCardContent,
+    defineIonCol,
+    defineIonGrid,
     defineIonItem,
     defineIonList,
+    defineIonRow,
     defineIonButton,
     defineIonIcon,
     defineIonInput,

@@ -43,7 +43,7 @@ export function installToolDrag(tools_selector, list_selector, on_drop) {
     const show_placeholder = function (drop) {
         if (!placeholder) {
             // match the question rows, so jQuery UI's own placeholder and this
-            // one are the same element type
+            // one is the same element type
             const row = drop.list.querySelector('.builder__question');
 
             placeholder = document.createElement(row ? row.nodeName.toLowerCase() : 'ion-item');
@@ -61,6 +61,13 @@ export function installToolDrag(tools_selector, list_selector, on_drop) {
         }
 
         placeholder.remove();
+
+        const empty = drop.list.querySelector('.builder__empty');
+
+        if (empty) {
+            empty.replaceWith(placeholder);
+            return;
+        }
 
         if (drop.index >= rows.length) {
             drop.list.append(placeholder);
@@ -192,7 +199,9 @@ function getPointer(event, ui) {
 
 /*
  * Resolved against the rows, not the list box: the list scrolls, so its own
- * rect can be smaller than the rows it shows.
+ * rect can be smaller than the rows it shows. An empty list still accepts a
+ * drop anywhere inside its box (expanded to fill the panel) so the placeholder
+ * appears before the pointer reaches the "No questions" message.
  */
 function resolveDrop(list_selector, pointer) {
     if (!pointer) {
@@ -209,15 +218,20 @@ function resolveDrop(list_selector, pointer) {
     const rows = [...list.querySelectorAll('.builder__question')];
 
     if (!rows.length) {
-        return pointer.y >= list_rect.top && pointer.y <= list_rect.bottom ? { list: list, index: 0 } : null;
+        const inside = pointer.x >= list_rect.left && pointer.x <= list_rect.right &&
+            pointer.y >= list_rect.top && pointer.y <= list_rect.bottom;
+
+        return inside ? { list: list, index: 0 } : null;
     }
 
     const first_rect = rows[0].getBoundingClientRect();
     const last_rect = rows[rows.length - 1].getBoundingClientRect();
     const left = Math.min(first_rect.left, list_rect.left);
     const right = Math.max(first_rect.right, list_rect.right);
+    const top = Math.min(first_rect.top, list_rect.top);
+    const bottom = Math.max(last_rect.bottom, list_rect.bottom);
 
-    if (pointer.x < left || pointer.x > right || pointer.y < list_rect.top || pointer.y > last_rect.bottom) {
+    if (pointer.x < left || pointer.x > right || pointer.y < top || pointer.y > bottom) {
         return null;
     }
 
