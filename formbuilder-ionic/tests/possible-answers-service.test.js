@@ -107,7 +107,7 @@ describe('possible answers', () => {
 
         expect(input.possible_answers[0].answer).toBe(' \ufe64b\ufe65Yes\ufe64/b\ufe65 ');
 
-        renamePossibleAnswer(input, 'answer_1', 'x'.repeat(200));
+        renamePossibleAnswer(input, 'answer_1', 'x'.repeat(300));
 
         expect(input.possible_answers[0].answer).toHaveLength(MAX_ANSWER_LENGTH);
     });
