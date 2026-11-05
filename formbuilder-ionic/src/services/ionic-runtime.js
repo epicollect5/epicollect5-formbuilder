@@ -14,6 +14,7 @@ import { defineCustomElement as defineIonIcon } from '@ionic/core/components/ion
 import { defineCustomElement as defineIonInput } from '@ionic/core/components/ion-input.js';
 import { defineCustomElement as defineIonCheckbox } from '@ionic/core/components/ion-checkbox.js';
 import { defineCustomElement as defineIonNote } from '@ionic/core/components/ion-note.js';
+import { defineCustomElement as defineIonPopover } from '@ionic/core/components/ion-popover.js';
 import { defineCustomElement as defineIonSegment } from '@ionic/core/components/ion-segment.js';
 import { defineCustomElement as defineIonSegmentButton } from '@ionic/core/components/ion-segment-button.js';
 import { defineCustomElement as defineIonSegmentContent } from '@ionic/core/components/ion-segment-content.js';
@@ -39,6 +40,7 @@ const IONIC_COMPONENTS = [
     defineIonInput,
     defineIonCheckbox,
     defineIonNote,
+    defineIonPopover,
     defineIonSegment,
     defineIonSegmentButton,
     defineIonSegmentContent,

@@ -937,7 +937,6 @@
 }
 
 .builder__answers-menu {
-    position: relative;
     display: inline-flex;
 }
 
@@ -945,21 +944,16 @@
     font-size: 12px;
 }
 
-.builder__answers-dropdown {
-    position: absolute;
-    top: calc(100% + 4px);
-    right: 0;
-    z-index: 30;
-    min-width: 180px;
-    padding: 4px 0;
-    border: 1px solid var(--fb-border-strong);
-    border-radius: 4px;
-    background: var(--fb-surface);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+/* ion-popover owns the surface, shadow and dismissal; the menu only styles
+   its items. */
+.builder__answers-popover {
+    --width: 200px;
+    --background: var(--fb-surface);
 }
 
-.builder__answers-dropdown[hidden] {
-    display: none;
+.builder__answers-dropdown {
+    padding: 4px 0;
+    background: var(--fb-surface);
 }
 
 .builder__answers-dropdown-item {

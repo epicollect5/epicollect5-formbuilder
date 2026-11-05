@@ -5,12 +5,10 @@ import { getAnswerLimit, isMultipleAnswerType } from '@/models/possible-answers.
 import {
     allowsRequired,
     allowsTitle,
-    DATE_FORMATS,
     getDefaultDatetimeFormat,
     hasAdvancedTab,
     hasJumpsTab,
-    REGEX_PRESETS,
-    TIME_FORMATS
+    REGEX_PRESETS
 } from '@/models/input-properties.js';
 
 const NUMERIC_TYPES = new Set(['integer', 'decimal']);
@@ -175,13 +173,18 @@ function renderForms() {
         return;
     }
 
+    const segment = container.querySelector('.builder__forms-segment');
+
+    if (!segment) {
+        return;
+    }
+
     const forms = getForms(getSession().project_definition);
     const current_index = getSession().current_form_index;
-    const segment = element('ion-segment', {
-        class: 'builder__forms-segment',
-        value: String(current_index),
-        scrollable: 'true'
-    });
+
+    segment.replaceChildren();
+    segment.setAttribute('value', String(current_index));
+    segment.value = String(current_index);
 
     forms.forEach(function (form, form_index) {
         const is_selected = form_index === current_index;
@@ -196,6 +199,17 @@ function renderForms() {
 
         segment.append(tab);
     });
+
+    bindFormSegment(segment);
+}
+
+/* The segment lives in the page shell, so its listeners are bound once. */
+function bindFormSegment(segment) {
+    if (segment.__form_tabs_bound === true) {
+        return;
+    }
+
+    segment.__form_tabs_bound = true;
 
     const activate_form = function (form_index) {
         if (form_index === getSession().current_form_index) {
@@ -212,16 +226,14 @@ function renderForms() {
     });
 
     segment.addEventListener('click', function (event) {
-        const button = event.target.closest('.builder__form-tab');
+        const tab = event.target.closest('.builder__form-tab');
 
-        if (!button) {
+        if (!tab) {
             return;
         }
 
-        activate_form(parseInt(button.getAttribute('value'), 10));
+        activate_form(parseInt(tab.getAttribute('value'), 10));
     });
-
-    container.replaceChildren(segment);
 }
 
 function renderQuestions() {
@@ -829,7 +841,6 @@ function bindNumberField(field, value, property) {
 
 function bindRegexField(wrapper, input) {
     const field = wrapper.querySelector('ion-input');
-    const presets = wrapper.querySelector('.builder__regex-presets');
 
     field.value = input.regex || '';
 
@@ -839,18 +850,15 @@ function bindRegexField(wrapper, input) {
         updateCurrentInput({ regex: text === '' ? null : text });
     });
 
-    REGEX_PRESETS.forEach(function (preset) {
-        const preset_button = button({
-            type: 'button',
-            class: 'builder__preset-btn'
-        }, [preset.label]);
+    wrapper.querySelectorAll('.builder__preset-btn').forEach(function (preset_button) {
+        const preset = REGEX_PRESETS.find(function (candidate) {
+            return candidate.key === preset_button.getAttribute('data-preset');
+        });
 
         preset_button.addEventListener('click', function () {
             field.value = preset.pattern;
             updateCurrentInput({ regex: preset.pattern });
         });
-
-        presets.append(preset_button);
     });
 }
 
@@ -890,20 +898,20 @@ function bindSearchTypeControl(field_group, input) {
 }
 
 function bindDatetimeFormatControl(field_group, input) {
-    const formats = input.type === 'time' ? TIME_FORMATS : DATE_FORMATS;
-    const current = input.datetime_format || getDefaultDatetimeFormat(input.type) || formats[0].value;
     const label = field_group.querySelector('.builder__field-label');
-    const group = field_group.querySelector('ion-radio-group');
 
     label.textContent = input.type === 'time' ? 'Time format' : 'Date format';
 
-    formats.forEach(function (format) {
-        group.append(buildRadioOption(format.value, format.label));
-    });
+    field_group.querySelectorAll('ion-radio-group').forEach(function (group) {
+        if (group.getAttribute('data-datetime-type') !== input.type) {
+            group.remove();
+            return;
+        }
 
-    group.value = current;
-    group.addEventListener('ionChange', function (event) {
-        updateCurrentInput({ datetime_format: event.detail.value });
+        group.value = input.datetime_format || getDefaultDatetimeFormat(input.type);
+        group.addEventListener('ionChange', function (event) {
+            updateCurrentInput({ datetime_format: event.detail.value });
+        });
     });
 }
 
@@ -917,14 +925,6 @@ function bindCurrentDatetimeToggle(toggle, input) {
     bindCheckboxToggle(toggle, input.set_to_current_datetime === true, function (checked) {
         updateCurrentInput({ set_to_current_datetime: checked });
     });
-}
-
-function buildRadioOption(value, label) {
-    const radio = element('ion-radio', { value: value, 'label-placement': 'end' });
-
-    radio.append(element('span', {}, [label]));
-
-    return radio;
 }
 
 function bindDefaultChoiceControl(select, input) {
@@ -957,10 +957,10 @@ function buildSelectOption(value, label) {
 function bindUniquenessControl(select, input) {
     const form = getCurrentForm();
     const form_name = form ? form.name : 'this form';
+    const scoped_option = select.querySelector('ion-select-option[value="form"]');
 
+    scoped_option.textContent = 'Unique to all ' + form_name + ' entries';
     select.value = input.uniqueness || 'none';
-    select.append(buildSelectOption('none', 'No uniqueness'));
-    select.append(buildSelectOption('form', 'Unique to all ' + form_name + ' entries'));
 
     select.addEventListener('ionChange', function (event) {
         updateCurrentInput({ uniqueness: event.detail.value || 'none' });
@@ -972,8 +972,6 @@ function buildPossibleAnswers(input) {
     const card = createView(possible_answers_view);
     const list = card.querySelector('.builder__answer-list');
     const add_button = card.querySelector('.builder__add-answer');
-    const menu_toggle = card.querySelector('.builder__answers-more-btn');
-    const dropdown = card.querySelector('.builder__answers-dropdown');
     const at_limit = answers.length >= getAnswerLimit(input.type);
 
     answers.forEach(function (answer, index) {
@@ -987,33 +985,7 @@ function buildPossibleAnswers(input) {
         }
     });
 
-    menu_toggle.addEventListener('click', function (event) {
-        event.stopPropagation();
-        const open = dropdown.hasAttribute('hidden');
-
-        closeAnswersMenus();
-
-        if (open) {
-            dropdown.removeAttribute('hidden');
-            menu_toggle.setAttribute('aria-expanded', 'true');
-        }
-    });
-
     return card;
-}
-
-function closeAnswersMenus() {
-    document.querySelectorAll('.builder__answers-dropdown:not([hidden])').forEach(function (node) {
-        node.setAttribute('hidden', 'hidden');
-    });
-    document.querySelectorAll('.builder__answers-more-btn[aria-expanded="true"]').forEach(function (node) {
-        node.setAttribute('aria-expanded', 'false');
-    });
-}
-
-if (!document.__answers_menu_close_bound) {
-    document.__answers_menu_close_bound = true;
-    document.addEventListener('click', closeAnswersMenus);
 }
 
 /* The list has to be in the document before jQuery UI can hold on to it. */

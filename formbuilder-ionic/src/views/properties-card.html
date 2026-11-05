@@ -152,6 +152,15 @@
                                        maxlength="50"></ion-input>
                             <div class="builder__regex-presets">
                                 <span class="builder__hint">Presets:</span>
+                                <button type="button"
+                                        class="builder__preset-btn"
+                                        data-preset="only_letters">Only letters</button>
+                                <button type="button"
+                                        class="builder__preset-btn"
+                                        data-preset="only_digits">Only digits</button>
+                                <button type="button"
+                                        class="builder__preset-btn"
+                                        data-preset="limit_length_20">Limit to 20 characters</button>
                             </div>
                         </div>
 
@@ -165,7 +174,52 @@
                              data-field="datetime_format">
                             <div class="builder__field-label"
                                  data-role="datetime-format-label">Date format</div>
-                            <ion-radio-group class="builder__radio-group"></ion-radio-group>
+                            <ion-radio-group class="builder__radio-group"
+                                             data-datetime-type="date">
+                                <ion-radio value="dd/MM/YYYY"
+                                           label-placement="end">
+                                    <span>Day/Month/Year</span>
+                                </ion-radio>
+                                <ion-radio value="MM/dd/YYYY"
+                                           label-placement="end">
+                                    <span>Month/Day/Year</span>
+                                </ion-radio>
+                                <ion-radio value="YYYY/MM/dd"
+                                           label-placement="end">
+                                    <span>Year/Month/Day</span>
+                                </ion-radio>
+                                <ion-radio value="MM/YYYY"
+                                           label-placement="end">
+                                    <span>Month/Year</span>
+                                </ion-radio>
+                                <ion-radio value="dd/MM"
+                                           label-placement="end">
+                                    <span>Day/Month</span>
+                                </ion-radio>
+                            </ion-radio-group>
+                            <ion-radio-group class="builder__radio-group"
+                                             data-datetime-type="time">
+                                <ion-radio value="HH:mm:ss"
+                                           label-placement="end">
+                                    <span>HH:mm:ss</span>
+                                </ion-radio>
+                                <ion-radio value="hh:mm:ss"
+                                           label-placement="end">
+                                    <span>hh:mm:ss</span>
+                                </ion-radio>
+                                <ion-radio value="HH:mm"
+                                           label-placement="end">
+                                    <span>HH:mm</span>
+                                </ion-radio>
+                                <ion-radio value="hh:mm"
+                                           label-placement="end">
+                                    <span>hh:mm</span>
+                                </ion-radio>
+                                <ion-radio value="mm:ss"
+                                           label-placement="end">
+                                    <span>mm:ss</span>
+                                </ion-radio>
+                            </ion-radio-group>
                         </div>
 
                         <ion-checkbox class="builder__checkbox"
@@ -178,7 +232,10 @@
                                     data-field="uniqueness"
                                     label="Uniqueness"
                                     label-placement="stacked"
-                                    interface="popover"></ion-select>
+                                    interface="popover">
+                            <ion-select-option value="none">No uniqueness</ion-select-option>
+                            <ion-select-option value="form">Unique to all this form entries</ion-select-option>
+                        </ion-select>
 
                         <ion-select class="builder__select"
                                     data-field="default_choice"

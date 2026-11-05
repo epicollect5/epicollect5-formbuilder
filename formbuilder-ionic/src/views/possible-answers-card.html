@@ -12,36 +12,40 @@
                 <div class="builder__answers-menu">
                     <button type="button"
                             class="builder__answers-more-btn"
-                            aria-label="More possible answer actions"
-                            aria-haspopup="true"
-                            aria-expanded="false">
+                            id="answers-actions-trigger"
+                            aria-label="More possible answer actions">
                         <ion-icon name="chevron-down-outline"
                                   aria-hidden="true"></ion-icon>
                     </button>
 
-                    <div class="builder__answers-dropdown"
-                         hidden>
-                        <button type="button"
-                                class="builder__answers-dropdown-item"
-                                disabled>Import CSV</button>
-                        <button type="button"
-                                class="builder__answers-dropdown-item"
-                                disabled>Export CSV</button>
-                        <div class="builder__answers-dropdown-divider"></div>
-                        <button type="button"
-                                class="builder__answers-dropdown-item"
-                                disabled>Order ascending</button>
-                        <button type="button"
-                                class="builder__answers-dropdown-item"
-                                disabled>Order descending</button>
-                        <button type="button"
-                                class="builder__answers-dropdown-item"
-                                disabled>Shuffle</button>
-                        <div class="builder__answers-dropdown-divider"></div>
-                        <button type="button"
-                                class="builder__answers-dropdown-item"
-                                disabled>Delete all answers</button>
-                    </div>
+                    <ion-popover trigger="answers-actions-trigger"
+                                 trigger-action="click"
+                                 side="bottom"
+                                 alignment="end"
+                                 class="builder__answers-popover">
+                        <div class="builder__answers-dropdown">
+                            <button type="button"
+                                    class="builder__answers-dropdown-item"
+                                    disabled>Import CSV</button>
+                            <button type="button"
+                                    class="builder__answers-dropdown-item"
+                                    disabled>Export CSV</button>
+                            <div class="builder__answers-dropdown-divider"></div>
+                            <button type="button"
+                                    class="builder__answers-dropdown-item"
+                                    disabled>Order ascending</button>
+                            <button type="button"
+                                    class="builder__answers-dropdown-item"
+                                    disabled>Order descending</button>
+                            <button type="button"
+                                    class="builder__answers-dropdown-item"
+                                    disabled>Shuffle</button>
+                            <div class="builder__answers-dropdown-divider"></div>
+                            <button type="button"
+                                    class="builder__answers-dropdown-item"
+                                    disabled>Delete all answers</button>
+                        </div>
+                    </ion-popover>
                 </div>
             </div>
         </div>
