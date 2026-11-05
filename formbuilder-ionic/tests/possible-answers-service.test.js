@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_ANSWERS } from '@/models/possible-answers.js';
+import { MAX_ANSWER_LENGTH, MAX_ANSWERS, POSSIBLE_ANSWERS_ORDER } from '@/models/possible-answers.js';
 import {
     addPossibleAnswer,
+    deleteAllAnswers,
     movePossibleAnswer,
+    orderPossibleAnswers,
     removePossibleAnswer,
     renamePossibleAnswer,
+    reorderAnswerPage,
     reorderPossibleAnswers
 } from '@/services/possible-answers.js';
 
@@ -95,5 +98,67 @@ describe('possible answers', () => {
         expect(input.possible_answers.map((answer) => answer.answer)).toEqual(['No', 'Yes']);
         expect(movePossibleAnswer(input, 0, 9)).toBe(false);
         expect(movePossibleAnswer(input, 1, 1)).toBe(false);
+    });
+
+    it('sanitises answer text and caps it at the answer length', () => {
+        const input = create_input();
+
+        renamePossibleAnswer(input, 'answer_1', ' <b>Yes</b> ');
+
+        expect(input.possible_answers[0].answer).toBe(' \ufe64b\ufe65Yes\ufe64/b\ufe65 ');
+
+        renamePossibleAnswer(input, 'answer_1', 'x'.repeat(200));
+
+        expect(input.possible_answers[0].answer).toHaveLength(MAX_ANSWER_LENGTH);
+    });
+
+    it('orders answers ascending and descending, keeping the refs', () => {
+        const input = create_input({
+            possible_answers: [
+                { answer: 'banana', answer_ref: 'answer_1' },
+                { answer: 'apple', answer_ref: 'answer_2' },
+                { answer: 'cherry', answer_ref: 'answer_3' }
+            ]
+        });
+
+        expect(orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.AZ)).toBe(true);
+        expect(input.possible_answers.map((answer) => answer.answer)).toEqual(['apple', 'banana', 'cherry']);
+        expect(input.possible_answers[0].answer_ref).toBe('answer_2');
+
+        orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.ZA);
+
+        expect(input.possible_answers.map((answer) => answer.answer)).toEqual(['cherry', 'banana', 'apple']);
+    });
+
+    it('shuffles without losing or duplicating an answer', () => {
+        const input = create_input();
+
+        expect(orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.SHUFFLE)).toBe(true);
+        expect(input.possible_answers.map((answer) => answer.answer_ref).sort()).toEqual(['answer_1', 'answer_2']);
+        expect(orderPossibleAnswers(create_input({ type: 'text', possible_answers: [] }), 'az')).toBe(false);
+    });
+
+    it('deletes every answer but one placeholder and clears the default', () => {
+        const input = create_input({ default: 'answer_1' });
+
+        expect(deleteAllAnswers(input)).toBe(true);
+        expect(input.possible_answers).toHaveLength(1);
+        expect(input.possible_answers[0].answer).toBe('I am a placeholder answer');
+        expect(input.default).toBeNull();
+        expect(deleteAllAnswers(create_input({ type: 'text', possible_answers: [] }))).toBe(false);
+    });
+
+    it('reorders only the answers on the visible page', () => {
+        const answers = Array.from({ length: 150 }, function (value, index) {
+            return { answer: 'Answer ' + index, answer_ref: 'answer_' + index };
+        });
+        const input = create_input({ possible_answers: answers });
+        const page_two = answers.slice(100).map((answer) => answer.answer_ref).reverse();
+
+        expect(reorderAnswerPage(input, page_two.slice(1), 2)).toBe(false);
+        expect(reorderAnswerPage(input, page_two, 2)).toBe(true);
+        expect(input.possible_answers[100].answer_ref).toBe('answer_149');
+        expect(input.possible_answers[0].answer_ref).toBe('answer_0');
+        expect(input.possible_answers).toHaveLength(150);
     });
 });

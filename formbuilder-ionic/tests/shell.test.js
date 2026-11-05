@@ -120,14 +120,14 @@ describe('builder shell', () => {
         expect(document.querySelector('#properties ion-input').value).toBe('Your name');
     });
 
-    it('shows disabled copy and validate actions plus a working delete', () => {
+    it('shows working copy and validate actions plus a working delete', () => {
         select_first_question();
 
         const buttons = [...document.querySelectorAll('#properties .builder__heading-actions button')];
 
         expect(buttons).toHaveLength(3);
-        expect(buttons[0].disabled).toBe(true);
-        expect(buttons[1].disabled).toBe(true);
+        expect(buttons[0].disabled).toBe(false);
+        expect(buttons[1].disabled).toBe(false);
         expect(buttons[2].disabled).toBe(false);
         expect(buttons[2].classList.contains('builder__icon-btn--danger')).toBe(true);
     });
