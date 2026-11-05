@@ -96,8 +96,8 @@ describe('possible answers CSV', () => {
         expect(input.possible_answers).toHaveLength(MAX_ANSWERS);
 
         const long = create_input({ possible_answers: [] });
-        importAnswers(long, parseCsv('x'.repeat(200)), { column_index: 0 });
-        expect(long.possible_answers[0].answer).toHaveLength(150);
+        importAnswers(long, parseCsv('x'.repeat(300)), { column_index: 0 });
+        expect(long.possible_answers[0].answer).toHaveLength(250);
     });
 
     it('keeps one placeholder when a replace import has no usable rows', () => {
