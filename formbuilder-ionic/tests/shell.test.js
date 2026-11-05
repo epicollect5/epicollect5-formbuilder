@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getCurrentInput, getCurrentInputs, getSession, setProject } from '@/services/session.js';
+import { getCurrentForm, getCurrentInput, getCurrentInputs, getSession, setProject } from '@/services/session.js';
 import { UNDO_THROTTLE_MS } from '@/services/undo.js';
 import { renderApp } from '@/ui/shell.js';
 
@@ -11,6 +11,7 @@ function build_markup() {
         '<button type="button" id="add-form">Add form</button>',
         '<button type="button" id="undo" disabled>Undo</button>',
         '<button type="button" id="save" disabled>Save project</button>',
+        '<span data-role="save-status" role="status" hidden></span>',
         '<section id="questions"></section>',
         '<section id="properties"></section>'
     ].join('');
@@ -47,6 +48,38 @@ function project_definition() {
             }
         }
     };
+}
+
+function valid_text_input(form_ref, ref, question) {
+    return {
+        ref: form_ref + '_' + ref,
+        type: 'text',
+        question: question,
+        is_title: false,
+        is_required: false,
+        uniqueness: 'none',
+        regex: null,
+        default: null,
+        verify: false,
+        max: null,
+        min: null,
+        datetime_format: null,
+        set_to_current_datetime: false,
+        possible_answers: [],
+        jumps: [],
+        branch: [],
+        group: []
+    };
+}
+
+function savable_project() {
+    const project = project_definition();
+    const forms = project.data.project.forms;
+
+    forms[0].inputs = [valid_text_input('form_1', 'input_1', 'Screening question')];
+    forms[1].inputs = [valid_text_input('form_2', 'input_2', 'Second question')];
+
+    return project;
 }
 
 function select_first_question() {
@@ -91,10 +124,11 @@ describe('builder shell', () => {
     });
 
     it('puts the form actions in the questions heading', () => {
-        const actions = document.querySelectorAll('#questions .builder__heading-actions button');
+        const actions = document.querySelectorAll('#questions .builder__heading-actions .builder__form-action-btn');
 
         expect(actions).toHaveLength(3);
-        expect([...actions].every((action) => action.disabled)).toBe(true);
+        // The root form cannot be deleted; rename and the menu are available.
+        expect([...actions].map((action) => action.disabled)).toEqual([true, false, false]);
     });
 
     it('lists the current form questions', () => {
@@ -155,6 +189,15 @@ describe('builder shell', () => {
         expect(getSession().current_input_ref).toBeNull();
         expect(document.querySelectorAll('#questions .builder__question')).toHaveLength(1);
         expect(document.querySelector('#properties .builder__empty')).not.toBeNull();
+    });
+
+    it('enables save only when every form is valid and filled', () => {
+        expect(document.getElementById('save').disabled).toBe(true);
+
+        setProject(savable_project());
+        renderApp();
+
+        expect(document.getElementById('save').disabled).toBe(false);
     });
 
     it('adds a form and switches to it', () => {
@@ -275,6 +318,19 @@ describe('undo', () => {
         expect(getCurrentInputs()[0].question).toBe('Do you have children');
     });
 
+    it('clamps the form index when an added form is undone', () => {
+        document.getElementById('add-form').click();
+
+        expect(getSession().current_form_index).toBe(2);
+
+        document.getElementById('undo').click();
+
+        expect(document.querySelectorAll('#form-tabs .builder__form-tab')).toHaveLength(2);
+        // The snapshot also restores the index it was taken with.
+        expect(getSession().current_form_index).toBe(0);
+        expect(document.querySelector('#form-tabs .builder__form-tab[aria-selected="true"]')).not.toBeNull();
+    });
+
     it('undoes an answer addition', () => {
         select_first_question();
         document.querySelector('#properties .builder__add-answer').click();
@@ -301,5 +357,137 @@ describe('undo', () => {
         vi.advanceTimersByTime(UNDO_THROTTLE_MS);
 
         expect(document.getElementById('undo').disabled).toBe(false);
+    });
+});
+
+describe('form actions', () => {
+    beforeEach(() => {
+        build_markup();
+        setProject(project_definition());
+        renderApp();
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    it('renames the current form from the edit button', () => {
+        document.querySelector('#questions .builder__form-action-btn--edit').click();
+
+        const panel = document.querySelector('#questions [data-role="form-rename"]');
+
+        expect(panel.hidden).toBe(false);
+
+        const field = panel.querySelector('[data-role="form-name-input"]');
+
+        expect(field.value).toBe('Screening form');
+
+        field.value = 'Renamed form';
+        panel.querySelector('[data-action="form-rename-save"]').click();
+
+        expect(getCurrentForm().name).toBe('Renamed form');
+        expect(document.querySelectorAll('#form-tabs .builder__form-tab')[0].textContent).toBe('Renamed form');
+        expect(document.querySelector('#questions [data-role="form-rename"]').hidden).toBe(true);
+    });
+
+    it('refuses a duplicate form name and shows why', () => {
+        document.querySelector('#questions .builder__form-action-btn--edit').click();
+
+        const panel = document.querySelector('#questions [data-role="form-rename"]');
+        const field = panel.querySelector('[data-role="form-name-input"]');
+
+        field.value = 'Second form';
+        panel.querySelector('[data-action="form-rename-save"]').click();
+
+        const status = document.querySelector('#questions [data-role="form-status"]');
+
+        expect(getCurrentForm().name).toBe('Screening form');
+        expect(status.textContent).toBe('Form name exists');
+        expect(status.classList.contains('is-error')).toBe(true);
+        expect(status.hidden).toBe(false);
+    });
+
+    it('deletes only the last child form, after confirmation', () => {
+        const delete_button = document.querySelector('#questions .builder__form-action-btn--delete');
+
+        expect(delete_button.disabled).toBe(true);
+
+        document.querySelectorAll('#form-tabs .builder__form-tab')[1].click();
+
+        const last_delete = document.querySelector('#questions .builder__form-action-btn--delete');
+
+        expect(last_delete.disabled).toBe(false);
+
+        last_delete.click();
+
+        const confirm_panel = document.querySelector('#questions [data-role="form-confirm"]');
+
+        expect(confirm_panel.hidden).toBe(false);
+
+        confirm_panel.querySelector('[data-action="form-confirm-yes"]').click();
+
+        expect(document.querySelectorAll('#form-tabs .builder__form-tab')).toHaveLength(1);
+        expect(getSession().current_form_index).toBe(0);
+    });
+
+    it('deletes all questions of the active form after confirmation', () => {
+        document.querySelector('#questions [data-action="form-delete-all"]').click();
+
+        const confirm_panel = document.querySelector('#questions [data-role="form-confirm"]');
+
+        expect(confirm_panel.hidden).toBe(false);
+        expect(confirm_panel.querySelector('[data-role="form-confirm-message"]').textContent).toBe('Delete all questions?');
+
+        confirm_panel.querySelector('[data-action="form-confirm-yes"]').click();
+
+        expect(getCurrentInputs()).toHaveLength(0);
+        expect(document.querySelector('#questions .builder__empty')).not.toBeNull();
+    });
+
+    it('caps the project at five forms and asks for the new name', () => {
+        for (let index = 0; index < 3; index += 1) {
+            document.getElementById('add-form').click();
+        }
+
+        expect(document.querySelectorAll('#form-tabs .builder__form-tab')).toHaveLength(5);
+        expect(getSession().current_form_index).toBe(4);
+        expect(document.querySelector('#questions [data-role="form-rename"]').hidden).toBe(false);
+        expect(document.getElementById('add-form').disabled).toBe(true);
+    });
+
+    it.skipIf(typeof CompressionStream === 'undefined')('saves a valid project and reports it', async () => {
+        const fetch_mock = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+
+        vi.stubGlobal('fetch', fetch_mock);
+        setProject(savable_project());
+        renderApp();
+
+        const save_button = document.getElementById('save');
+
+        expect(save_button.disabled).toBe(false);
+        save_button.click();
+
+        await vi.waitFor(() => {
+            expect(document.querySelector('[data-role="save-status"]').textContent).toBe('Project saved!');
+        });
+
+        expect(fetch_mock).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports a failed save without losing the project', async () => {
+        const fetch_mock = vi.fn().mockRejectedValue(new Error('offline'));
+
+        vi.stubGlobal('fetch', fetch_mock);
+        setProject(savable_project());
+        renderApp();
+
+        document.getElementById('save').click();
+
+        await vi.waitFor(() => {
+            expect(document.querySelector('[data-role="save-status"]').textContent).toContain('Project error!');
+        });
+
+        expect(document.querySelector('[data-role="save-status"]').classList.contains('is-error')).toBe(true);
+        expect(getSession().project_definition.data.project.forms).toHaveLength(2);
     });
 });
