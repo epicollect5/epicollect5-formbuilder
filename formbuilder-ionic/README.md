@@ -76,9 +76,19 @@ undo (ten states, throttled typing, data-only restore), save / export / import
 remap on import) and form management (rename with duplicate check, delete the
 last child form, the five-form cap, delete all questions).
 
-Pending: print as PDF, the `beforeunload` guard, per-form tab validity icons,
-and the remaining modals/menus/toasts (the CSV, name and confirm panels are
-inline for now). The full breakdown and the phase order are in
+Notifications are `ion-toast` at the top of the page, the busy overlay is
+`ion-loading`, and the info help is an external docs link (placeholder URLs)
+rather than a modal; the regex presets were dropped.
+
+The tab strip flags invalid forms, question deletion asks with `ion-alert`, the
+`beforeunload` guard covers unsaved changes, and save enforces the project
+limits.
+
+Print form fills `.print-preview-wrapper` and calls `window.print()`, using a
+ported copy of the legacy print stylesheet.
+
+Pending: `ion-modal` for the CSV options and the form rename / delete panels
+(those remain inline for now). The full breakdown and the phase order are in
 `docs/ROADMAP.md`.
 
 ## Tests

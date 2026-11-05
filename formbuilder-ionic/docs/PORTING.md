@@ -36,8 +36,9 @@ session, so each slice can be compared side by side.
 | Validation and question copy | `actions/validation.js`, `actions/input-duplicator.js`, `ui-handlers/event-handler-callbacks/*` | `src/models/validation.js`, `src/services/validation.js`, `src/services/question-actions.js`, `src/ui/shell.js` | ported (phase 4) |
 | Undo | `actions/undo.js` | `src/services/undo.js`, `src/ui/shell.js` | ported (phase 6) |
 | Save / export / import | `actions/save/**`, `helpers/import-form-validation.js`, `ui-handlers/event-handler-callbacks/{save-project,export-form,import-form}-click-callback.js` | `src/services/save.js`, `src/services/form-import.js`, `src/services/import-form-validation.js`, `src/ui/shell.js` | ported (phase 7) |
+| Print as PDF | `ui-handlers/event-handler-callbacks/print-as-pdf-click-callback.js`, `css/sass/_print.scss` | `src/ui/print.js`, `src/theme/_print.scss`, `src/index.html` | ported (phase 8) |
 | Readme editor | Summernote rich-text field | Tiptap 3 rich-text field | ported |
-| Modals, menus, tooltips | Bootstrap JS | Ionic components per slice | pending |
+| Modals, menus, tooltips | Bootstrap JS | `src/ui/toast.js`, `src/ui/loading.js`, `src/ui/alert.js`, `ion-tooltip`, `src/views/**` docs links | partial (phase 8: toasts, loading, tooltips, docs links and the question-delete alert ported; CSV and form rename/delete modals pending) |
 
 The finer-grained gap against the legacy feature surface, and the phase order
 that closes it, are in `ROADMAP.md`.

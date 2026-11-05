@@ -1,15 +1,15 @@
 # Ionic port — risk register
 
 Risks found while porting the legacy builder into `formbuilder-ionic/`, backfilled
-from phases 1–5. Each entry records what can go wrong, where it lives, the
+from phases 1–8. Each entry records what can go wrong, where it lives, the
 impact, and what to check when the area is touched again.
 
 This register is a working list, not a defect log: a risk can be accepted
 (legacy parity), fixed (keep the regression in mind), or open (needs a decision
-or more work). Reconstructed from the code as of phase 5, so line-level detail
+or more work). Reconstructed from the code as of phase 8, so line-level detail
 lives in the named functions, not in line numbers that will drift.
 
-Updated: 2026-11-05 (phase 7 complete).
+Updated: 2026-11-05 (phase 8 component replacement).
 
 Status legend: **open** — not addressed; **watch** — accepted or fixed but easy
 to regress; **fixed** — the concrete case found during the port is handled.
@@ -190,8 +190,10 @@ to regress; **fixed** — the concrete case found during the port is handled.
   the user continues, and any future export path that forgets to call
   `areAllInputsValid` ships invalid JSON.
 - **Impact:** invalid projects exported or saved.
-- **Status:** open — phase 7 must run the gate in the save pipeline.
-- **Revisit when:** implementing save/export.
+- **Status:** fixed — `saveProject` runs `areAllInputsValid` and the project
+  limits before encoding; Copy still gates on validity.
+- **Revisit when:** adding another write path (export validates the one form it
+  writes).
 
 ### R-41 Validity is recomputed on every keystroke, recursively
 - **Where:** `refreshCurrentProperties`, `updateCurrentQuestionStatus`,
@@ -301,8 +303,8 @@ to regress; **fixed** — the concrete case found during the port is handled.
   or CSP change could block it while tests stay green.
 - **Impact:** export silently does nothing.
 - **Status:** open.
-- **Revisit when:** first manual export check, or when adding a download helper
-  for other exports (phase 7).
+- **Revisit when:** first manual export check; `downloadFile` is now shared with
+  the form export.
 
 ## Phase 6 — undo
 
@@ -348,9 +350,10 @@ to regress; **fixed** — the concrete case found during the port is handled.
   flow that mutates the current object *without* pushing leaves no undo entry.
 - **Impact:** undo restores data from another project, or a change cannot be
   undone.
-- **Status:** watch — import / load in phase 7 must replace the object, not
-  patch it in place.
-- **Revisit when:** implementing save / import.
+- **Status:** watch — form import patches the current form's inputs in place
+  (the project object stays the same), so its undo entry and the baseline are
+  unaffected; project load still replaces the object through `setProject`.
+- **Revisit when:** a flow replaces or reloads the project object.
 
 ### R-64 Dedupe hides no-op pushes
 - **Where:** `store` compares the serialized state with the top of the stack.
@@ -385,8 +388,8 @@ the jump row shows a fallback answer (R-30, R-33).
 ### R-66 Saving needs `CompressionStream`
 - **Where:** `services/save.js` `encodeProject`.
 - **Risk:** the browser has to provide `CompressionStream` (Safari 16.4+).
-  Otherwise the save throws before the request and only the status line
-  explains it. Export and import are unaffected.
+  Otherwise the save throws before the request and only a toast explains it.
+  Export and import are unaffected.
 - **Impact:** older browsers cannot save at all.
 - **Status:** open (accepted: no polyfill is bundled).
 - **Revisit when:** the supported browser matrix changes.
@@ -430,9 +433,9 @@ the jump row shows a fallback answer (R-30, R-33).
 - **Risk:** the menu is an Ionic popover but rename, confirm and file picking are
   inline panels re-created on every render. A re-render (undo, save, name change)
   throws away an open confirmation, and phase 8 has to replace these panels with
-  modals without losing the status line contract.
+  modals without losing the toast and `data-role` hooks.
 - **Impact:** a confirm can disappear mid-flow; the phase-8 migration can strand
-  the file input or the status target.
+  the file input or the toast target.
 - **Status:** watch.
 - **Revisit when:** adding the Ionic modals; keep the `data-role` hooks stable.
 
@@ -445,11 +448,89 @@ the jump row shows a fallback answer (R-30, R-33).
 - **Status:** open.
 - **Revisit when:** imports become common or large exports are expected.
 
-### R-72 The save status is a single line per page
-- **Where:** `ui/shell.js` `showSaveStatus`, `recordChange`.
-- **Risk:** the status is cleared on the next recorded change, but a save in
-  flight followed by a mutation can finish and overwrite a newer status with
-  "Project saved!", and a second save is only guarded by the `saving` flag.
-- **Impact:** a misleading success message after a later unsaved edit.
+### R-72 An edit made during a save is marked saved
+- **Where:** `ui/shell.js` `performSave`, `recordChange`.
+- **Risk:** the payload is encoded when the save starts; a mutation while it is
+  in flight is not in that payload, yet a successful response clears
+  `unsaved_changes` and shows "Project saved!". A second save is only blocked by
+  the `saving` flag.
+- **Impact:** the unload guard can let an unsaved edit go after a save that
+  raced it.
+- **Status:** open.
+- **Revisit when:** adding autosave/retries; track a save revision instead of a
+  boolean.
+
+## Phase 8 — chrome feedback, guards and limits
+
+### R-73 The docs links are placeholders
+- **Where:** `src/views/properties-card.html`, `src/views/question-card.html`
+  (`PLACEHOLDER-titles`, `PLACEHOLDER-regex`, `PLACEHOLDER-import`).
+- **Risk:** the info modals were replaced with external links before the target
+  pages exist. Shipping without replacing the slugs leaves three 404 links.
+- **Impact:** users lose the title / regex / import help.
+- **Status:** open.
+- **Revisit when:** the docs pages are confirmed; replace all three hrefs.
+
+### R-74 One toast replaces the previous one
+- **Where:** `src/ui/toast.js` `showToast`, `TOAST_DURATION = 3200`.
+- **Risk:** the legacy toastr stacked messages; this keeps one. A validation
+  error followed immediately by another message hides the first, and the fixed
+  duration ignores message length.
+- **Impact:** a message can disappear before the user reads it.
 - **Status:** watch.
-- **Revisit when:** adding autosave or retries; track a save revision.
+- **Revisit when:** adding more notification points or long messages.
+
+### R-75 The busy overlay has no cursor change by default
+- **Where:** `src/ui/loading.js`, `ion-loading.fb-loading` in `_builder.scss`.
+- **Risk:** `ion-loading` covers the viewport with a backdrop (`showBackdrop`
+  default true, `backdropDismiss` default false) and a spinner, but it does not
+  set a wait cursor; the `cursor: progress` rule only helps where the host's
+  cursor is inherited. A thrown error between `showLoading` and `hideLoading`
+  leaves the overlay blocking the page.
+- **Impact:** the port looks stuck rather than busy on some platforms.
+- **Status:** watch (save hides in `finally`, import has a guarded hide).
+- **Revisit when:** adding another long-running action.
+
+### R-76 Help is no longer context-preserving
+- **Where:** the docs links in the properties and question cards.
+- **Risk:** opening docs in a new tab keeps the builder state, but the legacy
+  modal kept the help inside the page. Reloading the builder from the docs tab
+  now triggers the `beforeunload` guard, so losing changes needs an explicit
+  confirmation.
+- **Impact:** unsaved edits can be lost while reading the help.
+- **Status:** fixed (guard ported in phase 8); the pending placeholder URLs are
+  R-73.
+- **Revisit when:** the docs links or the guard change.
+
+### R-77 The unload guard tracks a boolean, not a saved snapshot
+- **Where:** `src/ui/shell.js` `recordChange`, `performSave`,
+  `installUnloadGuard`.
+- **Risk:** `unsaved_changes` is set by any recorded change and cleared only by a
+  successful save. Editing a value and undoing it still warns, while a save
+  clears the flag even if a throttled typing snapshot lands afterwards (the JSON
+  is live, so the save itself is correct).
+- **Impact:** a spurious leave prompt, never a silent data loss.
+- **Status:** watch.
+- **Revisit when:** undo or dirty tracking changes; compare against a saved
+  snapshot instead of a flag.
+
+### R-78 The delete confirmation closes over the question object
+- **Where:** `src/ui/shell.js` `bindPropertyActions`, `src/ui/alert.js`.
+- **Risk:** the confirm handler captures the input and removes it by ref. If the
+  panel is re-rendered (undo, another delete) while the alert is open, the alert
+  survives but the question may already be gone; the confirm then no-ops, and a
+  different question can occupy the same ref only if refs are regenerated.
+- **Impact:** a confirmation that does nothing, or deletes an unintended
+  question after an undo.
+- **Status:** watch.
+- **Revisit when:** the alert is replaced with the modal flow or refs change.
+
+### R-79 Print depends on the browser dialog and print CSS
+- **Where:** `src/ui/print.js`, `src/theme/_print.scss`, `src/index.html`.
+- **Risk:** jsdom can assert the generated markup and the `window.print` call,
+  but the paper output depends on the browser dialog (headers/footers, page
+  size) and on the rule that hides every `ion-app` sibling. Readme rich text is
+  flattened to plain text and long tables can split across pages.
+- **Impact:** the preview is correct in the DOM yet paginates badly on paper.
+- **Status:** watch (markup tested, print output not).
+- **Revisit when:** print styling or the app shell changes; check in a browser.

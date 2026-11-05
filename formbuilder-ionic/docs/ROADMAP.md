@@ -35,30 +35,34 @@ Ported today:
   POST, the plain-JSON form envelope, and an import that validates against the
   schema and rewrites refs structurally.
 - Form management: add (five-form cap and name prompt), rename (duplicate
-  checked), delete the last child form, delete all questions, and a per-form
-  status line.
+  checked), delete the last child form and delete all questions.
+- Chrome feedback: `ion-toast` notifications at the top of the page, the
+  `ion-loading` busy overlay during save and import, `ion-tooltip` on the
+  question actions, and docs links instead of the info modals.
+- Form tab validity icons, the `beforeunload` guard for unsaved changes, an
+  `ion-alert` confirmation before deleting a question, and the project-level
+  limits enforced when saving.
+- Print form: the preview is built from the definition into
+  `.print-preview-wrapper` and printed with `window.print()`; the ported copy of
+  the legacy `_print.scss` hides the builder on paper (`theme/_print.scss`).
 
 ## Gap vs legacy
 
 ### Chrome and shell actions
 
-- Print as PDF.
-- Per-form valid / invalid tab icons (the tab strip shows names only).
-- `beforeunload` guard.
-- The add-form, rename and delete confirmations are inline panels for now;
-  phase 8 replaces them with the Ionic modal components.
+- The add-form, rename, delete-form and delete-all confirmations are inline
+  panels for now; converting them to Ionic modals is still pending.
 
 ### Properties panel
 
-- Properties / Advanced / Jumps tab strip with error badges.
-- Advanced fields per type: `default`, `regex` (+ three "apply this" presets),
-  `verify` (double entry), `min` / `max`, integer / **decimal** radio,
-  `datetime_format` + `set_to_current_datetime`, initial-answer select,
-  `searchsingle` / **searchmultiple** radio.
+- Advanced fields per type: `default`, `regex`, `verify` (double entry),
+  `min` / `max`, integer / **decimal** radio, `datetime_format` +
+  `set_to_current_datetime`, initial-answer select, `searchsingle` /
+  **searchmultiple** radio. The regex presets were dropped in phase 8.
 - Uniqueness control (`none` / `form` / `hierarchy`, plus the branch variant).
-- Title rules: `LIMITS.titles_max = 3` and the info-title modal.
+- Title rules: `LIMITS.titles_max = 3`; the info-title modal is a docs link.
 - Per-type gating: required only on `REQUIRED_ALLOWED_TYPES`, no required/title
-  on media / branch / group / readme (the port shows both everywhere).
+  on media / branch / group / readme.
 - Text caps: 255 for question and header, 1000 for readme.
 
 ### Branches and groups
@@ -89,8 +93,8 @@ pagination at 100 per page, ordering A-Z / Z-A / shuffle, delete all, duplicate
 `answer_ref` detection, the 300 / 1000 answer limits, the 150-char cap and
 `<` / `>` sanitisation on every write.
 
-The CSV panel is inline inside the answers card rather than a Bootstrap modal;
-Ionic modals arrive with phase 8.
+The CSV panel is still inline inside the answers card rather than an Ionic
+modal; that conversion is pending.
 
 ### Validation
 
@@ -101,16 +105,22 @@ invalidates its branch), jump destinations and conditions, `areFormInputsValid`
 / `areAllInputsValid`, the per-row validity badge and the Properties / Jumps tab
 badges. Each error carries the tab it belongs to.
 
-Remaining:
-
-- Project-level caps on save: 300 inputs, 3 titles per list and 5 search
-  questions are enforced when importing a form, not yet when saving.
+The project-level caps (300 inputs, 3 titles per list, 5 search questions) are
+enforced on save through `services/project-limits.js` and on import through the
+same counters.
 
 ### Modals, menus, toasts
 
-- Replace Bootstrap: edit-form-name, info-title, info-regex, info-import-form,
-  csv-import, warning-delete-question modals; the two "more" dropdowns;
-  tooltips; the global busy overlay; toastr toasts.
+- Info help (`info-title`, `info-regex`, `info-import-form`) is **not** ported
+  as a modal: the help icons are external docs links (`target="_blank"`, with
+  placeholder URLs until the docs pages are confirmed). The regex presets
+  (`only_letters`, `only_digits`, `limit_length_20`) were dropped.
+- Toasts are `ion-toast` at the top of the page (`ui/toast.js`), the busy
+  overlay is `ion-loading` (`ui/loading.js`), and the question action buttons
+  use `ion-tooltip`.
+- The question delete warning is an `ion-alert`. Still pending: `ion-modal` for
+  the CSV import options and the form rename / delete panels (those stay inline
+  for now).
 
 ## Static markup porting rule
 
@@ -141,7 +151,8 @@ container and each dynamic collection's empty-state markup in the view.
 
 ## Phases
 
-Phases 1–7 are ported; 8 is pending. Risks carried by the port are tracked in
+Phases 1–8 are ported. Remaining in phase 8: `ion-modal` for the CSV options and
+the form rename / delete panels. Risks carried by the port are tracked in
 `docs/risks.md`.
 
 1. **Properties panel, full.** Port each existing Bootstrap panel to the
@@ -164,11 +175,12 @@ Phases 1–7 are ported; 8 is pending. Risks carried by the port are tracked in
 7. **Save, export, import and form management.** Ported: save pipeline (deep
    copy, `replaceWordChars`, jump rebuild, `base64(gzip)` POST), export envelope
    and filename, import flow on the existing Ajv validator with a structural
-   ref remap, form rename / delete and the 5-form cap, delete all questions,
-   and a status line per card. The name prompt and delete confirmation are
-   inline panels until phase 8.
-8. **Chrome polish.** Ionic modals / menus / tooltips / toasts, busy overlay,
-   print as PDF, `beforeunload`.
+   ref remap, form rename / delete and the 5-form cap, and delete all
+   questions. The name prompt and delete confirmation remain inline panels.
+8. **Chrome polish.** Ported: toasts, busy overlay, tooltips, docs links, the
+   question-delete `ion-alert`, form tab validity icons, `beforeunload`, the
+   save-time project caps and print as PDF. Still pending: `ion-modal` for the
+   CSV options and the form rename / delete panels.
 
 ## Limits (from the legacy contract)
 
@@ -195,9 +207,10 @@ Phases 1–7 are ported; 8 is pending. Risks carried by the port are tracked in
   `validation.js` possible-answer parenthesis bug, `getInputsTotal` not counting
   nested-group children, branch jumps validated against the array instead of the
   input, and the branch owner's leftover `group[]`.
-- **Single source for limits.** `300` / `1000` are declared in both
-  `models/possible-answers.js` and `services/import-form-validation.js`;
-  consolidate when the answers work lands.
+- **Single source for limits.** The answer caps live in
+  `models/possible-answers.js` and `services/import-form-validation.js`; the
+  project caps live in `services/project-limits.js`. Keep save and import on the
+  same counters.
 - **Two save formats.** Save is `base64(gzip(JSON))`; export and import are
   plain JSON. They must stay distinct.
 - **State model.** Save and undo assume a deep clone that survives a re-render;
