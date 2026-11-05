@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 import { QUESTION_TYPES } from '@/models/question-types.js';
-import { DATE_FORMATS, REGEX_PRESETS, TIME_FORMATS } from '@/models/input-properties.js';
+import { DATE_FORMATS, TIME_FORMATS } from '@/models/input-properties.js';
 import { getAdvancedFields } from '@/services/properties.js';
 
 function datetime_values(html, type) {
@@ -80,11 +80,14 @@ describe('fixed markup views', () => {
         });
     });
 
-    it('keeps the regex presets in the properties view', async () => {
-        const html = await read('src/views/properties-card.html');
-        const keys = [...html.matchAll(/data-preset="([^"]+)"/g)].map((match) => match[1]);
+    it('links the help to the docs instead of info modals', async () => {
+        const properties = await read('src/views/properties-card.html');
+        const questions = await read('src/views/question-card.html');
+        const links = [...(properties + questions).matchAll(/href="([^"]+)"[^>]*target="_blank"/g)];
 
-        expect(keys).toEqual(REGEX_PRESETS.map((preset) => preset.key));
+        expect(links.length).toBeGreaterThanOrEqual(3);
+        expect(links.every((link) => link[1].includes('docs.epicollect.net'))).toBe(true);
+        expect(properties).not.toContain('data-toggle="modal"');
     });
 
     it('keeps the date and time format choices in the properties view', async () => {

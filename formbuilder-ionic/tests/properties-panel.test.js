@@ -171,20 +171,6 @@ describe('properties panel', () => {
         expect(input.regex).toBe('^[0-9]+$');
     });
 
-    it('applies a regex preset', () => {
-        setProject(project_definition([base_input({ type: 'text', question: 'Code' })]));
-        renderApp();
-        select_first_question();
-        open_tab('advanced');
-
-        const preset = [...document.querySelectorAll('#properties .builder__preset-btn')]
-            .find((button) => button.textContent === 'Only digits');
-
-        preset.click();
-
-        expect(getCurrentInput().regex).toBe('^[0-9]+$');
-    });
-
     it('switches integer to decimal and keeps the type in the definition', () => {
         setProject(project_definition([base_input({ type: 'integer', question: 'Amount' })]));
         renderApp();

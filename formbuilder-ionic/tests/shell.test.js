@@ -11,7 +11,6 @@ function build_markup() {
         '<button type="button" id="add-form">Add form</button>',
         '<button type="button" id="undo" disabled>Undo</button>',
         '<button type="button" id="save" disabled>Save project</button>',
-        '<span data-role="save-status" role="status" hidden></span>',
         '<section id="questions"></section>',
         '<section id="properties"></section>'
     ].join('');
@@ -181,9 +180,13 @@ describe('builder shell', () => {
         expect(document.querySelector('#questions .builder__question[aria-current="true"] .builder__question-text').textContent).toBe('Untitled question');
     });
 
-    it('deletes the selected question', () => {
+    it('deletes the selected question after confirmation', () => {
         select_first_question();
         document.querySelector('#properties .builder__icon-btn--danger').click();
+
+        expect(getCurrentInputs()).toHaveLength(2);
+
+        document.querySelector('ion-alert').buttons[1].handler();
 
         expect(getCurrentInputs()).toHaveLength(1);
         expect(getSession().current_input_ref).toBeNull();
@@ -198,6 +201,30 @@ describe('builder shell', () => {
         renderApp();
 
         expect(document.getElementById('save').disabled).toBe(false);
+    });
+
+    it('warns before unload once the project changed', () => {
+        const clean = new Event('beforeunload', { cancelable: true });
+
+        window.dispatchEvent(clean);
+        expect(clean.defaultPrevented).toBe(false);
+
+        [...document.querySelectorAll('#tools .builder__tool')]
+            .find((tool) => tool.getAttribute('data-type') === 'text')
+            .click();
+
+        const dirty = new Event('beforeunload', { cancelable: true });
+
+        window.dispatchEvent(dirty);
+        expect(dirty.defaultPrevented).toBe(true);
+    });
+
+    it('marks an invalid form in the tab strip', () => {
+        const tabs = document.querySelectorAll('#form-tabs .builder__form-tab');
+
+        expect(tabs[0].querySelector('.builder__form-tab-state')).toBeNull();
+        expect(tabs[1].querySelector('.builder__form-tab-state')).not.toBeNull();
+        expect(tabs[1].getAttribute('aria-label')).toBeNull();
     });
 
     it('adds a form and switches to it', () => {
@@ -309,6 +336,7 @@ describe('undo', () => {
     it('restores a deleted question', () => {
         select_first_question();
         document.querySelector('#properties .builder__icon-btn--danger').click();
+        document.querySelector('ion-alert').buttons[1].handler();
 
         expect(getCurrentInputs()).toHaveLength(1);
 
@@ -399,12 +427,11 @@ describe('form actions', () => {
         field.value = 'Second form';
         panel.querySelector('[data-action="form-rename-save"]').click();
 
-        const status = document.querySelector('#questions [data-role="form-status"]');
+        const toast = document.querySelector('ion-toast');
 
         expect(getCurrentForm().name).toBe('Screening form');
-        expect(status.textContent).toBe('Form name exists');
-        expect(status.classList.contains('is-error')).toBe(true);
-        expect(status.hidden).toBe(false);
+        expect(toast.message).toBe('Form name exists');
+        expect(toast.cssClass).toContain('fb-toast--danger');
     });
 
     it('deletes only the last child form, after confirmation', () => {
@@ -468,10 +495,16 @@ describe('form actions', () => {
         save_button.click();
 
         await vi.waitFor(() => {
-            expect(document.querySelector('[data-role="save-status"]').textContent).toBe('Project saved!');
+            expect(document.querySelector('ion-toast')?.message).toBe('Project saved!');
         });
 
+        expect(document.querySelector('ion-toast').cssClass).toContain('fb-toast--success');
         expect(fetch_mock).toHaveBeenCalledTimes(1);
+
+        const unload = new Event('beforeunload', { cancelable: true });
+
+        window.dispatchEvent(unload);
+        expect(unload.defaultPrevented).toBe(false);
     });
 
     it('reports a failed save without losing the project', async () => {
@@ -484,10 +517,10 @@ describe('form actions', () => {
         document.getElementById('save').click();
 
         await vi.waitFor(() => {
-            expect(document.querySelector('[data-role="save-status"]').textContent).toContain('Project error!');
+            expect(document.querySelector('ion-toast')?.message).toContain('Project error!');
         });
 
-        expect(document.querySelector('[data-role="save-status"]').classList.contains('is-error')).toBe(true);
+        expect(document.querySelector('ion-toast').cssClass).toContain('fb-toast--danger');
         expect(getSession().project_definition.data.project.forms).toHaveLength(2);
     });
 });

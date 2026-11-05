@@ -164,6 +164,44 @@ describe('saving', () => {
         expect(fetch_project).not.toHaveBeenCalled();
     });
 
+    it('refuses a project over the title limit', async () => {
+        const project = project_definition();
+        const form = project.data.project.forms[0];
+        const input = clone(form.inputs[0]);
+
+        form.inputs = [0, 1, 2, 3].map((index) => {
+            const titled = clone(input);
+
+            titled.is_title = true;
+            titled.question = 'Title ' + index;
+
+            return titled;
+        });
+
+        await expect(saveProject(project, { fetch_project: vi.fn() })).rejects.toThrow('Too many titles');
+    });
+
+    it('counts nested questions against the project limit', async () => {
+        const project = project_definition();
+        const form = project.data.project.forms[0];
+        const branch = clone(form.inputs[0]);
+
+        branch.type = 'branch';
+        branch.branch = [];
+
+        for (let index = 0; index < 150; index += 1) {
+            branch.branch.push(clone(form.inputs[0]));
+        }
+
+        form.inputs = [branch];
+
+        for (let index = 0; index < 150; index += 1) {
+            form.inputs.push(clone(form.inputs[0]));
+        }
+
+        await expect(saveProject(project, { fetch_project: vi.fn() })).rejects.toThrow('Too many questions');
+    });
+
     it('throws when the endpoint answers with an error', async () => {
         const fetch_project = vi.fn().mockResolvedValue({ ok: false, status: 500 });
 
