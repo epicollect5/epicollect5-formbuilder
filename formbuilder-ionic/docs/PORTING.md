@@ -29,9 +29,9 @@ session, so each slice can be compared side by side.
 | Adding / reordering / deleting questions | `ui-handlers/sortable.js`, `actions/input-collection*`, `factory/input-factory.js` | `src/models/input-factory.js`, `src/models/refs.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 2) |
 | Possible answers (add, rename, remove, sort) | `actions/possible-answers*.js`, `template/methods/getPossibleAnswers*` | `src/models/possible-answers.js`, `src/services/possible-answers.js`, `src/ui/shell.js` | ported (slice 3) |
 | Possible answers CSV import and pagination | `actions/possible-answers.js`, `possible-answers-pager.js` | — | pending |
-| Advanced properties, uniqueness, title rules | `template/methods/prepareAdvancedInputPropertiesHTML.js`, `getUniquenessHTML.js` | — | pending |
+| Advanced properties, uniqueness, title rules | `template/methods/prepareAdvancedInputPropertiesHTML.js`, `getUniquenessHTML.js` | `src/services/properties.js`, `src/views/properties-card.html`, `src/ui/shell.js` | ported (phase 1) |
 | Form management (rename / delete form, name modal, child-form cap) | `ui-handlers/event-handler-callbacks/*form*`, `factory/form-factory.js` | — | pending |
-| Branches and groups | `inputs/branch.js`, `inputs/group.js`, `ui-handlers/*branch*`, `ui-handlers/*group*` | — | pending |
+| Branches and groups | `inputs/branch.js`, `inputs/group.js`, `ui-handlers/*branch*`, `ui-handlers/*group*` | `src/models/nesting.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 4, phase 2) |
 | Jumps | `actions/jumps.js`, `helpers/utils.getJumpAvailableDestinations` | — | pending |
 | Validation and question copy | `actions/validation.js`, `ui-handlers/event-handler-callbacks/*` | — | pending (buttons present, disabled) |
 | Undo | `actions/undo.js` | — | pending |

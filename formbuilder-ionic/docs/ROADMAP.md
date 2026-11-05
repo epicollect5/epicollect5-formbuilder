@@ -17,6 +17,9 @@ Ported today:
 - Readme editor (Tiptap, replacing Summernote), 1000-char cap.
 - Possible answers: add, rename, remove, reorder.
 - Import validation schema half (`services/import-form-validation.js`, Ajv).
+- Branches and groups: enter / exit editing, container sortables, nesting rules
+  (no branch-in-branch, group-in-group or branch-in-group), child counts,
+  breadcrumbs, per-level refs and branch-scoped titles / uniqueness label.
 
 ## Gap vs legacy
 
@@ -49,14 +52,15 @@ Ported today:
 
 ### Branches and groups
 
-- `branch[]` / `group[]` child arrays, enter and exit editing, branch / group
-  sortables, nested group inside a branch, breadcrumbs.
-- Nesting rules: no branch-in-branch, no group-in-group, no branch-in-group.
-- Branch-scoped jumps (destinations limited to later inputs in the same branch)
-  and branch-scoped uniqueness.
-- Ref conventions: top-level refs are `form_ref_uniqid` (3 `_` segments),
-  branch / group children 4, nested-group children 5. `generateInputRef` only
-  builds the top-level form today.
+Ported: `branch[]` / `group[]` child arrays, enter and exit editing, the container
+sortables, a nested group inside a branch, breadcrumbs, child counts, the nesting
+rules, refs with one more `_` segment per level, and the branch-scoped titles and
+uniqueness label (`form` means the branch there, as in the legacy builder).
+
+Remaining:
+
+- Branch-scoped jumps (destinations limited to later inputs in the same branch).
+- Parent validity badges that reflect branch / group child validation.
 
 ### Jumps
 

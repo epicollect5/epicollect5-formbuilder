@@ -64,13 +64,14 @@ npm run dev
 ## Status
 
 Ported: project loading, form switching and adding, question list
-(add/reorder/delete/select), basic question editing (text, required, title),
-readme editor (Tiptap), and possible answers (add/rename/remove/reorder).
+(add/reorder/delete/select), basic and advanced question editing (including
+uniqueness and per-type gating), readme editor (Tiptap), possible answers
+(add/rename/remove/reorder), and branches and groups (enter/exit, nesting rules,
+breadcrumbs).
 
-Pending: advanced properties and uniqueness, branches and groups, jumps, full
-validation, possible-answers default/CSV/pagination, undo, save/export/import,
-form rename/delete, and the modals/menus/toasts. The full breakdown and the
-phase order are in `docs/ROADMAP.md`.
+Pending: jumps, full validation, possible-answers default/CSV/pagination, undo,
+save/export/import, form rename/delete, and the modals/menus/toasts. The full
+breakdown and the phase order are in `docs/ROADMAP.md`.
 
 ## Tests
 
