@@ -42,6 +42,22 @@ session, so each slice can be compared side by side.
 The finer-grained gap against the legacy feature surface, and the phase order
 that closes it, are in `ROADMAP.md`.
 
+## Static panel markup
+
+Port existing panels one-to-one: `panel` to `ion-card`, `panel-heading` to
+`ion-card-header`, `panel-title` to `ion-card-title`, and `panel-body` to
+`ion-card-content`. Reuse the existing property fragments and static field
+markup rather than recreating equivalent fields in JavaScript. Preserve legacy
+classes, ids and data attributes; where selectors require literal
+`div.panel` / `div.panel-body`, retain those hook elements inside the Ionic card
+shell. Keep Bootstrap CSS out of the Ionic page and style the port with Ionic
+tokens.
+
+Fixed layout belongs in HTML views or the static page shell, not JavaScript DOM
+builders. This includes cards, headings, labels, buttons, fields, toolbars and
+empty states. JavaScript binds events, updates values and renders repeated rows
+from project data such as forms, questions and answers.
+
 ## Slices
 
 1. Boundary and project loading: own entry, own DOM, form switching, question list, selection.

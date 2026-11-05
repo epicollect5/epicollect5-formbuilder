@@ -85,9 +85,39 @@ Ported today:
   csv-import, warning-delete-question modals; the two "more" dropdowns;
   tooltips; the global busy overlay; toastr toasts.
 
+## Static markup porting rule
+
+Port existing Bootstrap panels to Ionic cards one-to-one. Preserve the panel's
+content, order, labels, fields, ids, data attributes and legacy hook classes;
+translate the outer structure to Ionic's card elements:
+
+| Bootstrap panel role | Ionic element |
+|---|---|
+| `.panel` | `ion-card` |
+| `.panel-heading` | `ion-card-header` |
+| `.panel-title` | `ion-card-title` |
+| `.panel-body` | `ion-card-content` |
+
+Reuse the existing property fragments and their static field markup. Do not
+rebuild those fields as custom JavaScript-created markup. Where a legacy
+selector requires a literal `div.panel` or `div.panel-body`, keep that hook
+inside the Ionic card shell and style it through the Ionic theme. Keep Bootstrap
+CSS out of the Ionic page. Add custom markup only for behavior with no existing
+markup or Ionic equivalent.
+
+Keep fixed page structure in HTML templates under `src/views/**` or in the
+static page shell. Do not use JavaScript DOM helpers to create fixed cards,
+headings, labels, buttons, fields, toolbars or empty states. JavaScript should
+bind behavior and update values in those templates; generating repeated rows
+from project data (questions, answers, forms) is appropriate. Keep the static
+container and each dynamic collection's empty-state markup in the view.
+
 ## Phases
 
-1. **Properties panel, full.** Advanced tab per type, uniqueness, title cap and
+1. **Properties panel, full.** Port each existing Bootstrap panel to the
+   equivalent Ionic card shell and reuse its property fragments in HTML views.
+   Keep fixed fields and controls in those views; use JavaScript for their data
+   and events. Advanced tab per type, uniqueness, title cap and
    gating, text caps, decimal / searchmultiple switches. Pure presentation over
    the existing contract, so no new models.
 2. **Branches and groups.** Nesting model and refs (4 / 5 segments), enter and
