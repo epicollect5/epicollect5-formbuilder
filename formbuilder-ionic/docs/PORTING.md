@@ -43,6 +43,20 @@ session, so each slice can be compared side by side.
 The finer-grained gap against the legacy feature surface, and the phase order
 that closes it, are in `ROADMAP.md`.
 
+## Shared parameters
+
+Runtime limits live in `src/models/parameters.js` as the exported `PARAMETERS`
+object, matching the naming convention used by the mobile app. This gives the
+Ionic port one source for limits shared by validation, editing controls, imports
+and user-facing messages. Keep type catalogues and other domain-specific rules
+with their existing models; domain modules may re-export parameter aliases for
+their callers, but must not define a second copy of a limit.
+
+The standalone project JSON schema still declares literal constraints because
+it must validate independently. Keep those schema constraints aligned with
+`PARAMETERS`; changing them is a project-definition contract change and is out
+of scope for the UI port.
+
 ## Static panel markup
 
 Port existing panels one-to-one: `panel` to `ion-card`, `panel-heading` to

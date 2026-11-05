@@ -60,7 +60,7 @@ Ported today:
   `set_to_current_datetime`, initial-answer select, `searchsingle` /
   **searchmultiple** radio. The regex presets were dropped in phase 8.
 - Uniqueness control (`none` / `form` / `hierarchy`, plus the branch variant).
-- Title rules: `LIMITS.titles_max = 3`; the info-title modal is a docs link.
+- Title rules: `PARAMETERS.TITLES_MAX = 3`; the info-title modal is a docs link.
 - Per-type gating: required only on `REQUIRED_ALLOWED_TYPES`, no required/title
   on media / branch / group / readme.
 - Text caps: 255 for question and header, 1000 for readme.
@@ -90,7 +90,7 @@ Remaining:
 Ported: add / rename / remove / reorder, default (initial answer) selection,
 CSV import (column picker, headers toggle, replace / append) and export,
 pagination at 100 per page, ordering A-Z / Z-A / shuffle, delete all, duplicate
-`answer_ref` detection, the 300 / 1000 answer limits, the 150-char cap and
+`answer_ref` detection, the 300 / 1000 answer limits, the 250-char cap and
 `<` / `>` sanitisation on every write.
 
 The CSV panel is still inline inside the answers card rather than an Ionic
@@ -184,20 +184,29 @@ the form rename / delete panels. Risks carried by the port are tracked in
 
 ## Limits (from the legacy contract)
 
-| Limit | Value |
-|---|---|
-| Questions per project (`INPUTS_MAX_ALLOWED`) | 300 |
-| Possible answers (radio, checkbox, dropdown) | 300 |
-| Possible answers (searchsingle, searchmultiple) | 1000 |
-| Possible answers per page | 100 |
-| Possible answer length | 150 |
-| Titles per form / branch | 3 |
-| Search questions per project | 5 |
-| Child forms (`MAX_NUMBER_OF_NESTED_CHILD_FORMS`) | 5 |
-| Question / header length | 255 |
-| Readme length | 1000 |
-| Regex and min / max length | 50 |
-| Undo states | 10 |
+Runtime values are defined in `src/models/parameters.js` as `PARAMETERS`,
+matching the mobile app convention. The project schema keeps its own literal
+constraints so it remains standalone; keep those declarations in sync with
+`PARAMETERS` without changing the project-definition contract.
+
+| Limit | `PARAMETERS` key | Value |
+|---|---|---:|
+| Questions per project | `INPUTS_MAX_ALLOWED` | 300 |
+| Possible answers (radio, checkbox, dropdown) | `MAX_ANSWERS` | 300 |
+| Possible answers (searchsingle, searchmultiple) | `MAX_SEARCH_ANSWERS` | 1000 |
+| Possible answers per page | `ANSWERS_PER_PAGE` | 100 |
+| Possible answer length | `MAX_ANSWER_LENGTH` | 250 |
+| Titles per form / branch | `TITLES_MAX` | 3 |
+| Search questions per project | `SEARCH_INPUTS_MAX` | 5 |
+| Forms per project | `MAX_FORMS` | 5 |
+| Form name length | `FORM_NAME_MAX_LENGTH` | 50 |
+| Question / header length | `QUESTION_MAX_LENGTH` | 255 |
+| Readme length | `README_MAX_LENGTH` | 1000 |
+| Regex length | `REGEX_MAX_LENGTH` | 50 |
+| Min / max value length | `MIN_MAX_LENGTH` | 50 |
+| Question preview length | `QUESTION_PREVIEW_LENGTH` | 50 |
+| Undo states | `MAX_UNDO_STATES` | 10 |
+| Undo typing throttle | `UNDO_THROTTLE_MS` | 500 ms |
 
 ## Constraints and risks
 
@@ -207,10 +216,10 @@ the form rename / delete panels. Risks carried by the port are tracked in
   `validation.js` possible-answer parenthesis bug, `getInputsTotal` not counting
   nested-group children, branch jumps validated against the array instead of the
   input, and the branch owner's leftover `group[]`.
-- **Single source for limits.** The answer caps live in
-  `models/possible-answers.js` and `services/import-form-validation.js`; the
-  project caps live in `services/project-limits.js`. Keep save and import on the
-  same counters.
+- **Single source for runtime limits.** `models/parameters.js` owns the
+  `PARAMETERS` values. Domain modules may re-export aliases, while validation,
+  controls, imports and messages consume the shared values. The standalone JSON
+  schema has parallel literal constraints that must remain aligned.
 - **Two save formats.** Save is `base64(gzip(JSON))`; export and import are
   plain JSON. They must stay distinct.
 - **State model.** Save and undo assume a deep clone that survives a re-render;

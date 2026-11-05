@@ -248,7 +248,7 @@ to regress; **fixed** — the concrete case found during the port is handled.
 ### R-52 Sanitising on every keystroke can fight the input method
 - **Where:** `buildAnswerRow` — `sanitizeAnswer` runs in `ionInput` and rewrites
   `field.value` when it differs.
-- **Risk:** rewriting the value interrupts IME composition (CJK), and the 150-char
+- **Risk:** rewriting the value interrupts IME composition (CJK), and the 250-char
   cap silently truncates pasted text with no feedback.
 - **Impact:** dropped characters while composing; surprising truncation.
 - **Status:** open.
