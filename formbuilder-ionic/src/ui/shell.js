@@ -1,6 +1,6 @@
 'use strict';
 
-import { getForms, getInputs, getProject } from '@/models/project-definition.js';
+import { getForms, getProject } from '@/models/project-definition.js';
 import { getAnswerLimit, isMultipleAnswerType } from '@/models/possible-answers.js';
 import {
     allowsRequired,
@@ -8,8 +8,10 @@ import {
     getDefaultDatetimeFormat,
     hasAdvancedTab,
     hasJumpsTab,
+    isBranchOrGroup,
     REGEX_PRESETS
 } from '@/models/input-properties.js';
+import { getContainerList } from '@/models/nesting.js';
 
 const NUMERIC_TYPES = new Set(['integer', 'decimal']);
 import { getQuestionType } from '@/models/question-types.js';
@@ -24,11 +26,17 @@ import { goBack } from '@/services/navigation.js';
 import {
     addForm,
     addInput,
+    canAddInput,
+    enterInput,
+    exitEditing,
     getCurrentForm,
     getCurrentInput,
     getCurrentInputs,
+    getEditingContainer,
+    getEditingTrail,
     getSession,
     insertInput,
+    isEditing,
     removeInput,
     reorderInputs,
     selectForm,
@@ -145,8 +153,15 @@ function renderTools() {
     container.replaceChildren(parseView(tools_view));
 
     container.querySelectorAll('.builder__tool').forEach(function (tool) {
+        const type = tool.getAttribute('data-type');
+        const allowed = canAddInput(type);
+
+        // The legacy palette hides the tools a container cannot hold.
+        tool.hidden = !allowed;
+        tool.disabled = !allowed;
+
         tool.onclick = function () {
-            addQuestion(tool.getAttribute('data-type'));
+            addQuestion(type);
         };
     });
 
@@ -185,6 +200,7 @@ function renderForms() {
     segment.replaceChildren();
     segment.setAttribute('value', String(current_index));
     segment.value = String(current_index);
+    segment.disabled = isEditing();
 
     forms.forEach(function (form, form_index) {
         const is_selected = form_index === current_index;
@@ -212,7 +228,7 @@ function bindFormSegment(segment) {
     segment.__form_tabs_bound = true;
 
     const activate_form = function (form_index) {
-        if (form_index === getSession().current_form_index) {
+        if (isEditing() || form_index === getSession().current_form_index) {
             return;
         }
 
@@ -247,14 +263,29 @@ function renderQuestions() {
     const current_ref = getSession().current_input_ref;
     const form = getCurrentForm();
     const form_name = form && form.name ? form.name : 'Form';
+    const trail = getEditingTrail();
+    const active_container = trail.length ? trail[trail.length - 1] : null;
     const card = createView(question_card_view);
     const title = card.querySelector('.builder__questions-title');
     const title_name = card.querySelector('.builder__questions-title-name');
     const list = card.querySelector('.builder__question-list');
     const empty = card.querySelector('.builder__empty');
 
-    title.setAttribute('title', 'Form > ' + form_name);
     title_name.textContent = form_name;
+
+    trail.forEach(function (node, index) {
+        title.append(element('span', { class: 'builder__questions-title-sep', 'aria-hidden': 'true' }, [' > ']));
+        title.append(element('span', {
+            class: 'builder__questions-title-crumb' + (index === trail.length - 1 ? ' is-current' : '')
+        }, [getQuestionLabel(node)]));
+    });
+
+    title.setAttribute('title', [form_name].concat(trail.map(getQuestionLabel)).join(' > '));
+
+    if (active_container) {
+        bindExitEditing(card, trail.length > 1);
+        empty.textContent = 'No questions in this ' + active_container.type + ' yet.';
+    }
 
     if (inputs.length) {
         empty.remove();
@@ -269,10 +300,25 @@ function renderQuestions() {
     installQuestionSortable(QUESTION_LIST, syncAfterDrop);
 }
 
+function bindExitEditing(card, nested) {
+    const exit_button = card.querySelector('.builder__questions-exit');
+    const label = exit_button.querySelector('.builder__questions-exit-label');
+
+    exit_button.removeAttribute('hidden');
+    label.textContent = nested ? 'Back to branch' : 'Back to form';
+
+    exit_button.addEventListener('click', function () {
+        exitEditing();
+        active_property_tab = 'basic';
+        renderApp(handlers);
+    });
+}
+
 /* ion-item with `button` supplies the button role and keyboard activation, so
    the row only needs the selection click. */
 function buildQuestionRow(input, is_current) {
     const question_type = getQuestionType(input.type);
+    const container_input = isBranchOrGroup(input.type);
     const row = element('ion-item', {
         class: 'builder__question',
         'data-input-ref': input.ref,
@@ -283,16 +329,69 @@ function buildQuestionRow(input, is_current) {
             icon(question_type ? question_type.icon : 'help-outline')
         ]),
         element('span', { class: 'builder__question-text', title: getQuestionLabel(input) }, [getQuestionLabel(input)]),
-        buildQuestionStatus(input)
+        buildQuestionTail(input)
     ]);
 
-    row.button = true;
+    if (container_input) {
+        // The row holds its own "edit" button, and an ion-item in button mode
+        // cannot contain another button, so the row keeps the button role.
+        row.setAttribute('role', 'button');
+        row.setAttribute('tabindex', '0');
+        row.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                chooseInput(input.ref);
+            }
+        });
+    }
+    else {
+        row.button = true;
+    }
 
     row.addEventListener('click', function () {
         chooseInput(input.ref);
     });
 
     return row;
+}
+
+function buildQuestionTail(input) {
+    const status = buildQuestionStatus(input);
+
+    if (isBranchOrGroup(input.type)) {
+        status.append(buildChildCount(input));
+        status.append(buildEnterButton(input));
+    }
+
+    return status;
+}
+
+function buildChildCount(input) {
+    const count = getContainerList(input).length;
+
+    return element('span', {
+        class: 'builder__question-count',
+        title: count + (count === 1 ? ' question' : ' questions')
+    }, [String(count)]);
+}
+
+function buildEnterButton(input) {
+    const label = input.type === 'branch' ? 'Edit branch' : 'Edit group';
+    const open = button({
+        type: 'button',
+        class: 'builder__question-enter',
+        'aria-label': label + ': ' + getQuestionLabel(input),
+        title: label
+    }, [icon('chevron-forward-outline')]);
+
+    open.addEventListener('click', function (event) {
+        event.stopPropagation();
+        enterInput(input.ref);
+        active_property_tab = 'basic';
+        renderApp(handlers);
+    });
+
+    return open;
 }
 
 function buildQuestionStatus(input) {
@@ -790,8 +889,7 @@ function bindCheckboxToggle(toggle, checked, on_change, options) {
 }
 
 function bindTitleToggle(toggle, input) {
-    const form = getCurrentForm();
-    const inputs = getInputs(form);
+    const inputs = getCurrentInputs();
     const other_titles = countTitles(inputs, input.ref);
     const checked = input.is_title === true;
     const limit_reached = !checked && other_titles >= TITLE_LIMIT;
@@ -800,7 +898,7 @@ function bindTitleToggle(toggle, input) {
     label.textContent = limit_reached ? 'Limit of ' + TITLE_LIMIT + ' titles reached' : 'Use answer as title';
 
     bindCheckboxToggle(toggle, checked, function (next_checked) {
-        if (next_checked && !input.is_title && countTitles(getInputs(getCurrentForm()), input.ref) >= TITLE_LIMIT) {
+        if (next_checked && !input.is_title && countTitles(getCurrentInputs(), input.ref) >= TITLE_LIMIT) {
             renderProperties();
             return;
         }
@@ -952,9 +1050,14 @@ function buildSelectOption(value, label) {
 function bindUniquenessControl(select, input) {
     const form = getCurrentForm();
     const form_name = form ? form.name : 'this form';
+    const container = getEditingContainer();
     const scoped_option = select.querySelector('ion-select-option[value="form"]');
 
-    scoped_option.textContent = 'Unique to all ' + form_name + ' entries';
+    // The contract keeps `form` for both scopes: inside a branch the legacy
+    // builder labels the same value as branch-scoped uniqueness.
+    scoped_option.textContent = container && container.type === 'branch' ?
+        'Unique within this branch' :
+        'Unique to all ' + form_name + ' entries';
     select.value = input.uniqueness || 'none';
 
     select.addEventListener('ionChange', function (event) {
@@ -1078,7 +1181,7 @@ function updateCurrentQuestionStatus() {
     row.setAttribute('data-valid', isInputRowValid(input) ? 'true' : 'false');
 
     const status = row.querySelector('.builder__question-status');
-    const replacement = buildQuestionStatus(input);
+    const replacement = buildQuestionTail(input);
 
     if (status) {
         status.replaceWith(replacement);

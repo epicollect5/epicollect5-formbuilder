@@ -419,6 +419,82 @@
     font-weight: 400;
 }
 
+.builder__questions-exit {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 30px;
+    margin: 8px 10px 0;
+    padding: 4px 10px;
+    border: 1px solid var(--fb-border-strong);
+    border-radius: 4px;
+    background: var(--fb-surface);
+    color: var(--ion-color-primary);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.builder__questions-exit[hidden] {
+    display: none;
+}
+
+.builder__questions-exit:hover {
+    background: var(--fb-surface-2);
+}
+
+.builder__questions-exit ion-icon {
+    font-size: 16px;
+}
+
+.builder__questions-title-crumb {
+    color: var(--fb-muted);
+    font-weight: 500;
+}
+
+.builder__questions-title-crumb.is-current {
+    color: var(--fb-text);
+    font-weight: 700;
+}
+
+.builder__question-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: var(--fb-surface-2);
+    color: var(--fb-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.builder__question-enter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--ion-color-primary);
+    cursor: pointer;
+}
+
+.builder__question-enter:hover {
+    background: var(--fb-surface-2);
+}
+
+.builder__question-enter ion-icon {
+    font-size: 18px;
+}
+
 /* ion-list owns its shadow wrapper, so the host only scrolls and pads; the row
    spacing comes from the item margins. */
 .builder__question-list {
@@ -433,11 +509,13 @@
 /* The item variables reproduce the legacy row box; the class stays on the host
    so the sortable selectors and the selection logic keep working. */
 ion-item.builder__question {
-    --min-height: 42px;
+    /* ion-item's inner wrapper inherits --min-height inside the padded, bordered
+       box, so the 2px border sits on top: 40 + 2 keeps the 42px legacy row. */
+    --min-height: 40px;
     --padding-start: 10px;
     --padding-end: 10px;
-    --padding-top: 7px;
-    --padding-bottom: 7px;
+    --padding-top: 0;
+    --padding-bottom: 0;
     --inner-padding-end: 0;
     --inner-border-width: 0;
     --background: var(--fb-surface);
