@@ -8,6 +8,7 @@ import { createReadStream, watch } from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkSchemaParameters } from './check-schema-parameters.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repo = path.resolve(root, '..');
@@ -50,7 +51,7 @@ const esbuild_common = {
     plugins: [raw_text_plugin],
     define: {
         'process.env.NODE_ENV': '"development"',
-        __FORMBUILDER_DEV__: 'true'
+        'window.__FORMBUILDER_DEV__': 'true'
     },
     legalComments: 'none',
     logLevel: 'silent'
@@ -331,6 +332,8 @@ function watchSources(onChange) {
 }
 
 async function main() {
+    await checkSchemaParameters();
+
     if (!is_watch) {
         await buildAll();
 
