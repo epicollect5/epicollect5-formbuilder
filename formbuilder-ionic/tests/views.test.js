@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 import { QUESTION_TYPES } from '@/models/question-types.js';
+import { getAdvancedFields } from '@/services/properties.js';
 
 function read(relative_path) {
     return readFile(new URL('../' + relative_path, import.meta.url), 'utf8');
@@ -49,6 +50,33 @@ describe('question catalogue', () => {
             expect(question_type.label.length).toBeGreaterThan(0);
             expect(question_type.icon.length).toBeGreaterThan(0);
         });
+    });
+});
+
+describe('fixed markup views', () => {
+    it('keeps the question toolbar in the view, in catalogue order', async () => {
+        const html = await read('src/views/tools.html');
+        const types = [...html.matchAll(/data-type="([^"]+)"/g)].map((match) => match[1]);
+
+        expect(types).toEqual(QUESTION_TYPES.map((question_type) => question_type.type));
+    });
+
+    it('defines every advanced property control in the properties view', async () => {
+        const html = await read('src/views/properties-card.html');
+        const field_ids = new Set([...html.matchAll(/data-field="([^"]+)"/g)].map((match) => match[1]));
+
+        QUESTION_TYPES.forEach((question_type) => {
+            getAdvancedFields(question_type.type).forEach((field_id) => {
+                expect(field_ids.has(field_id)).toBe(true);
+            });
+        });
+    });
+
+    it('keeps the readme toolbar buttons in the view', async () => {
+        const html = await read('src/views/readme-editor.html');
+        const formats = [...html.matchAll(/data-format="([^"]+)"/g)].map((match) => match[1]);
+
+        expect(formats).toEqual(['bold', 'italic', 'underline']);
     });
 });
 
