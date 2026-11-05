@@ -92,7 +92,7 @@ describe('builder shell', () => {
     });
 
     it('puts the form actions in the questions heading', () => {
-        const actions = document.querySelectorAll('#questions .builder__heading-actions .builder__icon-btn');
+        const actions = document.querySelectorAll('#questions .builder__heading-actions button');
 
         expect(actions).toHaveLength(3);
         expect([...actions].every((action) => action.disabled)).toBe(true);
@@ -106,7 +106,8 @@ describe('builder shell', () => {
         expect(rows[1].querySelector('.builder__question-text').textContent).toBe('Your name');
         expect(document.querySelectorAll('#tools .builder__tool')).toHaveLength(18);
         expect(rows[0].getAttribute('data-input-ref')).toBe('input_1');
-        expect(rows[0].querySelectorAll('ion-icon')).toHaveLength(1);
+        expect(rows[0].querySelectorAll('.builder__question-type-icon ion-icon')).toHaveLength(1);
+        expect(rows[0].querySelector('.builder__question-status .question-state')).not.toBeNull();
     });
 
     it('selects a question and opens its properties', () => {
@@ -124,12 +125,13 @@ describe('builder shell', () => {
     it('shows disabled copy and validate actions plus a working delete', () => {
         select_first_question();
 
-        const buttons = [...document.querySelectorAll('#properties .builder__icon-btn')];
+        const buttons = [...document.querySelectorAll('#properties .builder__heading-actions button')];
 
         expect(buttons).toHaveLength(3);
         expect(buttons[0].disabled).toBe(true);
         expect(buttons[1].disabled).toBe(true);
         expect(buttons[2].disabled).toBe(false);
+        expect(buttons[2].classList.contains('builder__icon-btn--danger')).toBe(true);
     });
 
     it('adds a question from the tools and selects it', () => {
