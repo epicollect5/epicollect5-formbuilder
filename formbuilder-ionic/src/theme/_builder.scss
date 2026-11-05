@@ -90,8 +90,9 @@
     align-items: center;
     gap: 10px;
     width: 100%;
-    min-height: 42px;
-    padding: 7px 10px;
+    min-height: 40px;
+    height: 40px;
+    padding: 6px 10px;
     border: 1px solid #999999;
     border-radius: 8px;
     background: var(--fb-surface);
@@ -798,19 +799,25 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 .builder__properties-body ion-input.builder__field {
-    min-height: 42px;
-    height: 42px;
-    --min-height: 42px;
+    min-height: 40px;
+    --min-height: 40px;
     --background: var(--fb-surface);
     --border-color: var(--fb-border-strong);
     --border-radius: 4px;
     --border-width: 1px;
     --highlight-color-focused: var(--ion-color-primary);
     --highlight-color-valid: var(--ion-color-primary);
-    --padding-start: 10px;
-    --padding-end: 10px;
-    --padding-top: 2px;
-    --padding-bottom: 2px;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 4px;
+    --padding-bottom: 4px;
+    --placeholder-color: transparent;
+    --placeholder-opacity: 0;
+}
+
+.builder__properties-body ion-input.builder__field::part(container),
+.builder__properties-body ion-input.builder__field::part(native-wrapper) {
+    min-height: 40px;
 }
 
 .builder__properties-body ion-input.builder__field::part(label) {
@@ -827,6 +834,12 @@ ion-item.builder__question[aria-current='true'] {
     padding: 0;
     font-size: 14px;
     line-height: 1.3;
+}
+
+.builder__properties-body ion-input.builder__field::part(input) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .builder__properties-body ion-select.builder__select {
@@ -1115,15 +1128,11 @@ ion-item.builder__question[aria-current='true'] {
     background: var(--fb-border);
 }
 
-.builder__answers-content {
-    padding: 10px;
-}
-
 .builder__answer-list {
     display: grid;
     gap: 6px;
-    margin: 0;
-    padding: 0;
+    margin: 16px 0 0;
+    padding: 0 0 6px;
     list-style: none;
 }
 
@@ -1131,8 +1140,12 @@ ion-item.builder__question[aria-current='true'] {
     display: flex;
     align-items: center;
     gap: 6px;
-    min-height: 42px;
+    min-height: 44px;
+    padding: 2px 4px;
     cursor: grab;
+    background: var(--fb-surface, #fff);
+    border-radius: 4px;
+    box-sizing: border-box;
 }
 
 .builder__answer-placeholder {
@@ -1150,7 +1163,7 @@ ion-item.builder__question[aria-current='true'] {
     cursor: grab;
 }
 
-.builder__answer-field {
+.builder__answers-card ion-input.builder__answer-field {
     flex: 1;
     min-width: 0;
     --background: var(--fb-surface);
@@ -1160,32 +1173,41 @@ ion-item.builder__question[aria-current='true'] {
     --highlight-height: 0;
     --highlight-color-focused: transparent;
     --highlight-color-valid: transparent;
-    --padding-start: 10px;
+    --padding-start: 16px;
     --padding-end: 10px;
     --padding-top: 0;
     --padding-bottom: 0;
+    --placeholder-color: transparent;
+    --placeholder-opacity: 0;
     font-size: 14px;
-    min-height: 34px;
-    height: 34px;
-    --min-height: 34px;
+    min-height: 40px !important;
+    height: 40px;
+    --min-height: 40px;
     border: 1px solid var(--fb-border-strong);
     border-radius: 4px;
     box-sizing: border-box;
+    overflow: visible;
+    display: block;
 }
 
-.builder__answer-field::part(native) {
-    min-height: 32px;
-    height: 32px;
-    padding: 0;
-    line-height: 1.3;
-}
-
-.builder__answer-field::part(label) {
-    display: none;
+.builder__answers-card ion-input.builder__answer-field::part(native) {
+    padding-inline-start: 16px !important;
 }
 
 .builder__answer--dragging {
     opacity: 0.5;
+}
+
+.builder__answer.ui-sortable-helper,
+.builder__answer.ui-sortable-dragging {
+    opacity: 1 !important;
+    background: var(--fb-surface, #fff);
+    border: 1px solid var(--fb-border, #e0e0e0);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 2px 4px;
+    box-sizing: border-box;
+    cursor: grabbing;
 }
 
 .builder__answer--over {

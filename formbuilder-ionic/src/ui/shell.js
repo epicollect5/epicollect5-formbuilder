@@ -1040,7 +1040,8 @@ function bindQuestionField(field, input) {
     const label = getQuestionLabelText(input.type);
 
     field.label = label;
-    field.placeholder = label;
+    field.placeholder = '';
+    field.setAttribute('placeholder', '');
     field.setAttribute('aria-label', label);
     field.value = input.question || '';
 
@@ -1113,6 +1114,8 @@ function bindTitleToggle(toggle, input) {
 
 function bindTextField(field, value, property) {
     field.value = value || '';
+    field.placeholder = '';
+    field.setAttribute('placeholder', '');
 
     field.addEventListener('ionInput', function (event) {
         const next = {};
@@ -1125,10 +1128,12 @@ function bindTextField(field, value, property) {
 
 function bindNumberField(field, value, property) {
     field.value = value === null || value === undefined ? '' : String(value);
+    field.placeholder = '';
+    field.setAttribute('placeholder', '');
 
     field.addEventListener('ionInput', function (event) {
-        const next = {};
         const text = event.detail.value || '';
+        const next = {};
 
         next[property] = text === '' ? null : text;
         updateCurrentInput(next);
@@ -1139,6 +1144,8 @@ function bindRegexField(wrapper, input) {
     const field = wrapper.querySelector('ion-input');
 
     field.value = input.regex || '';
+    field.placeholder = '';
+    field.setAttribute('placeholder', '');
 
     field.addEventListener('ionInput', function (event) {
         const text = event.detail.value || '';
@@ -1268,35 +1275,50 @@ function bindUniquenessControl(control, input) {
 
     const form = getCurrentForm();
     const form_name = form ? form.name : 'this form';
+    const project = getSession().project_definition && getSession().project_definition.data && getSession().project_definition.data.project;
+    const forms = project && project.forms ? project.forms : [];
+    const form_index = form ? forms.indexOf(form) : 0;
     const container = getEditingContainer();
-    const scoped_label = container && container.type === 'branch' ?
-        'Unique within this branch' :
-        'Unique to all ' + form_name + ' entries';
-    const options = [
-        { value: 'none', label: 'No uniqueness' },
-        { value: 'form', label: scoped_label }
-    ];
+    const is_editing_branch = !!(container && container.type === 'branch');
+
+    let options = [{ value: 'none', label: 'No uniqueness' }];
+
+    if (is_editing_branch) {
+        // Legacy branch uniqueness: contract value is 'form', label is branch-scoped.
+        options.push({ value: 'form', label: 'Unique within this branch' });
+    }
+    else if (form_index > 0) {
+        const parent_name = forms[form_index - 1] ? forms[form_index - 1].name : 'parent form';
+        options.push({ value: 'form', label: 'Unique to all ' + form_name + ' entries' });
+        options.push({ value: 'hierarchy', label: 'Unique to all ' + parent_name + ' entries' });
+    }
+    else {
+        options.push({ value: 'form', label: 'Unique to all ' + form_name + ' entries' });
+    }
+
+    const value = options.some(function (option) { return option.value === (input.uniqueness || 'none'); }) ?
+        (input.uniqueness || 'none') : 'none';
 
     const dropdown_control = (typeof control.setOptions === 'function' || control.hasAttribute('data-dropdown')) ?
         control :
         control.querySelector('[data-dropdown], .dropdown');
 
     if (dropdown_control) {
-        const dropdown = initDropdown(dropdown_control, options, input.uniqueness || 'none', function (detail) {
+        const dropdown = initDropdown(dropdown_control, options, value, function (detail) {
             updateCurrentInput({ uniqueness: detail.value || 'none' });
         }, false);
 
         if (dropdown) {
-            dropdown.setOptions(options, input.uniqueness || 'none');
+            dropdown.setOptions(options, value);
         }
         return;
     }
 
-    const scoped_option = control.querySelector('ion-select-option[value="form"]');
-    if (scoped_option) {
-        scoped_option.textContent = scoped_label;
-    }
-    control.value = input.uniqueness || 'none';
+    control.replaceChildren();
+    options.forEach(function (option_data) {
+        control.append(element('ion-select-option', { value: option_data.value }, [option_data.label]));
+    });
+    control.value = value;
     control.addEventListener('ionChange', function (event) {
         updateCurrentInput({ uniqueness: event.detail.value || 'none' });
     });
@@ -1354,10 +1376,13 @@ function buildAnswerRow(input, answer, index, total) {
 
     const field = element('ion-input', {
         class: 'builder__answer-field',
-        'aria-label': 'Answer ' + (index + 1)
+        'aria-label': 'Answer ' + (index + 1),
+        fill: 'outline'
     });
 
     field.value = answer.answer;
+    field.placeholder = '';
+    field.setAttribute('placeholder', '');
     field.addEventListener('ionInput', function (event) {
         renamePossibleAnswer(input, answer.answer_ref, event.detail.value || '');
     });
@@ -1375,7 +1400,7 @@ function buildAnswerRow(input, answer, index, total) {
         }
     });
 
-    row.append(icon('reorder-three-outline'));
+    row.append(icon('swap-vertical-outline'));
     row.append(field);
     row.append(remove_button);
 
