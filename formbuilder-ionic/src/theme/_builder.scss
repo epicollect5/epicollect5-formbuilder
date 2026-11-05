@@ -419,45 +419,79 @@
     font-weight: 400;
 }
 
+/* ion-list owns its shadow wrapper, so the host only scrolls and pads; the row
+   spacing comes from the item margins. */
 .builder__question-list {
-    display: grid;
+    display: block;
     flex: 1;
-    align-content: start;
-    gap: 6px;
     min-height: 0;
     margin: 0;
     padding: 10px;
     overflow-y: auto;
-    list-style: none;
 }
 
-.builder__question {
+/* The item variables reproduce the legacy row box; the class stays on the host
+   so the sortable selectors and the selection logic keep working. */
+ion-item.builder__question {
+    --min-height: 42px;
+    --padding-start: 10px;
+    --padding-end: 10px;
+    --padding-top: 7px;
+    --padding-bottom: 7px;
+    --inner-padding-end: 0;
+    --inner-border-width: 0;
+    --background: var(--fb-surface);
+    --background-hover-opacity: 0;
+    --color: var(--fb-text);
+    --border-width: 1px;
+    --border-style: solid;
+    --border-color: #999999;
+    --border-radius: 8px;
+    --ripple-color: transparent;
+    margin: 0 0 6px;
+    min-width: 0;
+    overflow: hidden;
+    cursor: grab;
+}
+
+ion-item.builder__question::part(native) {
+    cursor: grab;
+}
+
+ion-item.builder__question:last-child {
+    margin-bottom: 0;
+}
+
+ion-item.builder__question:focus-within {
+    outline: 2px solid rgba(var(--ion-color-primary-rgb), 0.35);
+    outline-offset: 1px;
+}
+
+/* Drag image cloned from a tool button: it borrows the row shape but is a
+   plain div, not an ion-item. */
+.builder__question--helper {
     display: flex;
     align-items: center;
     gap: 10px;
-    min-height: 42px;
     padding: 7px 10px;
     border: 1px solid #999999;
     border-radius: 8px;
-    background: var(--fb-surface);
-    cursor: grab;
-    min-width: 0;
-    overflow: hidden;
-}
-
-.builder__question--helper {
     box-sizing: border-box;
+    background: var(--fb-surface);
     cursor: grabbing;
     opacity: 0.9;
-    background: var(--fb-surface);
     box-shadow: 0 8px 24px rgba(28, 18, 40, 0.18);
 }
 
+/* Matches the tag of the rows so the drop preview is an item too. */
 .builder__question-placeholder {
-    min-height: 42px;
-    border: 1px dashed var(--ion-color-primary);
-    border-radius: 8px;
-    background: #c76abb22;
+    --min-height: 42px;
+    --border-width: 1px;
+    --border-style: dashed;
+    --border-color: var(--ion-color-primary);
+    --border-radius: 8px;
+    --background: #c76abb22;
+    margin: 0 0 6px;
     visibility: visible !important;
 }
 
@@ -486,9 +520,17 @@
     flex: 0 0 auto;
 }
 
-.builder__question[aria-current='true'] {
-    border-color: var(--ion-color-primary);
-    background: #c76abb73;
+/* The row gap lived on the host before ion-item; the slotted children sit in
+   the item's own flex wrapper, so the spacing moves onto the icon. */
+.builder__question-type-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    margin-inline-end: 10px;
+}
+
+ion-item.builder__question[aria-current='true'] {
+    --border-color: var(--ion-color-primary);
+    --background: #c76abb73;
 }
 
 .builder__question-text {

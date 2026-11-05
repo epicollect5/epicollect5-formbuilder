@@ -9,6 +9,8 @@ import { defineCustomElement as defineIonCard } from '@ionic/core/components/ion
 import { defineCustomElement as defineIonCardHeader } from '@ionic/core/components/ion-card-header.js';
 import { defineCustomElement as defineIonCardTitle } from '@ionic/core/components/ion-card-title.js';
 import { defineCustomElement as defineIonCardContent } from '@ionic/core/components/ion-card-content.js';
+import { defineCustomElement as defineIonItem } from '@ionic/core/components/ion-item.js';
+import { defineCustomElement as defineIonList } from '@ionic/core/components/ion-list.js';
 import { defineCustomElement as defineIonButton } from '@ionic/core/components/ion-button.js';
 import { defineCustomElement as defineIonIcon } from '@ionic/core/components/ion-icon.js';
 import { defineCustomElement as defineIonInput } from '@ionic/core/components/ion-input.js';
@@ -35,6 +37,8 @@ const IONIC_COMPONENTS = [
     defineIonCardHeader,
     defineIonCardTitle,
     defineIonCardContent,
+    defineIonItem,
+    defineIonList,
     defineIonButton,
     defineIonIcon,
     defineIonInput,

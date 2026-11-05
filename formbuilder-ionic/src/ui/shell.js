@@ -269,12 +269,12 @@ function renderQuestions() {
     installQuestionSortable(QUESTION_LIST, syncAfterDrop);
 }
 
+/* ion-item with `button` supplies the button role and keyboard activation, so
+   the row only needs the selection click. */
 function buildQuestionRow(input, is_current) {
     const question_type = getQuestionType(input.type);
-    const row = element('li', {
+    const row = element('ion-item', {
         class: 'builder__question',
-        role: 'button',
-        tabindex: '0',
         'data-input-ref': input.ref,
         'aria-current': is_current ? 'true' : 'false',
         'data-valid': isInputRowValid(input) ? 'true' : 'false'
@@ -286,15 +286,10 @@ function buildQuestionRow(input, is_current) {
         buildQuestionStatus(input)
     ]);
 
+    row.button = true;
+
     row.addEventListener('click', function () {
         chooseInput(input.ref);
-    });
-
-    row.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            chooseInput(input.ref);
-        }
     });
 
     return row;

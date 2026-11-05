@@ -42,7 +42,11 @@ export function installToolDrag(tools_selector, list_selector, on_drop) {
 
     const show_placeholder = function (drop) {
         if (!placeholder) {
-            placeholder = document.createElement('li');
+            // match the question rows, so jQuery UI's own placeholder and this
+            // one are the same element type
+            const row = drop.list.querySelector('.builder__question');
+
+            placeholder = document.createElement(row ? row.nodeName.toLowerCase() : 'ion-item');
             placeholder.className = 'builder__question-placeholder';
         }
 
