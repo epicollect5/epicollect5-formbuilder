@@ -102,6 +102,7 @@ let active_readme_editor = null;
 let active_property_tab = 'basic';
 let saving = false;
 let unsaved_changes = false;
+let change_revision = 0;
 let tracked_project = null;
 let unload_guard_bound = false;
 
@@ -226,6 +227,7 @@ const bindChrome = () => {
 const recordChange = (options) => {
     // The throttled push lands later, so the button gate has to follow it.
     pushUndoState(Object.assign({ on_change: updateUndoButton }, options || {}));
+    change_revision += 1;
     unsaved_changes = true;
     updateUndoButton();
     updateSaveButton();
@@ -275,6 +277,10 @@ const performUndo = () => {
         selectForm(Math.max(getForms(getSession().project_definition).length - 1, 0));
     }
 
+    // the data now differs from any save in flight, so a racing save must not
+    // clear the unsaved marker (R-72)
+    change_revision += 1;
+
     active_property_tab = 'basic';
     renderApp(handlers);
     // Legacy drops the overlay ANIMATION_SLOW after re-rendering the state.
@@ -300,6 +306,9 @@ const performSave = async () => {
     }
 
     const project_definition = getSession().project_definition;
+    // the payload is copied synchronously inside saveProject, so this revision
+    // is the one the request carries
+    const revision_at_start = change_revision;
 
     saving = true;
     updateSaveButton();
@@ -307,7 +316,11 @@ const performSave = async () => {
 
     try {
         await saveProject(project_definition, { dev: isDevMode() });
-        unsaved_changes = false;
+
+        // an edit or an undo made while the request was in flight is not in
+        // the saved payload, so it stays marked unsaved (R-72)
+        unsaved_changes = change_revision !== revision_at_start;
+
         // Legacy keeps the overlay up for ANIMATION_SLOW after the response;
         // the toast waits for the overlay to clear.
         hideLoading(500);
