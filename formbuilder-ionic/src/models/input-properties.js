@@ -1,6 +1,6 @@
 'use strict';
 
-import { isMultipleAnswerType } from '@/models/possible-answers.js';
+import { PARAMETERS } from '@/config/parameters.js';
 
 export const REQUIRED_ALLOWED_TYPES = [
     'text',
@@ -40,7 +40,6 @@ export const VERIFY_ALLOWED_TYPES = [
 
 export const MEDIA_TYPES = ['photo', 'audio', 'video', 'location'];
 export const BRANCH_GROUP_TYPES = ['branch', 'group'];
-export const READONLY_PANEL_TYPES = [...MEDIA_TYPES, ...BRANCH_GROUP_TYPES, 'readme'];
 
 export const DATE_FORMATS = [
     { value: 'dd/MM/YYYY', label: 'Day/Month/Year' },
@@ -95,16 +94,16 @@ export const hasAdvancedTab = (type) => {
 };
 
 export const hasJumpsTab = (type) => {
-    return isBranchOrGroup(type) ? false : true;
+    return !isBranchOrGroup(type);
 };
 
 export const getDefaultDatetimeFormat = (type) => {
     if (type === 'date') {
-        return 'dd/MM/YYYY';
+        return PARAMETERS.DATE_FORMATS_DEFAULT;
     }
 
     if (type === 'time') {
-        return 'HH:mm';
+        return PARAMETERS.TIME_FORMATS_DEFAULT;
     }
 
     return null;

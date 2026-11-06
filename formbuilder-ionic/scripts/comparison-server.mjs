@@ -6,7 +6,7 @@ export const COMPARISON_BASE = '/epicollect5-formbuilder';
 export const IONIC_PREFIX = COMPARISON_BASE + '/ionic/';
 export const PUBLIC_PREFIX = COMPARISON_BASE + '/public/';
 export const PROJECT_PREFIX = COMPARISON_BASE + '/project/';
-export const PROJECT_SAVE_PATH = COMPARISON_BASE + '/project/project.json';
+export const DEV_PROJECT_SAVE_PATH = COMPARISON_BASE + '/project/project.json';
 
 const mime_types = {
     '.css': 'text/css; charset=utf-8',
@@ -84,7 +84,7 @@ export function projectSaveMiddleware(repo_root) {
         // Local development save: write the project definition back to the
         // file both comparison entries read, if the request came from the
         // local comparison server.
-        if (request.method !== 'POST' || pathname !== PROJECT_SAVE_PATH) {
+        if (request.method !== 'POST' || pathname !== DEV_PROJECT_SAVE_PATH) {
             next();
             return;
         }

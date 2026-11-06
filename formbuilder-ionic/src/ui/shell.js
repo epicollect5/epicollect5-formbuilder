@@ -1,15 +1,14 @@
 'use strict';
 
 import { getForms, getProject } from '@/models/project-definition.js';
-import { PARAMETERS } from '@/models/parameters.js';
+import { PARAMETERS } from '@/config/parameters.js';
 import {
-    ANSWERS_PER_PAGE,
-    MAX_ANSWER_LENGTH,
     POSSIBLE_ANSWERS_ORDER,
     getAnswerLimit,
     getAnswerPage,
     getAnswerPageCount,
     isMultipleAnswerType,
+    isSearchType,
     sanitizeAnswer
 } from '@/models/possible-answers.js';
 import {
@@ -21,7 +20,7 @@ import {
     isBranchOrGroup,
     isMediaType
 } from '@/models/input-properties.js';
-import { FORM_MESSAGES, VALIDATION_MESSAGES } from '@/models/messages.js';
+import { FORM_MESSAGES, VALIDATION_MESSAGES } from '@/config/strings.js';
 import { getQuestionType } from '@/models/question-types.js';
 import { countTitles, getAdvancedFields } from '@/services/properties.js';
 import {
@@ -43,7 +42,6 @@ import {
     addJump,
     canAddJump,
     getJumpAvailableDestinations,
-    JUMP_TO_END_OF_FORM_REF,
     removeJump,
     updateJump
 } from '@/services/jumps.js';
@@ -72,15 +70,14 @@ import {
     updateCurrentInput
 } from '@/services/session.js';
 import { duplicateInput } from '@/services/question-actions.js';
-import { getFormNameError, MAX_FORMS } from '@/services/form-management.js';
+import { getFormNameError } from '@/services/form-management.js';
 import { prepareImportedForm } from '@/services/form-import.js';
 import { buildFormExport, getFormExportFilename, saveProject } from '@/services/save.js';
 import { areAllInputsValid, areFormInputsValid, getInputErrors, isInputValid } from '@/services/validation.js';
 import { canUndo, ensureUndoBaseline, pushUndoState, undo } from '@/services/undo.js';
+import { countProjectSearchInputs } from '@/models/project-limits.js';
 import { button, createView, element, icon, parseView } from '@/ui/dom.js';
-import { hideLoading, showLoading } from '@/ui/loading.js';
-import { openModal } from '@/ui/modal.js';
-import { showToast } from '@/ui/toast.js';
+import { hideLoading, notifyError, notifySuccess, notifyWarning, openModal, showLoading } from '@/services/notifications.js';
 import { createDropdown, createMenu } from '@/ui/dropdown.js';
 import { printForm } from '@/ui/print.js';
 import { createReadmeEditor } from '@/ui/readme-editor.js';
@@ -207,11 +204,11 @@ const bindChrome = () => {
 
     const add_form = document.getElementById('add-form');
     const forms = getForms(getSession().project_definition);
-    const at_form_cap = forms.length >= MAX_FORMS;
+    const at_form_cap = forms.length >= PARAMETERS.MAX_FORMS;
 
     if (add_form) {
         add_form.disabled = at_form_cap;
-        add_form.title = at_form_cap ? `A project can have at most ${MAX_FORMS} forms` : 'Add form';
+        add_form.title = at_form_cap ? `A project can have at most ${PARAMETERS.MAX_FORMS} forms` : 'Add form';
         add_form.onclick = () => {
             if (at_form_cap) {
                 return;
@@ -314,13 +311,13 @@ const performSave = async () => {
         unsaved_changes = false;
         // Legacy keeps the overlay up for ANIMATION_SLOW after the response.
         hideLoading(500);
-        showToast(FORM_MESSAGES.PROJECT_SAVED, 'success');
+        notifySuccess(FORM_MESSAGES.PROJECT_SAVED);
     }
     catch (error) {
         const message = error && error.message ? error.message : '';
 
         hideLoading();
-        showToast(`${FORM_MESSAGES.PROJECT_NOT_SAVED}${message ? ` ${message}` : ''}`, 'error');
+        notifyError(`${FORM_MESSAGES.PROJECT_NOT_SAVED}${message ? ` ${message}` : ''}`);
     }
     finally {
         saving = false;
@@ -347,7 +344,7 @@ const installFormActions = (card, form) => {
             if (deleteForm(form_index)) {
                 recordChange();
                 renderApp(handlers);
-                showToast(FORM_MESSAGES.FORM_DELETED, 'warning');
+                notifyWarning(FORM_MESSAGES.FORM_DELETED);
             }
         };
     }
@@ -371,7 +368,7 @@ const installFormActions = (card, form) => {
             const payload = buildFormExport(getSession().project_definition, form_index);
 
             if (!payload) {
-                showToast(FORM_MESSAGES.FORM_IS_INVALID, 'error');
+                notifyError(FORM_MESSAGES.FORM_IS_INVALID);
                 return;
             }
 
@@ -379,7 +376,7 @@ const installFormActions = (card, form) => {
         },
         'form-print': () => {
             if (!printForm(getSession().project_definition, form_index)) {
-                showToast(FORM_MESSAGES.FORM_IS_INVALID, 'error');
+                notifyError(FORM_MESSAGES.FORM_IS_INVALID);
             }
         },
         'form-import': () => {
@@ -510,7 +507,7 @@ const deleteQuestion = (input) => {
 
     recordChange();
     renderApp(handlers);
-    showToast(FORM_MESSAGES.INPUT_DELETED, 'warning');
+    notifyWarning(FORM_MESSAGES.INPUT_DELETED);
 };
 
 const openDeleteQuestion = (input) => {
@@ -551,7 +548,7 @@ const importFormFile = (card) => {
         }
 
         if (!/\.json$/i.test(file.name)) {
-            showToast(FORM_MESSAGES.FORM_FILE_INVALID, 'error');
+            notifyError(FORM_MESSAGES.FORM_FILE_INVALID);
             return;
         }
 
@@ -572,7 +569,7 @@ const importFormFile = (card) => {
 
             if (!result.ok) {
                 hideLoading();
-                showToast(result.error, 'error');
+                notifyError(result.error);
                 return;
             }
 
@@ -582,12 +579,12 @@ const importFormFile = (card) => {
             renderApp(handlers);
             // Legacy hides the overlay ANIMATION_SLOW after the import.
             hideLoading(500);
-            showToast(FORM_MESSAGES.FORM_IMPORTED, 'success');
+            notifySuccess(FORM_MESSAGES.FORM_IMPORTED);
         };
 
         reader.onerror = () => {
             hideLoading();
-            showToast(FORM_MESSAGES.FORM_FILE_INVALID, 'error');
+            notifyError(FORM_MESSAGES.FORM_FILE_INVALID);
         };
 
         reader.readAsText(file);
@@ -638,6 +635,11 @@ const addQuestion = (type) => {
     recordChange();
     renderQuestions();
     renderProperties();
+
+    // Legacy warns when the new question reaches the search cap.
+    if (isSearchType(type) && countProjectSearchInputs(getSession().project_definition) >= PARAMETERS.SEARCH_INPUTS_MAX) {
+        notifyWarning(FORM_MESSAGES.SEARCH_INPUTS_LIMIT_REACHED);
+    }
 };
 
 const renderForms = () => {
@@ -1011,6 +1013,7 @@ const bindPropertyActions = (card, input) => {
         renderQuestions();
         renderProperties();
         hideLoading(500);
+        notifySuccess(FORM_MESSAGES.INPUT_COPIED);
     });
 
     validate_button.addEventListener('click', () => {
@@ -1038,7 +1041,12 @@ const performInputValidation = () => {
         const input = getCurrentInput();
         const valid = input ? isInputValid(input, getCurrentInputs()) : false;
 
-        showToast(valid ? VALIDATION_MESSAGES.INPUT_VALID : VALIDATION_MESSAGES.INPUT_NOT_VALID, valid ? 'success' : 'error');
+        if (valid) {
+            notifySuccess(VALIDATION_MESSAGES.INPUT_VALID);
+        }
+        else {
+            notifyError(VALIDATION_MESSAGES.INPUT_NOT_VALID);
+        }
     }, 600);
 };
 
@@ -1529,7 +1537,7 @@ const buildJumpRow = (input, jump, index, destinations) => {
     if (jump.to && !has_destination) {
         destination_options.unshift({
             value: jump.to,
-            label: jump.to === JUMP_TO_END_OF_FORM_REF ? 'End of form' : 'Unavailable destination'
+            label: jump.to === PARAMETERS.JUMP_TO_END_OF_FORM_REF ? 'End of form' : 'Unavailable destination'
         });
     }
 
@@ -1914,7 +1922,7 @@ const buildPossibleAnswers = (input) => {
     const notice = answer_notices.get(input.ref);
 
     page_answers.forEach((answer, index) => {
-        list.append(buildAnswerRow(input, answer, (page - 1) * ANSWERS_PER_PAGE + index, answers.length));
+        list.append(buildAnswerRow(input, answer, (page - 1) * PARAMETERS.ANSWERS_PER_PAGE + index, answers.length));
     });
 
     add_button.disabled = at_limit;
@@ -2096,7 +2104,7 @@ const pickAnswersCsv = (input) => {
 
         if (!/\.csv$/i.test(file.name)) {
             field.remove();
-            showToast(VALIDATION_MESSAGES.CSV_FILE_INVALID, 'error');
+            notifyError(VALIDATION_MESSAGES.CSV_FILE_INVALID);
             return;
         }
 
@@ -2108,7 +2116,7 @@ const pickAnswersCsv = (input) => {
             field.remove();
 
             if (!parsed.rows.length) {
-                showToast(VALIDATION_MESSAGES.CSV_FILE_INVALID, 'error');
+                notifyError(VALIDATION_MESSAGES.CSV_FILE_INVALID);
                 return;
             }
 
@@ -2117,7 +2125,7 @@ const pickAnswersCsv = (input) => {
 
         reader.onerror = () => {
             field.remove();
-            showToast(VALIDATION_MESSAGES.CSV_FILE_INVALID, 'error');
+            notifyError(VALIDATION_MESSAGES.CSV_FILE_INVALID);
         };
 
         reader.readAsText(file);
@@ -2193,7 +2201,7 @@ const openAnswersCsvModal = (input, parsed) => {
 
                     if (!result.ok) {
                         hideLoading();
-                        showToast(VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY, 'error');
+                        notifyError(VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY);
                         return;
                     }
 
@@ -2205,7 +2213,7 @@ const openAnswersCsvModal = (input, parsed) => {
                     updateCurrentQuestionStatus();
                     // Legacy hides the overlay after ANIMATION_SUPER_SLOW.
                     hideLoading(1000);
-                    showToast(VALIDATION_MESSAGES.POSSIBLE_ANSWERS_IMPORTED, 'success');
+                    notifySuccess(VALIDATION_MESSAGES.POSSIBLE_ANSWERS_IMPORTED);
                 }
             }
         ]
@@ -2250,7 +2258,7 @@ const buildAnswerRow = (input, answer, index, total) => {
         class: 'builder__answer-field',
         'aria-label': `Answer ${index + 1}`,
         fill: 'outline',
-        maxlength: String(MAX_ANSWER_LENGTH)
+        maxlength: String(PARAMETERS.MAX_ANSWER_LENGTH)
     });
 
     field.value = answer.answer;

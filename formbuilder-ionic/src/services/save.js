@@ -1,9 +1,10 @@
 'use strict';
 
 import { getForms, getProject } from '@/models/project-definition.js';
+import { PARAMETERS } from '@/config/parameters.js';
 import { areAllInputsValid } from '@/services/validation.js';
 import { getJumpAvailableDestinations } from '@/services/jumps.js';
-import { getProjectLimitsError } from '@/services/project-limits.js';
+import { getProjectLimitsError } from '@/models/project-limits.js';
 
 /*
  * Port of `actions/save/**` plus the export half of the form callbacks.
@@ -13,8 +14,6 @@ import { getProjectLimitsError } from '@/services/project-limits.js';
  * On the wire the project is still `base64(gzip(JSON))`, posted as the raw
  * request body like the legacy `$.ajax` call.
  */
-
-const PROJECT_SAVE_PATH = 'api/internal/formbuilder/';
 
 export const replaceWordChars = (text) => {
     return String(text === undefined || text === null ? '' : text)
@@ -40,7 +39,7 @@ const cleanJumpList = (jumps, input, inputs, state) => {
         const answer_ref = when === 'ALL' || when === 'NO_ANSWER_GIVEN' ? null : (jump && jump.answer_ref ? jump.answer_ref : null);
 
         // END is a valid destination; it is not a question ref.
-        if (to !== 'END' && !destinations.has(to)) {
+        if (to !== PARAMETERS.JUMP_TO_END_OF_FORM_REF && !destinations.has(to)) {
             state.all_jumps_valid = false;
             state.invalid_jumps_question = input.question || '';
         }
@@ -158,7 +157,7 @@ export const getSaveUrl = (project_definition, base_url) => {
     // Drop the builder page and the project slug from the path.
     segments.splice(Math.max(segments.length - 2, 0), 2);
 
-    return `${url.origin}/${[...segments, 'api', 'internal', 'formbuilder', project ? project.slug : ''].join('/')}`;
+    return `${url.origin}/${[...segments, ...PARAMETERS.PROJECT_SAVE_PATH.split('/'), project ? project.slug : ''].join('/')}`;
 };
 
 /* Local development saves straight to the comparison server's project file. */

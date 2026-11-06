@@ -3,8 +3,8 @@
 }
 
 ion-modal.legacy-modal-host {
-    --width: min(760px, 94vw);
-    --height: min(84vh, 760px);
+    --width: min(560px, 94vw);
+    --height: auto;
     --max-height: 84vh;
     --border-radius: 16px;
     --backdrop-opacity: 0.55;
@@ -13,7 +13,6 @@ ion-modal.legacy-modal-host {
 .legacy-modal-host .modal {
     display: block;
     position: static;
-    height: 100%;
     overflow: auto;
     opacity: 1;
     background: var(--fb-surface);
@@ -23,13 +22,11 @@ ion-modal.legacy-modal-host {
     margin: 0;
     width: 100%;
     max-width: 100%;
-    height: 100%;
 }
 
 .modal-content {
     display: flex;
     flex-direction: column;
-    height: 100%;
     background: var(--fb-surface);
 }
 

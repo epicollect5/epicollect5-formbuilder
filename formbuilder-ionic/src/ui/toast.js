@@ -1,5 +1,7 @@
 'use strict';
 
+import { PARAMETERS } from '@/config/parameters.js';
+
 /*
  * Toastr replacement: one ion-toast at the top of the page.
  *
@@ -7,8 +9,6 @@
  * success followed by an error) cannot stack. The styles live in
  * `theme/components/legacy-toast.scss`.
  */
-const TOAST_DURATION = 3200;
-
 const TOAST_CLASSES = {
     success: 'fb-toast--success',
     error: 'fb-toast--danger',
@@ -28,7 +28,7 @@ export const showToast = (message, type) => {
 
     toast.cssClass = `fb-toast ${TOAST_CLASSES[type] || TOAST_CLASSES.success}`;
     toast.position = 'top';
-    toast.duration = TOAST_DURATION;
+    toast.duration = PARAMETERS.TOAST_DURATION_MS;
     toast.message = String(message);
     toast.buttons = [{ text: 'Dismiss', role: 'cancel' }];
 

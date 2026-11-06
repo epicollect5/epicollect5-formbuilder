@@ -1,7 +1,7 @@
 'use strict';
 
 import { getForms } from '@/models/project-definition.js';
-import { PARAMETERS } from '@/models/parameters.js';
+import { PARAMETERS } from '@/config/parameters.js';
 import { getSession, selectForm, setProject } from '@/services/session.js';
 
 /*
@@ -21,9 +21,6 @@ import { getSession, selectForm, setProject } from '@/services/session.js';
  * project (load, import) starts a fresh history, while in-place edits and undo
  * restores keep the current one.
  */
-
-export const MAX_UNDO_STATES = PARAMETERS.MAX_UNDO_STATES;
-export const UNDO_THROTTLE_MS = PARAMETERS.UNDO_THROTTLE_MS;
 
 let states = [];
 let keys = [];
@@ -58,7 +55,7 @@ const store = (state) => {
         return false;
     }
 
-    if (states.length >= MAX_UNDO_STATES) {
+    if (states.length >= PARAMETERS.MAX_UNDO_STATES) {
         states.shift();
         keys.shift();
     }
@@ -118,7 +115,7 @@ export const pushUndoState = (options) => {
             pending = null;
             store(capture());
             notify(config);
-        }, UNDO_THROTTLE_MS);
+        }, PARAMETERS.UNDO_THROTTLE_MS);
 
         return true;
     }

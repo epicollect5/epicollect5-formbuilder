@@ -1,11 +1,11 @@
 'use strict';
 
 import { isBranchOrGroup } from '@/models/input-properties.js';
-import { getContainerList } from '@/models/nesting.js';
+import { getContainerList } from '@/services/nesting.js';
 import { isMultipleAnswerType } from '@/models/possible-answers.js';
-import { generateUniqID } from '@/models/refs.js';
+import { generateUniqID } from '@/factory/refs-factory.js';
 import { addInputObject, getCurrentForm, getEditingContainer } from '@/services/session.js';
-import { JUMP_TO_END_OF_FORM_REF } from '@/services/jumps.js';
+import { PARAMETERS } from '@/config/parameters.js';
 
 /*
  * Question duplication, ported from `actions/input-duplicator.js`.
@@ -66,7 +66,7 @@ const remapJumps = (input, input_refs, answer_refs) => {
     const jumps = Array.isArray(input.jumps) ? input.jumps : [];
 
     input.jumps = jumps.map((jump) => {
-        const to = jump.to === JUMP_TO_END_OF_FORM_REF ? JUMP_TO_END_OF_FORM_REF : input_refs.get(String(jump.to));
+        const to = jump.to === PARAMETERS.JUMP_TO_END_OF_FORM_REF ? PARAMETERS.JUMP_TO_END_OF_FORM_REF : input_refs.get(String(jump.to));
 
         if (!to) {
             return null;

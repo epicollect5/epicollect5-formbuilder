@@ -1,9 +1,9 @@
 'use strict';
 
-const PROJECT_PATH = '../project/project.json';
+import { PARAMETERS } from '@/config/parameters.js';
 
 export const getProjectUrl = (base_url) => {
-    return new URL(PROJECT_PATH, base_url || document.baseURI).href;
+    return new URL(PARAMETERS.PROJECT_PATH, base_url || document.baseURI).href;
 };
 
 /*

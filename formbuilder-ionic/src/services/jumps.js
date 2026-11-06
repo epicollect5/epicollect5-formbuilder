@@ -3,8 +3,7 @@
 import { createJump, jumpNeedsAnswer, JUMP_TO_END_OF_FORM_LABEL, JUMP_WHEN, usesAlwaysJump } from '@/models/jumps.js';
 import { hasJumpsTab } from '@/models/input-properties.js';
 import { isMultipleAnswerType } from '@/models/possible-answers.js';
-import { PARAMETERS } from '@/models/parameters.js';
-import { JUMP_TO_END_OF_FORM_REF } from '@/services/import-form-validation.js';
+import { PARAMETERS } from '@/config/parameters.js';
 
 /*
  * Phase 3 scope: top-level form inputs. `inputs` is the active list so Phase 2
@@ -76,7 +75,7 @@ export const getJumpAvailableDestinations = (input, inputs) => {
 
     if (current_input_index < list.length - 1) {
         destinations.push({
-            ref: JUMP_TO_END_OF_FORM_REF,
+            ref: PARAMETERS.JUMP_TO_END_OF_FORM_REF,
             question: JUMP_TO_END_OF_FORM_LABEL,
             type: null
         });
@@ -185,4 +184,3 @@ export const updateJump = (input, index, patch) => {
     return true;
 };
 
-export { JUMP_TO_END_OF_FORM_REF };

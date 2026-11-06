@@ -1,10 +1,10 @@
 'use strict';
 
 import { hasDuplicateAnswerRefs, isMultipleAnswerType } from '@/models/possible-answers.js';
-import { getContainerList } from '@/models/nesting.js';
+import { getContainerList } from '@/services/nesting.js';
 import { isBranchOrGroup } from '@/models/input-properties.js';
-import { VALIDATION_MESSAGES as M } from '@/models/messages.js';
-import { PARAMETERS } from '@/models/parameters.js';
+import { VALIDATION_MESSAGES as M } from '@/config/strings.js';
+import { PARAMETERS } from '@/config/parameters.js';
 
 /*
  * Per-input validation, ported from `actions/validation.js` without the legacy

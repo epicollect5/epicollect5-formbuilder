@@ -1,12 +1,12 @@
 'use strict';
 
 import { getForms, getInputs } from '@/models/project-definition.js';
-import { getContainerList } from '@/models/nesting.js';
+import { getContainerList } from '@/services/nesting.js';
 import { hasJumpsTab, isBranchOrGroup } from '@/models/input-properties.js';
 import { isMultipleAnswerType } from '@/models/possible-answers.js';
 import { jumpNeedsAnswer, JUMP_WHEN } from '@/models/jumps.js';
 import { getInputObjectErrors } from '@/models/validation.js';
-import { VALIDATION_MESSAGES as M } from '@/models/messages.js';
+import { VALIDATION_MESSAGES as M } from '@/config/strings.js';
 import { getJumpAvailableDestinations } from '@/services/jumps.js';
 
 /*

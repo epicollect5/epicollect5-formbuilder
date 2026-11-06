@@ -1,7 +1,7 @@
 'use strict';
 
+import { PARAMETERS } from '@/config/parameters.js';
 import {
-    ANSWERS_PER_PAGE,
     createAnswer,
     getAnswerLimit,
     isMultipleAnswerType,
@@ -93,8 +93,8 @@ export const reorderPossibleAnswers = (input, refs) => {
 /* Paged lists sort one page at a time, so only that slice changes order. */
 export const reorderAnswerPage = (input, refs, page) => {
     const answers = input ? input.possible_answers : [];
-    const start = (Math.max(page, 1) - 1) * ANSWERS_PER_PAGE;
-    const page_answers = answers.slice(start, start + ANSWERS_PER_PAGE);
+    const start = (Math.max(page, 1) - 1) * PARAMETERS.ANSWERS_PER_PAGE;
+    const page_answers = answers.slice(start, start + PARAMETERS.ANSWERS_PER_PAGE);
     const by_ref = new Map(page_answers.map((answer) => {
         return [answer.answer_ref, answer];
     }));

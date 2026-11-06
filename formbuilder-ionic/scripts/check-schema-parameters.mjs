@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PARAMETERS } from '../src/models/parameters.js';
+import { PARAMETERS } from '../src/config/parameters.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 

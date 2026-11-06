@@ -1,10 +1,10 @@
 'use strict';
 
 import { findInput, getForm, getForms, getInputs, getProject } from '@/models/project-definition.js';
-import { createInput } from '@/models/input-factory.js';
-import { canContainInput, getContainerList } from '@/models/nesting.js';
-import { generateFormRef } from '@/models/refs.js';
-import { FORM_NAME_MAX_LENGTH, MAX_FORMS } from '@/services/form-management.js';
+import { createInput } from '@/factory/input-factory.js';
+import { canContainInput, getContainerList } from '@/services/nesting.js';
+import { generateFormRef } from '@/factory/refs-factory.js';
+import { PARAMETERS } from '@/config/parameters.js';
 
 /*
  * The project definition is the state. This module only holds the reference to
@@ -217,13 +217,13 @@ export const reorderInputs = (refs) => {
 export const addForm = (name) => {
     const project = getProject(session.project_definition);
 
-    if (!project || project.forms.length >= MAX_FORMS) {
+    if (!project || project.forms.length >= PARAMETERS.MAX_FORMS) {
         return null;
     }
 
     const form_name = String(name === undefined || name === null || String(name).trim() === '' ? 'New form' : name)
         .trim()
-        .slice(0, FORM_NAME_MAX_LENGTH);
+        .slice(0, PARAMETERS.FORM_NAME_MAX_LENGTH);
     const form = {
         ref: generateFormRef(project.ref),
         name: form_name,
@@ -246,7 +246,7 @@ const slugify = (text) => {
 
 export const renameForm = (form_index, name) => {
     const form = getForms(session.project_definition)[form_index];
-    const trimmed = String(name === undefined || name === null ? '' : name).trim().slice(0, FORM_NAME_MAX_LENGTH);
+    const trimmed = String(name === undefined || name === null ? '' : name).trim().slice(0, PARAMETERS.FORM_NAME_MAX_LENGTH);
 
     if (!form || !trimmed) {
         return null;

@@ -1,7 +1,7 @@
 'use strict';
 
 import { getInputs } from '@/models/project-definition.js';
-import { PARAMETERS } from '@/models/parameters.js';
+import { PARAMETERS } from '@/config/parameters.js';
 import { isMultipleAnswerType } from '@/models/possible-answers.js';
 import {
     allowsRequired,

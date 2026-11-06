@@ -1,17 +1,15 @@
 'use strict';
 
-import { FORM_MESSAGES } from '@/models/messages.js';
-import { getContainerList } from '@/models/nesting.js';
+import { FORM_MESSAGES } from '@/config/strings.js';
+import { getContainerList } from '@/services/nesting.js';
 import { getForms } from '@/models/project-definition.js';
 import {
     countInputs,
     countSearchInputs,
     countTitles,
-    eachInput,
-    INPUTS_MAX_ALLOWED,
-    SEARCH_INPUTS_MAX,
-    TITLES_MAX
-} from '@/services/project-limits.js';
+    eachInput
+} from '@/models/project-limits.js';
+import { PARAMETERS } from '@/config/parameters.js';
 import {
     areJumpsDestinationsValid,
     hasValidFormStructure,
@@ -27,16 +25,6 @@ import {
  * The legacy flow ran a string replace over the serialized JSON; this walks the
  * refs instead, so a question containing the imported ref as text is untouched.
  */
-
-/* Re-exported so callers and tests keep one import point for the limits. */
-export {
-    countInputs,
-    countSearchInputs,
-    countTitles,
-    INPUTS_MAX_ALLOWED,
-    SEARCH_INPUTS_MAX,
-    TITLES_MAX
-};
 
 const remapRefs = (inputs, imported_ref, current_ref) => {
     const remap = (value) => {
@@ -103,16 +91,16 @@ export const prepareImportedForm = (text, project_definition, form_index) => {
         return total + countInputs(index === form_index ? imported : candidate.inputs);
     }, 0);
 
-    if (inputs_total > INPUTS_MAX_ALLOWED) {
+    if (inputs_total > PARAMETERS.INPUTS_MAX_ALLOWED) {
         return { ok: false, error: FORM_MESSAGES.FORM_IS_INVALID };
     }
 
-    if (countTitles(imported) > TITLES_MAX) {
+    if (countTitles(imported) > PARAMETERS.TITLES_MAX) {
         return { ok: false, error: FORM_MESSAGES.FORM_IS_INVALID };
     }
 
     const branch_titles_exceeded = imported.some((input) => {
-        return input.type === 'branch' && countTitles(getContainerList(input)) > TITLES_MAX;
+        return input.type === 'branch' && countTitles(getContainerList(input)) > PARAMETERS.TITLES_MAX;
     });
 
     if (branch_titles_exceeded) {
@@ -123,7 +111,7 @@ export const prepareImportedForm = (text, project_definition, form_index) => {
         return total + countSearchInputs(index === form_index ? imported : candidate.inputs);
     }, 0);
 
-    if (search_total > SEARCH_INPUTS_MAX) {
+    if (search_total > PARAMETERS.SEARCH_INPUTS_MAX) {
         return { ok: false, error: FORM_MESSAGES.FORM_IS_INVALID };
     }
 

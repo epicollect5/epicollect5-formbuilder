@@ -3,10 +3,8 @@
 import Ajv2020 from 'ajv/dist/2020';
 import addFormats from 'ajv-formats';
 import project_schema from '../../schemas/project.schema.json';
-import { PARAMETERS } from '@/models/parameters.js';
+import { PARAMETERS } from '@/config/parameters.js';
 
-const PROJECT_SCHEMA_ID = 'epicollect5-project';
-export const JUMP_TO_END_OF_FORM_REF = 'END';
 const CHOICE_TYPES = ['dropdown', 'radio', 'checkbox', 'searchsingle', 'searchmultiple'];
 const SEARCH_TYPES = ['searchsingle', 'searchmultiple'];
 
@@ -17,12 +15,12 @@ const ajv = new Ajv2020({
 });
 
 addFormats(ajv);
-ajv.addSchema(project_schema, PROJECT_SCHEMA_ID);
+ajv.addSchema(project_schema, PARAMETERS.PROJECT_SCHEMA_ID);
 
-const validate_form = ajv.getSchema(PROJECT_SCHEMA_ID + '#/$defs/form');
-const validate_input = ajv.getSchema(PROJECT_SCHEMA_ID + '#/$defs/input');
-const validate_jump = ajv.getSchema(PROJECT_SCHEMA_ID + '#/$defs/jump');
-const validate_possible_answer = ajv.getSchema(PROJECT_SCHEMA_ID + '#/$defs/possibleAnswer');
+const validate_form = ajv.getSchema(`${PARAMETERS.PROJECT_SCHEMA_ID}#/$defs/form`);
+const validate_input = ajv.getSchema(`${PARAMETERS.PROJECT_SCHEMA_ID}#/$defs/input`);
+const validate_jump = ajv.getSchema(`${PARAMETERS.PROJECT_SCHEMA_ID}#/$defs/jump`);
+const validate_possible_answer = ajv.getSchema(`${PARAMETERS.PROJECT_SCHEMA_ID}#/$defs/possibleAnswer`);
 
 const isChoiceType = (type) => {
     return CHOICE_TYPES.indexOf(type) > -1;
@@ -125,7 +123,7 @@ const availableDestinations = (current_input_index, inputs) => {
     });
 
     if (current_input_index < inputs.length - 1) {
-        destinations.add(JUMP_TO_END_OF_FORM_REF);
+        destinations.add(PARAMETERS.JUMP_TO_END_OF_FORM_REF);
     }
 
     return destinations;
