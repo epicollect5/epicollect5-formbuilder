@@ -412,9 +412,15 @@ shows the dangling ref as "Unavailable answer".
   refs are rewritten onto the current form ref, so a suffix that already exists
   produces duplicate refs with ambiguous jump targets.
 - **Impact:** the form imports "successfully" with broken or misdirected jumps.
-- **Status:** open.
-- **Revisit when:** adding ref uniqueness checks or post-import jump repair;
-  validate the whole project after an import, not just the imported list.
+- **Status:** fixed (2026-11-07, narrowed) — cross-form jumps are structurally
+  impossible (destinations are list-scoped) and the import validator enforces
+  ref/uniqueness rules, so the real residual gap was runtime-only rules the
+  schema leaves to the app (readme length, empty question text). The import
+  result now carries the whole-project runtime validity after the swap and the
+  shell warns instead of celebrating when it is false; the save gate still
+  blocks until fixed.
+- **Revisit when:** the import gains ref-uniqueness escapes or the runtime
+  rules diverge further from the import checks.
 
 ### R-68 Rename regenerates the slug
 - **Where:** `services/session.js` `renameForm`, `services/save.js`
@@ -455,7 +461,10 @@ shows the dangling ref as "Unavailable answer".
   parsed and schema-validated synchronously, blocking the UI. There is no size
   cap and no MIME check.
 - **Impact:** a slow or frozen builder while the import runs.
-- **Status:** open.
+- **Status:** fixed (2026-11-07) — files above `PARAMETERS.FORM_IMPORT_MAX_BYTES`
+  (5 MB) are refused before reading with a "Form file is too large" error. The
+  parse is still synchronous; the cap bounds its cost. No unit test (the check
+  lives in the shell file-input handler).
 - **Revisit when:** imports become common or large exports are expected.
 
 ### R-72 An edit made during a save is marked saved

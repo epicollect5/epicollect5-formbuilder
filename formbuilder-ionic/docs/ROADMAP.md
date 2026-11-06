@@ -62,7 +62,8 @@ Ported today:
 - Parent validity badges that reflect branch / group child validation.
 - Save / export / import: cleaning on a deep copy, the `base64(gzip(JSON))`
   POST, the plain-JSON form envelope, and an import that validates against the
-  schema and rewrites refs structurally.
+  schema and rewrites refs structurally, reports the whole-project runtime
+  validity after the swap and refuses files above 5 MB.
 - Form management: add (five-form cap and name prompt), rename (duplicate
   checked), delete the last child form and delete all questions.
 - Chrome feedback: `ion-toast` notifications at the top of the page, the
