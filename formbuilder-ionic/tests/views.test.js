@@ -91,14 +91,19 @@ describe('fixed markup views', () => {
         });
     });
 
-    it('keeps the title help in an info button instead of a docs link', async () => {
+    it('links the title help to the docs instead of a modal', async () => {
         const properties = await read('src/views/properties-card.html');
         const questions = await read('src/views/question-card.html');
+        const shell = await read('src/ui/shell.js');
 
         expect(properties).toContain('data-role="title-info"');
         expect(questions).toContain('data-role="title-info"');
+        expect(properties).toContain('https://docs.epicollect.net/formbuilder/title');
+        expect(questions).toContain('https://docs.epicollect.net/formbuilder/title');
         expect(properties).not.toContain('PLACEHOLDER-titles');
         expect(properties).not.toContain('data-toggle="modal"');
+        expect(shell).not.toContain('openTitleInfo');
+        expect(shell).not.toContain('title-info-body');
     });
 
     it('keeps the date and time format choices in the properties view', async () => {
@@ -119,7 +124,6 @@ describe('fixed markup views', () => {
         const bodies = [
             'src/views/form-name-modal-body.html',
             'src/views/csv-import-modal-body.html',
-            'src/views/title-info-body.html',
             'src/views/delete-question-modal-body.html'
         ];
 
