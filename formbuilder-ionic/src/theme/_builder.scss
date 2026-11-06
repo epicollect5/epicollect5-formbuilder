@@ -768,6 +768,15 @@ ion-item.builder__question[aria-current='true'] {
     color: var(--ion-color-danger);
 }
 
+/* The tab error icon mirrors the legacy "!" on the affected tab. */
+.builder__property-tabs ion-segment-button .builder__property-tab-state {
+    margin-left: 4px;
+    color: var(--ion-color-danger);
+    font-size: 16px;
+    vertical-align: middle;
+    font-weight: 700;
+}
+
 .builder__property-error {
     margin: 0;
     color: var(--ion-color-danger);

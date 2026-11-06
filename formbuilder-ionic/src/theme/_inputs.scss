@@ -130,7 +130,8 @@
 }
 
 .ui-sortable-helper {
-    box-shadow: 0 16px 34px rgba(28, 18, 40, 0.22);
+    /* matches the tool drag helper's elevation (.builder__question--helper) */
+    box-shadow: 0 8px 24px rgba(28, 18, 40, 0.18);
 }
 
 .ui-sortable-placeholder {
