@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getSession, selectForm, setProject } from '@/services/session.js';
+import { PARAMETERS } from '@/config/parameters.js';
 import {
-    MAX_UNDO_STATES,
-    UNDO_THROTTLE_MS,
     canUndo,
     pushUndoState,
     resetUndoHistory,
@@ -67,7 +66,7 @@ describe('undo history', () => {
     });
 
     it('keeps at most ten states', () => {
-        for (let index = 0; index < MAX_UNDO_STATES + 4; index += 1) {
+        for (let index = 0; index < PARAMETERS.MAX_UNDO_STATES + 4; index += 1) {
             first_question().question = 'Q' + index;
             pushUndoState();
         }
@@ -78,7 +77,7 @@ describe('undo history', () => {
             undos += 1;
         }
 
-        expect(undos).toBe(MAX_UNDO_STATES - 1);
+        expect(undos).toBe(PARAMETERS.MAX_UNDO_STATES - 1);
         expect(first_question().question).not.toBe('First');
     });
 
@@ -89,7 +88,7 @@ describe('undo history', () => {
 
         expect(canUndo()).toBe(false);
 
-        vi.advanceTimersByTime(UNDO_THROTTLE_MS);
+        vi.advanceTimersByTime(PARAMETERS.UNDO_THROTTLE_MS);
 
         expect(canUndo()).toBe(true);
         expect(undo()).toBe(true);
@@ -103,7 +102,7 @@ describe('undo history', () => {
         first_question().question = 'Typed more';
         pushUndoState();
 
-        vi.advanceTimersByTime(UNDO_THROTTLE_MS);
+        vi.advanceTimersByTime(PARAMETERS.UNDO_THROTTLE_MS);
 
         expect(undo()).toBe(true);
         expect(first_question().question).toBe('First');

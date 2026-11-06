@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import form_export from './fixtures/form.json';
-import { FORM_MESSAGES } from '@/models/messages.js';
+import { FORM_MESSAGES } from '@/config/strings.js';
+import { PARAMETERS } from '@/config/parameters.js';
 import {
     countInputs,
     countSearchInputs,
-    countTitles,
-    INPUTS_MAX_ALLOWED,
-    prepareImportedForm
-} from '@/services/form-import.js';
+    countTitles
+} from '@/models/project-limits.js';
+import { prepareImportedForm } from '@/services/form-import.js';
 
 const IMPORTED_REF = form_export.data.form.ref;
 // Refs are hex: a letter outside [a-f] fails the schema's ref pattern.
@@ -127,7 +127,7 @@ describe('preparing an import', () => {
             inputs.push(input_with_ref(IMPORTED_REF + '_' + suffix(index)));
         }
 
-        expect(countInputs(inputs)).toBe(INPUTS_MAX_ALLOWED + 1);
+        expect(countInputs(inputs)).toBe(PARAMETERS.INPUTS_MAX_ALLOWED + 1);
         expect(prepareImportedForm(JSON.stringify(payload_with(inputs)), project_definition(), 0)).toEqual({
             ok: false,
             error: FORM_MESSAGES.FORM_IS_INVALID

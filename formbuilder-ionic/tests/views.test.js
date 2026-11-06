@@ -172,6 +172,6 @@ describe('build boundary', () => {
 
         expect(routes).toContain('PUBLIC_PREFIX');
         expect(routes).toContain("COMPARISON_BASE + '/public/'");
-        expect(routes).toContain('PROJECT_SAVE_PATH');
+        expect(routes).toContain('DEV_PROJECT_SAVE_PATH');
     });
 });

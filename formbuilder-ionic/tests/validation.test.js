@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { areAllInputsValid, areFormInputsValid, getInputErrors, isInputValid } from '@/services/validation.js';
-import { JUMP_TO_END_OF_FORM_REF } from '@/services/jumps.js';
+import { PARAMETERS } from '@/config/parameters.js';
 
-const END = JUMP_TO_END_OF_FORM_REF;
+const END = PARAMETERS.JUMP_TO_END_OF_FORM_REF;
 
 function input(ref, overrides) {
     return Object.assign({

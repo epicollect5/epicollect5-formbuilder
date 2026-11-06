@@ -5,7 +5,7 @@ import { Writable } from 'node:stream';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     IONIC_PREFIX,
-    PROJECT_SAVE_PATH,
+    DEV_PROJECT_SAVE_PATH,
     landingMiddleware,
     projectSaveMiddleware,
     staticMiddleware
@@ -143,7 +143,7 @@ describe('comparison server middleware', () => {
         it('writes the posted definition to the shared project file', async () => {
             const { next, response } = await run(projectSaveMiddleware(repo_root), {
                 method: 'POST',
-                url: PROJECT_SAVE_PATH,
+                url: DEV_PROJECT_SAVE_PATH,
                 body: '{"data":{"ping":true}}'
             });
 
@@ -156,7 +156,7 @@ describe('comparison server middleware', () => {
         it('rejects an invalid payload without touching the file', async () => {
             const { response } = await run(projectSaveMiddleware(repo_root), {
                 method: 'POST',
-                url: PROJECT_SAVE_PATH,
+                url: DEV_PROJECT_SAVE_PATH,
                 body: 'not json'
             });
 
@@ -168,7 +168,7 @@ describe('comparison server middleware', () => {
         it('passes other requests through', async () => {
             const { next } = await run(projectSaveMiddleware(repo_root), {
                 method: 'GET',
-                url: PROJECT_SAVE_PATH
+                url: DEV_PROJECT_SAVE_PATH
             });
 
             expect(next).toHaveBeenCalledTimes(1);

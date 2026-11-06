@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createInput } from '@/models/input-factory.js';
+import { createInput } from '@/factory/input-factory.js';
 import { getCurrentInput, setProject } from '@/services/session.js';
 import { renderApp } from '@/ui/shell.js';
 

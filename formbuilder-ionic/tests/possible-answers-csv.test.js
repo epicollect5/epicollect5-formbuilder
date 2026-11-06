@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_ANSWERS } from '@/models/possible-answers.js';
+import { PARAMETERS } from '@/config/parameters.js';
 import {
     exportCsv,
     getCsvColumns,
@@ -84,7 +84,7 @@ describe('possible answers CSV', () => {
     });
 
     it('truncates long answers and stops at the question limit', () => {
-        const answers = Array.from({ length: MAX_ANSWERS - 1 }, function (value, index) {
+        const answers = Array.from({ length: PARAMETERS.MAX_ANSWERS - 1 }, function (value, index) {
             return { answer: 'Answer ' + index, answer_ref: 'answer_' + index };
         });
         const input = create_input({ possible_answers: answers });
@@ -93,7 +93,7 @@ describe('possible answers CSV', () => {
 
         expect(result.imported).toBe(1);
         expect(result.skipped).toBe(2);
-        expect(input.possible_answers).toHaveLength(MAX_ANSWERS);
+        expect(input.possible_answers).toHaveLength(PARAMETERS.MAX_ANSWERS);
 
         const long = create_input({ possible_answers: [] });
         importAnswers(long, parseCsv('x'.repeat(300)), { column_index: 0 });

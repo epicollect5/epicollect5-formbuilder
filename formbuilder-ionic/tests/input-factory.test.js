@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createInput } from '@/models/input-factory.js';
+import { createInput } from '@/factory/input-factory.js';
 
 const BASE_KEYS = [
     'ref', 'type', 'question', 'is_title', 'is_required', 'uniqueness', 'regex',

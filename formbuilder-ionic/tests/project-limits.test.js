@@ -1,14 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { PARAMETERS } from '@/config/parameters.js';
 import {
     countInputs,
     countSearchInputs,
     countTitles,
-    getProjectLimitsError,
-    INPUTS_MAX_ALLOWED,
-    SEARCH_INPUTS_MAX,
-    TITLES_MAX
-} from '@/services/project-limits.js';
-import { FORM_MESSAGES } from '@/models/messages.js';
+    getProjectLimitsError
+} from '@/models/project-limits.js';
+import { FORM_MESSAGES } from '@/config/strings.js';
 
 function input(overrides) {
     return Object.assign({
@@ -102,9 +100,9 @@ describe('project limits', () => {
     });
 
     it('allows exactly the question limit and rejects one more', () => {
-        expect(INPUTS_MAX_ALLOWED).toBe(300);
-        expect(getProjectLimitsError(project([form(many(INPUTS_MAX_ALLOWED))]))).toBeNull();
-        expect(getProjectLimitsError(project([form(many(INPUTS_MAX_ALLOWED + 1))])))
+        expect(PARAMETERS.INPUTS_MAX_ALLOWED).toBe(300);
+        expect(getProjectLimitsError(project([form(many(PARAMETERS.INPUTS_MAX_ALLOWED))]))).toBeNull();
+        expect(getProjectLimitsError(project([form(many(PARAMETERS.INPUTS_MAX_ALLOWED + 1))])))
             .toBe(FORM_MESSAGES.TOO_MANY_QUESTIONS);
     });
 
@@ -123,7 +121,7 @@ describe('project limits', () => {
     });
 
     it('allows three titles per form and rejects four', () => {
-        expect(TITLES_MAX).toBe(3);
+        expect(PARAMETERS.TITLES_MAX).toBe(3);
         expect(getProjectLimitsError(project([form(many(3, { is_title: true }))]))).toBeNull();
         expect(getProjectLimitsError(project([form(many(4, { is_title: true }))])))
             .toBe(FORM_MESSAGES.TOO_MANY_TITLES);
@@ -160,7 +158,7 @@ describe('project limits', () => {
     });
 
     it('allows five search questions and rejects six', () => {
-        expect(SEARCH_INPUTS_MAX).toBe(5);
+        expect(PARAMETERS.SEARCH_INPUTS_MAX).toBe(5);
         expect(getProjectLimitsError(project([form(many(5, { type: 'searchsingle' }))]))).toBeNull();
         expect(getProjectLimitsError(project([form(many(6, { type: 'searchmultiple' }))])))
             .toBe(FORM_MESSAGES.TOO_MANY_SEARCH_QUESTIONS);

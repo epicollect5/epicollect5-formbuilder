@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_ANSWER_LENGTH, MAX_ANSWERS, POSSIBLE_ANSWERS_ORDER } from '@/models/possible-answers.js';
+import { PARAMETERS } from '@/config/parameters.js';
+import { POSSIBLE_ANSWERS_ORDER } from '@/models/possible-answers.js';
 import {
     addPossibleAnswer,
     deleteAllAnswers,
@@ -42,7 +43,7 @@ describe('possible answers', () => {
     });
 
     it('stops adding at the answer limit', () => {
-        const answers = Array.from({ length: MAX_ANSWERS }, function (value, index) {
+        const answers = Array.from({ length: PARAMETERS.MAX_ANSWERS }, function (value, index) {
             return { answer: 'Answer ' + index, answer_ref: 'answer_' + index };
         });
 
@@ -109,7 +110,7 @@ describe('possible answers', () => {
 
         renamePossibleAnswer(input, 'answer_1', 'x'.repeat(300));
 
-        expect(input.possible_answers[0].answer).toHaveLength(MAX_ANSWER_LENGTH);
+        expect(input.possible_answers[0].answer).toHaveLength(PARAMETERS.MAX_ANSWER_LENGTH);
     });
 
     it('orders answers ascending and descending, keeping the refs', () => {

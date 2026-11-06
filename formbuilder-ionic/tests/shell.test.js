@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCurrentForm, getCurrentInput, getCurrentInputs, getSession, setProject } from '@/services/session.js';
-import { UNDO_THROTTLE_MS } from '@/services/undo.js';
+import { PARAMETERS } from '@/config/parameters.js';
 import { renderApp } from '@/ui/shell.js';
 
 function build_markup() {
@@ -567,7 +567,7 @@ describe('undo', () => {
 
         expect(document.getElementById('undo').disabled).toBe(true);
 
-        vi.advanceTimersByTime(UNDO_THROTTLE_MS);
+        vi.advanceTimersByTime(PARAMETERS.UNDO_THROTTLE_MS);
 
         expect(document.getElementById('undo').disabled).toBe(false);
     });

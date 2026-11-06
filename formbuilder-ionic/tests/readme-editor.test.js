@@ -1,9 +1,9 @@
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import { afterEach, describe, expect, it } from 'vitest';
+import { PARAMETERS } from '@/config/parameters.js';
 import {
     createReadmeEditor,
-    README_MAX_LENGTH,
     ReadmeLength,
     sanitizeEditorHTML
 } from '@/ui/readme-editor.js';
@@ -58,27 +58,27 @@ describe('readme sanitising', () => {
 
 describe('readme length limit', () => {
     it('blocks an insertion that would pass the limit', () => {
-        const editor = length_editor('<p>' + 'x'.repeat(README_MAX_LENGTH) + '</p>');
+        const editor = length_editor('<p>' + 'x'.repeat(PARAMETERS.README_MAX_LENGTH) + '</p>');
 
-        expect(editor.getText()).toHaveLength(README_MAX_LENGTH);
+        expect(editor.getText()).toHaveLength(PARAMETERS.README_MAX_LENGTH);
 
         editor.commands.insertContent('y');
 
-        expect(editor.getText()).toHaveLength(README_MAX_LENGTH);
+        expect(editor.getText()).toHaveLength(PARAMETERS.README_MAX_LENGTH);
     });
 
     it('allows replacing characters at the limit and shrinking the text', () => {
-        const editor = length_editor('<p>' + 'x'.repeat(README_MAX_LENGTH) + '</p>');
+        const editor = length_editor('<p>' + 'x'.repeat(PARAMETERS.README_MAX_LENGTH) + '</p>');
 
         editor.commands.insertContentAt({ from: 1, to: 2 }, 'y');
-        expect(editor.getText()).toHaveLength(README_MAX_LENGTH);
+        expect(editor.getText()).toHaveLength(PARAMETERS.README_MAX_LENGTH);
         expect(editor.getText().charAt(0)).toBe('y');
 
         editor.commands.deleteRange({ from: 1, to: 2 });
-        expect(editor.getText()).toHaveLength(README_MAX_LENGTH - 1);
+        expect(editor.getText()).toHaveLength(PARAMETERS.README_MAX_LENGTH - 1);
 
-        editor.commands.insertContentAt(README_MAX_LENGTH - 1, 'z');
-        expect(editor.getText()).toHaveLength(README_MAX_LENGTH);
+        editor.commands.insertContentAt(PARAMETERS.README_MAX_LENGTH - 1, 'z');
+        expect(editor.getText()).toHaveLength(PARAMETERS.README_MAX_LENGTH);
     });
 });
 
