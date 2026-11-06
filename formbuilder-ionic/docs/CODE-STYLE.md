@@ -112,7 +112,7 @@ Rules:
   Font Awesome markup, classes, dependencies, or an FA-to-Ionicons upgrade
   layer. Render icons as `<ion-icon>` (directly in views or via the `icon()`
   helper) and style them with Ionic/palette tokens.
-- Bootstrap JavaScript is not loaded. `components/legacy-*` provide the
+- Bootstrap JavaScript is not loaded. `src/ui/` adapters provide the
   replacement behaviour on top of Ionic `ion-modal`, ARIA tabs, accessible menus
   and accessible labels.
 

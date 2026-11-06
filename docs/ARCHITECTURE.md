@@ -29,8 +29,8 @@ and export execute the legacy code. Only the presentation layer is replaced:
   `public/views/properties/**`.
 - `src/theme/**` styles the legacy hook classes on Ionic tokens; no Bootstrap
   stylesheet is loaded.
-- `src/components/legacy-*` provides the Bootstrap JS replacements: `ion-modal`
-  hosts the legacy `.modal` element, tabs are ARIA controllers firing
+- `src/ui/**` provides the Bootstrap JS replacements: `ui/modal.js` hosts the
+  legacy `.modal` element, tabs are ARIA controllers firing
   `show/shown.bs.tab`, and dropdowns are accessible menus. Icons are Ionicons
   only (`<ion-icon>`); no Font Awesome.
 

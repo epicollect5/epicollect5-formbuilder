@@ -1,4 +1,4 @@
-/* Notifications rendered by the Ionic toast (src/components/legacy-toast). */
+/* Notifications rendered by the Ionic toast (src/ui/toast.js). */
 ion-toast.fb-toast {
     /* vw, not %: the percentages resolve against the shrink-wrapped toast wrapper. */
     --width: min(560px, calc(100vw - 32px));

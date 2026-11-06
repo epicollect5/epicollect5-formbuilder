@@ -7,7 +7,7 @@ import { PARAMETERS } from '@/config/parameters.js';
  *
  * A single toast is kept on screen at a time, so a burst of messages (or a
  * success followed by an error) cannot stack. The styles live in
- * `theme/components/legacy-toast.scss`.
+ * `theme/components/toast.scss`.
  */
 const TOAST_CLASSES = {
     success: 'fb-toast--success',
