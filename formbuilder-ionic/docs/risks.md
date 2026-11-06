@@ -9,7 +9,7 @@ This register is a working list, not a defect log: a risk can be accepted
 or more work). Reconstructed from the code as of phase 8, so line-level detail
 lives in the named functions, not in line numbers that will drift.
 
-Updated: 2026-11-05 (phase 8 component replacement).
+Updated: 2026-11-07 (jump truthfulness fixes).
 
 Status legend: **open** — not addressed; **watch** — accepted or fixed but easy
 to regress; **fixed** — the concrete case found during the port is handled.
@@ -148,7 +148,11 @@ to regress; **fixed** — the concrete case found during the port is handled.
   preselects the first option).
 - **Impact:** the panel shows a jump the data does not contain; the retarget
   happens without the user choosing it.
-- **Status:** open (legacy behaviour, but the port makes it visible in a select).
+- **Status:** fixed (2026-11-07) — `normalizeJump` keeps a stored ref that no
+  longer matches an answer and only defaults a *missing* ref to the first
+  answer; the row renders the dangling ref as "Unavailable answer" (mirroring
+  destinations) and validation flags it. Legacy silently retargets on save; the
+  port now blocks the save instead (deliberate divergence).
 - **Revisit when:** touching jump normalisation or answer deletion/import.
 
 ### R-31 Jump destinations are a function of current order
@@ -169,7 +173,9 @@ to regress; **fixed** — the concrete case found during the port is handled.
   is invalid.
 - **Impact:** the user opens Jumps and finds nothing wrong; the bad row is one
   level down.
-- **Status:** open.
+- **Status:** fixed (2026-11-07) — a child's jump error now lights the
+  container's Jumps tab as well (the aggregate Properties entry stays, so both
+  tabs show the badge); the offending row itself is still one level down.
 - **Revisit when:** improving tab badges or row-level jump errors.
 
 ### R-33 Deleting or importing answers leaves jumps pointing at old refs
@@ -180,7 +186,9 @@ to regress; **fixed** — the concrete case found during the port is handled.
   first answer as selected while the stored ref is dangling.
 - **Impact:** the question is invalid, yet the panel looks like a valid jump
   exists until the user touches the dropdown.
-- **Status:** open (validation catches it; presentation hides it).
+- **Status:** fixed (2026-11-07, with R-30) — the dangling ref is kept in the
+  data, rendered as "Unavailable answer" on the row and flagged by the Jumps
+  badge; the save gate blocks until the user picks a real answer.
 - **Revisit when:** revisiting R-30, or when save starts blocking invalid input.
 
 ## Phase 4 — validation and question copy
@@ -371,8 +379,9 @@ to regress; **fixed** — the concrete case found during the port is handled.
 
 The phase-5 report claimed validation does not cross-check that a jump's
 `answer_ref` still exists. It does: `getJumpErrors` flags `JUMP_ANSWER_NOT_SELECTED`
-when the ref is missing from `possible_answers`. The real gap is presentation —
-the jump row shows a fallback answer (R-30, R-33).
+when the ref is missing from `possible_answers`. The presentation gap (the jump
+row showing a fallback answer, R-30 / R-33) was fixed on 2026-11-07: the row now
+shows the dangling ref as "Unavailable answer".
 
 ## Phase 7 — save, export, import, form management
 

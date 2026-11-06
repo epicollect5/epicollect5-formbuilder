@@ -114,7 +114,9 @@ and parent validity badges that reflect the children.
 Ported: rows with When (`NO_ANSWER_GIVEN` / `IS` / `IS_NOT` / `ALL`), Answer and
 destination, the single-answer "always" variant, the one-jump-per-answer limit,
 the row jump icon, destinations limited to the active list (a branch can only
-jump inside itself) and jump validity in the Jumps tab badge.
+jump inside itself) and jump validity in the Jumps tab badge. A stored answer
+ref that no longer matches a possible answer is kept in the data and rendered
+as "Unavailable answer" instead of silently falling back to the first answer.
 
 Remaining:
 
@@ -138,8 +140,9 @@ Ported (`models/validation.js` + `services/validation.js`): question text and
 readme length, possible answers, integer / decimal min, max and initial answer,
 default vs regex, branch / group children (recursive, so a nested group
 invalidates its branch), jump destinations and conditions, `areFormInputsValid`
-/ `areAllInputsValid`, the per-row validity badge and the Properties / Jumps tab
-badges. Each error carries the tab it belongs to.
+/ `areAllInputsValid`, the per-row validity badge and the Properties / Advanced
+/ Jumps tab badges. Each error carries the tab it belongs to, and a child's
+broken jump lights the container's Jumps badge as well.
 
 The project-level caps (300 inputs, 3 titles per list, 5 search questions) are
 enforced on save through `models/project-limits.js` and on import through the
