@@ -466,9 +466,12 @@ shows the dangling ref as "Unavailable answer".
   the `saving` flag.
 - **Impact:** the unload guard can let an unsaved edit go after a save that
   raced it.
-- **Status:** open.
-- **Revisit when:** adding autosave/retries; track a save revision instead of a
-  boolean.
+- **Status:** fixed (2026-11-07) — a monotonic `change_revision` is bumped by
+  every recorded change and by undo; a successful save only clears
+  `unsaved_changes` when the revision is unchanged since the payload was
+  copied, so racing edits and undos stay guarded and re-enable the Save button.
+- **Revisit when:** adding autosave/retries; the revision can also back a
+  dirty-state comparison instead of the R-77 boolean.
 
 ## Phase 8 — chrome feedback, guards and limits
 
