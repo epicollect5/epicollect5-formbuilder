@@ -59,16 +59,17 @@ to regress; **fixed** — the concrete case found during the port is handled.
 
 ## Phase 1 — properties panel
 
-### R-10 Shared property fragments can break the legacy runtime silently
-- **Where:** `public/views/properties/**` reused verbatim at build time;
-  `src/views/properties-card.html`.
-- **Risk:** legacy selectors depend on `div.panel` / `div.panel-body` and hook
-  classes. Renaming or restructuring a fragment fails at runtime, with no
-  compile step to catch it.
-- **Impact:** a property panel stops binding in one or both apps.
+### R-10 Renaming a legacy hook class breaks port behaviour silently
+- **Where:** `src/views/**` — the port re-authors the legacy markup but keeps
+  the hook classes (`div.panel` / `div.panel-body`, `data-*` hooks) the bundled
+  legacy modules query.
+- **Risk:** renaming or restructuring a hook fails at runtime, with no
+  compile step to catch it. `public/views/properties/**` is NOT reused by the
+  port, so editing it affects the legacy app only.
+- **Impact:** a property panel stops binding in the port.
 - **Status:** watch.
-- **Revisit when:** editing anything under `public/views/`; load the legacy page
-  and the Ionic page before closing the change.
+- **Revisit when:** editing anything under `src/views/`; verify the hook
+  classes the legacy modules query are still present.
 
 ### R-11 The advanced panel removes fields from cloned markup
 - **Where:** `buildAdvancedPanel` — `field.remove()` for every type-gated field.

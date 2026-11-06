@@ -24,8 +24,8 @@ port. Consistency over "modern framework" patterns.
   bundled with the app by Vite. Do not load Ionic from a CDN.
 - Vanilla ES modules built and served by Vite. Use modern JavaScript syntax
   supported by the configured Vite build target. No Vue, no React, no TypeScript.
-- jQuery 2.2.1 + jQuery UI 1.11.4 remain the drag-and-drop engine, exactly as in
-  the legacy app.
+- jQuery 4 + jQuery UI 1.14.2 (pinned npm packages) remain the drag-and-drop
+  engine. Newer than the legacy app's jQuery 2.2.1 + jQuery UI 1.11.4.
 - The legacy `js/app_modules/**` code is the behavioural source of truth and is
   consumed unmodified through Vite aliases.
 

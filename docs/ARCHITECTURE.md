@@ -24,8 +24,9 @@ behaviour: the frozen `js/app_modules/**` modules are bundled through esbuild
 aliases, so rendering, validation, jumps, possible answers, undo, save, import
 and export execute the legacy code. Only the presentation layer is replaced:
 
-- `src/views/**` re-authors the Bootstrap containers and partials; the
-  placeholder-only `public/views/properties/**` files are reused at build time.
+- `src/views/**` re-authors the Bootstrap containers and partials as Ionic
+  markup (bundled via `?raw` imports); nothing is reused from
+  `public/views/properties/**`.
 - `src/theme/**` styles the legacy hook classes on Ionic tokens; no Bootstrap
   stylesheet is loaded.
 - `src/components/legacy-*` provides the Bootstrap JS replacements: `ion-modal`
