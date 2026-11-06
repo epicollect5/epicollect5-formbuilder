@@ -130,7 +130,7 @@ js/app_modules/config/consts.js
 js/app_modules/config/extend-natives.js
 js/app_modules/config/formbuilder.js
 js/app_modules/config/init.js
-js/app_modules/config/messages.js
+js/app_modules/config/strings.js
 js/app_modules/config/toast.js
 js/app_modules/factory/form-factory.js
 js/app_modules/factory/input-factory.js
