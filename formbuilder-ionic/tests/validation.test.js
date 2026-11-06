@@ -136,6 +136,20 @@ describe('validation', () => {
         expect(isInputValid(branch, [branch])).toBe(false);
     });
 
+    it('lights the Jumps tab on a branch whose child jump is broken', () => {
+        const child = input('form_1_b_a', { question: 'Child' });
+        const branch = input('form_1_b', { type: 'branch', question: 'Branch', branch: [child] });
+
+        child.jumps = [{ to: 'missing_ref', when: 'ALL', answer_ref: null }];
+
+        const tabs = getInputErrors(branch, [branch]).map((error) => {
+            return error.tab;
+        });
+
+        expect(tabs).toContain('properties');
+        expect(tabs).toContain('jumps');
+    });
+
     it('validates jump destinations against the current order', () => {
         const first = input('form_1_a');
         const second = input('form_1_b');

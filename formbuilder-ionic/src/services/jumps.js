@@ -107,11 +107,11 @@ const normalizeJump = (jump, input) => {
     }
 
     const possible_answers = input && Array.isArray(input.possible_answers) ? input.possible_answers : [];
-    const has_answer = possible_answers.some((possible_answer) => {
-        return possible_answer.answer_ref === next.answer_ref;
-    });
 
-    if (!has_answer) {
+    // a ref that no longer matches an answer is kept, not silently retargeted:
+    // the row shows it as unavailable and validation flags it, as with jump
+    // destinations. Only a missing ref defaults to the first answer.
+    if (next.answer_ref === null || next.answer_ref === undefined || next.answer_ref === '') {
         next.answer_ref = possible_answers.length ? (possible_answers[0].answer_ref || '') : '';
     }
 

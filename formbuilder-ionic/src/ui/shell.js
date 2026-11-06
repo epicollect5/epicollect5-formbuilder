@@ -1529,9 +1529,16 @@ const buildJumpRow = (input, jump, index, destinations) => {
             const has_value = answer_options.some((option) => {
                 return String(option.value) === String(jump.answer_ref);
             });
-            const answer_value = needs_answer ?
-                (has_value ? jump.answer_ref : (answer_options[0] ? answer_options[0].value : '')) :
-                '';
+
+            // a stored ref that no longer matches an answer stays visible as
+            // unavailable instead of silently showing the first answer (R-30)
+            if (needs_answer && jump.answer_ref && !has_value) {
+                answer_options.unshift({ value: jump.answer_ref, label: 'Unavailable answer' });
+            }
+
+            const answer_value = !needs_answer ?
+                '' :
+                (jump.answer_ref ? jump.answer_ref : (answer_options[0] ? answer_options[0].value : ''));
 
             const answer_dropdown = initDropdown(answer_placeholder, answer_options, answer_value, needs_answer ? (detail) => {
                 updateJump(input, index, { answer_ref: detail.value || '' });

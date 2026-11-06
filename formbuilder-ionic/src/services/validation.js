@@ -82,15 +82,28 @@ export const getInputErrors = (input, inputs) => {
 
     if (isBranchOrGroup(input.type)) {
         const children = getContainerList(input);
-        const invalid_child = children.some((child) => {
-            return !isInputValid(child, children);
-        });
+        const child_errors = children.reduce((collected, child) => {
+            return collected.concat(getInputErrors(child, children));
+        }, []);
 
-        if (invalid_child) {
+        if (child_errors.length) {
             errors.push({
                 message: input.type === 'branch' ? M.INVALID_BRANCH_INPUTS : M.INVALID_GROUP_INPUTS,
                 tab: PROPERTIES_TAB
             });
+
+            // a child's broken jump lights the container's Jumps tab too,
+            // instead of hiding behind the generic Properties error (R-32)
+            const child_jump_error = child_errors.some((child_error) => {
+                return child_error.tab === JUMPS_TAB;
+            });
+
+            if (child_jump_error) {
+                errors.push({
+                    message: input.type === 'branch' ? M.INVALID_BRANCH_INPUTS : M.INVALID_GROUP_INPUTS,
+                    tab: JUMPS_TAB
+                });
+            }
         }
     }
 
