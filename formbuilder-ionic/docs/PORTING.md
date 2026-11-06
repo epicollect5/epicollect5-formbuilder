@@ -50,12 +50,12 @@ middleware development-only; never put generated output in the legacy app.
 | Shell, form switching, question list, selection | `loaders/load-containers.js`, `actions/parse/**`, `ui-handlers/*sortable*` | `src/ui/shell.js` | ported (slice 1) |
 | Basic question editing (text, required, title) | `actions/parse`, `actions/validation`, `inputs/**` | `src/ui/shell.js` | ported (slice 2, minimal) |
 | Drag and drop (tool to question list, question and answer reordering) | `ui-handlers/sortable.js`, `ui-handlers/possible-answers-sortable.js` | `src/ui/sortable.js` | ported (jQuery UI 1.14 on jQuery 4, vendored from node_modules) |
-| Adding / reordering / deleting questions | `ui-handlers/sortable.js`, `actions/input-collection*`, `factory/input-factory.js` | `src/models/input-factory.js`, `src/models/refs.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 2) |
+| Adding / reordering / deleting questions | `ui-handlers/sortable.js`, `actions/input-collection*`, `factory/input-factory.js` | `src/factory/input-factory.js`, `src/factory/refs-factory.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 2) |
 | Possible answers (add, rename, remove, sort) | `actions/possible-answers*.js`, `template/methods/getPossibleAnswers*` | `src/models/possible-answers.js`, `src/services/possible-answers.js`, `src/ui/shell.js` | ported (slice 3) |
 | Possible answers CSV import/export, pagination, ordering, delete all | `actions/possible-answers.js`, `actions/possible-answers-pager.js`, `ui-handlers/event-handler-callbacks/confirm-import-possible-answers-callback.js` | `src/services/possible-answers.js`, `src/services/possible-answers-csv.js`, `src/views/possible-answers-card.html`, `src/ui/shell.js` | ported (phase 5; inline CSV panel instead of a modal) |
 | Advanced properties, uniqueness, title rules | `template/methods/prepareAdvancedInputPropertiesHTML.js`, `getUniquenessHTML.js` | `src/services/properties.js`, `src/views/properties-card.html`, `src/ui/shell.js` | ported (phase 1) |
 | Form management (rename / delete form, name prompt, child-form cap) | `ui-handlers/event-handler-callbacks/*form*`, `factory/form-factory.js` | `src/services/form-management.js`, `src/services/session.js`, `src/views/question-card.html`, `src/ui/shell.js` | ported (phase 7; inline panels instead of modals) |
-| Branches and groups | `inputs/branch.js`, `inputs/group.js`, `ui-handlers/*branch*`, `ui-handlers/*group*` | `src/models/nesting.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 4, phase 2) |
+| Branches and groups | `inputs/branch.js`, `inputs/group.js`, `ui-handlers/*branch*`, `ui-handlers/*group*` | `src/services/nesting.js`, `src/services/session.js`, `src/ui/shell.js` | ported (slice 4, phase 2) |
 | Jumps | `actions/jumps.js`, `helpers/utils.getJumpAvailableDestinations` | `src/models/jumps.js`, `src/services/jumps.js`, `src/views/jump-row*.html`, `src/ui/shell.js` | ported (phase 3) |
 | Validation and question copy | `actions/validation.js`, `actions/input-duplicator.js`, `ui-handlers/event-handler-callbacks/*` | `src/models/validation.js`, `src/services/validation.js`, `src/services/question-actions.js`, `src/ui/shell.js` | ported (phase 4) |
 | Undo | `actions/undo.js` | `src/services/undo.js`, `src/ui/shell.js` | ported (phase 6) |
@@ -69,7 +69,7 @@ that closes it, are in `ROADMAP.md`.
 
 ## Shared parameters
 
-Runtime limits live in `src/models/parameters.js` as the exported `PARAMETERS`
+Runtime limits live in `src/config/parameters.js` as the exported `PARAMETERS`
 object, matching the naming convention used by the mobile app. This gives the
 Ionic port one source for limits shared by validation, editing controls, imports
 and user-facing messages. Keep type catalogues and other domain-specific rules

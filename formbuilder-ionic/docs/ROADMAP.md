@@ -135,7 +135,7 @@ invalidates its branch), jump destinations and conditions, `areFormInputsValid`
 badges. Each error carries the tab it belongs to.
 
 The project-level caps (300 inputs, 3 titles per list, 5 search questions) are
-enforced on save through `services/project-limits.js` and on import through the
+enforced on save through `models/project-limits.js` and on import through the
 same counters.
 
 ### Modals, menus, toasts
@@ -213,7 +213,7 @@ the form rename / delete panels. Risks carried by the port are tracked in
 
 ## Limits (from the legacy contract)
 
-Runtime values are defined in `src/models/parameters.js` as `PARAMETERS`,
+Runtime values are defined in `src/config/parameters.js` as `PARAMETERS`,
 matching the mobile app convention. The project schema keeps its own literal
 constraints so it remains standalone; keep those declarations in sync with
 `PARAMETERS` without changing the project-definition contract.
@@ -245,7 +245,7 @@ constraints so it remains standalone; keep those declarations in sync with
   `validation.js` possible-answer parenthesis bug, `getInputsTotal` not counting
   nested-group children, branch jumps validated against the array instead of the
   input, and the branch owner's leftover `group[]`.
-- **Single source for runtime limits.** `models/parameters.js` owns the
+- **Single source for runtime limits.** `config/parameters.js` owns the
   `PARAMETERS` values. Domain modules may re-export aliases, while validation,
   controls, imports and messages consume the shared values. The standalone JSON
   schema has parallel literal constraints that must remain aligned.

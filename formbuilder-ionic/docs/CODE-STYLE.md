@@ -40,6 +40,7 @@ src/
   pages/        entry-level composition, boot order only
   services/     runtime wiring, Ionic setup, legacy UI installation
   models/       shared constants and lookup tables (no DOM, no side effects)
+  factory/      constructors and generators for contract shapes (no DOM, no I/O)
   theme/        SCSS, mirroring components/ 1:1 plus shared layout/control partials
 ```
 
@@ -51,6 +52,9 @@ Rules:
   business logic either: validation, undo, save and jumps stay in the legacy
   modules.
 - **Models** are pure data/constants. No DOM access, no jQuery, no side effects.
+- **Factories** build contract shapes (`createInput`, ref generators, container
+  rules). No DOM access, no jQuery, no I/O; they only construct values the
+  models describe.
 - **Pages** only decide boot order. No UI markup and no event handlers.
 - The **legacy project-definition JSON remains the single source of truth**. DOM
   interactions update that object through the legacy modules; rendering,
@@ -81,6 +85,21 @@ Rules:
   page or another component needs.
 - Do not add comments that restate the code. Comment only non-obvious legacy
   coupling (why a hook must keep its class, for example).
+
+## Constants
+
+- `config/parameters.js` (`PARAMETERS`) is the single source for shared
+  values: numeric limits and caps, paths, endpoint fragments, schema ids and
+  other tuning knobs. Import `PARAMETERS` where the value is used.
+- Do not re-export a `PARAMETERS` value under a bare name from another module
+  (`export const MAX_FORMS = PARAMETERS.MAX_FORMS`). Re-exports force every
+  importer to discover which module owns which alias; a direct
+  `PARAMETERS.MAX_FORMS` read always resolves to the same place.
+- Domain catalogues stay in their domain models: question types in
+  `models/question-types.js`, jump conditions in `models/jumps.js`, datetime
+  formats and type-gating lists in `models/input-properties.js`, messages in
+  `config/strings.js`. These are shapes, not tuning knobs, so they are not
+  `PARAMETERS` entries.
 
 ## DOM Rules
 

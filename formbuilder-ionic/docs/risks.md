@@ -119,7 +119,7 @@ to regress; **fixed** — the concrete case found during the port is handled.
   change the active list.
 
 ### R-22 Nesting rules are enforced at creation, not on every append
-- **Where:** `models/nesting.js` `canContainInput`, `insertInput`,
+- **Where:** `services/nesting.js` `canContainInput`, `insertInput`,
   `services/session.js` `addInputObject`.
 - **Risk:** tools and `insertInput` check the rule; duplication appends the copy
   through `addInputObject`, which does not. The active list normally cannot hold
@@ -130,7 +130,7 @@ to regress; **fixed** — the concrete case found during the port is handled.
   trusting the server tree.
 
 ### R-23 Generated refs are not checked for uniqueness
-- **Where:** `models/refs.js`, `input-factory.js`, `question-actions.js`.
+- **Where:** `factory/refs-factory.js`, `factory/input-factory.js`, `question-actions.js`.
 - **Risk:** refs use a 13-character random suffix per parent; uniqueness is
   assumed, not verified, while the import validator does enforce it.
 - **Impact:** a collision would merge two questions in lookups and jumps.
