@@ -1,11 +1,9 @@
 import { defineConfig } from 'vitest/config';
-import { fileURLToPath } from 'node:url';
+import { resolveAliases } from './scripts/resolve-aliases.mjs';
 
 export default defineConfig({
     resolve: {
-        alias: {
-            '@': fileURLToPath(new URL('./src', import.meta.url))
-        }
+        alias: resolveAliases()
     },
     test: {
         environment: 'jsdom',
