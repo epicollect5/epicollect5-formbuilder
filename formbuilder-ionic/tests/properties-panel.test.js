@@ -279,6 +279,48 @@ describe('properties panel', () => {
         expect(getCurrentInput().datetime_format).toBe('dd/MM/YYYY');
     });
 
+    it('hides the no-title well when a question is checked as title', () => {
+        setProject(project_definition([base_input({ question: 'Name' })]));
+        renderApp();
+
+        const warning = () => document.querySelector('#questions [data-role="title-warning"]');
+
+        expect(warning().hidden).toBe(false);
+
+        select_first_question();
+
+        const toggle = checkbox_by_label('Use answer as title');
+
+        expect(toggle).not.toBeUndefined();
+
+        toggle.checked = true;
+        toggle.dispatchEvent(new CustomEvent('ionChange', { detail: { checked: true } }));
+
+        expect(getCurrentInput().is_title).toBe(true);
+        expect(warning().hidden).toBe(true);
+    });
+
+    it('shows the no-title well again when the last title is unchecked', () => {
+        setProject(project_definition([base_input({ question: 'Name', is_title: true })]));
+        renderApp();
+
+        const warning = () => document.querySelector('#questions [data-role="title-warning"]');
+
+        expect(warning().hidden).toBe(true);
+
+        select_first_question();
+
+        const toggle = checkbox_by_label('Use answer as title');
+
+        toggle.checked = false;
+        toggle.dispatchEvent(new CustomEvent('ionChange', { detail: { checked: false } }));
+
+        expect(getCurrentInput().is_title).toBe(false);
+        expect(warning().hidden).toBe(false);
+        expect(warning().querySelector('[data-role="title-warning-text"]').textContent)
+            .toBe('No title set for this form yet');
+    });
+
     it('sanitises angle brackets in question text like legacy', () => {
         setProject(project_definition([base_input({ type: 'text', question: 'Name' })]));
         renderApp();

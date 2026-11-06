@@ -1660,6 +1660,37 @@ const bindCheckboxToggle = (toggle, checked, on_change, options) => {
     });
 };
 
+/* Syncs the no-title well in the question column with the active list: visible
+   only when the active list (form inputs or the drilled-in container) holds
+   questions but no title. Called after a change that cannot re-render
+   (the title toggle skips renderApp to keep focus and scroll position). */
+const refreshTitleWarning = () => {
+    const questions = document.getElementById('questions');
+
+    if (!questions) {
+        return;
+    }
+
+    const warning = questions.querySelector('[data-role="title-warning"]');
+
+    if (!warning) {
+        return;
+    }
+
+    const trail = getEditingTrail();
+    const active_container = trail.length ? trail[trail.length - 1] : null;
+    const branch_active = active_container && active_container.type === 'branch';
+    const inputs = getCurrentInputs();
+    const show = countTitles(inputs) === 0 && (branch_active || (!active_container && inputs.length > 0));
+
+    warning.hidden = !show;
+
+    if (show) {
+        warning.querySelector('[data-role="title-warning-text"]').textContent =
+            branch_active ? 'No title set for this branch yet' : 'No title set for this form yet';
+    }
+};
+
 const bindTitleToggle = (row, input) => {
     const toggle = row.querySelector('.builder__title-toggle');
     const inputs = getCurrentInputs();
@@ -1679,7 +1710,9 @@ const bindTitleToggle = (row, input) => {
 
         // No re-render: the checkbox already shows its own state, and replacing
         // the card would drop focus and reset the panel's scroll position.
+        // The title well lives in the question column, so sync it directly.
         updateCurrentInput({ is_title: next_checked });
+        refreshTitleWarning();
     }, { disabled: limit_reached });
 };
 

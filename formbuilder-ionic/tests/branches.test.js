@@ -6,6 +6,7 @@ import {
     enterInput,
     exitEditing,
     getCurrentForm,
+    getCurrentInput,
     getCurrentInputs,
     getEditingTrail,
     getSession,
@@ -345,5 +346,28 @@ describe('branch and group rows', () => {
 
         expect(warning.hidden).toBe(false);
         expect(warning.textContent).toContain('No title set for this branch yet');
+    });
+
+    it('hides the branch no-title well when a branch child is checked as title', () => {
+        rows()[0].click();
+        document.querySelector('#properties [data-role="edit-container"]').click();
+
+        const warning = () => document.querySelector('#questions [data-role="title-warning"]');
+
+        expect(warning().hidden).toBe(false);
+        expect(warning().textContent).toContain('No title set for this branch yet');
+
+        document.querySelectorAll('#questions .builder__question')[0].click();
+
+        const toggle = [...document.querySelectorAll('#properties ion-checkbox')]
+            .find((box) => box.textContent.indexOf('Use answer as title') !== -1);
+
+        expect(toggle).not.toBeUndefined();
+
+        toggle.checked = true;
+        toggle.dispatchEvent(new CustomEvent('ionChange', { detail: { checked: true } }));
+
+        expect(getCurrentInput().is_title).toBe(true);
+        expect(warning().hidden).toBe(true);
     });
 });
