@@ -1116,6 +1116,7 @@ const updateTabBadges = (tab_strip, input) => {
     };
 
     markTabInvalid(tab_strip.querySelector('[value="basic"]'), has_error('properties'));
+    markTabInvalid(tab_strip.querySelector('[value="advanced"]'), has_error('advanced'));
     markTabInvalid(tab_strip.querySelector('[value="jumps"]'), has_error('jumps'));
 };
 
@@ -1127,6 +1128,21 @@ const markTabInvalid = (tab, invalid) => {
     }
     else {
         tab.removeAttribute('aria-invalid');
+    }
+
+    //as in legacy, a tab holding an error shows an alert icon next to its label
+    const label = tab.querySelector('ion-label');
+    const state_icon = label ? label.querySelector('.builder__property-tab-state') : null;
+
+    if (invalid && !state_icon) {
+        label.append(element('ion-icon', {
+            class: 'builder__property-tab-state',
+            name: 'alert',
+            'aria-label': 'Tab has validation errors'
+        }));
+    }
+    else if (!invalid && state_icon) {
+        state_icon.remove();
     }
 };
 
@@ -1462,7 +1478,9 @@ const initDropdown = (control, options, value, on_change, disabled) => {
     const dropdown = createDropdown({
         class_name: placeholder.className.replace(/\bdropdown\b/g, '').trim(),
         aria_label: placeholder.getAttribute('aria-label') || control.getAttribute('aria-label') || 'Select option',
-        placeholder: placeholder.getAttribute('data-dropdown-placeholder') || 'Select',
+        placeholder: placeholder.hasAttribute('data-dropdown-placeholder') ?
+            placeholder.getAttribute('data-dropdown-placeholder') :
+            'Select',
         options,
         value,
         disabled: !!disabled,
@@ -1507,18 +1525,26 @@ const buildJumpRow = (input, jump, index, destinations) => {
                     label: answer.answer || 'Untitled answer'
                 };
             });
+            const needs_answer = jumpNeedsAnswer(jump.when);
             const has_value = answer_options.some((option) => {
                 return String(option.value) === String(jump.answer_ref);
             });
-            const answer_value = has_value ? jump.answer_ref : (answer_options[0] ? answer_options[0].value : '');
+            const answer_value = needs_answer ?
+                (has_value ? jump.answer_ref : (answer_options[0] ? answer_options[0].value : '')) :
+                '';
 
-            initDropdown(answer_placeholder, answer_options, answer_value, !jumpNeedsAnswer(jump.when) ? null : (detail) => {
+            const answer_dropdown = initDropdown(answer_placeholder, answer_options, answer_value, needs_answer ? (detail) => {
                 updateJump(input, index, { answer_ref: detail.value || '' });
                 recordChange();
                 renderProperties();
                 renderQuestions();
                 updateCurrentQuestionStatus();
-            }, !jumpNeedsAnswer(jump.when));
+            } : null, !needs_answer);
+
+            //a condition that does not reference an answer keeps no selection (legacy empties the select)
+            if (answer_dropdown && !needs_answer) {
+                answer_dropdown.setValue('');
+            }
         }
     }
 
@@ -1748,6 +1774,8 @@ const bindNumberField = (field, value, property) => {
 
         next[property] = text === '' ? null : text;
         updateCurrentInput(next);
+        updateCurrentQuestionStatus();
+        refreshCurrentProperties();
         recordChange({ throttle: true });
     });
 };
@@ -1764,6 +1792,8 @@ const bindRegexField = (wrapper, input) => {
         const text = event.detail.value || '';
 
         updateCurrentInput({ regex: text === '' ? null : text });
+        updateCurrentQuestionStatus();
+        refreshCurrentProperties();
         recordChange({ throttle: true });
     });
 

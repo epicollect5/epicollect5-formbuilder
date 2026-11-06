@@ -142,6 +142,9 @@ export function installQuestionSortable(list_selector, on_sync) {
         forcePlaceholderSize: true,
         tolerance: 'pointer',
         axis: 'y',
+        // as in legacy, keep the dragged row inside the list so it cannot
+        // slide up under the questions header while sorting
+        containment: 'parent',
         stop: function () {
             on_sync();
         }

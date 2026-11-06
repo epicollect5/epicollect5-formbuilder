@@ -71,8 +71,11 @@ export const createDropdown = (options) => {
     const render_label = () => {
         const label = trigger.querySelector('.dropdown__label');
         const selected = find_item(selected_value);
+        //an explicitly empty placeholder keeps the trigger blank, e.g. a locked
+        //jump "answer" select that references no answer
+        const placeholder_text = typeof config.placeholder === 'string' ? config.placeholder : 'Select';
 
-        label.textContent = selected ? selected.label : (config.placeholder || 'Select');
+        label.textContent = selected ? selected.label : placeholder_text;
         label.classList.toggle('dropdown__label--placeholder', !selected);
     };
 

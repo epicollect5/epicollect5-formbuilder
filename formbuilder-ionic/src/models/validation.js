@@ -19,6 +19,20 @@ import { PARAMETERS } from '@/config/parameters.js';
 
 const NUMERIC_TYPES = ['integer', 'decimal'];
 
+/*
+ * Error destinations, as in legacy: question text, possible answers and
+ * container errors flag the basic tab; min / max / default / regex errors
+ * flag the advanced tab (legacy's showSingleAdvancedPropertyError).
+ */
+export const PROPERTIES_TAB = 'properties';
+export const ADVANCED_TAB = 'advanced';
+
+const withTab = (tab, messages) => {
+    return messages.map((message) => {
+        return { message, tab };
+    });
+};
+
 export const isBlank = (value) => {
     return value === null || value === undefined || String(value).trim() === '';
 };
@@ -153,14 +167,14 @@ const getChildrenErrors = (input) => {
 /* Object-level rules only; jump and child-validity checks need the list. */
 export const getInputObjectErrors = (input) => {
     if (!input) {
-        return [M.QUESTION_TEXT_EMPTY];
+        return withTab(PROPERTIES_TAB, [M.QUESTION_TEXT_EMPTY]);
     }
 
     return [
-        ...getQuestionTextErrors(input),
-        ...getChildrenErrors(input),
-        ...getPossibleAnswerErrors(input),
-        ...getNumericErrors(input),
-        ...getDefaultErrors(input)
+        ...withTab(PROPERTIES_TAB, getQuestionTextErrors(input)),
+        ...withTab(PROPERTIES_TAB, getChildrenErrors(input)),
+        ...withTab(PROPERTIES_TAB, getPossibleAnswerErrors(input)),
+        ...withTab(ADVANCED_TAB, getNumericErrors(input)),
+        ...withTab(ADVANCED_TAB, getDefaultErrors(input))
     ];
 };

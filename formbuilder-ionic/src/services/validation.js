@@ -18,6 +18,7 @@ import { getJumpAvailableDestinations } from '@/services/jumps.js';
  */
 
 export const PROPERTIES_TAB = 'properties';
+export const ADVANCED_TAB = 'advanced';
 export const JUMPS_TAB = 'jumps';
 
 const destinationRefs = (input, inputs) => {
@@ -73,9 +74,7 @@ export const getInputErrors = (input, inputs) => {
     }
 
     const list = Array.isArray(inputs) ? inputs : [];
-    const errors = getInputObjectErrors(input).map((message) => {
-        return { message, tab: PROPERTIES_TAB };
-    });
+    const errors = getInputObjectErrors(input);
 
     getJumpErrors(input, list).forEach((error) => {
         errors.push(error);
