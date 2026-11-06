@@ -67,10 +67,10 @@ Ported today:
   checked), delete the last child form and delete all questions.
 - Chrome feedback: `ion-toast` notifications at the top of the page, the
   legacy `.wait-overlay` busy overlay during save and import, `ion-tooltip` on
-  the question actions, and docs links instead of the info modals.
+  the question actions, and the title info as an auto-height modal.
 - Form tab validity icons, the `beforeunload` guard for unsaved changes, an
-  `ion-alert` confirmation before deleting a question, and the project-level
-  limits enforced when saving.
+  auto-height `ion-modal` confirmation before deleting a question, and the
+  project-level limits enforced when saving.
 - Print form: the preview is built from the definition into
   `.print-preview-wrapper` and printed with `window.print()`; the ported copy of
   the legacy `_print.scss` hides the builder on paper (`theme/_print.scss`).
@@ -79,8 +79,14 @@ Ported today:
 
 ### Chrome and shell actions
 
-- The add-form, rename, delete-form and delete-all confirmations are inline
-  panels for now; converting them to Ionic modals is still pending.
+- The form-name prompt, the CSV import options and the question-delete
+  confirmation already use `ion-modal` (auto-height via `--height: auto`).
+- Form delete and delete-all execute immediately with a toast, matching the
+  legacy callbacks (`delete-form-click-callback.js`,
+  `delete-all-questions-click-callback.js`), which show no confirmation modal.
+  The `FORM_DELETE_CONFIRM` / `DELETE_ALL_CONFIRM` strings exist in both
+  message tables but have no callers; adding confirmations would be new
+  behaviour, not parity.
 
 ### Properties panel
 
@@ -89,7 +95,8 @@ Ported today:
   `set_to_current_datetime`, initial-answer select, `searchsingle` /
   **searchmultiple** radio. The regex presets were dropped in phase 8.
 - Uniqueness control (`none` / `form` / `hierarchy`, plus the branch variant).
-- Title rules: `PARAMETERS.TITLES_MAX = 3`; the info-title modal is a docs link.
+- Title rules: `PARAMETERS.TITLES_MAX = 3`; the title help is a modal, the
+  regex help icons remain docs links.
 - Per-type gating: required only on `REQUIRED_ALLOWED_TYPES`, no required/title
   on media / branch / group / readme.
 - Text caps: 255 for question and header, 1000 for readme.
@@ -122,8 +129,8 @@ pagination at 100 per page, ordering A-Z / Z-A / shuffle, delete all, duplicate
 `answer_ref` detection, the 300 / 1000 answer limits, the 250-char cap and
 `<` / `>` sanitisation on every write.
 
-The CSV panel is still inline inside the answers card rather than an Ionic
-modal; that conversion is pending.
+- The CSV panel is rendered through `openModal` (auto-height) rather than
+  inline in the answers card.
 
 ### Validation
 
@@ -140,16 +147,15 @@ same counters.
 
 ### Modals, menus, toasts
 
-- Info help (`info-title`, `info-regex`, `info-import-form`) is **not** ported
-  as a modal: the help icons are external docs links (`target="_blank"`, with
-  placeholder URLs until the docs pages are confirmed). The regex presets
-  (`only_letters`, `only_digits`, `limit_length_20`) were dropped.
-- Toasts are `ion-toast` at the top of the page (`ui/toast.js`), the busy
-  overlay is the legacy `.wait-overlay` sheet (`ui/loading.js`), and the question
-  action buttons use `ion-tooltip`.
-- The question delete warning is an `ion-alert`. Still pending: `ion-modal` for
-  the CSV import options and the form rename / delete panels (those stay inline
-  for now).
+- Info help: the title explanation links to the docs; the regex help icon was
+  removed with its placeholder link. The regex presets (`only_letters`,
+  `only_digits`, `limit_length_20`) were dropped.
+- Toasts are `ion-toast` at the top of the page (`ui/toast.js`, via the
+  `services/notifications.js` service), the busy overlay is the legacy
+  `.wait-overlay` sheet (`ui/loading.js`), and the question action buttons use
+  `ion-tooltip`.
+- The question-delete warning, the form-name prompt, the CSV import options and
+  the info panels use auto-height `ion-modal` through `ui/modal.js`.
 
 ## Static markup porting rule
 
@@ -180,9 +186,10 @@ container and each dynamic collection's empty-state markup in the view.
 
 ## Phases
 
-Phases 1–8 are ported. Remaining in phase 8: `ion-modal` for the CSV options and
-the form rename / delete panels. Risks carried by the port are tracked in
-`docs/risks.md`.
+Phases 1–8 are ported, including the phase-8 `ion-modal` conversions (form-name
+prompt, CSV import options, question-delete confirmation, title info). The
+modals are auto-height (`--height: auto`). Risks carried by the port are tracked
+in `docs/risks.md`.
 
 1. **Properties panel, full.** Port each existing Bootstrap panel to the
    equivalent Ionic card shell and reuse its property fragments in HTML views.
@@ -205,11 +212,12 @@ the form rename / delete panels. Risks carried by the port are tracked in
    copy, `replaceWordChars`, jump rebuild, `base64(gzip)` POST), export envelope
    and filename, import flow on the existing Ajv validator with a structural
    ref remap, form rename / delete and the 5-form cap, and delete all
-   questions. The name prompt and delete confirmation remain inline panels.
-8. **Chrome polish.** Ported: toasts, busy overlay, tooltips, docs links, the
-   question-delete `ion-alert`, form tab validity icons, `beforeunload`, the
-   save-time project caps and print as PDF. Still pending: `ion-modal` for the
-   CSV options and the form rename / delete panels.
+   questions.
+8. **Chrome polish.** Ported: toasts, busy overlay, tooltips, the
+   question-delete confirmation, form tab validity icons,
+   `beforeunload`, the save-time project caps and print as PDF. The form-name
+   prompt and CSV import options use auto-height `ion-modal`; the title help
+   links to the docs.
 
 ## Limits (from the legacy contract)
 

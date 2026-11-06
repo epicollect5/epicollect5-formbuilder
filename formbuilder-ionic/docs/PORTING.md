@@ -62,7 +62,7 @@ middleware development-only; never put generated output in the legacy app.
 | Save / export / import | `actions/save/**`, `helpers/import-form-validation.js`, `ui-handlers/event-handler-callbacks/{save-project,export-form,import-form}-click-callback.js` | `src/services/save.js`, `src/services/form-import.js`, `src/services/import-form-validation.js`, `src/ui/shell.js` | ported (phase 7) |
 | Print as PDF | `ui-handlers/event-handler-callbacks/print-as-pdf-click-callback.js`, `css/sass/_print.scss` | `src/ui/print.js`, `src/theme/_print.scss`, `src/index.html` | ported (phase 8) |
 | Readme editor | Summernote rich-text field | Tiptap 3 rich-text field | ported |
-| Modals, menus, tooltips | Bootstrap JS | `src/ui/toast.js`, `src/ui/loading.js`, `src/ui/alert.js`, `ion-tooltip`, `src/views/**` docs links | partial (phase 8: toasts, loading, tooltips, docs links and the question-delete alert ported; CSV and form rename/delete modals pending) |
+| Modals, menus, tooltips | Bootstrap JS | `src/services/notifications.js`, `src/ui/toast.js`, `src/ui/loading.js`, `src/ui/modal.js`, `ion-tooltip`, `src/views/**` (title help links to the docs) | ported (phase 8: toasts, loading, tooltips and the question-delete confirmation ported) |
 
 The finer-grained gap against the legacy feature surface, and the phase order
 that closes it, are in `ROADMAP.md`.

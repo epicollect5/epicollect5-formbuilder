@@ -462,14 +462,13 @@ the jump row shows a fallback answer (R-30, R-33).
 
 ## Phase 8 — chrome feedback, guards and limits
 
-### R-73 The docs links are placeholders
-- **Where:** `src/views/properties-card.html`, `src/views/question-card.html`
-  (`PLACEHOLDER-titles`, `PLACEHOLDER-regex`, `PLACEHOLDER-import`).
-- **Risk:** the info modals were replaced with external links before the target
-  pages exist. Shipping without replacing the slugs leaves three 404 links.
-- **Impact:** users lose the title / regex / import help.
+### R-73 The import docs link is a placeholder
+- **Where:** `src/views/delete-question-modal-body.html`.
+- **Risk:** the delete confirmation links to the edit-inputs docs section; if
+  that anchor moves, the help link breaks.
+- **Impact:** users lose the delete-questions help.
 - **Status:** open.
-- **Revisit when:** the docs pages are confirmed; replace all three hrefs.
+- **Revisit when:** the docs pages are confirmed; verify the anchor.
 
 ### R-74 One toast replaces the previous one
 - **Where:** `src/ui/toast.js` `showToast`, `TOAST_DURATION = 3200`.
@@ -513,7 +512,7 @@ the jump row shows a fallback answer (R-30, R-33).
   snapshot instead of a flag.
 
 ### R-78 The delete confirmation closes over the question object
-- **Where:** `src/ui/shell.js` `bindPropertyActions`, `src/ui/alert.js`.
+- **Where:** `src/ui/shell.js` `bindPropertyActions`, `src/ui/modal.js`.
 - **Risk:** the confirm handler captures the input and removes it by ref. If the
   panel is re-rendered (undo, another delete) while the alert is open, the alert
   survives but the question may already be gone; the confirm then no-ops, and a
