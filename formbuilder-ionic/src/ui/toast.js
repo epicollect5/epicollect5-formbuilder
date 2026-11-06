@@ -17,7 +17,7 @@ const TOAST_CLASSES = {
 
 let active_toast = null;
 
-export function showToast(message, type) {
+export const showToast = (message, type) => {
     if (!message) {
         return null;
     }
@@ -26,14 +26,14 @@ export function showToast(message, type) {
 
     const toast = document.createElement('ion-toast');
 
-    toast.cssClass = 'fb-toast ' + (TOAST_CLASSES[type] || TOAST_CLASSES.success);
+    toast.cssClass = `fb-toast ${TOAST_CLASSES[type] || TOAST_CLASSES.success}`;
     toast.position = 'top';
     toast.duration = TOAST_DURATION;
     toast.message = String(message);
     toast.buttons = [{ text: 'Dismiss', role: 'cancel' }];
 
     // The custom element is not upgraded in jsdom, so only remove on the event.
-    toast.addEventListener('ionToastDidDismiss', function () {
+    toast.addEventListener('ionToastDidDismiss', () => {
         if (active_toast === toast) {
             active_toast = null;
         }
@@ -50,9 +50,9 @@ export function showToast(message, type) {
     active_toast = toast;
 
     return toast;
-}
+};
 
-export function dismissToast() {
+export const dismissToast = () => {
     if (!active_toast) {
         return;
     }
@@ -66,4 +66,4 @@ export function dismissToast() {
     }
 
     toast.remove();
-}
+};

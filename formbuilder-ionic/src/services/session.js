@@ -21,33 +21,33 @@ const session = {
     editing: []
 };
 
-export function getSession() {
+export const getSession = () => {
     return session;
-}
+};
 
-export function setProject(project_definition) {
+export const setProject = (project_definition) => {
     session.project_definition = project_definition;
     session.current_form_index = 0;
     session.current_input_ref = null;
     session.editing = [];
-}
+};
 
-export function getCurrentForm() {
+export const getCurrentForm = () => {
     return getForm(session.project_definition, session.current_form_index);
-}
+};
 
-function findInList(inputs, input_ref) {
+const findInList = (inputs, input_ref) => {
     if (!input_ref) {
         return null;
     }
 
-    return inputs.find(function (input) {
+    return inputs.find((input) => {
         return input.ref === input_ref;
     }) || null;
-}
+};
 
 /* The containers being edited, outermost first, resolved from the definition. */
-export function getEditingTrail() {
+export const getEditingTrail = () => {
     const trail = [];
     let inputs = getInputs(getCurrentForm());
 
@@ -63,34 +63,34 @@ export function getEditingTrail() {
     }
 
     return trail;
-}
+};
 
-export function isEditing() {
+export const isEditing = () => {
     return session.editing.length > 0;
-}
+};
 
-export function getEditingContainer() {
+export const getEditingContainer = () => {
     const trail = getEditingTrail();
 
     return trail.length ? trail[trail.length - 1] : null;
-}
+};
 
 /* The list the question panel shows: a branch / group array or form inputs. */
-function getActiveInputs() {
+const getActiveInputs = () => {
     const container = getEditingContainer();
 
     return container ? getContainerList(container) : getInputs(getCurrentForm());
-}
+};
 
-export function getCurrentInputs() {
+export const getCurrentInputs = () => {
     return getActiveInputs();
-}
+};
 
-export function getCurrentInput() {
+export const getCurrentInput = () => {
     return findInList(getActiveInputs(), session.current_input_ref);
-}
+};
 
-export function selectForm(form_index) {
+export const selectForm = (form_index) => {
     if (!getForms(session.project_definition)[form_index]) {
         return null;
     }
@@ -100,18 +100,18 @@ export function selectForm(form_index) {
     session.editing = [];
 
     return getCurrentForm();
-}
+};
 
-export function selectInput(input_ref) {
+export const selectInput = (input_ref) => {
     const input = findInList(getActiveInputs(), input_ref);
 
     session.current_input_ref = input ? input.ref : null;
 
     return input;
-}
+};
 
 /* Enters a branch or group; the list then shows that container's children. */
-export function enterInput(input_ref) {
+export const enterInput = (input_ref) => {
     const input = findInList(getActiveInputs(), input_ref);
 
     if (!input || (input.type !== 'branch' && input.type !== 'group')) {
@@ -122,10 +122,10 @@ export function enterInput(input_ref) {
     session.current_input_ref = null;
 
     return input;
-}
+};
 
 /* Leaves the innermost container and selects it again, as in the legacy app. */
-export function exitEditing() {
+export const exitEditing = () => {
     const entry = session.editing.pop();
 
     if (!entry) {
@@ -135,32 +135,32 @@ export function exitEditing() {
     session.current_input_ref = entry.ref;
 
     return getCurrentInput();
-}
+};
 
-export function canAddInput(type) {
+export const canAddInput = (type) => {
     return canContainInput(getEditingContainer(), type);
-}
+};
 
-export function updateCurrentInput(changes) {
+export const updateCurrentInput = (changes) => {
     const input = getCurrentInput();
 
     if (!input) {
         return null;
     }
 
-    Object.keys(changes).forEach(function (key) {
+    Object.keys(changes).forEach((key) => {
         input[key] = changes[key];
     });
 
     return input;
-}
+};
 
-export function addInput(type) {
+export const addInput = (type) => {
     return insertInput(type, getActiveInputs().length);
-}
+};
 
 /* Appends an already-built input (a duplicate) to the active list. */
-export function addInputObject(input) {
+export const addInputObject = (input) => {
     if (!input) {
         return null;
     }
@@ -169,9 +169,9 @@ export function addInputObject(input) {
     session.current_input_ref = input.ref;
 
     return input;
-}
+};
 
-export function insertInput(type, index) {
+export const insertInput = (type, index) => {
     const form = getCurrentForm();
 
     if (!form || !canAddInput(type)) {
@@ -187,10 +187,10 @@ export function insertInput(type, index) {
     session.current_input_ref = input.ref;
 
     return input;
-}
+};
 
 /* Applies the order the sortable produced; refuses a partial list. */
-export function reorderInputs(refs) {
+export const reorderInputs = (refs) => {
     const form = getCurrentForm();
 
     if (!form) {
@@ -198,10 +198,10 @@ export function reorderInputs(refs) {
     }
 
     const inputs = getActiveInputs();
-    const by_ref = new Map(inputs.map(function (input) {
+    const by_ref = new Map(inputs.map((input) => {
         return [input.ref, input];
     }));
-    const ordered = refs.map(function (ref) {
+    const ordered = refs.map((ref) => {
         return by_ref.get(ref);
     }).filter(Boolean);
 
@@ -209,12 +209,12 @@ export function reorderInputs(refs) {
         return false;
     }
 
-    inputs.splice.apply(inputs, [0, inputs.length].concat(ordered));
+    inputs.splice(0, inputs.length, ...ordered);
 
     return true;
-}
+};
 
-export function addForm(name) {
+export const addForm = (name) => {
     const project = getProject(session.project_definition);
 
     if (!project || project.forms.length >= MAX_FORMS) {
@@ -227,7 +227,7 @@ export function addForm(name) {
     const form = {
         ref: generateFormRef(project.ref),
         name: form_name,
-        slug: slugify(form_name + '-' + (project.forms.length + 1)),
+        slug: slugify(`${form_name}-${project.forms.length + 1}`),
         type: 'hierarchy',
         inputs: []
     };
@@ -238,13 +238,13 @@ export function addForm(name) {
     session.editing = [];
 
     return form;
-}
+};
 
-function slugify(text) {
+const slugify = (text) => {
     return String(text).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-}
+};
 
-export function renameForm(form_index, name) {
+export const renameForm = (form_index, name) => {
     const form = getForms(session.project_definition)[form_index];
     const trimmed = String(name === undefined || name === null ? '' : name).trim().slice(0, FORM_NAME_MAX_LENGTH);
 
@@ -256,10 +256,10 @@ export function renameForm(form_index, name) {
     form.slug = slugify(trimmed);
 
     return form;
-}
+};
 
 /* Legacy deletes only the last child form; the first form is the root. */
-export function deleteForm(form_index) {
+export const deleteForm = (form_index) => {
     const forms = getForms(session.project_definition);
 
     if (form_index <= 0 || form_index !== forms.length - 1) {
@@ -270,10 +270,10 @@ export function deleteForm(form_index) {
     selectForm(form_index - 1);
 
     return true;
-}
+};
 
 /* Delete all questions of the active list (form inputs or a container). */
-export function removeAllInputs() {
+export const removeAllInputs = () => {
     const inputs = getActiveInputs();
 
     if (!inputs.length) {
@@ -284,11 +284,11 @@ export function removeAllInputs() {
     session.current_input_ref = null;
 
     return true;
-}
+};
 
-export function removeInput(input_ref) {
+export const removeInput = (input_ref) => {
     const inputs = getActiveInputs();
-    const index = inputs.findIndex(function (input) {
+    const index = inputs.findIndex((input) => {
         return input.ref === input_ref;
     });
 
@@ -303,9 +303,9 @@ export function removeInput(input_ref) {
     }
 
     return true;
-}
+};
 
-export function moveInput(from_index, to_index) {
+export const moveInput = (from_index, to_index) => {
     const inputs = getActiveInputs();
 
     if (from_index === to_index || from_index < 0 || to_index < 0 || from_index >= inputs.length || to_index >= inputs.length) {
@@ -317,4 +317,4 @@ export function moveInput(from_index, to_index) {
     inputs.splice(to_index, 0, input);
 
     return true;
-}
+};

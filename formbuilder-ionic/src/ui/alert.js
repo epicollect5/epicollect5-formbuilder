@@ -6,7 +6,7 @@
  */
 let active_alert = null;
 
-export function confirmAlert(options) {
+export const confirmAlert = (options) => {
     const config = options || {};
 
     dismissAlert();
@@ -27,7 +27,7 @@ export function confirmAlert(options) {
 
     document.body.append(dialog);
 
-    dialog.addEventListener('ionAlertDidDismiss', function () {
+    dialog.addEventListener('ionAlertDidDismiss', () => {
         if (active_alert === dialog) {
             active_alert = null;
         }
@@ -42,9 +42,9 @@ export function confirmAlert(options) {
     active_alert = dialog;
 
     return dialog;
-}
+};
 
-export function dismissAlert() {
+export const dismissAlert = () => {
     if (!active_alert) {
         return;
     }
@@ -58,4 +58,4 @@ export function dismissAlert() {
     }
 
     dialog.remove();
-}
+};

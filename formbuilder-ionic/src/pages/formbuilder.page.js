@@ -10,7 +10,7 @@ import { renderApp } from '@/ui/shell.js';
  * definition, then the shell. Every render reads the definition; no view keeps
  * its own copy of the data.
  */
-export async function bootFormbuilder(options) {
+export const bootFormbuilder = async (options) => {
     const settings = options || {};
 
     setupIonic();
@@ -21,4 +21,4 @@ export async function bootFormbuilder(options) {
     renderApp(settings.handlers || {});
 
     return project_definition;
-}
+};

@@ -14,7 +14,7 @@ export const FORM_NAME_REGEX = PARAMETERS.FORM_NAME_REGEX;
  * duplicate names when adding a form; the port checks on rename too, because a
  * duplicate label makes the form tabs ambiguous.
  */
-export function getFormNameError(forms, name, exclude_index) {
+export const getFormNameError = (forms, name, exclude_index) => {
     const trimmed = String(name === undefined || name === null ? '' : name).trim();
 
     if (!trimmed) {
@@ -29,9 +29,9 @@ export function getFormNameError(forms, name, exclude_index) {
         return FORM_MESSAGES.FORM_NAME_INVALID;
     }
 
-    const duplicate = (forms || []).some(function (form, index) {
+    const duplicate = (forms || []).some((form, index) => {
         return index !== exclude_index && String(form.name || '').toLowerCase() === trimmed.toLowerCase();
     });
 
     return duplicate ? FORM_MESSAGES.FORM_NAME_EXISTS : null;
-}
+};

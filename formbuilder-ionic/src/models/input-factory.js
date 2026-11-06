@@ -3,7 +3,7 @@
 import { createAnswer, isMultipleAnswerType } from '@/models/possible-answers.js';
 import { generateInputRef } from '@/models/refs.js';
 
-function getDefaultDatetimeFormat(type) {
+const getDefaultDatetimeFormat = (type) => {
     if (type === 'date') {
         return 'dd/MM/YYYY';
     }
@@ -13,16 +13,16 @@ function getDefaultDatetimeFormat(type) {
     }
 
     return null;
-}
+};
 
 /*
  * A new question starts with the same shape the legacy factory produced, so the
  * server, the mobile app and the dataviewer keep receiving the same object.
  */
-export function createInput(type, form_ref) {
+export const createInput = (type, form_ref) => {
     return {
         ref: generateInputRef(form_ref),
-        type: type,
+        type,
         question: '',
         is_title: false,
         is_required: false,
@@ -39,4 +39,4 @@ export function createInput(type, form_ref) {
         branch: [],
         group: []
     };
-}
+};

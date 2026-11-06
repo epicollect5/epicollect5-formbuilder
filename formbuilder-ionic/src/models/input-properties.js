@@ -40,7 +40,7 @@ export const VERIFY_ALLOWED_TYPES = [
 
 export const MEDIA_TYPES = ['photo', 'audio', 'video', 'location'];
 export const BRANCH_GROUP_TYPES = ['branch', 'group'];
-export const READONLY_PANEL_TYPES = MEDIA_TYPES.concat(BRANCH_GROUP_TYPES).concat(['readme']);
+export const READONLY_PANEL_TYPES = [...MEDIA_TYPES, ...BRANCH_GROUP_TYPES, 'readme'];
 
 export const DATE_FORMATS = [
     { value: 'dd/MM/YYYY', label: 'Day/Month/Year' },
@@ -58,31 +58,31 @@ export const TIME_FORMATS = [
     { value: 'mm:ss', label: 'Minutes:Seconds' }
 ];
 
-export function allowsRequired(type) {
+export const allowsRequired = (type) => {
     return REQUIRED_ALLOWED_TYPES.indexOf(type) !== -1;
-}
+};
 
-export function allowsTitle(type) {
+export const allowsTitle = (type) => {
     return !isMediaType(type) && !isBranchOrGroup(type) && type !== 'readme';
-}
+};
 
-export function allowsUniqueness(type) {
+export const allowsUniqueness = (type) => {
     return UNIQUENESS_ALLOWED_TYPES.indexOf(type) !== -1;
-}
+};
 
-export function allowsVerify(type) {
+export const allowsVerify = (type) => {
     return VERIFY_ALLOWED_TYPES.indexOf(type) !== -1;
-}
+};
 
-export function isMediaType(type) {
+export const isMediaType = (type) => {
     return MEDIA_TYPES.indexOf(type) !== -1;
-}
+};
 
-export function isBranchOrGroup(type) {
+export const isBranchOrGroup = (type) => {
     return BRANCH_GROUP_TYPES.indexOf(type) !== -1;
-}
+};
 
-export function hasAdvancedTab(type) {
+export const hasAdvancedTab = (type) => {
     if (type === 'readme') {
         return false;
     }
@@ -92,13 +92,13 @@ export function hasAdvancedTab(type) {
     }
 
     return true;
-}
+};
 
-export function hasJumpsTab(type) {
+export const hasJumpsTab = (type) => {
     return isBranchOrGroup(type) ? false : true;
-}
+};
 
-export function getDefaultDatetimeFormat(type) {
+export const getDefaultDatetimeFormat = (type) => {
     if (type === 'date') {
         return 'dd/MM/YYYY';
     }
@@ -108,4 +108,4 @@ export function getDefaultDatetimeFormat(type) {
     }
 
     return null;
-}
+};

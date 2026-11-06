@@ -14,9 +14,9 @@ const DISCARDED_TAGS = new Set(['script', 'style', 'iframe', 'object']);
 export const ReadmeLength = Extension.create({
     name: 'readmeLength',
 
-    addProseMirrorPlugins: function () {
+    addProseMirrorPlugins: () => {
         return [new Plugin({
-            filterTransaction: function (transaction, state) {
+            filterTransaction: (transaction, state) => {
                 if (!transaction.docChanged) {
                     return true;
                 }
@@ -30,7 +30,7 @@ export const ReadmeLength = Extension.create({
     }
 });
 
-export function createReadmeEditor(value, on_change) {
+export const createReadmeEditor = (value, on_change) => {
     const element = createView(readme_editor_view);
     const content = element.querySelector('.builder__readme-content');
     const toolbar_buttons = [...element.querySelectorAll('.builder__readme-toolbar-button')];
@@ -59,7 +59,7 @@ export function createReadmeEditor(value, on_change) {
                 'aria-multiline': 'true'
             }
         },
-        onUpdate: function (event) {
+        onUpdate: (event) => {
             const plain_text = event.editor.getText();
             const html = plain_text === '' ? '' : sanitizeEditorHTML(event.editor.getHTML());
 
@@ -67,59 +67,61 @@ export function createReadmeEditor(value, on_change) {
         }
     });
 
-    toolbar_buttons.forEach(function (toolbar_button) {
+    toolbar_buttons.forEach((toolbar_button) => {
         const format = toolbar_button.getAttribute('data-format');
 
-        toolbar_button.addEventListener('mousedown', function (mouse_event) {
+        toolbar_button.addEventListener('mousedown', (mouse_event) => {
             mouse_event.preventDefault();
         });
 
-        toolbar_button.addEventListener('click', function () {
-            editor.chain().focus()['toggle' + format[0].toUpperCase() + format.slice(1)]().run();
+        toolbar_button.addEventListener('click', () => {
+            const toggle = `toggle${format[0].toUpperCase()}${format.slice(1)}`;
+
+            editor.chain().focus()[toggle]().run();
         });
     });
 
-    function updateToolbarState() {
-        toolbar_buttons.forEach(function (toolbar_button) {
+    const updateToolbarState = () => {
+        toolbar_buttons.forEach((toolbar_button) => {
             const format = toolbar_button.getAttribute('data-format');
 
             toolbar_button.setAttribute('aria-pressed', String(editor.isActive(format)));
         });
-    }
+    };
 
     editor.on('selectionUpdate', updateToolbarState);
     editor.on('transaction', updateToolbarState);
     updateToolbarState();
     updatePlaceholderState(content, editor);
-    editor.on('update', function () {
+    editor.on('update', () => {
         updatePlaceholderState(content, editor);
     });
 
     return {
-        element: element,
-        destroy: function () {
+        element,
+        destroy: () => {
             editor.destroy();
         }
     };
-}
+};
 
-function getDocumentTextLength(document) {
+const getDocumentTextLength = (document) => {
     return document.textBetween(0, document.content.size, ' ').length;
-}
+};
 
 /* Persist only the readme tags supported by the project-definition contract. */
-export function sanitizeEditorHTML(html) {
+export const sanitizeEditorHTML = (html) => {
     const parsed = new DOMParser().parseFromString(html, 'text/html');
     const safe_container = document.createElement('div');
 
-    Array.from(parsed.body.childNodes).forEach(function (node) {
+    Array.from(parsed.body.childNodes).forEach((node) => {
         appendSafeNode(safe_container, node);
     });
 
     return safe_container.innerHTML;
-}
+};
 
-function appendSafeNode(parent, node) {
+const appendSafeNode = (parent, node) => {
     if (node.nodeType === Node.TEXT_NODE) {
         parent.appendChild(document.createTextNode(node.nodeValue || ''));
         return;
@@ -136,7 +138,7 @@ function appendSafeNode(parent, node) {
     }
 
     if (!ALLOWED_TAGS.has(tag_name)) {
-        Array.from(node.childNodes).forEach(function (child) {
+        Array.from(node.childNodes).forEach((child) => {
             appendSafeNode(parent, child);
         });
         return;
@@ -144,13 +146,13 @@ function appendSafeNode(parent, node) {
 
     const safe_element = document.createElement(tag_name);
 
-    Array.from(node.childNodes).forEach(function (child) {
+    Array.from(node.childNodes).forEach((child) => {
         appendSafeNode(safe_element, child);
     });
 
     parent.appendChild(safe_element);
-}
+};
 
-function updatePlaceholderState(content, editor) {
+const updatePlaceholderState = (content, editor) => {
     content.classList.toggle('is-empty', editor.isEmpty);
-}
+};

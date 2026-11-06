@@ -10,7 +10,7 @@ import { JUMP_TO_END_OF_FORM_REF } from '@/services/import-form-validation.js';
  * Phase 3 scope: top-level form inputs. `inputs` is the active list so Phase 2
  * can pass branch-scoped children later without changing the contract.
  */
-function decodeHtml(text) {
+const decodeHtml = (text) => {
     if (!text) {
         return '';
     }
@@ -20,13 +20,13 @@ function decodeHtml(text) {
     textarea.innerHTML = text;
 
     return textarea.value;
-}
+};
 
-function stripTags(text) {
+const stripTags = (text) => {
     return String(text || '').replace(/<[^>]*>/g, '');
-}
+};
 
-function trunc(text, length) {
+const trunc = (text, length) => {
     const value = String(text || '');
 
     if (value.length <= length) {
@@ -34,9 +34,9 @@ function trunc(text, length) {
     }
 
     return value.slice(0, length);
-}
+};
 
-function destinationLabel(input) {
+const destinationLabel = (input) => {
     if (!input) {
         return '';
     }
@@ -54,11 +54,11 @@ function destinationLabel(input) {
     }
 
     return trunc(input.question, PARAMETERS.QUESTION_PREVIEW_LENGTH);
-}
+};
 
-export function getJumpAvailableDestinations(input, inputs) {
+export const getJumpAvailableDestinations = (input, inputs) => {
     const list = Array.isArray(inputs) ? inputs : [];
-    const current_input_index = list.findIndex(function (available_input) {
+    const current_input_index = list.findIndex((available_input) => {
         return available_input && input && available_input.ref === input.ref;
     });
 
@@ -66,7 +66,7 @@ export function getJumpAvailableDestinations(input, inputs) {
         return [];
     }
 
-    const destinations = list.slice(current_input_index + 2).map(function (available_input) {
+    const destinations = list.slice(current_input_index + 2).map((available_input) => {
         return {
             ref: available_input.ref,
             question: destinationLabel(available_input),
@@ -83,9 +83,9 @@ export function getJumpAvailableDestinations(input, inputs) {
     }
 
     return destinations;
-}
+};
 
-function normalizeJump(jump, input) {
+const normalizeJump = (jump, input) => {
     const next = {
         to: jump && jump.to !== undefined && jump.to !== null ? String(jump.to) : '',
         when: jump && jump.when ? jump.when : (usesAlwaysJump(input && input.type) ? JUMP_WHEN.ALL : JUMP_WHEN.IS),
@@ -108,7 +108,7 @@ function normalizeJump(jump, input) {
     }
 
     const possible_answers = input && Array.isArray(input.possible_answers) ? input.possible_answers : [];
-    const has_answer = possible_answers.some(function (possible_answer) {
+    const has_answer = possible_answers.some((possible_answer) => {
         return possible_answer.answer_ref === next.answer_ref;
     });
 
@@ -117,13 +117,13 @@ function normalizeJump(jump, input) {
     }
 
     return next;
-}
+};
 
-export function sanitizeJump(jump, input) {
+export const sanitizeJump = (jump, input) => {
     return normalizeJump(jump, input);
-}
+};
 
-export function canAddJump(input, inputs) {
+export const canAddJump = (input, inputs) => {
     if (!input || !hasJumpsTab(input.type)) {
         return false;
     }
@@ -144,9 +144,9 @@ export function canAddJump(input, inputs) {
 
     // A single-answer question can only follow one unconditional jump.
     return jumps.length === 0;
-}
+};
 
-export function addJump(input, inputs) {
+export const addJump = (input, inputs) => {
     if (!canAddJump(input, inputs)) {
         return null;
     }
@@ -156,9 +156,9 @@ export function addJump(input, inputs) {
     input.jumps.push(jump);
 
     return jump;
-}
+};
 
-export function removeJump(input, index) {
+export const removeJump = (input, index) => {
     if (!input || !Array.isArray(input.jumps) || index < 0 || index >= input.jumps.length) {
         return false;
     }
@@ -166,9 +166,9 @@ export function removeJump(input, index) {
     input.jumps.splice(index, 1);
 
     return true;
-}
+};
 
-export function updateJump(input, index, patch) {
+export const updateJump = (input, index, patch) => {
     if (!input || !Array.isArray(input.jumps) || index < 0 || index >= input.jumps.length) {
         return false;
     }
@@ -183,6 +183,6 @@ export function updateJump(input, index, patch) {
     input.jumps[index] = normalizeJump(next, input);
 
     return true;
-}
+};
 
 export { JUMP_TO_END_OF_FORM_REF };

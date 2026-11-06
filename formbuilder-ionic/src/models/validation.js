@@ -19,29 +19,29 @@ import { PARAMETERS } from '@/models/parameters.js';
 
 const NUMERIC_TYPES = ['integer', 'decimal'];
 
-export function isBlank(value) {
+export const isBlank = (value) => {
     return value === null || value === undefined || String(value).trim() === '';
-}
+};
 
-export function isIntegerValue(value) {
+export const isIntegerValue = (value) => {
     const number = Number(value);
 
     return Number.isFinite(number) && Math.floor(number) === number;
-}
+};
 
-export function isNumberValue(value) {
+export const isNumberValue = (value) => {
     return Number.isFinite(Number(value));
-}
+};
 
-function numberOrNull(value) {
+const numberOrNull = (value) => {
     return isBlank(value) ? null : Number(value);
-}
+};
 
-function plainTextLength(html) {
+const plainTextLength = (html) => {
     return String(html || '').replace(/<[^>]*>/g, '').trim().length;
-}
+};
 
-export function getQuestionTextErrors(input) {
+export const getQuestionTextErrors = (input) => {
     const question = input.question === null || input.question === undefined ? '' : String(input.question);
 
     if (question.trim() === '') {
@@ -53,9 +53,9 @@ export function getQuestionTextErrors(input) {
     }
 
     return question.length > PARAMETERS.QUESTION_MAX_LENGTH ? [M.QUESTION_LENGTH_LIMIT_EXCEEDED] : [];
-}
+};
 
-function getPossibleAnswerErrors(input) {
+const getPossibleAnswerErrors = (input) => {
     if (!isMultipleAnswerType(input.type)) {
         return [];
     }
@@ -66,7 +66,7 @@ function getPossibleAnswerErrors(input) {
         return [M.POSSIBLE_ANSWER_EMPTY];
     }
 
-    if (answers.some(function (answer) {
+    if (answers.some((answer) => {
         return !answer || isBlank(answer.answer);
     })) {
         return [M.POSSIBLE_ANSWER_EMPTY];
@@ -77,9 +77,9 @@ function getPossibleAnswerErrors(input) {
     }
 
     return [];
-}
+};
 
-function getNumericErrors(input) {
+const getNumericErrors = (input) => {
     if (NUMERIC_TYPES.indexOf(input.type) === -1) {
         return [];
     }
@@ -121,9 +121,9 @@ function getNumericErrors(input) {
     }
 
     return errors;
-}
+};
 
-function getDefaultErrors(input) {
+const getDefaultErrors = (input) => {
     // Legacy applies the regex to numeric defaults as well.
     if (isBlank(input.regex) || isBlank(input.default)) {
         return [];
@@ -136,9 +136,9 @@ function getDefaultErrors(input) {
         // A half-typed pattern must not break the properties panel.
         return [M.INITIAL_ANSWER_NOT_MATCHING_REGEX];
     }
-}
+};
 
-function getChildrenErrors(input) {
+const getChildrenErrors = (input) => {
     if (!isBranchOrGroup(input.type)) {
         return [];
     }
@@ -148,17 +148,19 @@ function getChildrenErrors(input) {
     }
 
     return [];
-}
+};
 
 /* Object-level rules only; jump and child-validity checks need the list. */
-export function getInputObjectErrors(input) {
+export const getInputObjectErrors = (input) => {
     if (!input) {
         return [M.QUESTION_TEXT_EMPTY];
     }
 
-    return getQuestionTextErrors(input)
-        .concat(getChildrenErrors(input))
-        .concat(getPossibleAnswerErrors(input))
-        .concat(getNumericErrors(input))
-        .concat(getDefaultErrors(input));
-}
+    return [
+        ...getQuestionTextErrors(input),
+        ...getChildrenErrors(input),
+        ...getPossibleAnswerErrors(input),
+        ...getNumericErrors(input),
+        ...getDefaultErrors(input)
+    ];
+};

@@ -5,7 +5,7 @@
  * and a group cannot hold a branch or another group. The form holds anything.
  * The rules are checked before an input is created, never while rendering.
  */
-export function canContainInput(container, type) {
+export const canContainInput = (container, type) => {
     if (!container) {
         return true;
     }
@@ -19,13 +19,13 @@ export function canContainInput(container, type) {
     }
 
     return true;
-}
+};
 
 /* A branch or group owns its `branch` / `group` array; the form owns `inputs`. */
-export function getContainerList(container) {
+export const getContainerList = (container) => {
     if (!container) {
         return [];
     }
 
     return Array.isArray(container[container.type]) ? container[container.type] : [];
-}
+};

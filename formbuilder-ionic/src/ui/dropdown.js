@@ -11,8 +11,8 @@ let dropdown_id = 0;
  * `.options`, `.value`, `.disabled`, and a `change` CustomEvent with
  * `event.detail.value`.
  */
-export function createDropdown(options) {
-    const id = 'fb-dropdown-' + (dropdown_id += 1);
+export const createDropdown = (options) => {
+    const id = `fb-dropdown-${dropdown_id += 1}`;
     const trigger_id = id + '-trigger';
     const config = options || {};
     const trigger = element('button', {
@@ -62,34 +62,34 @@ export function createDropdown(options) {
     let is_disabled = !!config.disabled;
     let on_change = typeof config.on_change === 'function' ? config.on_change : null;
 
-    function find_item(value) {
-        return items.find(function (item) {
+    const find_item = (value) => {
+        return items.find((item) => {
             return String(item.value) === String(value);
         }) || null;
-    }
+    };
 
-    function render_label() {
+    const render_label = () => {
         const label = trigger.querySelector('.dropdown__label');
         const selected = find_item(selected_value);
 
         label.textContent = selected ? selected.label : (config.placeholder || 'Select');
         label.classList.toggle('dropdown__label--placeholder', !selected);
-    }
+    };
 
-    function render_options() {
+    const render_options = () => {
         list.replaceChildren();
 
-        items.forEach(function (item) {
+        items.forEach((item) => {
             const selected = String(item.value) === String(selected_value);
             const option = element('button', {
                 type: 'button',
-                class: 'dropdown__option' + (selected ? ' dropdown__option--selected' : ''),
+                class: `dropdown__option${selected ? ' dropdown__option--selected' : ''}`,
                 role: 'option',
                 'aria-selected': selected ? 'true' : 'false',
                 'data-value': item.value
             }, [item.label || '']);
 
-            option.addEventListener('click', function () {
+            option.addEventListener('click', () => {
                 if (is_disabled) {
                     return;
                 }
@@ -104,9 +104,9 @@ export function createDropdown(options) {
         });
 
         render_label();
-    }
+    };
 
-    function set_value(value, emit) {
+    const set_value = (value, emit) => {
         const next = value === undefined || value === null ? '' : value;
         const changed = String(selected_value) !== String(next);
 
@@ -115,38 +115,38 @@ export function createDropdown(options) {
 
         if (emit && changed) {
             const detail = { value: selected_value };
-            root.dispatchEvent(new CustomEvent('change', { detail: detail, bubbles: true }));
-            root.dispatchEvent(new CustomEvent('ionChange', { detail: detail, bubbles: true }));
+            root.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }));
+            root.dispatchEvent(new CustomEvent('ionChange', { detail, bubbles: true }));
 
             if (on_change) {
                 on_change(detail);
             }
         }
-    }
+    };
 
-    function set_options(next_options, value) {
-        items = (next_options || []).map(function (item) {
+    const set_options = (next_options, value) => {
+        items = (next_options || []).map((item) => {
             return {
                 value: item.value === undefined || item.value === null ? '' : item.value,
                 label: item.label === undefined || item.label === null ? '' : String(item.label)
             };
         });
 
-        const has_value = items.some(function (item) {
+        const has_value = items.some((item) => {
             return String(item.value) === String(value);
         });
         selected_value = has_value ? value : (items[0] ? items[0].value : '');
         render_options();
-    }
+    };
 
-    function set_disabled(disabled) {
+    const set_disabled = (disabled) => {
         is_disabled = !!disabled;
         trigger.disabled = is_disabled;
         trigger.setAttribute('aria-disabled', is_disabled ? 'true' : 'false');
         root.classList.toggle('dropdown--disabled', is_disabled);
-    }
+    };
 
-    trigger.addEventListener('click', async function (event) {
+    trigger.addEventListener('click', async (event) => {
         if (is_disabled) {
             return;
         }
@@ -166,54 +166,54 @@ export function createDropdown(options) {
         }
     });
 
-    popover.addEventListener('didDismiss', function () {
+    popover.addEventListener('didDismiss', () => {
         trigger.setAttribute('aria-expanded', 'false');
     });
 
-    root.setOptions = function (next_options, value) {
+    root.setOptions = (next_options, value) => {
         set_options(next_options, value);
     };
-    root.setValue = function (value, emit) {
+    root.setValue = (value, emit) => {
         set_value(value, !!emit);
     };
-    root.selectValue = function (value) {
+    root.selectValue = (value) => {
         set_value(value, true);
     };
-    root.getValue = function () {
+    root.getValue = () => {
         return selected_value;
     };
-    root.setDisabled = function (disabled) {
+    root.setDisabled = (disabled) => {
         set_disabled(disabled);
     };
-    root.onChange = function (handler) {
+    root.onChange = (handler) => {
         on_change = typeof handler === 'function' ? handler : null;
     };
 
     Object.defineProperty(root, 'value', {
-        get: function () { return selected_value; },
-        set: function (value) { set_value(value, false); }
+        get: () => { return selected_value; },
+        set: (value) => { set_value(value, false); }
     });
     Object.defineProperty(root, 'disabled', {
-        get: function () { return is_disabled; },
-        set: function (disabled) { set_disabled(disabled); }
+        get: () => { return is_disabled; },
+        set: (disabled) => { set_disabled(disabled); }
     });
 
     set_disabled(is_disabled);
     set_options(config.options || [], config.value || '');
 
     return root;
-}
+};
 
 /*
  * Action menu sharing the dropdown list surface: same popover, option padding
  * and hover state as the selection dropdowns, but without a selected value.
  */
-export function createMenu(trigger, items, on_select) {
+export const createMenu = (trigger, items, on_select) => {
     if (!trigger) {
         return null;
     }
 
-    const id = trigger.id || 'fb-menu-' + (dropdown_id += 1);
+    const id = trigger.id || `fb-menu-${dropdown_id += 1}`;
     const list = element('div', { class: 'dropdown__list', role: 'menu' });
     const popover = element('ion-popover', {
         class: 'dropdown-popover builder__action-popover',
@@ -231,7 +231,7 @@ export function createMenu(trigger, items, on_select) {
     trigger.setAttribute('aria-haspopup', 'menu');
     trigger.setAttribute('aria-expanded', 'false');
 
-    (items || []).forEach(function (item) {
+    (items || []).forEach((item) => {
         if (item.divider) {
             list.append(element('div', { class: 'builder__answers-dropdown-divider' }));
             return;
@@ -245,7 +245,7 @@ export function createMenu(trigger, items, on_select) {
             disabled: item.disabled ? 'disabled' : undefined
         }, [item.label]);
 
-        option.addEventListener('click', function () {
+        option.addEventListener('click', () => {
             if (item.disabled) {
                 return;
             }
@@ -272,7 +272,7 @@ export function createMenu(trigger, items, on_select) {
     popover.side = 'bottom';
     popover.alignment = 'end';
 
-    trigger.addEventListener('click', async function (event) {
+    trigger.addEventListener('click', async (event) => {
         event.preventDefault();
         trigger.setAttribute('aria-expanded', 'true');
         popover.trigger = id;
@@ -283,14 +283,14 @@ export function createMenu(trigger, items, on_select) {
         }
     });
 
-    popover.addEventListener('didDismiss', function () {
+    popover.addEventListener('didDismiss', () => {
         trigger.setAttribute('aria-expanded', 'false');
     });
 
     return popover;
-}
+};
 
-export function populateDropdown(dropdown, options, value, on_change) {
+export const populateDropdown = (dropdown, options, value, on_change) => {
     if (!dropdown) {
         return;
     }
@@ -305,10 +305,10 @@ export function populateDropdown(dropdown, options, value, on_change) {
 
     // fallback for any remaining plain selects during transition
     dropdown.replaceChildren();
-    (options || []).forEach(function (option_data) {
+    (options || []).forEach((option_data) => {
         const option = element('option', { value: option_data.value });
         option.textContent = option_data.label;
         dropdown.append(option);
     });
     dropdown.value = value;
-}
+};

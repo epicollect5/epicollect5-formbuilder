@@ -10,13 +10,13 @@ import modal_view from '@/views/modal.html?raw';
  */
 let active_modal = null;
 
-export function openModal(options) {
+export const openModal = (options) => {
     const config = options || {};
     const modal = document.createElement('ion-modal');
 
     dismissModal();
 
-    modal.className = 'legacy-modal-host' + (config.class_name ? ' ' + config.class_name : '');
+    modal.className = `legacy-modal-host${config.class_name ? ` ${config.class_name}` : ''}`;
 
     const shell = createView(modal_view);
     const body = shell.querySelector('.modal-body');
@@ -28,11 +28,11 @@ export function openModal(options) {
         body.append(config.body);
     }
 
-    function remove() {
+    const remove = () => {
         modal.remove();
-    }
+    };
 
-    function close() {
+    const close = () => {
         if (active_modal === modal) {
             active_modal = null;
         }
@@ -44,18 +44,18 @@ export function openModal(options) {
         }
 
         remove();
-    }
+    };
 
     shell.querySelector('.close').addEventListener('click', close);
 
-    (config.buttons || []).forEach(function (button_config) {
+    (config.buttons || []).forEach((button_config) => {
         const control = element('button', {
             type: 'button',
-            class: 'btn ' + (button_config.class_name || 'btn-default'),
+            class: `btn ${button_config.class_name || 'btn-default'}`,
             disabled: button_config.disabled ? 'disabled' : undefined
         }, [button_config.text || '']);
 
-        control.addEventListener('click', function () {
+        control.addEventListener('click', () => {
             if (typeof button_config.on_click === 'function') {
                 button_config.on_click(close);
                 return;
@@ -74,7 +74,7 @@ export function openModal(options) {
     modal.append(shell);
     document.body.append(modal);
 
-    modal.addEventListener('ionModalDidDismiss', function () {
+    modal.addEventListener('ionModalDidDismiss', () => {
         if (active_modal === modal) {
             active_modal = null;
         }
@@ -89,13 +89,13 @@ export function openModal(options) {
     active_modal = modal;
 
     if (typeof config.on_present === 'function') {
-        config.on_present({ modal: modal, body: body, footer: footer, close: close });
+        config.on_present({ modal, body, footer, close });
     }
 
-    return { modal: modal, body: body, footer: footer, close: close };
-}
+    return { modal, body, footer, close };
+};
 
-export function dismissModal() {
+export const dismissModal = () => {
     if (!active_modal) {
         return;
     }
@@ -105,8 +105,8 @@ export function dismissModal() {
     active_modal = null;
 
     if (typeof modal.dismiss === 'function') {
-        Promise.resolve(modal.dismiss()).then(function () { modal.remove(); }, function () { modal.remove(); });
+        Promise.resolve(modal.dismiss()).then(() => { modal.remove(); }, () => { modal.remove(); });
     }
 
     modal.remove();
-}
+};

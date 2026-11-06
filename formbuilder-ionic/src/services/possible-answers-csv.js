@@ -12,16 +12,16 @@ import {
  * row may hold headers, replace or append) with a small RFC 4180 parser.
  */
 
-function stripMarkup(value) {
+const stripMarkup = (value) => {
     return String(value === undefined || value === null ? '' : value).replace(/<[^>]*>/g, ' ');
-}
+};
 
-function plainQuestion(input) {
+const plainQuestion = (input) => {
     return stripMarkup(input && input.question ? input.question : '').trim();
-}
+};
 
 /* Accepts quoted fields, escaped quotes, commas and CRLF / LF row endings. */
-export function parseCsv(text) {
+export const parseCsv = (text) => {
     const source = String(text === undefined || text === null ? '' : text).replace(/^\ufeff/, '');
     const rows = [];
     let row = [];
@@ -79,20 +79,20 @@ export function parseCsv(text) {
     row.push(field);
     rows.push(row);
 
-    const filled = rows.filter(function (csv_row) {
-        return csv_row.some(function (value) {
+    const filled = rows.filter((csv_row) => {
+        return csv_row.some((value) => {
             return String(value).trim() !== '';
         });
     });
-    const width = filled.reduce(function (max, csv_row) {
+    const width = filled.reduce((max, csv_row) => {
         return Math.max(max, csv_row.length);
     }, 0);
 
-    return { rows: filled, width: width };
-}
+    return { rows: filled, width };
+};
 
 /* Column labels come from the header row when the file has one. */
-export function getCsvColumns(parsed, has_headers) {
+export const getCsvColumns = (parsed, has_headers) => {
     const first_row = parsed && parsed.rows.length ? parsed.rows[0] : [];
     const columns = [];
 
@@ -101,19 +101,19 @@ export function getCsvColumns(parsed, has_headers) {
 
         columns.push({
             value: String(index),
-            label: header || 'Column ' + (index + 1)
+            label: header || `Column ${index + 1}`
         });
     }
 
     return columns;
-}
+};
 
 /*
  * Adds the selected column to the question. Answers are stripped of markup,
  * trimmed, skipped when empty and capped at the question's limit; `replace`
  * swaps the whole list, otherwise the imported rows are appended.
  */
-export function importAnswers(input, parsed, options) {
+export const importAnswers = (input, parsed, options) => {
     const settings = options || {};
     const column = Number(settings.column_index);
     const replace = settings.replace === true;
@@ -129,7 +129,7 @@ export function importAnswers(input, parsed, options) {
     let imported = 0;
     let skipped = 0;
 
-    rows.forEach(function (csv_row) {
+    rows.forEach((csv_row) => {
         if (csv_row[column] === undefined) {
             return;
         }
@@ -159,30 +159,30 @@ export function importAnswers(input, parsed, options) {
         input.default = null;
     }
 
-    return { ok: imported > 0, imported: imported, skipped: skipped };
-}
+    return { ok: imported > 0, imported, skipped };
+};
 
-function quoteCsv(value) {
+const quoteCsv = (value) => {
     const text = String(value === undefined || value === null ? '' : value);
 
     if (!/[",\r\n]/.test(text)) {
         return text;
     }
 
-    return '"' + text.replace(/"/g, '""') + '"';
-}
+    return `"${text.replace(/"/g, '""')}"`;
+};
 
 /* One column, headed by the question text — the shape the legacy export had. */
-export function exportCsv(input) {
-    const rows = [plainQuestion(input)].concat((input && input.possible_answers || []).map(function (answer) {
+export const exportCsv = (input) => {
+    const rows = [plainQuestion(input), ...((input && input.possible_answers || []).map((answer) => {
         return String(answer.answer || '');
-    }));
+    }))];
 
     return rows.map(quoteCsv).join('\r\n');
-}
+};
 
-export function getCsvFilename(input) {
+export const getCsvFilename = (input) => {
     const name = plainQuestion(input).slice(0, 20).trim() || 'possible_answers';
 
     return name + '__possible_answers.csv';
-}
+};

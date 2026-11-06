@@ -8,7 +8,7 @@
 
 let seed = Math.floor(Math.random() * 0x75bcd15);
 
-function format_seed(value, width) {
+const format_seed = (value, width) => {
     const hex = parseInt(value, 10).toString(16);
 
     if (width < hex.length) {
@@ -16,18 +16,18 @@ function format_seed(value, width) {
     }
 
     return Array(1 + (width - hex.length)).join('0') + hex;
-}
+};
 
-export function generateUniqID() {
+export const generateUniqID = () => {
     seed += 1;
 
     return format_seed(Math.floor(Date.now() / 1000), 8) + format_seed(seed, 5);
-}
+};
 
-export function generateInputRef(form_ref) {
-    return form_ref + '_' + generateUniqID();
-}
+export const generateInputRef = (form_ref) => {
+    return `${form_ref}_${generateUniqID()}`;
+};
 
-export function generateFormRef(project_ref) {
-    return project_ref + '_' + generateUniqID();
-}
+export const generateFormRef = (project_ref) => {
+    return `${project_ref}_${generateUniqID()}`;
+};

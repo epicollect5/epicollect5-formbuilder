@@ -16,7 +16,7 @@ import { getProjectLimitsError } from '@/services/project-limits.js';
 
 const PROJECT_SAVE_PATH = 'api/internal/formbuilder/';
 
-export function replaceWordChars(text) {
+export const replaceWordChars = (text) => {
     return String(text === undefined || text === null ? '' : text)
         .replace(/[\u2018\u2019\u201A]/g, "'")
         .replace(/[\u201C\u201D\u201E]/g, '"')
@@ -27,14 +27,14 @@ export function replaceWordChars(text) {
         .replace(/\u203A/g, ' ')
         .replace(/[\u02DC\u00A0]/g, ' ')
         .replace(/\uFFFD/g, ' ');
-}
+};
 
-function cleanJumpList(jumps, input, inputs, state) {
-    const destinations = new Set(getJumpAvailableDestinations(input, inputs).map(function (destination) {
+const cleanJumpList = (jumps, input, inputs, state) => {
+    const destinations = new Set(getJumpAvailableDestinations(input, inputs).map((destination) => {
         return String(destination.ref);
     }));
 
-    return (Array.isArray(jumps) ? jumps : []).map(function (jump) {
+    return (Array.isArray(jumps) ? jumps : []).map((jump) => {
         const to = jump && jump.to !== undefined && jump.to !== null ? String(jump.to) : '';
         const when = jump && jump.when ? jump.when : 'ALL';
         const answer_ref = when === 'ALL' || when === 'NO_ANSWER_GIVEN' ? null : (jump && jump.answer_ref ? jump.answer_ref : null);
@@ -46,11 +46,11 @@ function cleanJumpList(jumps, input, inputs, state) {
         }
 
         // Rebuilt, so stray properties never reach the server.
-        return { to: to, when: when, answer_ref: answer_ref };
+        return { to, when, answer_ref };
     });
-}
+};
 
-function cleanInput(input, inputs, state) {
+const cleanInput = (input, inputs, state) => {
     if (!input || typeof input !== 'object') {
         return;
     }
@@ -68,24 +68,24 @@ function cleanInput(input, inputs, state) {
     }
 
     if (input.type === 'branch') {
-        (input.branch || []).forEach(function (child) {
+        (input.branch || []).forEach((child) => {
             cleanInput(child, input.branch, state);
         });
     }
 
     if (input.type === 'group') {
-        (input.group || []).forEach(function (child) {
+        (input.group || []).forEach((child) => {
             cleanInput(child, input.group, state);
         });
     }
-}
+};
 
-export function cleanProject(project_definition) {
+export const cleanProject = (project_definition) => {
     const cleaned = JSON.parse(JSON.stringify(project_definition));
     const state = { all_jumps_valid: true, invalid_jumps_question: '' };
 
-    getForms(cleaned).forEach(function (form) {
-        (form.inputs || []).forEach(function (input) {
+    getForms(cleaned).forEach((form) => {
+        (form.inputs || []).forEach((input) => {
             cleanInput(input, form.inputs, state);
         });
     });
@@ -95,11 +95,11 @@ export function cleanProject(project_definition) {
         all_jumps_valid: state.all_jumps_valid,
         invalid_jumps_question: state.invalid_jumps_question
     };
-}
+};
 
 /* Reads a stream by hand: Blob.stream() and Response are not available in every
    environment the builder runs in (and not in jsdom). */
-async function readStream(readable) {
+const readStream = async (readable) => {
     const reader = readable.getReader();
     const chunks = [];
     let total = 0;
@@ -118,16 +118,16 @@ async function readStream(readable) {
     const bytes = new Uint8Array(total);
     let offset = 0;
 
-    chunks.forEach(function (value) {
+    chunks.forEach((value) => {
         bytes.set(value, offset);
         offset += value.length;
     });
 
     return bytes;
-}
+};
 
 /* base64(gzip(JSON)), the body the Laravel endpoint decodes. */
-export async function encodeProject(project_definition) {
+export const encodeProject = async (project_definition) => {
     if (typeof CompressionStream === 'undefined') {
         throw new Error('This browser cannot compress the project definition');
     }
@@ -142,15 +142,15 @@ export async function encodeProject(project_definition) {
     const bytes = await compressed;
     let binary = '';
 
-    bytes.forEach(function (byte) {
+    bytes.forEach((byte) => {
         binary += String.fromCharCode(byte);
     });
 
     return btoa(binary);
-}
+};
 
 /* Laravel's internal formbuilder endpoint, derived from the builder's origin. */
-export function getSaveUrl(project_definition, base_url) {
+export const getSaveUrl = (project_definition, base_url) => {
     const project = getProject(project_definition);
     const url = new URL(base_url || document.baseURI);
     const segments = url.pathname.split('/').filter(Boolean);
@@ -158,15 +158,15 @@ export function getSaveUrl(project_definition, base_url) {
     // Drop the builder page and the project slug from the path.
     segments.splice(Math.max(segments.length - 2, 0), 2);
 
-    return url.origin + '/' + segments.concat(['api', 'internal', 'formbuilder', project ? project.slug : '']).join('/');
-}
+    return `${url.origin}/${[...segments, 'api', 'internal', 'formbuilder', project ? project.slug : ''].join('/')}`;
+};
 
 /* Local development saves straight to the comparison server's project file. */
-export function getDevSaveUrl(base_url) {
+export const getDevSaveUrl = (base_url) => {
     return new URL('../project/project.json', base_url || document.baseURI).href;
-}
+};
 
-export async function saveProject(project_definition, options) {
+export const saveProject = async (project_definition, options) => {
     const config = options || {};
 
     if (!areAllInputsValid(project_definition)) {
@@ -182,7 +182,7 @@ export async function saveProject(project_definition, options) {
     const cleaned = cleanProject(project_definition);
 
     if (!cleaned.all_jumps_valid) {
-        throw new Error('Invalid jump on question: ' + cleaned.invalid_jumps_question);
+        throw new Error(`Invalid jump on question: ${cleaned.invalid_jumps_question}`);
     }
 
     if (config.dev === true) {
@@ -195,7 +195,7 @@ export async function saveProject(project_definition, options) {
         });
 
         if (!response.ok) {
-            throw new Error('The project could not be saved (HTTP ' + response.status + ')');
+            throw new Error(`The project could not be saved (HTTP ${response.status})`);
         }
 
         return cleaned.project_definition;
@@ -211,14 +211,14 @@ export async function saveProject(project_definition, options) {
     });
 
     if (!response.ok) {
-        throw new Error('The project could not be saved (HTTP ' + response.status + ')');
+        throw new Error(`The project could not be saved (HTTP ${response.status})`);
     }
 
     return cleaned.project_definition;
-}
+};
 
 /* `{ data: { id, type: 'form', form } }`, the shape the import expects back. */
-export function buildFormExport(project_definition, form_index) {
+export const buildFormExport = (project_definition, form_index) => {
     const project = getProject(project_definition);
     const form = project && project.forms ? project.forms[form_index] : null;
 
@@ -240,9 +240,9 @@ export function buildFormExport(project_definition, form_index) {
             form: cleaned_form
         }
     };
-}
+};
 
-export function getFormExportFilename(project_definition, form_index) {
+export const getFormExportFilename = (project_definition, form_index) => {
     const project = getProject(project_definition);
     const form = project && project.forms ? project.forms[form_index] : null;
 
@@ -250,5 +250,5 @@ export function getFormExportFilename(project_definition, form_index) {
         return 'form.epicollect.json';
     }
 
-    return project.slug + '__' + form.slug + '.form.epicollect.json';
-}
+    return `${project.slug}__${form.slug}.form.epicollect.json`;
+};

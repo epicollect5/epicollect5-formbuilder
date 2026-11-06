@@ -17,23 +17,23 @@ import { JUMP_TO_END_OF_FORM_REF } from '@/services/jumps.js';
  * the copy, because a copied destination never exists at the original ref.
  */
 
-function clone(value) {
+const clone = (value) => {
     return JSON.parse(JSON.stringify(value));
-}
+};
 
-function regenerateAnswers(input, answer_refs) {
+const regenerateAnswers = (input, answer_refs) => {
     if (!isMultipleAnswerType(input.type)) {
         return;
     }
 
     const answers = Array.isArray(input.possible_answers) ? input.possible_answers : [];
 
-    input.possible_answers = answers.map(function (answer) {
+    input.possible_answers = answers.map((answer) => {
         const answer_ref = generateUniqID();
 
         answer_refs.set(String(answer.answer_ref), answer_ref);
 
-        return { answer: answer.answer, answer_ref: answer_ref };
+        return { answer: answer.answer, answer_ref };
     });
 
     if (!input.default) {
@@ -43,29 +43,29 @@ function regenerateAnswers(input, answer_refs) {
     const remapped = answer_refs.get(String(input.default));
 
     input.default = remapped === undefined ? null : remapped;
-}
+};
 
-function regenerateRefs(input, parent_ref, input_refs, answer_refs) {
+const regenerateRefs = (input, parent_ref, input_refs, answer_refs) => {
     const old_ref = String(input.ref);
 
-    input.ref = parent_ref + '_' + generateUniqID();
+    input.ref = `${parent_ref}_${generateUniqID()}`;
     input_refs.set(old_ref, input.ref);
 
     regenerateAnswers(input, answer_refs);
 
     if (isBranchOrGroup(input.type)) {
-        getContainerList(input).forEach(function (child) {
+        getContainerList(input).forEach((child) => {
             regenerateRefs(child, input.ref, input_refs, answer_refs);
         });
     }
 
     return input;
-}
+};
 
-function remapJumps(input, input_refs, answer_refs) {
+const remapJumps = (input, input_refs, answer_refs) => {
     const jumps = Array.isArray(input.jumps) ? input.jumps : [];
 
-    input.jumps = jumps.map(function (jump) {
+    input.jumps = jumps.map((jump) => {
         const to = jump.to === JUMP_TO_END_OF_FORM_REF ? JUMP_TO_END_OF_FORM_REF : input_refs.get(String(jump.to));
 
         if (!to) {
@@ -73,21 +73,21 @@ function remapJumps(input, input_refs, answer_refs) {
         }
 
         return {
-            to: to,
+            to,
             when: jump.when,
             answer_ref: jump.answer_ref ? (answer_refs.get(String(jump.answer_ref)) || null) : null
         };
     }).filter(Boolean);
 
     if (isBranchOrGroup(input.type)) {
-        getContainerList(input).forEach(function (child) {
+        getContainerList(input).forEach((child) => {
             remapJumps(child, input_refs, answer_refs);
         });
     }
-}
+};
 
 /* Appends the copy to the active list (form inputs or the container edited). */
-export function duplicateInput(input) {
+export const duplicateInput = (input) => {
     const form = getCurrentForm();
 
     if (!form || !input) {
@@ -107,10 +107,10 @@ export function duplicateInput(input) {
     copy.jumps = [];
 
     if (isBranchOrGroup(copy.type)) {
-        getContainerList(copy).forEach(function (child) {
+        getContainerList(copy).forEach((child) => {
             remapJumps(child, input_refs, answer_refs);
         });
     }
 
     return addInputObject(copy);
-}
+};

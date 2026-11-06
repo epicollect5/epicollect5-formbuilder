@@ -15,7 +15,7 @@
 
 export function getJQuery() {
     return window.jQuery || null;
-}
+};
 
 export function installToolDrag(tools_selector, list_selector, on_drop) {
     const $ = getJQuery();
@@ -117,7 +117,7 @@ export function installToolDrag(tools_selector, list_selector, on_drop) {
             }
         }
     });
-}
+};
 
 export function installQuestionSortable(list_selector, on_sync) {
     const $ = getJQuery();
@@ -146,7 +146,7 @@ export function installQuestionSortable(list_selector, on_sync) {
             on_sync();
         }
     });
-}
+};
 
 export function installAnswerSortable(list_selector, on_sync) {
     const $ = getJQuery();
@@ -177,7 +177,7 @@ export function installAnswerSortable(list_selector, on_sync) {
             on_sync();
         }
     });
-}
+};
 
 function getPointer(event, ui) {
     const original = event.originalEvent || event;
@@ -195,7 +195,7 @@ function getPointer(event, ui) {
     const rect = helper.getBoundingClientRect();
 
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-}
+};
 
 /*
  * Resolved against the rows, not the list box: the list scrolls, so its own
@@ -221,7 +221,7 @@ function resolveDrop(list_selector, pointer) {
         const inside = pointer.x >= list_rect.left && pointer.x <= list_rect.right &&
             pointer.y >= list_rect.top && pointer.y <= list_rect.bottom;
 
-        return inside ? { list: list, index: 0 } : null;
+        return inside ? { list, index: 0 } : null;
     }
 
     const first_rect = rows[0].getBoundingClientRect();
@@ -246,5 +246,5 @@ function resolveDrop(list_selector, pointer) {
         }
     }
 
-    return { list: list, index: index };
-}
+    return { list, index };
+};

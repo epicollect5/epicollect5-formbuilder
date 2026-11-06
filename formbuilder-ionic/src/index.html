@@ -22,11 +22,11 @@
           rel="stylesheet"
           type="text/css">
 
-    <!-- Ionic Core 8.8.4 (pinned, copied into vendor/ionic by the build) -->
+    <!-- Ionic Core CSS and the prototype theme, bundled by Vite. -->
     <link rel="stylesheet"
-          href="vendor/ionic/css/ionic.bundle.css">
+          href="./ionic.css">
     <link rel="stylesheet"
-          href="css/ionic-formbuilder.css">
+          href="./theme/ionic-formbuilder.scss">
 </head>
 
 <body class="loader-background">
@@ -127,13 +127,10 @@
 
 <div class="print-preview-wrapper"></div>
 
-<!-- jQuery 4 and jQuery UI 1.14, copied from node_modules by the build. -->
-<script src="vendor/jquery.min.js"
-        defer></script>
-<script src="vendor/jquery-ui.min.js"
-        defer></script>
-<script src="js/formbuilder-ionic.js"
-        defer></script>
+<!-- jQuery and jQuery UI are bundled by Vite through npm imports in app.js;
+     Ionic registers its components from setupIonic() there. -->
+<script type="module"
+        src="./app.js"></script>
 
 </body>
 

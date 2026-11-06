@@ -109,7 +109,7 @@ let unsaved_changes = false;
 let tracked_project = null;
 let unload_guard_bound = false;
 
-export function renderApp(app_handlers) {
+export const renderApp = (app_handlers) => {
     handlers = app_handlers || {};
 
     if (getSession().project_definition !== tracked_project) {
@@ -126,9 +126,9 @@ export function renderApp(app_handlers) {
     renderForms();
     renderQuestions();
     renderProperties();
-}
+};
 
-function renderProjectName() {
+const renderProjectName = () => {
     const project = getProject(getSession().project_definition);
     const title = document.querySelector('ion-title #project-name, ion-title') || document.getElementById('project-name');
     const name = document.getElementById('project-name');
@@ -144,10 +144,10 @@ function renderProjectName() {
     if (logo) {
         logo.src = getProjectLogoUrl(project);
     }
-}
+};
 
 /* Same source as the legacy navbar: the project logo, else the media endpoint. */
-function getProjectLogoUrl(project) {
+const getProjectLogoUrl = (project) => {
     if (!project) {
         return '';
     }
@@ -161,11 +161,11 @@ function getProjectLogoUrl(project) {
 
     parts.pop();
 
-    return protocol + '//' + parts.join('/') + '/api/internal/media/' + project.slug +
+    return `${protocol}//${parts.join('/')}/api/internal/media/${project.slug}` +
         '?type=photo&name=logo.jpg&format=project_mobile_logo';
-}
+};
 
-function revealBuilder() {
+const revealBuilder = () => {
     const loader = document.querySelector('.loader');
     const builder = document.getElementById('builder');
 
@@ -176,13 +176,13 @@ function revealBuilder() {
     if (builder) {
         builder.hidden = false;
     }
-}
+};
 
 /* Chrome controls are static, so assigning handlers keeps re-renders from
    stacking duplicate listeners. */
-function bindChrome() {
-    document.querySelectorAll('[data-action="back"], [data-action="exit"]').forEach(function (control) {
-        control.onclick = function () {
+const bindChrome = () => {
+    document.querySelectorAll('[data-action="back"], [data-action="exit"]').forEach((control) => {
+        control.onclick = () => {
             goBack();
         };
     });
@@ -190,7 +190,7 @@ function bindChrome() {
     const undo_button = document.getElementById('undo');
 
     if (undo_button) {
-        undo_button.onclick = function () {
+        undo_button.onclick = () => {
             performUndo();
         };
     }
@@ -198,8 +198,8 @@ function bindChrome() {
     const save_button = document.getElementById('save');
 
     if (save_button) {
-        save_button.onclick = function () {
-            performSave().catch(function (error) {
+        save_button.onclick = () => {
+            performSave().catch((error) => {
                 console.error('[formbuilder-ionic] unexpected save error', error);
             });
         };
@@ -211,8 +211,8 @@ function bindChrome() {
 
     if (add_form) {
         add_form.disabled = at_form_cap;
-        add_form.title = at_form_cap ? 'A project can have at most ' + MAX_FORMS + ' forms' : 'Add form';
-        add_form.onclick = function () {
+        add_form.title = at_form_cap ? `A project can have at most ${MAX_FORMS} forms` : 'Add form';
+        add_form.onclick = () => {
             if (at_form_cap) {
                 return;
             }
@@ -224,10 +224,10 @@ function bindChrome() {
 
     updateUndoButton();
     updateSaveButton();
-}
+};
 
 /* Snapshots are taken after a mutation, matching the legacy push points. */
-function recordChange(options) {
+const recordChange = (options) => {
     // The throttled push lands later, so the button gate has to follow it.
     pushUndoState(Object.assign({ on_change: updateUndoButton }, options || {}));
     unsaved_changes = true;
@@ -235,8 +235,8 @@ function recordChange(options) {
     updateSaveButton();
     // Validity changes while editing, not only on select or sort.
     refreshFormTabs();
-}
-function updateUndoButton() {
+};
+const updateUndoButton = () => {
     const undo_button = document.getElementById('undo');
 
     if (!undo_button) {
@@ -247,25 +247,25 @@ function updateUndoButton() {
 
     undo_button.disabled = !available;
     undo_button.title = available ? 'Undo the last change' : 'Nothing to undo';
-}
+};
 
-function installUnloadGuard() {
+const installUnloadGuard = () => {
     if (unload_guard_bound) {
         return;
     }
 
     unload_guard_bound = true;
 
-    window.addEventListener('beforeunload', function (event) {
+    window.addEventListener('beforeunload', (event) => {
         if (!unsaved_changes) {
             return;
         }
 
         event.preventDefault();
     });
-}
+};
 
-function performUndo() {
+const performUndo = () => {
     showLoading();
 
     if (!undo()) {
@@ -283,9 +283,9 @@ function performUndo() {
     renderApp(handlers);
     // Legacy drops the overlay ANIMATION_SLOW after re-rendering the state.
     hideLoading(500);
-}
+};
 
-function updateSaveButton() {
+const updateSaveButton = () => {
     const button = document.getElementById('save');
 
     if (!button) {
@@ -296,9 +296,9 @@ function updateSaveButton() {
 
     button.disabled = saving || !valid;
     button.title = saving ? FORM_MESSAGES.PROJECT_SAVING : (valid ? 'Save project' : 'Fix the validation errors before saving');
-}
+};
 
-async function performSave() {
+const performSave = async () => {
     if (saving) {
         return;
     }
@@ -320,15 +320,15 @@ async function performSave() {
         const message = error && error.message ? error.message : '';
 
         hideLoading();
-        showToast(FORM_MESSAGES.PROJECT_NOT_SAVED + (message ? ' ' + message : ''), 'error');
+        showToast(`${FORM_MESSAGES.PROJECT_NOT_SAVED}${message ? ` ${message}` : ''}`, 'error');
     }
     finally {
         saving = false;
         updateSaveButton();
     }
-}
+};
 
-function installFormActions(card, form) {
+const installFormActions = (card, form) => {
     if (!form) {
         return;
     }
@@ -343,7 +343,7 @@ function installFormActions(card, form) {
     if (delete_button) {
         delete_button.disabled = !deletable;
         delete_button.title = deletable ? 'Delete form' : FORM_MESSAGES.FORM_CANNOT_BE_DELETED;
-        delete_button.onclick = function () {
+        delete_button.onclick = () => {
             if (deleteForm(form_index)) {
                 recordChange();
                 renderApp(handlers);
@@ -353,21 +353,21 @@ function installFormActions(card, form) {
     }
 
     if (edit_button) {
-        edit_button.onclick = function () {
+        edit_button.onclick = () => {
             openFormNameModal(form);
         };
     }
 
-    import_buttons.forEach(function (import_button) {
+    import_buttons.forEach((import_button) => {
         import_button.disabled = isEditing();
         import_button.title = isEditing() ? 'Return to the form to import' : 'Import form';
     });
 
     const actions = {
-        'form-rename': function () {
+        'form-rename': () => {
             openFormNameModal(form);
         },
-        'form-export': function () {
+        'form-export': () => {
             const payload = buildFormExport(getSession().project_definition, form_index);
 
             if (!payload) {
@@ -377,17 +377,17 @@ function installFormActions(card, form) {
 
             downloadFile(getFormExportFilename(getSession().project_definition, form_index), JSON.stringify(payload), 'application/json');
         },
-        'form-print': function () {
+        'form-print': () => {
             if (!printForm(getSession().project_definition, form_index)) {
                 showToast(FORM_MESSAGES.FORM_IS_INVALID, 'error');
             }
         },
-        'form-import': function () {
+        'form-import': () => {
             if (!isEditing()) {
                 importFormFile(card);
             }
         },
-        'form-delete-all': function () {
+        'form-delete-all': () => {
             if (!removeAllInputs()) {
                 return;
             }
@@ -400,9 +400,9 @@ function installFormActions(card, form) {
         }
     };
 
-    Object.keys(actions).forEach(function (action) {
-        card.querySelectorAll('[data-action="' + action + '"]').forEach(function (control) {
-            control.onclick = function (event) {
+    Object.keys(actions).forEach((action) => {
+        card.querySelectorAll(`[data-action="${action}"]`).forEach((control) => {
+            control.onclick = (event) => {
                 event.preventDefault();
                 actions[action]();
             };
@@ -419,17 +419,17 @@ function installFormActions(card, form) {
             { label: 'Import form', data_action: 'form-import', action: actions['form-import'], disabled: isEditing() },
             { divider: true },
             { label: 'Delete all questions', data_action: 'form-delete-all', action: actions['form-delete-all'] }
-        ], function (item) {
+        ], (item) => {
             item.action();
         });
     }
-}
+};
 
-function isDevMode() {
+const isDevMode = () => {
     return window.__FORMBUILDER_DEV__ === true;
-}
+};
 
-function openFormNameModal(form) {
+const openFormNameModal = (form) => {
     const adding = !form;
     const body = createView(form_name_modal_body_view);
     const field = body.querySelector('input');
@@ -437,19 +437,19 @@ function openFormNameModal(form) {
 
     field.maxLength = PARAMETERS.FORM_NAME_MAX_LENGTH;
     field.value = form ? form.name || '' : '';
-    field.addEventListener('input', function () {
+    field.addEventListener('input', () => {
         error.hidden = true;
     });
 
     const modal = openModal({
         title: 'Form name',
-        body: body,
+        body,
         buttons: [
             { text: 'Close', class_name: 'btn-default' },
             {
                 text: 'Save changes',
                 class_name: 'btn-primary',
-                on_click: function (close) {
+                on_click: (close) => {
                     const forms = getForms(getSession().project_definition);
                     const form_index = getSession().current_form_index;
                     const validation_error = getFormNameError(forms, field.value, adding ? -1 : form_index);
@@ -480,17 +480,17 @@ function openFormNameModal(form) {
     field.focus();
 
     return modal;
-}
+};
 
-function openTitleInfo() {
+const openTitleInfo = () => {
     openModal({
         title: 'What do you mean by title?',
         body: createView(title_info_body_view),
         buttons: [{ text: 'Close', class_name: 'btn-primary' }]
     });
-}
+};
 
-function getTotalEntries() {
+const getTotalEntries = () => {
     const legacy_counter = document.querySelector('.total-entries');
     const data_value = legacy_counter ? legacy_counter.getAttribute('data-total-entries') : null;
 
@@ -501,9 +501,9 @@ function getTotalEntries() {
     const project = getProject(getSession().project_definition);
 
     return Number(project && (project.total_entries || project.entries) || 0);
-}
+};
 
-function deleteQuestion(input) {
+const deleteQuestion = (input) => {
     if (!removeInput(input.ref)) {
         return;
     }
@@ -511,9 +511,9 @@ function deleteQuestion(input) {
     recordChange();
     renderApp(handlers);
     showToast(FORM_MESSAGES.INPUT_DELETED, 'warning');
-}
+};
 
-function openDeleteQuestion(input) {
+const openDeleteQuestion = (input) => {
     // With entries on the server, legacy warns before dropping their data.
     if (getTotalEntries() === 0) {
         deleteQuestion(input);
@@ -527,15 +527,15 @@ function openDeleteQuestion(input) {
         buttons: [{
             text: 'Confirm',
             class_name: 'btn-danger',
-            on_click: function (close) {
+            on_click: (close) => {
                 close();
                 deleteQuestion(input);
             }
         }]
     });
-}
+};
 
-function importFormFile(card) {
+const importFormFile = (card) => {
     const field = card.querySelector('[data-role="form-file"]');
 
     if (!field) {
@@ -543,7 +543,7 @@ function importFormFile(card) {
     }
 
     field.value = '';
-    field.onchange = function () {
+    field.onchange = () => {
         const file = field.files && field.files[0];
 
         if (!file) {
@@ -559,7 +559,7 @@ function importFormFile(card) {
 
         showLoading();
 
-        reader.onload = function () {
+        reader.onload = () => {
             let result;
 
             try {
@@ -585,7 +585,7 @@ function importFormFile(card) {
             showToast(FORM_MESSAGES.FORM_IMPORTED, 'success');
         };
 
-        reader.onerror = function () {
+        reader.onerror = () => {
             hideLoading();
             showToast(FORM_MESSAGES.FORM_FILE_INVALID, 'error');
         };
@@ -594,10 +594,10 @@ function importFormFile(card) {
     };
 
     field.click();
-}
+};
 
 /* The tool catalogue is static markup; only the click and drag wiring changes. */
-function renderTools() {
+const renderTools = () => {
     const container = document.getElementById('tools');
 
     if (!container) {
@@ -606,7 +606,7 @@ function renderTools() {
 
     container.replaceChildren(parseView(tools_view));
 
-    container.querySelectorAll('.builder__tool').forEach(function (tool) {
+    container.querySelectorAll('.builder__tool').forEach((tool) => {
         const type = tool.getAttribute('data-type');
         const allowed = canAddInput(type);
 
@@ -614,12 +614,12 @@ function renderTools() {
         tool.hidden = !allowed;
         tool.disabled = !allowed;
 
-        tool.onclick = function () {
+        tool.onclick = () => {
             addQuestion(type);
         };
     });
 
-    installToolDrag('#tools .builder__tool', QUESTION_LIST, function (type, index) {
+    installToolDrag('#tools .builder__tool', QUESTION_LIST, (type, index) => {
         if (!insertInput(type, index)) {
             return;
         }
@@ -628,9 +628,9 @@ function renderTools() {
         renderQuestions();
         renderProperties();
     });
-}
+};
 
-function addQuestion(type) {
+const addQuestion = (type) => {
     if (!addInput(type)) {
         return;
     }
@@ -638,9 +638,9 @@ function addQuestion(type) {
     recordChange();
     renderQuestions();
     renderProperties();
-}
+};
 
-function renderForms() {
+const renderForms = () => {
     const container = document.getElementById('form-tabs');
 
     if (!container) {
@@ -661,7 +661,7 @@ function renderForms() {
     segment.value = String(current_index);
     segment.disabled = isEditing();
 
-    forms.forEach(function (form, form_index) {
+    forms.forEach((form, form_index) => {
         const is_selected = form_index === current_index;
         const tab = element('ion-segment-button', {
             class: 'builder__form-tab',
@@ -674,9 +674,9 @@ function renderForms() {
     });
 
     bindFormSegment(segment);
-}
+};
 
-function buildFormTabLabel(form) {
+const buildFormTabLabel = (form) => {
     const label = element('ion-label', {}, [form.name]);
 
     if (!areFormInputsValid(form)) {
@@ -688,17 +688,17 @@ function buildFormTabLabel(form) {
     }
 
     return label;
-}
+};
 
 /* The segment lives in the page shell, so its listeners are bound once. */
-function bindFormSegment(segment) {
+const bindFormSegment = (segment) => {
     if (segment.__form_tabs_bound === true) {
         return;
     }
 
     segment.__form_tabs_bound = true;
 
-    const activate_form = function (form_index) {
+    const activate_form = (form_index) => {
         if (isEditing() || form_index === getSession().current_form_index) {
             return;
         }
@@ -708,11 +708,11 @@ function bindFormSegment(segment) {
         renderApp(handlers);
     };
 
-    segment.addEventListener('ionChange', function (event) {
+    segment.addEventListener('ionChange', (event) => {
         activate_form(parseInt(event.detail.value, 10));
     });
 
-    segment.addEventListener('click', function (event) {
+    segment.addEventListener('click', (event) => {
         const tab = event.target.closest('.builder__form-tab');
 
         if (!tab) {
@@ -721,9 +721,9 @@ function bindFormSegment(segment) {
 
         activate_form(parseInt(tab.getAttribute('value'), 10));
     });
-}
+};
 
-function renderQuestions() {
+const renderQuestions = () => {
     const container = document.getElementById('questions');
 
     if (!container) {
@@ -744,17 +744,17 @@ function renderQuestions() {
 
     title_name.textContent = form_name;
 
-    trail.forEach(function (node, index) {
+    trail.forEach((node, index) => {
         title.append(element('span', { class: 'builder__questions-title-sep', 'aria-hidden': 'true' }, [' > ']));
         title.append(element('span', {
-            class: 'builder__questions-title-crumb' + (index === trail.length - 1 ? ' is-current' : '')
+            class: `builder__questions-title-crumb${index === trail.length - 1 ? ' is-current' : ''}`
         }, [getQuestionLabel(node)]));
     });
 
-    title.setAttribute('title', [form_name].concat(trail.map(getQuestionLabel)).join(' > '));
+    title.setAttribute('title', [form_name, ...trail.map(getQuestionLabel)].join(' > '));
 
     if (active_container) {
-        empty.textContent = 'No questions in this ' + active_container.type + ' yet.';
+        empty.textContent = `No questions in this ${active_container.type} yet.`;
     }
 
     const branch_active = active_container && active_container.type === 'branch';
@@ -776,7 +776,7 @@ function renderQuestions() {
     if (inputs.length) {
         empty.remove();
 
-        inputs.forEach(function (input) {
+        inputs.forEach((input) => {
             list.append(buildQuestionRow(input, input.ref === current_ref));
         });
     }
@@ -786,11 +786,11 @@ function renderQuestions() {
     installFormActions(card, form);
 
     installQuestionSortable(QUESTION_LIST, syncAfterDrop);
-}
+};
 
 /* ion-item with `button` supplies the button role and keyboard activation, so
    the row only needs the selection click. */
-function buildQuestionRow(input, is_current) {
+const buildQuestionRow = (input, is_current) => {
     const question_type = getQuestionType(input.type);
     const row = element('ion-item', {
         class: 'builder__question',
@@ -807,23 +807,23 @@ function buildQuestionRow(input, is_current) {
 
     row.button = true;
 
-    row.addEventListener('click', function () {
+    row.addEventListener('click', () => {
         chooseInput(input.ref);
     });
 
     return row;
-}
+};
 
-function buildQuestionTail(input) {
+const buildQuestionTail = (input) => {
     return buildQuestionStatus(input);
-}
+};
 
-function buildQuestionStatus(input) {
+const buildQuestionStatus = (input) => {
     const valid = isInputRowValid(input);
     const has_jumps = Array.isArray(input.jumps) && input.jumps.length > 0;
     const status = element('span', { class: 'builder__question-status' });
     const validity = element('span', {
-        class: 'question-state ' + (valid ? 'is-valid' : 'is-invalid'),
+        class: `question-state ${valid ? 'is-valid' : 'is-invalid'}`,
         'aria-label': valid ? 'Valid question' : 'Question has errors',
         title: valid ? 'Valid' : 'Needs attention'
     }, [
@@ -843,22 +843,22 @@ function buildQuestionStatus(input) {
     status.append(validity);
 
     return status;
-}
+};
 
 /* Rows belong to the active list, so that list is the jump-validation context. */
-function isInputRowValid(input) {
+const isInputRowValid = (input) => {
     return isInputValid(input, getCurrentInputs());
-}
+};
 
 /* Persists the order the sortable left in the DOM. */
-function syncAfterDrop() {
+const syncAfterDrop = () => {
     const list = document.querySelector(QUESTION_LIST);
 
     if (!list) {
         return;
     }
 
-    const reordered = reorderInputs([...list.querySelectorAll('.builder__question')].map(function (row) {
+    const reordered = reorderInputs([...list.querySelectorAll('.builder__question')].map((row) => {
         return row.getAttribute('data-input-ref');
     }));
 
@@ -868,42 +868,42 @@ function syncAfterDrop() {
 
     // jQuery UI is still unwinding its own drop when stop fires, so the
     // re-render waits for the next task.
-    setTimeout(function () {
+    setTimeout(() => {
         renderQuestions();
         renderProperties();
         runBackgroundValidation();
     }, 0);
-}
+};
 
-function chooseInput(input_ref) {
+const chooseInput = (input_ref) => {
     selectInput(input_ref);
     active_property_tab = 'basic';
     updateSelection();
     renderProperties();
     runBackgroundValidation();
-}
+};
 
 /* Only the selected row changes, so the list and its scroll position stay put. */
-function updateSelection() {
+const updateSelection = () => {
     const current_ref = getSession().current_input_ref;
 
-    document.querySelectorAll('#questions .builder__question').forEach(function (row) {
+    document.querySelectorAll('#questions .builder__question').forEach((row) => {
         row.setAttribute('aria-current', row.getAttribute('data-input-ref') === current_ref ? 'true' : 'false');
     });
-}
+};
 
 /* Legacy disables Jumps for anything edited inside a group. */
-function canUseJumpsTab(input) {
+const canUseJumpsTab = (input) => {
     return hasJumpsTab(input.type) && !isEditingInsideGroup();
-}
+};
 
-function isEditingInsideGroup() {
-    return getEditingTrail().some(function (node) {
+const isEditingInsideGroup = () => {
+    return getEditingTrail().some((node) => {
         return node.type === 'group';
     });
-}
+};
 
-function renderProperties() {
+const renderProperties = () => {
     const container = document.getElementById('properties');
     const input = getCurrentInput();
 
@@ -925,7 +925,7 @@ function renderProperties() {
     if (editing_bar) {
         if (isEditing()) {
             editing_bar.hidden = false;
-            editing_bar.querySelector('[data-role="exit-editing"]').onclick = function () {
+            editing_bar.querySelector('[data-role="exit-editing"]').onclick = () => {
                 exitEditing();
                 active_property_tab = 'basic';
                 renderApp(handlers);
@@ -981,16 +981,16 @@ function renderProperties() {
     }
 
     body.scrollTop = previous_scroll;
-}
+};
 
-function destroyReadmeEditor() {
+const destroyReadmeEditor = () => {
     if (active_readme_editor) {
         active_readme_editor.destroy();
         active_readme_editor = null;
     }
-}
+};
 
-function bindPropertyActions(card, input) {
+const bindPropertyActions = (card, input) => {
     const copy_button = card.querySelector('[data-action="copy"]');
     const validate_button = card.querySelector('[data-action="validate"]');
     const delete_button = card.querySelector('[data-action="delete"]');
@@ -998,7 +998,7 @@ function bindPropertyActions(card, input) {
     // Legacy keeps copy disabled until the question itself is valid.
     copy_button.disabled = !isInputValid(input, getCurrentInputs());
 
-    copy_button.addEventListener('click', function () {
+    copy_button.addEventListener('click', () => {
         // Legacy covers the copy and drops the overlay ANIMATION_SLOW later.
         showLoading();
 
@@ -1013,17 +1013,17 @@ function bindPropertyActions(card, input) {
         hideLoading(500);
     });
 
-    validate_button.addEventListener('click', function () {
+    validate_button.addEventListener('click', () => {
         performInputValidation();
     });
 
-    delete_button.addEventListener('click', function () {
+    delete_button.addEventListener('click', () => {
         openDeleteQuestion(input);
     });
-}
+};
 
 /* Legacy validates the selected question and toasts the result. */
-function performInputValidation() {
+const performInputValidation = () => {
     if (!getCurrentInput()) {
         return;
     }
@@ -1031,7 +1031,7 @@ function performInputValidation() {
     showLoading();
 
     // The overlay makes the pass, and the icons it refreshes, visible.
-    setTimeout(function () {
+    setTimeout(() => {
         hideLoading();
         renderApp(handlers);
 
@@ -1040,10 +1040,10 @@ function performInputValidation() {
 
         showToast(valid ? VALIDATION_MESSAGES.INPUT_VALID : VALIDATION_MESSAGES.INPUT_NOT_VALID, valid ? 'success' : 'error');
     }, 600);
-}
+};
 
 /* Shows the first error for the selected question, under the question field. */
-function updatePropertyError(card, input) {
+const updatePropertyError = (card, input) => {
     const message = card.querySelector('[data-role="properties-error"]');
 
     if (!message) {
@@ -1060,9 +1060,9 @@ function updatePropertyError(card, input) {
 
     message.textContent = errors[0].message;
     message.removeAttribute('hidden');
-}
+};
 
-function bindPropertyTabs(tab_strip, input) {
+const bindPropertyTabs = (tab_strip, input) => {
     const advanced_tab = tab_strip.querySelector('[value="advanced"]');
     const jumps_tab = tab_strip.querySelector('[value="jumps"]');
 
@@ -1076,7 +1076,7 @@ function bindPropertyTabs(tab_strip, input) {
         jumps_tab.setAttribute('disabled', 'disabled');
     }
 
-    tab_strip.addEventListener('ionChange', function (event) {
+    tab_strip.addEventListener('ionChange', (event) => {
         const value = event.detail.value;
 
         if (!value) {
@@ -1098,21 +1098,21 @@ function bindPropertyTabs(tab_strip, input) {
         active_property_tab = value;
         setActivePropertyContent(value);
     });
-}
+};
 
-function updateTabBadges(tab_strip, input) {
+const updateTabBadges = (tab_strip, input) => {
     const errors = getInputErrors(input, getCurrentInputs());
-    const has_error = function (tab) {
-        return errors.some(function (error) {
+    const has_error = (tab) => {
+        return errors.some((error) => {
             return error.tab === tab;
         });
     };
 
     markTabInvalid(tab_strip.querySelector('[value="basic"]'), has_error('properties'));
     markTabInvalid(tab_strip.querySelector('[value="jumps"]'), has_error('jumps'));
-}
+};
 
-function markTabInvalid(tab, invalid) {
+const markTabInvalid = (tab, invalid) => {
     tab.classList.toggle('is-invalid', invalid);
 
     if (invalid) {
@@ -1121,10 +1121,10 @@ function markTabInvalid(tab, invalid) {
     else {
         tab.removeAttribute('aria-invalid');
     }
-}
+};
 
 /* Live edits change validity, so the message, badges and copy gate follow. */
-function refreshPropertyValidation(card, input) {
+const refreshPropertyValidation = (card, input) => {
     const tab_strip = card.querySelector('.builder__property-tabs');
     const copy_button = card.querySelector('[data-action="copy"]');
 
@@ -1137,16 +1137,16 @@ function refreshPropertyValidation(card, input) {
     }
 
     updatePropertyError(card, input);
-}
+};
 
-function refreshCurrentProperties() {
+const refreshCurrentProperties = () => {
     const card = document.querySelector('#properties ion-card');
     const input = getCurrentInput();
 
     if (card && input) {
         refreshPropertyValidation(card, input);
     }
-}
+};
 
 /*
  * Background pass: reordering changes jump validity and selecting another
@@ -1154,18 +1154,18 @@ function refreshCurrentProperties() {
  * updates the icons and gates in place and never toasts, so only the explicit
  * Validate action reports a result.
  */
-function runBackgroundValidation() {
+const runBackgroundValidation = () => {
     refreshQuestionRows();
     refreshFormTabs();
     updateSaveButton();
     refreshCurrentProperties();
-}
+};
 
-function refreshQuestionRows() {
+const refreshQuestionRows = () => {
     const inputs = getCurrentInputs();
 
-    document.querySelectorAll(QUESTION_LIST + ' > .builder__question').forEach(function (row) {
-        const input = inputs.find(function (candidate) {
+    document.querySelectorAll(QUESTION_LIST + ' > .builder__question').forEach((row) => {
+        const input = inputs.find((candidate) => {
             return candidate.ref === row.getAttribute('data-input-ref');
         });
 
@@ -1187,14 +1187,14 @@ function refreshQuestionRows() {
             row.append(replacement);
         }
     });
-}
+};
 
 /* The form tabs live in the page shell and outlive question re-renders. */
-function refreshFormTabs() {
+const refreshFormTabs = () => {
     const forms = getForms(getSession().project_definition);
     const tabs = document.querySelectorAll('#form-tabs .builder__form-tab');
 
-    tabs.forEach(function (tab, index) {
+    tabs.forEach((tab, index) => {
         const form = forms[index];
         const label = tab.querySelector('ion-label');
 
@@ -1216,11 +1216,11 @@ function refreshFormTabs() {
             warning.remove();
         }
     });
-}
+};
 
-function setActivePropertyContent(value) {
-    document.querySelectorAll('#properties .builder__property-content').forEach(function (content) {
-        const active = content.id === 'property-content-' + value;
+const setActivePropertyContent = (value) => {
+    document.querySelectorAll('#properties .builder__property-content').forEach((content) => {
+        const active = content.id === `property-content-${value}`;
 
         content.classList.toggle('is-active', active);
 
@@ -1233,9 +1233,9 @@ function setActivePropertyContent(value) {
             content.setAttribute('aria-hidden', 'true');
         }
     });
-}
+};
 
-function buildBasicPanel(input, pane) {
+const buildBasicPanel = (input, pane) => {
     const panel = pane.querySelector('.builder__properties-panel');
     const question_group = panel.querySelector('.builder__question-field-group');
     const question_field = panel.querySelector('.builder__question-field');
@@ -1250,12 +1250,12 @@ function buildBasicPanel(input, pane) {
         title_row.remove();
         edit_container.remove();
 
-        active_readme_editor = createReadmeEditor(input.question || '', function (question, plain_text) {
+        active_readme_editor = createReadmeEditor(input.question || '', (question, plain_text) => {
             if (getSession().current_input_ref !== input.ref) {
                 return;
             }
 
-            updateCurrentInput({ question: question });
+            updateCurrentInput({ question });
             updateQuestionText(plain_text);
             recordChange({ throttle: true });
         });
@@ -1268,7 +1268,7 @@ function buildBasicPanel(input, pane) {
     bindQuestionField(question_field, input);
 
     if (allowsRequired(input.type)) {
-        bindCheckboxToggle(required_toggle, input.is_required === true, function (checked) {
+        bindCheckboxToggle(required_toggle, input.is_required === true, (checked) => {
             updateCurrentInput({ is_required: checked });
         });
     }
@@ -1288,7 +1288,7 @@ function buildBasicPanel(input, pane) {
         edit_container.hidden = false;
         edit_container.textContent = input.type === 'branch' ? 'Edit Branch' : 'Edit Group';
         edit_container.disabled = String(input.question || '').trim() === '';
-        edit_container.onclick = function () {
+        edit_container.onclick = () => {
             enterInput(input.ref);
             active_property_tab = 'basic';
             renderApp(handlers);
@@ -1301,14 +1301,14 @@ function buildBasicPanel(input, pane) {
     if (isMultipleAnswerType(input.type)) {
         panel.append(buildPossibleAnswers(input));
     }
-}
+};
 
-function buildAdvancedPanel(input, pane) {
+const buildAdvancedPanel = (input, pane) => {
     const panel = pane.querySelector('.builder__properties-panel');
     const empty = panel.querySelector('[data-role="advanced-empty"]');
     const fields = getAdvancedFields(input.type);
 
-    panel.querySelectorAll('[data-field]').forEach(function (field) {
+    panel.querySelectorAll('[data-field]').forEach((field) => {
         if (fields.indexOf(field.getAttribute('data-field')) === -1) {
             field.remove();
         }
@@ -1354,7 +1354,7 @@ function buildAdvancedPanel(input, pane) {
                 'Require double entry';
         }
 
-        bindCheckboxToggle(panel.querySelector('[data-field="verify"]'), input.verify === true, function (checked) {
+        bindCheckboxToggle(panel.querySelector('[data-field="verify"]'), input.verify === true, (checked) => {
             updateCurrentInput({ verify: checked });
         });
     }
@@ -1384,9 +1384,9 @@ function buildAdvancedPanel(input, pane) {
     if (fields.indexOf('search_type') !== -1) {
         bindSearchTypeControl(panel.querySelector('[data-field="search_type"]'), input);
     }
-}
+};
 
-function buildJumpsPanel(input, pane) {
+const buildJumpsPanel = (input, pane) => {
     const panel = pane.querySelector('.builder__jumps-panel');
     const add_button = panel.querySelector('.builder__add-jump');
     const no_jumps = panel.querySelector('[data-role="no-jumps"]');
@@ -1400,7 +1400,7 @@ function buildJumpsPanel(input, pane) {
 
     add_button.disabled = !can_add;
     add_button.title = can_add ? 'Add jump' : 'No jump destinations available';
-    add_button.addEventListener('click', function () {
+    add_button.addEventListener('click', () => {
         if (addJump(input, getCurrentInputs())) {
             recordChange();
             renderProperties();
@@ -1416,12 +1416,12 @@ function buildJumpsPanel(input, pane) {
 
     no_jumps.setAttribute('hidden', 'hidden');
 
-    jumps.forEach(function (jump, index) {
+    jumps.forEach((jump, index) => {
         list.append(buildJumpRow(input, jump, index, destinations));
     });
-}
+};
 
-function initDropdown(control, options, value, on_change, disabled) {
+const initDropdown = (control, options, value, on_change, disabled) => {
     if (!control) {
         return null;
     }
@@ -1457,8 +1457,8 @@ function initDropdown(control, options, value, on_change, disabled) {
         class_name: placeholder.className.replace(/\bdropdown\b/g, '').trim(),
         aria_label: placeholder.getAttribute('aria-label') || control.getAttribute('aria-label') || 'Select option',
         placeholder: placeholder.getAttribute('data-dropdown-placeholder') || 'Select',
-        options: options,
-        value: value,
+        options,
+        value,
         disabled: !!disabled,
         on_change: on_change
     });
@@ -1468,9 +1468,9 @@ function initDropdown(control, options, value, on_change, disabled) {
     }
 
     return dropdown;
-}
+};
 
-function buildJumpRow(input, jump, index, destinations) {
+const buildJumpRow = (input, jump, index, destinations) => {
     const always = usesAlwaysJump(input.type);
     const row = createView(always ? jump_row_always_view : jump_row_view);
     const when_placeholder = row.querySelector('.builder__jump-when');
@@ -1484,9 +1484,9 @@ function buildJumpRow(input, jump, index, destinations) {
         initDropdown(when_placeholder, [{ value: 'ALL', label: 'always' }], 'ALL', null, true);
     }
     else {
-        initDropdown(when_placeholder, JUMP_CONDITIONS.map(function (condition) {
+        initDropdown(when_placeholder, JUMP_CONDITIONS.map((condition) => {
             return { value: condition.key, label: condition.label };
-        }), jump.when || 'IS', function (detail) {
+        }), jump.when || 'IS', (detail) => {
             updateJump(input, index, { when: detail.value });
             recordChange();
             renderProperties();
@@ -1495,18 +1495,18 @@ function buildJumpRow(input, jump, index, destinations) {
         }, false);
 
         if (answer_placeholder) {
-            const answer_options = (input.possible_answers || []).map(function (answer) {
+            const answer_options = (input.possible_answers || []).map((answer) => {
                 return {
                     value: answer.answer_ref,
                     label: answer.answer || 'Untitled answer'
                 };
             });
-            const has_value = answer_options.some(function (option) {
+            const has_value = answer_options.some((option) => {
                 return String(option.value) === String(jump.answer_ref);
             });
             const answer_value = has_value ? jump.answer_ref : (answer_options[0] ? answer_options[0].value : '');
 
-            initDropdown(answer_placeholder, answer_options, answer_value, !jumpNeedsAnswer(jump.when) ? null : function (detail) {
+            initDropdown(answer_placeholder, answer_options, answer_value, !jumpNeedsAnswer(jump.when) ? null : (detail) => {
                 updateJump(input, index, { answer_ref: detail.value || '' });
                 recordChange();
                 renderProperties();
@@ -1516,13 +1516,13 @@ function buildJumpRow(input, jump, index, destinations) {
         }
     }
 
-    const destination_options = destinations.map(function (destination) {
+    const destination_options = destinations.map((destination) => {
         return {
             value: destination.ref,
             label: destination.question
         };
     });
-    const has_destination = destination_options.some(function (option) {
+    const has_destination = destination_options.some((option) => {
         return String(option.value) === String(jump.to);
     });
 
@@ -1533,18 +1533,18 @@ function buildJumpRow(input, jump, index, destinations) {
         });
     }
 
-    if (!jump.to || !destination_options.some(function (option) { return String(option.value) === String(jump.to); })) {
+    if (!jump.to || !destination_options.some((option) => { return String(option.value) === String(jump.to); })) {
         destination_options.unshift({ value: '', label: 'Select destination' });
     }
 
-    initDropdown(goto_placeholder, destination_options, jump.to || '', function (detail) {
+    initDropdown(goto_placeholder, destination_options, jump.to || '', (detail) => {
         updateJump(input, index, { to: detail.value || '' });
         recordChange();
         renderQuestions();
         updateCurrentQuestionStatus();
     }, false);
 
-    remove_button.addEventListener('click', function () {
+    remove_button.addEventListener('click', () => {
         if (removeJump(input, index)) {
             recordChange();
             renderProperties();
@@ -1554,9 +1554,9 @@ function buildJumpRow(input, jump, index, destinations) {
     });
 
     return row;
-}
+};
 
-function getQuestionLabelText(type) {
+const getQuestionLabelText = (type) => {
     if (isBranchOrGroup(type)) {
         return 'Header';
     }
@@ -1567,10 +1567,10 @@ function getQuestionLabelText(type) {
     }
 
     return 'Question';
-}
+};
 
 /* Legacy disables Edit while a branch/group header is empty. */
-function updateEditButtonState(input) {
+const updateEditButtonState = (input) => {
     if (!isBranchOrGroup(input.type)) {
         return;
     }
@@ -1580,7 +1580,9 @@ function updateEditButtonState(input) {
     if (edit_container) {
         edit_container.disabled = String(input.question || '').trim() === '';
     }
-}function bindQuestionField(field, input) {
+};
+
+const bindQuestionField = (field, input) => {
     const label = getQuestionLabelText(input.type);
     const placeholder = isBranchOrGroup(input.type) ? 'Type header here...' : 'Type question here...';
 
@@ -1597,7 +1599,7 @@ function updateEditButtonState(input) {
         field.setAttribute('maxlength', String(PARAMETERS.QUESTION_MAX_LENGTH));
     }
 
-    field.addEventListener('ionInput', function (event) {
+    field.addEventListener('ionInput', (event) => {
         const question = sanitizeQuestion(getCurrentInput(), event.detail.value || '');
 
         if (field.value !== question) {
@@ -1605,25 +1607,25 @@ function updateEditButtonState(input) {
             field.value = question;
         }
 
-        updateCurrentInput({ question: question });
+        updateCurrentInput({ question });
         updateEditButtonState(input);
         updateQuestionText(question);
         updateCurrentQuestionStatus();
         refreshCurrentProperties();
         recordChange({ throttle: true });
     });
-}
+};
 
-function sanitizeQuestion(input, value) {
+const sanitizeQuestion = (input, value) => {
     const text = value === undefined || value === null ? '' : String(value);
     const limit = input && input.type === 'readme' ? PARAMETERS.README_MAX_LENGTH : PARAMETERS.QUESTION_MAX_LENGTH;
     // Legacy stores angle brackets as look-alike Unicode instead of markup.
     const sanitized = input && input.type === 'readme' ? text : text.replace(/>/g, '\ufe65').replace(/</g, '\ufe64');
 
     return sanitized.slice(0, limit);
-}
+};
 
-function getQuestionLabel(input) {
+const getQuestionLabel = (input) => {
     if (!input || !input.question) {
         return input && input.type === 'readme' ? 'Readme' : 'Untitled question';
     }
@@ -1635,9 +1637,9 @@ function getQuestionLabel(input) {
     const parsed = new DOMParser().parseFromString(input.question, 'text/html');
 
     return parsed.body.textContent.trim() || 'Readme';
-}
+};
 
-function bindCheckboxToggle(toggle, checked, on_change, options) {
+const bindCheckboxToggle = (toggle, checked, on_change, options) => {
     const config = options || {};
 
     if (config.disabled) {
@@ -1645,14 +1647,14 @@ function bindCheckboxToggle(toggle, checked, on_change, options) {
     }
 
     toggle.checked = checked;
-    toggle.addEventListener('ionChange', function (event) {
+    toggle.addEventListener('ionChange', (event) => {
         on_change(event.detail.checked);
         // A refused change leaves the state identical and is skipped by dedupe.
         recordChange();
     });
-}
+};
 
-function bindTitleToggle(row, input) {
+const bindTitleToggle = (row, input) => {
     const toggle = row.querySelector('.builder__title-toggle');
     const inputs = getCurrentInputs();
     const other_titles = countTitles(inputs, input.ref);
@@ -1660,9 +1662,9 @@ function bindTitleToggle(row, input) {
     const limit_reached = !checked && other_titles >= PARAMETERS.TITLES_MAX;
     const label = row.querySelector('.builder__title-label');
 
-    label.textContent = limit_reached ? 'Limit of ' + PARAMETERS.TITLES_MAX + ' titles reached' : 'Use answer as title';
+    label.textContent = limit_reached ? `Limit of ${PARAMETERS.TITLES_MAX} titles reached` : 'Use answer as title';
 
-    bindCheckboxToggle(toggle, checked, function (next_checked) {
+    bindCheckboxToggle(toggle, checked, (next_checked) => {
         if (next_checked && !input.is_title && countTitles(getCurrentInputs(), input.ref) >= PARAMETERS.TITLES_MAX) {
             // Refused by the limit: put the box back without rebuilding the panel.
             toggle.checked = input.is_title === true;
@@ -1673,15 +1675,15 @@ function bindTitleToggle(row, input) {
         // the card would drop focus and reset the panel's scroll position.
         updateCurrentInput({ is_title: next_checked });
     }, { disabled: limit_reached });
-}
+};
 
-function bindTextField(field, value, property) {
+const bindTextField = (field, value, property) => {
     field.setAttribute('maxlength', String(PARAMETERS.QUESTION_MAX_LENGTH));
     field.value = value || '';
     field.placeholder = '';
     field.setAttribute('placeholder', '');
 
-    field.addEventListener('ionInput', function (event) {
+    field.addEventListener('ionInput', (event) => {
         const next = {};
         const text = event.detail.value || '';
 
@@ -1689,9 +1691,9 @@ function bindTextField(field, value, property) {
         updateCurrentInput(next);
         recordChange({ throttle: true });
     });
-}
+};
 
-function bindNumberField(field, value, property) {
+const bindNumberField = (field, value, property) => {
     const max_length = property === 'min' || property === 'max' ?
         PARAMETERS.MIN_MAX_LENGTH :
         PARAMETERS.QUESTION_MAX_LENGTH;
@@ -1701,7 +1703,7 @@ function bindNumberField(field, value, property) {
     field.placeholder = '';
     field.setAttribute('placeholder', '');
 
-    field.addEventListener('ionInput', function (event) {
+    field.addEventListener('ionInput', (event) => {
         const text = event.detail.value || '';
         const next = {};
 
@@ -1709,9 +1711,9 @@ function bindNumberField(field, value, property) {
         updateCurrentInput(next);
         recordChange({ throttle: true });
     });
-}
+};
 
-function bindRegexField(wrapper, input) {
+const bindRegexField = (wrapper, input) => {
     const field = wrapper.querySelector('ion-input');
 
     field.setAttribute('maxlength', String(PARAMETERS.REGEX_MAX_LENGTH));
@@ -1719,21 +1721,21 @@ function bindRegexField(wrapper, input) {
     field.placeholder = '';
     field.setAttribute('placeholder', '');
 
-    field.addEventListener('ionInput', function (event) {
+    field.addEventListener('ionInput', (event) => {
         const text = event.detail.value || '';
 
         updateCurrentInput({ regex: text === '' ? null : text });
         recordChange({ throttle: true });
     });
 
-}
+};
 
-function bindNumericTypeControl(field_group, input) {
+const bindNumericTypeControl = (field_group, input) => {
     const current = input.type === 'decimal' ? 'decimal' : 'integer';
     const group = field_group.querySelector('ion-radio-group');
 
     group.value = current;
-    group.addEventListener('ionChange', function (event) {
+    group.addEventListener('ionChange', (event) => {
         const next_type = event.detail.value;
 
         if (next_type !== 'integer' && next_type !== 'decimal') {
@@ -1745,13 +1747,13 @@ function bindNumericTypeControl(field_group, input) {
         renderQuestions();
         renderProperties();
     });
-}
+};
 
-function bindSearchTypeControl(field_group, input) {
+const bindSearchTypeControl = (field_group, input) => {
     const group = field_group.querySelector('ion-radio-group');
 
     group.value = input.type;
-    group.addEventListener('ionChange', function (event) {
+    group.addEventListener('ionChange', (event) => {
         const next_type = event.detail.value;
 
         if (next_type !== 'searchsingle' && next_type !== 'searchmultiple') {
@@ -1763,51 +1765,51 @@ function bindSearchTypeControl(field_group, input) {
         renderQuestions();
         renderProperties();
     });
-}
+};
 
-function bindDatetimeFormatControl(field_group, input) {
+const bindDatetimeFormatControl = (field_group, input) => {
     const label = field_group.querySelector('.builder__field-label');
 
     label.textContent = input.type === 'time' ? 'Time format' : 'Date format';
 
-    field_group.querySelectorAll('ion-radio-group').forEach(function (group) {
+    field_group.querySelectorAll('ion-radio-group').forEach((group) => {
         if (group.getAttribute('data-datetime-type') !== input.type) {
             group.remove();
             return;
         }
 
         group.value = input.datetime_format || getDefaultDatetimeFormat(input.type);
-        group.addEventListener('ionChange', function (event) {
+        group.addEventListener('ionChange', (event) => {
             updateCurrentInput({ datetime_format: event.detail.value });
             recordChange();
         });
     });
-}
+};
 
-function bindCurrentDatetimeToggle(toggle, input) {
+const bindCurrentDatetimeToggle = (toggle, input) => {
     const label = toggle.querySelector('[data-role="datetime-label"]');
 
     label.textContent = input.type === 'date' ?
         'Set initial answer to current date' :
         'Set initial answer to current time';
 
-    bindCheckboxToggle(toggle, input.set_to_current_datetime === true, function (checked) {
+    bindCheckboxToggle(toggle, input.set_to_current_datetime === true, (checked) => {
         updateCurrentInput({ set_to_current_datetime: checked });
     });
-}
+};
 
-function bindDefaultChoiceControl(control, input) {
+const bindDefaultChoiceControl = (control, input) => {
     if (!control) {
         return;
     }
 
-    const options = [{ value: '', label: 'None' }].concat((input.possible_answers || []).map(function (answer) {
+    const options = [{ value: '', label: 'None' }, ...(input.possible_answers || []).map((answer) => {
         return {
             value: answer.answer_ref,
             label: answer.answer || 'Untitled answer'
         };
-    }));
-    const has_default = (input.possible_answers || []).some(function (answer) {
+    })];
+    const has_default = (input.possible_answers || []).some((answer) => {
         return String(answer.answer_ref) === String(input.default);
     });
     const value = has_default ? input.default : '';
@@ -1817,7 +1819,7 @@ function bindDefaultChoiceControl(control, input) {
         control.querySelector('[data-dropdown], .dropdown');
 
     if (dropdown_control) {
-        initDropdown(dropdown_control, options, value, function (detail) {
+        initDropdown(dropdown_control, options, value, (detail) => {
             updateCurrentInput({ default: detail.value ? detail.value : null });
             recordChange();
         }, false);
@@ -1825,18 +1827,18 @@ function bindDefaultChoiceControl(control, input) {
     }
 
     control.replaceChildren();
-    options.forEach(function (option_data) {
+    options.forEach((option_data) => {
         control.append(element('ion-select-option', { value: option_data.value }, [option_data.label]));
     });
     control.value = value;
-    control.addEventListener('ionChange', function (event) {
+    control.addEventListener('ionChange', (event) => {
         const next = event.detail.value;
         updateCurrentInput({ default: next ? next : null });
         recordChange();
     });
-}
+};
 
-function bindUniquenessControl(control, input) {
+const bindUniquenessControl = (control, input) => {
     if (!control) {
         return;
     }
@@ -1846,31 +1848,31 @@ function bindUniquenessControl(control, input) {
     const project = getSession().project_definition && getSession().project_definition.data && getSession().project_definition.data.project;
     const forms = project && project.forms ? project.forms : [];
     const form_index = form ? forms.indexOf(form) : 0;
-    const branch_container = getEditingTrail().find(function (node) {
+    const branch_container = getEditingTrail().find((node) => {
         return node.type === 'branch';
     });
     const is_editing_branch = !!branch_container;
     const branch_header = branch_container && branch_container.question ? branch_container.question : 'branch';
 
-    let options = [{ value: 'none', label: 'No uniqueness' }];
+    const options = [{ value: 'none', label: 'No uniqueness' }];
 
     if (is_editing_branch) {
         // Legacy branch uniqueness: contract value is 'form', label is branch-scoped.
         options.push({
             value: 'form',
-            label: 'Make answer unique to all ' + branch_header + ' entries of a ' + form_name + ' entry'
+            label: `Make answer unique to all ${branch_header} entries of a ${form_name} entry`
         });
     }
     else if (form_index > 0) {
         const parent_name = forms[form_index - 1] ? forms[form_index - 1].name : 'parent form';
-        options.push({ value: 'form', label: 'All ' + form_name + ' entries' });
-        options.push({ value: 'hierarchy', label: 'Only ' + form_name + ' children of a ' + parent_name + ' parent entry' });
+        options.push({ value: 'form', label: `All ${form_name} entries` });
+        options.push({ value: 'hierarchy', label: `Only ${form_name} children of a ${parent_name} parent entry` });
     }
     else {
-        options.push({ value: 'form', label: 'Make answer unique to all ' + form_name + ' entries' });
+        options.push({ value: 'form', label: `Make answer unique to all ${form_name} entries` });
     }
 
-    const value = options.some(function (option) { return option.value === (input.uniqueness || 'none'); }) ?
+    const value = options.some((option) => { return option.value === (input.uniqueness || 'none'); }) ?
         (input.uniqueness || 'none') : 'none';
 
     const dropdown_control = (typeof control.setOptions === 'function' || control.hasAttribute('data-dropdown')) ?
@@ -1878,7 +1880,7 @@ function bindUniquenessControl(control, input) {
         control.querySelector('[data-dropdown], .dropdown');
 
     if (dropdown_control) {
-        const dropdown = initDropdown(dropdown_control, options, value, function (detail) {
+        const dropdown = initDropdown(dropdown_control, options, value, (detail) => {
             updateCurrentInput({ uniqueness: detail.value || 'none' });
             recordChange();
         }, false);
@@ -1890,17 +1892,17 @@ function bindUniquenessControl(control, input) {
     }
 
     control.replaceChildren();
-    options.forEach(function (option_data) {
+    options.forEach((option_data) => {
         control.append(element('ion-select-option', { value: option_data.value }, [option_data.label]));
     });
     control.value = value;
-    control.addEventListener('ionChange', function (event) {
+    control.addEventListener('ionChange', (event) => {
         updateCurrentInput({ uniqueness: event.detail.value || 'none' });
         recordChange();
     });
-}
+};
 
-function buildPossibleAnswers(input) {
+const buildPossibleAnswers = (input) => {
     const answers = input.possible_answers;
     const card = createView(possible_answers_view);
     const list = card.querySelector('.builder__answer-list');
@@ -1911,12 +1913,12 @@ function buildPossibleAnswers(input) {
     const at_limit = answers.length >= getAnswerLimit(input.type);
     const notice = answer_notices.get(input.ref);
 
-    page_answers.forEach(function (answer, index) {
+    page_answers.forEach((answer, index) => {
         list.append(buildAnswerRow(input, answer, (page - 1) * ANSWERS_PER_PAGE + index, answers.length));
     });
 
     add_button.disabled = at_limit;
-    add_button.addEventListener('click', function () {
+    add_button.addEventListener('click', () => {
         if (!addPossibleAnswer(input)) {
             return;
         }
@@ -1936,23 +1938,23 @@ function buildPossibleAnswers(input) {
     installAnswersMenu(card, input);
 
     return card;
-}
+};
 
 /* The visible page is the unit the list sorts and saves. */
-function getAnswersPage(input) {
+const getAnswersPage = (input) => {
     const pages = getAnswerPageCount(input.possible_answers);
     const page = Math.min(Math.max(answer_pages.get(input.ref) || 1, 1), pages);
 
     answer_pages.set(input.ref, page);
 
     return page;
-}
+};
 
-function setAnswersPage(input, page) {
+const setAnswersPage = (input, page) => {
     answer_pages.set(input.ref, page);
-}
+};
 
-function showAnswersNote(card, message, is_error) {
+const showAnswersNote = (card, message, is_error) => {
     const note = card.querySelector('[data-role="answers-note"]');
 
     if (!note) {
@@ -1962,16 +1964,16 @@ function showAnswersNote(card, message, is_error) {
     note.textContent = message || '';
     note.classList.toggle('is-error', is_error === true);
     note.hidden = !message;
-}
+};
 
 /* Paging is blocked while a visible answer is still empty. */
-function canLeaveAnswersPage(page_answers) {
-    return page_answers.every(function (answer) {
+const canLeaveAnswersPage = (page_answers) => {
+    return page_answers.every((answer) => {
         return String(answer.answer || '').trim() !== '';
     });
-}
+};
 
-function installAnswersPager(card, input, page, pages, page_answers) {
+const installAnswersPager = (card, input, page, pages, page_answers) => {
     const pager = card.querySelector('[data-role="answers-pager"]');
 
     if (!pager) {
@@ -1994,7 +1996,7 @@ function installAnswersPager(card, input, page, pages, page_answers) {
     previous.disabled = page <= 1;
     next.disabled = page >= pages;
 
-    function go_to(target) {
+    const go_to = (target) => {
         if (!canLeaveAnswersPage(page_answers)) {
             showAnswersNote(card, VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY, true);
             return;
@@ -2002,19 +2004,19 @@ function installAnswersPager(card, input, page, pages, page_answers) {
 
         setAnswersPage(input, target);
         renderProperties();
-    }
+    };
 
-    previous.addEventListener('click', function () {
+    previous.addEventListener('click', () => {
         go_to(page - 1);
     });
 
-    next.addEventListener('click', function () {
+    next.addEventListener('click', () => {
         go_to(page + 1);
     });
-}
+};
 
-function downloadFile(filename, contents, type) {
-    const blob = new Blob([contents], { type: type });
+const downloadFile = (filename, contents, type) => {
+    const blob = new Blob([contents], { type });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
 
@@ -2024,9 +2026,9 @@ function downloadFile(filename, contents, type) {
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-}
+};
 
-function installAnswersMenu(card, input) {
+const installAnswersMenu = (card, input) => {
     const trigger = card.querySelector('[data-role="answers-actions-trigger"]');
 
     if (!trigger) {
@@ -2034,16 +2036,16 @@ function installAnswersMenu(card, input) {
     }
 
     createMenu(trigger, [
-        { label: 'Import CSV', data_action: 'import', action: function () { pickAnswersCsv(input); } },
-        { label: 'Export CSV', data_action: 'export', action: function () {
+        { label: 'Import CSV', data_action: 'import', action: () => { pickAnswersCsv(input); } },
+        { label: 'Export CSV', data_action: 'export', action: () => {
             downloadFile(getCsvFilename(input), exportCsv(input), 'text/csv;charset=utf-8;');
         } },
         { divider: true },
-        { label: 'Order ascending', data_action: 'order-az', action: function () { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.AZ); } },
-        { label: 'Order descending', data_action: 'order-za', action: function () { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.ZA); } },
-        { label: 'Shuffle', data_action: 'shuffle', action: function () { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.SHUFFLE); } },
+        { label: 'Order ascending', data_action: 'order-az', action: () => { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.AZ); } },
+        { label: 'Order descending', data_action: 'order-za', action: () => { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.ZA); } },
+        { label: 'Shuffle', data_action: 'shuffle', action: () => { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.SHUFFLE); } },
         { divider: true },
-        { label: 'Delete all answers', data_action: 'delete-all', action: function () {
+        { label: 'Delete all answers', data_action: 'delete-all', action: () => {
             showLoading();
 
             if (deleteAllAnswers(input)) {
@@ -2056,12 +2058,12 @@ function installAnswersMenu(card, input) {
             // Legacy keeps the overlay up for ANIMATION_SUPER_SLOW.
             hideLoading(1000);
         } }
-    ], function (item) {
+    ], (item) => {
         item.action();
     });
-}
+};
 
-function orderAnswers(input, order) {
+const orderAnswers = (input, order) => {
     // Legacy reorders behind the overlay and hides it after ANIMATION_SUPER_SLOW.
     showLoading();
 
@@ -2075,16 +2077,16 @@ function orderAnswers(input, order) {
     renderProperties();
     updateCurrentQuestionStatus();
     hideLoading(1000);
-}
+};
 
-function pickAnswersCsv(input) {
+const pickAnswersCsv = (input) => {
     const field = document.createElement('input');
 
     field.type = 'file';
     field.accept = '.csv,text/csv';
     field.hidden = true;
 
-    field.addEventListener('change', function () {
+    field.addEventListener('change', () => {
         const file = field.files && field.files[0];
 
         if (!file) {
@@ -2100,7 +2102,7 @@ function pickAnswersCsv(input) {
 
         const reader = new FileReader();
 
-        reader.onload = function () {
+        reader.onload = () => {
             const parsed = parseCsv(reader.result);
 
             field.remove();
@@ -2113,7 +2115,7 @@ function pickAnswersCsv(input) {
             openAnswersCsvModal(input, parsed);
         };
 
-        reader.onerror = function () {
+        reader.onerror = () => {
             field.remove();
             showToast(VALIDATION_MESSAGES.CSV_FILE_INVALID, 'error');
         };
@@ -2123,9 +2125,9 @@ function pickAnswersCsv(input) {
 
     document.body.append(field);
     field.click();
-}
+};
 
-function openAnswersCsvModal(input, parsed) {
+const openAnswersCsvModal = (input, parsed) => {
     const body = createView(csv_import_modal_body_view);
     const headers = body.querySelector('[data-role="csv-headers"]');
     const mode = body.querySelector('[data-role="csv-mode"]');
@@ -2140,9 +2142,9 @@ function openAnswersCsvModal(input, parsed) {
         class_name: 'builder__csv-column-select',
         aria_label: 'Column to import',
         placeholder: 'Pick column',
-        options: [{ value: '', label: 'Pick column' }].concat(getCsvColumns(parsed, true)),
+        options: [{ value: '', label: 'Pick column' }, ...getCsvColumns(parsed, true)],
         value: '',
-        on_change: function (detail) {
+        on_change: (detail) => {
             selected_column = detail.value;
 
             if (import_button) {
@@ -2154,10 +2156,10 @@ function openAnswersCsvModal(input, parsed) {
     column_dropdown.setAttribute('data-role', 'csv-column');
     column_placeholder.replaceWith(column_dropdown);
 
-    headers.addEventListener('ionChange', function () {
+    headers.addEventListener('ionChange', () => {
         selected_column = '';
         column_dropdown.setOptions(
-            [{ value: '', label: 'Pick column' }].concat(getCsvColumns(parsed, headers.checked === true)),
+            [{ value: '', label: 'Pick column' }, ...getCsvColumns(parsed, headers.checked === true)],
             ''
         );
 
@@ -2168,14 +2170,14 @@ function openAnswersCsvModal(input, parsed) {
 
     const modal = openModal({
         title: 'Possible answers csv import options',
-        body: body,
+        body,
         buttons: [
             { text: 'Dismiss', class_name: 'btn-default' },
             {
                 text: 'Import',
                 class_name: 'btn-primary',
                 disabled: true,
-                on_click: function (close) {
+                on_click: (close) => {
                     if (!selected_column) {
                         return;
                     }
@@ -2210,18 +2212,18 @@ function openAnswersCsvModal(input, parsed) {
     });
 
     import_button = modal.footer.querySelectorAll('button')[1];
-}
+};
 
 /* The list has to be in the document before jQuery UI can hold on to it. */
-function installAnswersSortable(input) {
-    installAnswerSortable('#properties .builder__answer-list', function () {
+const installAnswersSortable = (input) => {
+    installAnswerSortable('#properties .builder__answer-list', () => {
         const answers_list = document.querySelector('#properties .builder__answer-list');
 
         if (!answers_list) {
             return;
         }
 
-        const refs = [...answers_list.querySelectorAll('.builder__answer')].map(function (row) {
+        const refs = [...answers_list.querySelectorAll('.builder__answer')].map((row) => {
             return row.getAttribute('data-answer-ref');
         });
         const page = answer_pages.get(input.ref) || 1;
@@ -2232,13 +2234,13 @@ function installAnswersSortable(input) {
 
         recordChange();
 
-        setTimeout(function () {
+        setTimeout(() => {
             renderProperties();
         }, 0);
     });
-}
+};
 
-function buildAnswerRow(input, answer, index, total) {
+const buildAnswerRow = (input, answer, index, total) => {
     const row = element('li', {
         class: 'builder__answer',
         'data-answer-ref': answer.answer_ref
@@ -2246,7 +2248,7 @@ function buildAnswerRow(input, answer, index, total) {
 
     const field = element('ion-input', {
         class: 'builder__answer-field',
-        'aria-label': 'Answer ' + (index + 1),
+        'aria-label': `Answer ${index + 1}`,
         fill: 'outline',
         maxlength: String(MAX_ANSWER_LENGTH)
     });
@@ -2254,7 +2256,7 @@ function buildAnswerRow(input, answer, index, total) {
     field.value = answer.answer;
     field.placeholder = '';
     field.setAttribute('placeholder', '');
-    field.addEventListener('ionInput', function (event) {
+    field.addEventListener('ionInput', (event) => {
         const value = sanitizeAnswer(event.detail.value || '');
 
         if (field.value !== value) {
@@ -2270,11 +2272,11 @@ function buildAnswerRow(input, answer, index, total) {
     const remove_button = button({
         type: 'button',
         class: 'builder__answer-remove',
-        'aria-label': 'Remove answer ' + (index + 1),
+        'aria-label': `Remove answer ${index + 1}`,
         disabled: total === 1 ? 'disabled' : undefined
     }, [icon('close-circle-outline')]);
 
-    remove_button.addEventListener('click', function () {
+    remove_button.addEventListener('click', () => {
         if (removePossibleAnswer(input, answer.answer_ref)) {
             recordChange();
             renderProperties();
@@ -2287,13 +2289,13 @@ function buildAnswerRow(input, answer, index, total) {
     row.append(remove_button);
 
     return row;
-}
+};
 
 /*
  * Keeps the selected row and the panel title in step with the edited text
  * without re-rendering the field being typed into.
  */
-function updateQuestionText(question) {
+const updateQuestionText = (question) => {
     const input = getCurrentInput();
     const title = document.querySelector('#properties .builder__panel-title');
     const row = document.querySelector('.builder__question[aria-current="true"] .builder__question-text');
@@ -2307,16 +2309,16 @@ function updateQuestionText(question) {
         row.textContent = label;
         row.setAttribute('title', label);
     }
-}
+};
 
-function updateCurrentQuestionStatus() {
+const updateCurrentQuestionStatus = () => {
     const input = getCurrentInput();
 
     if (!input) {
         return;
     }
 
-    const row = document.querySelector('.builder__question[data-input-ref="' + input.ref + '"]');
+    const row = document.querySelector(`.builder__question[data-input-ref="${input.ref}"]`);
 
     if (!row) {
         return;
@@ -2333,4 +2335,4 @@ function updateCurrentQuestionStatus() {
     else {
         row.append(replacement);
     }
-}
+};

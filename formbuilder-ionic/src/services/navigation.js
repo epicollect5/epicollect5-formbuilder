@@ -5,7 +5,7 @@
  * under a project slug (Laravel) or as the standalone comparison build, and in
  * both cases the project page sits one level above the entry point.
  */
-export function getBackUrl(href) {
+export const getBackUrl = (href) => {
     const location_href = href || window.location.href;
     const without_query = location_href.split('?')[0].split('#')[0];
     const scheme = without_query.match(/^[a-z][a-z0-9+.-]*:\/\//i);
@@ -19,8 +19,8 @@ export function getBackUrl(href) {
     parts.pop();
 
     return prefix + parts.join('/');
-}
+};
 
-export function goBack(href) {
+export const goBack = (href) => {
     window.location.replace(getBackUrl(href));
-}
+};

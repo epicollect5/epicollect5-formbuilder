@@ -15,50 +15,50 @@ export const INPUTS_MAX_ALLOWED = PARAMETERS.INPUTS_MAX_ALLOWED;
 export const TITLES_MAX = PARAMETERS.TITLES_MAX;
 export const SEARCH_INPUTS_MAX = PARAMETERS.SEARCH_INPUTS_MAX;
 
-export function eachInput(inputs, visit) {
-    (inputs || []).forEach(function (input) {
+export const eachInput = (inputs, visit) => {
+    (inputs || []).forEach((input) => {
         visit(input);
 
         if (input.type === 'branch' || input.type === 'group') {
             eachInput(getContainerList(input), visit);
         }
     });
-}
+};
 
-export function countInputs(inputs) {
+export const countInputs = (inputs) => {
     let total = 0;
 
-    eachInput(inputs, function () {
+    eachInput(inputs, () => {
         total += 1;
     });
 
     return total;
-}
+};
 
 /* Titles are per list: form inputs and each branch have their own cap. */
-export function countTitles(inputs) {
-    return (inputs || []).reduce(function (total, input) {
+export const countTitles = (inputs) => {
+    return (inputs || []).reduce((total, input) => {
         const own = input.is_title === true ? 1 : 0;
         const nested = input.type === 'group' ? countTitles(getContainerList(input)) : 0;
 
         return total + own + nested;
     }, 0);
-}
+};
 
-export function countSearchInputs(inputs) {
+export const countSearchInputs = (inputs) => {
     let total = 0;
 
-    eachInput(inputs, function (input) {
+    eachInput(inputs, (input) => {
         if (isSearchType(input.type)) {
             total += 1;
         }
     });
 
     return total;
-}
+};
 
-function branchTitlesExceeded(inputs) {
-    return (inputs || []).some(function (input) {
+const branchTitlesExceeded = (inputs) => {
+    return (inputs || []).some((input) => {
         if (input.type !== 'branch') {
             return false;
         }
@@ -67,13 +67,13 @@ function branchTitlesExceeded(inputs) {
 
         return countTitles(children) > TITLES_MAX || branchTitlesExceeded(children);
     });
-}
+};
 
 /* Returns the first limit error, or null when the project is inside them. */
-export function getProjectLimitsError(project_definition) {
+export const getProjectLimitsError = (project_definition) => {
     const forms = getForms(project_definition);
 
-    const inputs_total = forms.reduce(function (total, form) {
+    const inputs_total = forms.reduce((total, form) => {
         return total + countInputs(getInputs(form));
     }, 0);
 
@@ -81,19 +81,19 @@ export function getProjectLimitsError(project_definition) {
         return FORM_MESSAGES.TOO_MANY_QUESTIONS;
     }
 
-    if (forms.some(function (form) {
+    if (forms.some((form) => {
         return countTitles(getInputs(form)) > TITLES_MAX;
     })) {
         return FORM_MESSAGES.TOO_MANY_TITLES;
     }
 
-    if (forms.some(function (form) {
+    if (forms.some((form) => {
         return branchTitlesExceeded(getInputs(form));
     })) {
         return FORM_MESSAGES.TOO_MANY_TITLES;
     }
 
-    const search_total = forms.reduce(function (total, form) {
+    const search_total = forms.reduce((total, form) => {
         return total + countSearchInputs(getInputs(form));
     }, 0);
 
@@ -102,4 +102,4 @@ export function getProjectLimitsError(project_definition) {
     }
 
     return null;
-}
+};

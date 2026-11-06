@@ -20,23 +20,23 @@ export const JUMP_WHEN = {
 export const JUMP_TO_END_OF_FORM_LABEL = 'End of form';
 
 /* Single/open-answer jump UX uses "always" (ALL) with no answer selector. */
-export function usesAlwaysJump(type) {
+export const usesAlwaysJump = (type) => {
     return !isMultipleAnswerType(type);
-}
+};
 
-export function jumpNeedsAnswer(when) {
+export const jumpNeedsAnswer = (when) => {
     return when === JUMP_WHEN.IS || when === JUMP_WHEN.IS_NOT;
-}
+};
 
-function firstAnswerRef(possible_answers) {
+const firstAnswerRef = (possible_answers) => {
     if (!Array.isArray(possible_answers) || possible_answers.length === 0) {
         return '';
     }
 
     return possible_answers[0].answer_ref || '';
-}
+};
 
-export function createJump(type, possible_answers) {
+export const createJump = (type, possible_answers) => {
     if (usesAlwaysJump(type)) {
         return {
             to: '',
@@ -50,4 +50,4 @@ export function createJump(type, possible_answers) {
         when: JUMP_WHEN.IS,
         answer_ref: firstAnswerRef(possible_answers)
     };
-}
+};

@@ -15,7 +15,7 @@ import {
  * a removed answer clears the default when it pointed at it.
  */
 
-export function addPossibleAnswer(input) {
+export const addPossibleAnswer = (input) => {
     if (!input || !isMultipleAnswerType(input.type)) {
         return null;
     }
@@ -29,14 +29,14 @@ export function addPossibleAnswer(input) {
     input.possible_answers.push(answer);
 
     return answer;
-}
+};
 
-export function removePossibleAnswer(input, answer_ref) {
+export const removePossibleAnswer = (input, answer_ref) => {
     if (!input || !isMultipleAnswerType(input.type) || input.possible_answers.length <= 1) {
         return false;
     }
 
-    const index = input.possible_answers.findIndex(function (answer) {
+    const index = input.possible_answers.findIndex((answer) => {
         return answer.answer_ref === answer_ref;
     });
 
@@ -51,14 +51,14 @@ export function removePossibleAnswer(input, answer_ref) {
     }
 
     return true;
-}
+};
 
-export function renamePossibleAnswer(input, answer_ref, value) {
+export const renamePossibleAnswer = (input, answer_ref, value) => {
     if (!input) {
         return false;
     }
 
-    const answer = input.possible_answers.find(function (possible_answer) {
+    const answer = input.possible_answers.find((possible_answer) => {
         return possible_answer.answer_ref === answer_ref;
     });
 
@@ -69,15 +69,15 @@ export function renamePossibleAnswer(input, answer_ref, value) {
     answer.answer = sanitizeAnswer(value);
 
     return true;
-}
+};
 
 /* Applies the order the sortable produced; refuses a partial list. */
-export function reorderPossibleAnswers(input, refs) {
+export const reorderPossibleAnswers = (input, refs) => {
     const answers = input ? input.possible_answers : [];
-    const by_ref = new Map(answers.map(function (answer) {
+    const by_ref = new Map(answers.map((answer) => {
         return [answer.answer_ref, answer];
     }));
-    const ordered = refs.map(function (ref) {
+    const ordered = refs.map((ref) => {
         return by_ref.get(ref);
     }).filter(Boolean);
 
@@ -85,20 +85,20 @@ export function reorderPossibleAnswers(input, refs) {
         return false;
     }
 
-    answers.splice.apply(answers, [0, answers.length].concat(ordered));
+    answers.splice(0, answers.length, ...ordered);
 
     return true;
-}
+};
 
 /* Paged lists sort one page at a time, so only that slice changes order. */
-export function reorderAnswerPage(input, refs, page) {
+export const reorderAnswerPage = (input, refs, page) => {
     const answers = input ? input.possible_answers : [];
     const start = (Math.max(page, 1) - 1) * ANSWERS_PER_PAGE;
     const page_answers = answers.slice(start, start + ANSWERS_PER_PAGE);
-    const by_ref = new Map(page_answers.map(function (answer) {
+    const by_ref = new Map(page_answers.map((answer) => {
         return [answer.answer_ref, answer];
     }));
-    const ordered = refs.map(function (ref) {
+    const ordered = refs.map((ref) => {
         return by_ref.get(ref);
     }).filter(Boolean);
 
@@ -106,12 +106,12 @@ export function reorderAnswerPage(input, refs, page) {
         return false;
     }
 
-    answers.splice.apply(answers, [start, page_answers.length].concat(ordered));
+    answers.splice(start, page_answers.length, ...ordered);
 
     return true;
-}
+};
 
-export function movePossibleAnswer(input, from_index, to_index) {
+export const movePossibleAnswer = (input, from_index, to_index) => {
     const answers = input ? input.possible_answers : [];
 
     if (from_index === to_index || from_index < 0 || to_index < 0 || from_index >= answers.length || to_index >= answers.length) {
@@ -123,23 +123,23 @@ export function movePossibleAnswer(input, from_index, to_index) {
     answers.splice(to_index, 0, answer);
 
     return true;
-}
+};
 
 /* Alphabetical or shuffled in place; refs stay with their answer. */
-export function orderPossibleAnswers(input, order) {
+export const orderPossibleAnswers = (input, order) => {
     if (!input || !isMultipleAnswerType(input.type)) {
         return false;
     }
 
     const ordered = sortAnswers(input.possible_answers, order);
 
-    input.possible_answers.splice.apply(input.possible_answers, [0, ordered.length].concat(ordered));
+    input.possible_answers.splice(0, ordered.length, ...ordered);
 
     return true;
-}
+};
 
 /* One placeholder answer is the minimum the contract allows. */
-export function deleteAllAnswers(input) {
+export const deleteAllAnswers = (input) => {
     if (!input || !isMultipleAnswerType(input.type)) {
         return false;
     }
@@ -148,4 +148,4 @@ export function deleteAllAnswers(input) {
     input.default = null;
 
     return true;
-}
+};

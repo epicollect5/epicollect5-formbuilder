@@ -70,13 +70,16 @@ const IONIC_COMPONENTS = [
 
 /*
  * Register the Ionic Core components this UI renders and point ion-icon at the
- * pinned Ionicons assets copied into dist/vendor/ionicons/svg by the build.
+ * pinned Ionicons SVGs: served from node_modules by the Vite dev server and
+ * copied to vendor/ionicons/svg in dist/ by the production build. The path is
+ * relative to the page, so it lands under /epicollect5-formbuilder/ionic/ in
+ * both flows.
  * The asset path comes first: defining ion-icon upgrades the ion-icon elements
  * already in the document and loads their svg immediately, and Ionic core and
  * the standalone `ionicons` package keep that path on separate platform
  * objects, so both copies need it.
  */
-export function setupIonic() {
+export const setupIonic = () => {
     const asset_path = new URL('vendor/ionicons/svg', document.baseURI).href;
 
     setAssetPath(asset_path);
@@ -84,7 +87,7 @@ export function setupIonic() {
 
     initialize();
 
-    IONIC_COMPONENTS.forEach(function (defineComponent) {
+    IONIC_COMPONENTS.forEach((defineComponent) => {
         defineComponent();
     });
-}
+};

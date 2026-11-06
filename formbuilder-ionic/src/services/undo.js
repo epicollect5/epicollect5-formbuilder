@@ -30,28 +30,28 @@ let keys = [];
 let pending = null;
 let baseline = null;
 
-function clone(value) {
+const clone = (value) => {
     return JSON.parse(JSON.stringify(value));
-}
+};
 
-function capture() {
+const capture = () => {
     const session = getSession();
 
     return {
         project_definition: clone(session.project_definition),
         current_form_index: session.current_form_index
     };
-}
+};
 
-function clearPending() {
+const clearPending = () => {
     if (pending !== null) {
         clearTimeout(pending);
         pending = null;
     }
-}
+};
 
 /* Identical consecutive states would be an undo step that changes nothing. */
-function store(state) {
+const store = (state) => {
     const key = JSON.stringify(state);
 
     if (keys.length && keys[keys.length - 1] === key) {
@@ -67,16 +67,16 @@ function store(state) {
     keys.push(key);
 
     return true;
-}
+};
 
 /* Lets the caller refresh its undo gate when a throttled push lands. */
-function notify(config) {
+const notify = (config) => {
     if (typeof config.on_change === 'function') {
         config.on_change();
     }
-}
+};
 
-export function ensureUndoBaseline() {
+export const ensureUndoBaseline = () => {
     const project = getSession().project_definition;
 
     if (!project) {
@@ -92,18 +92,18 @@ export function ensureUndoBaseline() {
     }
 
     return states.length > 0;
-}
+};
 
-export function resetUndoHistory() {
+export const resetUndoHistory = () => {
     clearPending();
     baseline = null;
     states = [];
     keys = [];
 
     return ensureUndoBaseline();
-}
+};
 
-export function pushUndoState(options) {
+export const pushUndoState = (options) => {
     const config = options || {};
 
     ensureUndoBaseline();
@@ -114,7 +114,7 @@ export function pushUndoState(options) {
 
     if (config.throttle === true) {
         clearPending();
-        pending = setTimeout(function () {
+        pending = setTimeout(() => {
             pending = null;
             store(capture());
             notify(config);
@@ -130,16 +130,16 @@ export function pushUndoState(options) {
     notify(config);
 
     return stored;
-}
+};
 
-export function canUndo() {
+export const canUndo = () => {
     ensureUndoBaseline();
 
     return states.length > 1;
-}
+};
 
 /* Restores the state below the current one; the session is reset to it. */
-export function undo() {
+export const undo = () => {
     ensureUndoBaseline();
 
     if (states.length <= 1) {
@@ -164,4 +164,4 @@ export function undo() {
     }
 
     return true;
-}
+};

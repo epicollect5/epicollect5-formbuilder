@@ -38,17 +38,17 @@ export {
     TITLES_MAX
 };
 
-function remapRefs(inputs, imported_ref, current_ref) {
-    const remap = function (value) {
+const remapRefs = (inputs, imported_ref, current_ref) => {
+    const remap = (value) => {
         const ref = String(value);
 
         return ref.indexOf(imported_ref) === 0 ? current_ref + ref.slice(imported_ref.length) : ref;
     };
 
-    eachInput(inputs, function (input) {
+    eachInput(inputs, (input) => {
         input.ref = remap(input.ref);
 
-        (input.jumps || []).forEach(function (jump) {
+        (input.jumps || []).forEach((jump) => {
             if (jump.to && jump.to !== 'END') {
                 jump.to = remap(jump.to);
             }
@@ -56,9 +56,9 @@ function remapRefs(inputs, imported_ref, current_ref) {
     });
 
     return inputs;
-}
+};
 
-export function prepareImportedForm(text, project_definition, form_index) {
+export const prepareImportedForm = (text, project_definition, form_index) => {
     let payload;
 
     try {
@@ -89,7 +89,7 @@ export function prepareImportedForm(text, project_definition, form_index) {
 
     const imported = remapRefs(JSON.parse(JSON.stringify(inputs)), payload.data.form.ref, form.ref);
 
-    if (imported.some(function (input) {
+    if (imported.some((input) => {
         return !isValidInput(form.ref, input, false, false);
     })) {
         return { ok: false, error: FORM_MESSAGES.FORM_FILE_INVALID };
@@ -99,7 +99,7 @@ export function prepareImportedForm(text, project_definition, form_index) {
         return { ok: false, error: FORM_MESSAGES.FORM_FILE_INVALID };
     }
 
-    const inputs_total = forms.reduce(function (total, candidate, index) {
+    const inputs_total = forms.reduce((total, candidate, index) => {
         return total + countInputs(index === form_index ? imported : candidate.inputs);
     }, 0);
 
@@ -111,7 +111,7 @@ export function prepareImportedForm(text, project_definition, form_index) {
         return { ok: false, error: FORM_MESSAGES.FORM_IS_INVALID };
     }
 
-    const branch_titles_exceeded = imported.some(function (input) {
+    const branch_titles_exceeded = imported.some((input) => {
         return input.type === 'branch' && countTitles(getContainerList(input)) > TITLES_MAX;
     });
 
@@ -119,7 +119,7 @@ export function prepareImportedForm(text, project_definition, form_index) {
         return { ok: false, error: FORM_MESSAGES.FORM_IS_INVALID };
     }
 
-    const search_total = forms.reduce(function (total, candidate, index) {
+    const search_total = forms.reduce((total, candidate, index) => {
         return total + countSearchInputs(index === form_index ? imported : candidate.inputs);
     }, 0);
 
@@ -128,4 +128,4 @@ export function prepareImportedForm(text, project_definition, form_index) {
     }
 
     return { ok: true, inputs: imported };
-}
+};

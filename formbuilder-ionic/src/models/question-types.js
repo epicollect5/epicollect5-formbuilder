@@ -32,10 +32,10 @@ const TYPE_ALIASES = {
     searchmultiple: 'searchsingle'
 };
 
-export function getQuestionType(type) {
+export const getQuestionType = (type) => {
     const resolved_type = TYPE_ALIASES[type] || type;
 
-    return QUESTION_TYPES.find(function (question_type) {
+    return QUESTION_TYPES.find((question_type) => {
         return question_type.type === resolved_type;
     }) || null;
-}
+};

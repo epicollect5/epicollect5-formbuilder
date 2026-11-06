@@ -13,8 +13,8 @@
 const OVERLAY_CLASS = 'wait-overlay';
 let hide_timer = null;
 
-function getOverlay() {
-    let overlay = document.querySelector('.' + OVERLAY_CLASS);
+const getOverlay = () => {
+    let overlay = document.querySelector(`.${OVERLAY_CLASS}`);
 
     if (!overlay) {
         overlay = document.createElement('div');
@@ -24,9 +24,9 @@ function getOverlay() {
     }
 
     return overlay;
-}
+};
 
-export function showLoading() {
+export const showLoading = () => {
     if (hide_timer !== null) {
         clearTimeout(hide_timer);
         hide_timer = null;
@@ -37,10 +37,10 @@ export function showLoading() {
     overlay.classList.add('is-visible');
 
     return overlay;
-}
+};
 
 /* Delay in milliseconds, matching the legacy `setTimeout(overlay.fadeOut, …)`. */
-export function hideLoading(delay) {
+export const hideLoading = (delay) => {
     const wait = Number(delay);
 
     if (hide_timer !== null) {
@@ -48,7 +48,7 @@ export function hideLoading(delay) {
         hide_timer = null;
     }
 
-    const overlay = document.querySelector('.' + OVERLAY_CLASS);
+    const overlay = document.querySelector(`.${OVERLAY_CLASS}`);
 
     if (!overlay) {
         return;
@@ -59,8 +59,8 @@ export function hideLoading(delay) {
         return;
     }
 
-    hide_timer = setTimeout(function () {
+    hide_timer = setTimeout(() => {
         hide_timer = null;
         overlay.classList.remove('is-visible');
     }, wait);
-}
+};

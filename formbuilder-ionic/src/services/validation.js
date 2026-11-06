@@ -20,33 +20,33 @@ import { getJumpAvailableDestinations } from '@/services/jumps.js';
 export const PROPERTIES_TAB = 'properties';
 export const JUMPS_TAB = 'jumps';
 
-function destinationRefs(input, inputs) {
-    return getJumpAvailableDestinations(input, inputs).map(function (destination) {
+const destinationRefs = (input, inputs) => {
+    return getJumpAvailableDestinations(input, inputs).map((destination) => {
         return destination.ref;
     });
-}
+};
 
-export function getJumpErrors(input, inputs) {
+export const getJumpErrors = (input, inputs) => {
     if (!input || !hasJumpsTab(input.type)) {
         return [];
     }
 
     const jumps = Array.isArray(input.jumps) ? input.jumps : [];
     const destinations = destinationRefs(input, inputs).map(String);
-    const answers = (input.possible_answers || []).map(function (answer) {
+    const answers = (input.possible_answers || []).map((answer) => {
         return String(answer.answer_ref);
     });
     const multiple = isMultipleAnswerType(input.type);
     const errors = [];
 
-    jumps.forEach(function (jump, index) {
+    jumps.forEach((jump, index) => {
         if (!jump || !jump.to) {
-            errors.push({ index: index, message: M.JUMP_DESTINATION_NOT_SELECTED, tab: JUMPS_TAB });
+            errors.push({ index, message: M.JUMP_DESTINATION_NOT_SELECTED, tab: JUMPS_TAB });
             return;
         }
 
         if (destinations.indexOf(String(jump.to)) === -1) {
-            errors.push({ index: index, message: M.JUMP_DESTINATION_INVALID, tab: JUMPS_TAB });
+            errors.push({ index, message: M.JUMP_DESTINATION_INVALID, tab: JUMPS_TAB });
             return;
         }
 
@@ -55,35 +55,35 @@ export function getJumpErrors(input, inputs) {
         }
 
         if (!JUMP_WHEN[jump.when]) {
-            errors.push({ index: index, message: M.JUMP_CONDITION_NOT_SELECTED, tab: JUMPS_TAB });
+            errors.push({ index, message: M.JUMP_CONDITION_NOT_SELECTED, tab: JUMPS_TAB });
             return;
         }
 
         if (jumpNeedsAnswer(jump.when) && answers.indexOf(String(jump.answer_ref)) === -1) {
-            errors.push({ index: index, message: M.JUMP_ANSWER_NOT_SELECTED, tab: JUMPS_TAB });
+            errors.push({ index, message: M.JUMP_ANSWER_NOT_SELECTED, tab: JUMPS_TAB });
         }
     });
 
     return errors;
-}
+};
 
-export function getInputErrors(input, inputs) {
+export const getInputErrors = (input, inputs) => {
     if (!input) {
         return [{ message: M.QUESTION_TEXT_EMPTY, tab: PROPERTIES_TAB }];
     }
 
     const list = Array.isArray(inputs) ? inputs : [];
-    const errors = getInputObjectErrors(input).map(function (message) {
-        return { message: message, tab: PROPERTIES_TAB };
+    const errors = getInputObjectErrors(input).map((message) => {
+        return { message, tab: PROPERTIES_TAB };
     });
 
-    getJumpErrors(input, list).forEach(function (error) {
+    getJumpErrors(input, list).forEach((error) => {
         errors.push(error);
     });
 
     if (isBranchOrGroup(input.type)) {
         const children = getContainerList(input);
-        const invalid_child = children.some(function (child) {
+        const invalid_child = children.some((child) => {
             return !isInputValid(child, children);
         });
 
@@ -96,27 +96,27 @@ export function getInputErrors(input, inputs) {
     }
 
     return errors;
-}
+};
 
-export function isInputValid(input, inputs) {
+export const isInputValid = (input, inputs) => {
     return !!input && getInputErrors(input, inputs).length === 0;
-}
+};
 
 /* A form is valid only when it has questions and every one of them is valid. */
-export function areFormInputsValid(form) {
+export const areFormInputsValid = (form) => {
     const inputs = getInputs(form);
 
     if (!inputs.length) {
         return false;
     }
 
-    return inputs.every(function (input) {
+    return inputs.every((input) => {
         return isInputValid(input, inputs);
     });
-}
+};
 
-export function areAllInputsValid(project_definition) {
+export const areAllInputsValid = (project_definition) => {
     const forms = getForms(project_definition);
 
     return forms.length > 0 && forms.every(areFormInputsValid);
-}
+};
