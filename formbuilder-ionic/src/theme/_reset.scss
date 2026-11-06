@@ -112,6 +112,14 @@ hr {
     padding: 10px 12px;
 }
 
+/* Destructive variant of the well: same shape, danger wash. */
+.danger-well {
+    background: var(--fb-danger-bg);
+    border-radius: 10px;
+    color: var(--fb-label);
+    padding: 10px 12px;
+}
+
 .screen-resolution {
     display: none;
 }

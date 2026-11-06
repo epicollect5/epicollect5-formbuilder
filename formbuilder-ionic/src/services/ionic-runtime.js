@@ -31,6 +31,8 @@ import { defineCustomElement as defineIonSelectOption } from '@ionic/core/compon
 import { defineCustomElement as defineIonRadio } from '@ionic/core/components/ion-radio.js';
 import { defineCustomElement as defineIonRadioGroup } from '@ionic/core/components/ion-radio-group.js';
 import { defineCustomElement as defineIonSpinner } from '@ionic/core/components/ion-spinner.js';
+import { defineCustomElement as defineIonToast } from '@ionic/core/components/ion-toast.js';
+import { defineCustomElement as defineIonModal } from '@ionic/core/components/ion-modal.js';
 import { setAssetPath as setIoniconAssetPath } from 'ionicons/components';
 import { defineCustomElement as defineIoniconIcon } from 'ionicons/components/ion-icon.js';
 
@@ -65,6 +67,8 @@ const IONIC_COMPONENTS = [
     defineIonRadio,
     defineIonRadioGroup,
     defineIonSpinner,
+    defineIonToast,
+    defineIonModal,
     defineIoniconIcon
 ];
 

@@ -90,7 +90,6 @@ import jump_row_view from '@/views/jump-row.html?raw';
 import jump_row_always_view from '@/views/jump-row-always.html?raw';
 import form_name_modal_body_view from '@/views/form-name-modal-body.html?raw';
 import csv_import_modal_body_view from '@/views/csv-import-modal-body.html?raw';
-import title_info_body_view from '@/views/title-info-body.html?raw';
 import delete_question_modal_body_view from '@/views/delete-question-modal-body.html?raw';
 
 const QUESTION_LIST = '#questions .builder__question-list';
@@ -309,9 +308,12 @@ const performSave = async () => {
     try {
         await saveProject(project_definition, { dev: isDevMode() });
         unsaved_changes = false;
-        // Legacy keeps the overlay up for ANIMATION_SLOW after the response.
+        // Legacy keeps the overlay up for ANIMATION_SLOW after the response;
+        // the toast waits for the overlay to clear.
         hideLoading(500);
-        notifySuccess(FORM_MESSAGES.PROJECT_SAVED);
+        setTimeout(() => {
+            notifySuccess(FORM_MESSAGES.PROJECT_SAVED);
+        }, 500);
     }
     catch (error) {
         const message = error && error.message ? error.message : '';
@@ -479,14 +481,6 @@ const openFormNameModal = (form) => {
     return modal;
 };
 
-const openTitleInfo = () => {
-    openModal({
-        title: 'What do you mean by title?',
-        body: createView(title_info_body_view),
-        buttons: [{ text: 'Close', class_name: 'btn-primary' }]
-    });
-};
-
 const getTotalEntries = () => {
     const legacy_counter = document.querySelector('.total-entries');
     const data_value = legacy_counter ? legacy_counter.getAttribute('data-total-entries') : null;
@@ -579,7 +573,9 @@ const importFormFile = (card) => {
             renderApp(handlers);
             // Legacy hides the overlay ANIMATION_SLOW after the import.
             hideLoading(500);
-            notifySuccess(FORM_MESSAGES.FORM_IMPORTED);
+            setTimeout(() => {
+                notifySuccess(FORM_MESSAGES.FORM_IMPORTED);
+            }, 500);
         };
 
         reader.onerror = () => {
@@ -771,7 +767,6 @@ const renderQuestions = () => {
             warning.querySelector('[data-role="title-warning-text"]').textContent = branch_active ?
                 'No title set for this branch yet' :
                 'No title set for this form yet';
-            warning.querySelector('[data-role="title-info"]').onclick = openTitleInfo;
         }
     }
 
@@ -1013,7 +1008,9 @@ const bindPropertyActions = (card, input) => {
         renderQuestions();
         renderProperties();
         hideLoading(500);
-        notifySuccess(FORM_MESSAGES.INPUT_COPIED);
+        setTimeout(() => {
+            notifySuccess(FORM_MESSAGES.INPUT_COPIED);
+        }, 500);
     });
 
     validate_button.addEventListener('click', () => {
@@ -1286,7 +1283,6 @@ const buildBasicPanel = (input, pane) => {
 
     if (allowsTitle(input.type)) {
         bindTitleToggle(title_row, input);
-        title_row.querySelector('[data-role="title-info"]').onclick = openTitleInfo;
     }
     else {
         title_row.remove();
@@ -2213,7 +2209,9 @@ const openAnswersCsvModal = (input, parsed) => {
                     updateCurrentQuestionStatus();
                     // Legacy hides the overlay after ANIMATION_SUPER_SLOW.
                     hideLoading(1000);
-                    notifySuccess(VALIDATION_MESSAGES.POSSIBLE_ANSWERS_IMPORTED);
+                    setTimeout(() => {
+                        notifySuccess(VALIDATION_MESSAGES.POSSIBLE_ANSWERS_IMPORTED);
+                    }, 1000);
                 }
             }
         ]

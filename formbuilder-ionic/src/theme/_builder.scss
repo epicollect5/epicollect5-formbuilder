@@ -1456,15 +1456,15 @@ ion-item.builder__question[aria-current='true'] {
     align-items: center;
 }
 
-/* Unchecked boxes need the same readable grey as the input tools. */
+/* Unchecked boxes keep the readable surface background; the label always uses
+   the body text color, checked or not. */
 ion-checkbox:not(.checkbox-checked) {
     --border-color: #999999;
     --checkbox-background: transparent;
-    color: #999999;
 }
 
 ion-checkbox:not(.checkbox-checked)::part(label) {
-    color: #999999;
+    color: var(--fb-text);
 }
 
 .builder__info-button {
