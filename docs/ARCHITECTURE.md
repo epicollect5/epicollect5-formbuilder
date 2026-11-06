@@ -30,8 +30,8 @@ and export execute the legacy code. Only the presentation layer is replaced:
   stylesheet is loaded.
 - `src/components/legacy-*` provides the Bootstrap JS replacements: `ion-modal`
   hosts the legacy `.modal` element, tabs are ARIA controllers firing
-  `show/shown.bs.tab`, dropdowns are accessible menus, and Font Awesome classes
-  are upgraded in place with `<ion-icon>` children.
+  `show/shown.bs.tab`, and dropdowns are accessible menus. Icons are Ionicons
+  only (`<ion-icon>`); no Font Awesome.
 
 jQuery 2.2.1 and jQuery UI stay in place for drag-and-drop and delegated events.
 The output is `formbuilder-ionic/dist/`, served with the legacy `public/` and the

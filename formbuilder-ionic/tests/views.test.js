@@ -31,6 +31,7 @@ describe('Ionic entry point', () => {
         expect(html).not.toContain('js/legacy-formbuilder.js');
         expect(html).not.toMatch(/bootstrap(\.min)?\.(css|js)|bootstrapcdn/i);
         expect(html).not.toContain('font-awesome.min.css');
+        expect(html).not.toMatch(/font-?awesome/i);
     });
 
     it('hosts the print preview and loads its print styles', async () => {

@@ -108,9 +108,10 @@ Rules:
 - Ionic custom elements are used where their values are not driven by legacy
   jQuery code. Controls that legacy code reads/writes with `.val()`, `.prop()`,
   `.attr()` or `.find('input')` stay native elements styled with Ionic tokens.
-- Every dynamically generated Font Awesome `<i>` is upgraded in place to an
-  `<ion-icon>` child. Never remove the Font Awesome class names: validation and
-  delegated handlers use them as state.
+- **Use only Ionicons (`<ion-icon name="...">`) for icons.** Do not add
+  Font Awesome markup, classes, dependencies, or an FA-to-Ionicons upgrade
+  layer. Render icons as `<ion-icon>` (directly in views or via the `icon()`
+  helper) and style them with Ionic/palette tokens.
 - Bootstrap JavaScript is not loaded. `components/legacy-*` provide the
   replacement behaviour on top of Ionic `ion-modal`, ARIA tabs, accessible menus
   and accessible labels.

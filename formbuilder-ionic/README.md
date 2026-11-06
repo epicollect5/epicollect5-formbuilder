@@ -61,8 +61,9 @@ output is served under `/epicollect5-formbuilder/ionic/` (see `base` in
 - **The UI owns its DOM.** `ui/shell.js` builds the toolbar, form tabs, question
   list and properties panel from the definition. It does not query legacy hooks
   (`.panel`, `.main__tabs`, `.inputs-collection`) and does not depend on
-  Bootstrap or Font Awesome. jQuery + jQuery UI are bundled from npm and own
-  only drag and drop (`ui/sortable.js`), exactly as in the legacy builder.
+  Bootstrap or Font Awesome. Icons are Ionicons only. jQuery + jQuery UI are
+  bundled from npm and own only drag and drop (`ui/sortable.js`), exactly as in
+  the legacy builder.
 - **Services stay free of DOM.** `project-source.js` loads and decodes the
   definition (plain JSON or the gzip/base64 body the Laravel endpoint returns);
   `models/project-definition.js` is a pure read layer over the contract.

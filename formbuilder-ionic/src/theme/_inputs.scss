@@ -69,16 +69,6 @@
     font-size: 15px;
 }
 
-/* Question rows inherit a 16px base while the sidebar rows use 14px, so a 2x
-   glyph would render larger here. Pin it to the sidebar size instead. */
-.inputs-collection .input .legacy-icon.fa-2x > ion-icon {
-    font-size: 1.575em;
-}
-
-.inputs-collection .input .legacy-icon.fa-2x.fa-fw {
-    width: 1.75em;
-}
-
 .inputs-collection .panel-body {
     min-height: 140px;
 }
@@ -165,18 +155,8 @@
     box-sizing: content-box;
     max-width: calc(100% - 22px) !important;
     height: auto !important;
-    font-size: 14px;
+    font-size: 15px;
     min-height: 26px;
-}
-
-.input.ui-draggable-dragging .legacy-icon.fa-2x > ion-icon,
-.input.ui-sortable-helper .legacy-icon.fa-2x > ion-icon {
-    font-size: 1.8em;
-}
-
-.input.ui-draggable-dragging .legacy-icon.fa-2x.fa-fw,
-.input.ui-sortable-helper .legacy-icon.fa-2x.fa-fw {
-    width: 2em;
 }
 
 .dragging-disabled {
@@ -211,30 +191,6 @@
     font-size: 15px;
 }
 
-.question-state.fa-check {
-    color: var(--ion-color-success);
-}
-
-.question-state.fa-exclamation-triangle {
-    color: var(--ion-color-warning);
-}
-
 .jump-state {
     color: var(--ion-color-medium-shade);
-}
-
-.form-state.fa-check {
-    color: var(--ion-color-success);
-}
-
-.form-state.fa-exclamation-triangle {
-    color: var(--ion-color-warning);
-}
-
-.project-state.fa-warning {
-    color: var(--ion-color-warning);
-}
-
-.project-state.fa-check {
-    color: var(--ion-color-success);
 }
