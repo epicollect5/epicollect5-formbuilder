@@ -8,6 +8,30 @@ it does not bundle, load or query legacy presentation code.
 `/epicollect5-formbuilder/public/index.html` against the same project file and
 session, so each slice can be compared side by side.
 
+## Vite and comparison server
+
+Vite is the only build and development server for this prototype. Ionic Core,
+Ionicons, jQuery, jQuery UI and the other npm dependencies are imported from
+their pinned packages and bundled locally; do not load Ionic from a CDN. The
+Vite config owns the `@` source alias and the aliases that map frozen legacy
+module IDs such as `config/*` and `helpers/*` into `js/app_modules/**`.
+
+Use Vite's `?raw` imports for HTML fragments and its Sass pipeline for the
+Ionic theme linked by `src/index.html`. Avoid separate esbuild, Sass or asset
+copy scripts where Vite's configured pipeline can do the work.
+
+The dev server must preserve the comparison workflow on port 5183:
+
+- `/epicollect5-formbuilder/ionic/` serves the Vite app.
+- `/epicollect5-formbuilder/public/` serves the legacy baseline from `public/`.
+- `/epicollect5-formbuilder/project/` serves the shared project files.
+- `POST /epicollect5-formbuilder/project/project.json` writes the local project
+  definition used by both comparison entries.
+
+The production build writes only `formbuilder-ionic/dist/`, with asset paths
+that work under `/epicollect5-formbuilder/ionic/`. Keep the comparison-server
+middleware development-only; never put generated output in the legacy app.
+
 > **Scope rule for this branch.** Change only `formbuilder-ionic/**`. The legacy
 > app (`js/**`, `css/**`, `public/**`, the root `package.json` and `gulpfile.js`)
 > is frozen reference material: read it to port behaviour, never edit it. New

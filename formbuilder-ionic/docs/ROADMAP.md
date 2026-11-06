@@ -5,6 +5,41 @@ close the gap. The legacy app under `js/`, `css/` and `public/` is the reference
 and is never edited (see `PORTING.md`); the project-definition JSON contract is
 frozen.
 
+## Tooling decision
+
+Use Vite for both development and production builds. Bundle Ionic Core and all
+other npm dependencies from their pinned packages; do not use CDN script or
+stylesheet URLs. Vite owns aliases for the Ionic source and frozen legacy
+modules, HTML `?raw` imports, Sass processing and the production output. Its dev
+server must retain the side-by-side legacy/project routes and local project
+save endpoint documented in `PORTING.md`. Do not maintain a separate esbuild
+build/watch script.
+
+### Vite and modern JavaScript migration plan
+
+This is an Ionic-prototype engineering task, separate from the feature-port
+phases above:
+
+1. Configure Vite for `formbuilder-ionic/src/index.html`, the `@` source alias,
+   and the existing aliases into frozen `js/app_modules/**`. Keep Ionic Core,
+   Ionicons, jQuery, jQuery UI and other npm dependencies local and bundled by
+   Vite.
+2. Move the current Sass compilation, raw HTML imports and static asset handling
+   into Vite's pipelines. Remove the custom esbuild build/watch script and its
+   dependency once Vite covers those jobs.
+3. Preserve the comparison workflow: port 5183, the `/ionic/`, `/public/` and
+   `/project/` routes, the local `project/project.json` save endpoint, and
+   production output under `formbuilder-ionic/dist/`.
+4. As part of the migration, refactor `formbuilder-ionic/src/**` toward ES6+
+   syntax where it is behavior-preserving: use `const` / `let`, arrow functions
+   for callbacks where clear, template literals and object shorthand where
+   useful, and native ES modules. Set Vite's browser target deliberately and
+   avoid an ES5-only output target. Keep `js/**`, `css/**` and `public/**`
+   untouched; their legacy syntax and build remain unchanged.
+5. Verify the Vite dev and production flows, Ionic custom-element registration
+   and icons, legacy/project route behavior, project load/save, and the existing
+   Ionic and legacy test suites.
+
 ## Where the port stands
 
 Ported today:

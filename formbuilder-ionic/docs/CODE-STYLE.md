@@ -20,12 +20,17 @@ port. Consistency over "modern framework" patterns.
 
 ## Stack
 
-- Ionic Core 8 web components + Ionicons, loaded from the pinned packages.
-- Vanilla ES modules, bundled by esbuild. No Vue, no React, no TypeScript.
+- Ionic Core 8 web components + Ionicons, imported from pinned npm packages and
+  bundled with the app by Vite. Do not load Ionic from a CDN.
+- Vanilla ES modules built and served by Vite. Use modern JavaScript syntax
+  supported by the configured Vite build target. No Vue, no React, no TypeScript.
 - jQuery 2.2.1 + jQuery UI 1.11.4 remain the drag-and-drop engine, exactly as in
   the legacy app.
 - The legacy `js/app_modules/**` code is the behavioural source of truth and is
-  consumed unmodified through aliases.
+  consumed unmodified through Vite aliases.
+
+Vite owns the Ionic prototype's dev server, asset pipeline and production build.
+Do not add a parallel esbuild script or custom bundling path.
 
 ## Architecture
 
