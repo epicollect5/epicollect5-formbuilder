@@ -3,22 +3,26 @@
 Ionic port of the Epicollect5 formbuilder.
 
 It is a separate entry point and build from the legacy app. The Ionic bundle
-contains **no legacy code**: it renders its own DOM, owns its own event wiring
-and keeps the project-definition JSON as its only state. The legacy page keeps
-running next to it, against the same project file and session, so every slice
-can be compared with the baseline.
+contains no legacy presentation or entry code: it renders its own DOM, owns its
+own event wiring and keeps the project-definition JSON as its only state,
+while reusing the shared behaviour modules from `js/app_modules/**` through
+Vite aliases. The legacy page keeps running next to it, against the same
+project file and session, so every slice can be compared with the baseline.
 
 ```
 formbuilder-ionic/
   src/
-    app.js                 entry: boot the page
+    app.js                 entry: jQuery setup, then boot the page
+    jquery.js              publishes the bundled jQuery for jQuery UI
+    ionic.css              re-exports the pinned Ionic Core bundle for Vite
     pages/                 page composition
     ui/                    native renderers (shell.js, dom.js, readme-editor.js)
     views/                 fixed Ionic markup (HTML), bundled as text
     services/              project loading, session, Ionic runtime
     models/                project-definition contract, question catalogue
     theme/                 SCSS (Ionic tokens + native builder styles)
-  scripts/                 esbuild/sass build and comparison server
+  vite.config.js           build, dev server and comparison routes
+  scripts/                 shared Vite aliases, schema parameter checker
   tests/                   Vitest + jsdom
   docs/PORTING.md          legacy inventory and slice status
   docs/ROADMAP.md          gap vs legacy and the next phases
@@ -34,16 +38,20 @@ npm run dev
 # http://localhost:5183/epicollect5-formbuilder/
 ```
 
-`npm run dev` builds `dist/` and serves three mounts from one origin:
+`npm run dev` starts Vite on port 5183 and serves the comparison workflow
+from one origin (Ionic app, legacy baseline, shared project file, local
+project-save endpoint):
 
 | URL | Content |
 |---|---|
 | `/epicollect5-formbuilder/` | comparison landing page |
-| `/epicollect5-formbuilder/ionic/` | Ionic port |
+| `/epicollect5-formbuilder/ionic/` | Ionic port (Vite dev) |
 | `/epicollect5-formbuilder/public/` | legacy baseline |
 | `/epicollect5-formbuilder/project/` | shared project definition |
 
-`npm run build` writes a static `dist/` and starts no server.
+`npm run build` writes a static `dist/` and starts no server. The production
+output is served under `/epicollect5-formbuilder/ionic/` (see `base` in
+`vite.config.js`).
 
 ## Architecture
 
@@ -53,7 +61,8 @@ npm run dev
 - **The UI owns its DOM.** `ui/shell.js` builds the toolbar, form tabs, question
   list and properties panel from the definition. It does not query legacy hooks
   (`.panel`, `.main__tabs`, `.inputs-collection`) and does not depend on
-  Bootstrap, jQuery or Font Awesome.
+  Bootstrap or Font Awesome. jQuery + jQuery UI are bundled from npm and own
+  only drag and drop (`ui/sortable.js`), exactly as in the legacy builder.
 - **Services stay free of DOM.** `project-source.js` loads and decodes the
   definition (plain JSON or the gzip/base64 body the Laravel endpoint returns);
   `models/project-definition.js` is a pure read layer over the contract.
@@ -67,7 +76,7 @@ Ported: project loading, form switching and adding, question list
 (add/reorder/delete/select), basic and advanced question editing (including
 uniqueness and per-type gating), readme editor (Tiptap), possible answers
 (add/rename/remove/reorder, ordering, delete all, 100-per-page pagination, CSV
-import/export, 150-char cap and `<` / `>` sanitisation), branches and groups
+import/export, 250-char cap and `<` / `>` sanitisation), branches and groups
 (enter/exit, nesting rules, breadcrumbs), jumps (rows, destinations, the always
 variant) and validation with question copy (row and tab badges, Validate
 button, duplicate with ref and answer-ref remap, duplicate answer-ref check),

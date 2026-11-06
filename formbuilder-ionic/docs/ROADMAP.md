@@ -17,28 +17,22 @@ build/watch script.
 
 ### Vite and modern JavaScript migration plan
 
-This is an Ionic-prototype engineering task, separate from the feature-port
-phases above:
+Done: Vite owns the dev server and the production build (`vite.config.js`,
+`base: /epicollect5-formbuilder/ionic/`, `target: es2020`). Ionic Core,
+Ionicons, jQuery, jQuery UI and the other npm dependencies are bundled from
+their pinned packages — no CDN scripts, no copied vendor JS. Icon SVGs are the
+exception: ion-icon loads them by URL at runtime, so the pinned SVGs are
+served from `node_modules` in dev and copied to `dist/vendor/ionicons/svg` by
+the production build. The `@`
+alias and the frozen `js/app_modules/**` aliases (including the Ajv validator
+override) live in `scripts/resolve-aliases.mjs` and are shared with Vitest.
+The comparison workflow is preserved (port 5183, `/ionic/`, `/public/` and
+`/project/` routes, the local save endpoint), and `src/**` uses ES6+
+(`const` / `let`, arrow callbacks, template literals, object shorthand,
+spread). The legacy `js/**`, `css/**` and `public/**` trees are untouched.
 
-1. Configure Vite for `formbuilder-ionic/src/index.html`, the `@` source alias,
-   and the existing aliases into frozen `js/app_modules/**`. Keep Ionic Core,
-   Ionicons, jQuery, jQuery UI and other npm dependencies local and bundled by
-   Vite.
-2. Move the current Sass compilation, raw HTML imports and static asset handling
-   into Vite's pipelines. Remove the custom esbuild build/watch script and its
-   dependency once Vite covers those jobs.
-3. Preserve the comparison workflow: port 5183, the `/ionic/`, `/public/` and
-   `/project/` routes, the local `project/project.json` save endpoint, and
-   production output under `formbuilder-ionic/dist/`.
-4. As part of the migration, refactor `formbuilder-ionic/src/**` toward ES6+
-   syntax where it is behavior-preserving: use `const` / `let`, arrow functions
-   for callbacks where clear, template literals and object shorthand where
-   useful, and native ES modules. Set Vite's browser target deliberately and
-   avoid an ES5-only output target. Keep `js/**`, `css/**` and `public/**`
-   untouched; their legacy syntax and build remain unchanged.
-5. Verify the Vite dev and production flows, Ionic custom-element registration
-   and icons, legacy/project route behavior, project load/save, and the existing
-   Ionic and legacy test suites.
+Remaining verification is the browser pass: component registration and icons,
+comparison routes, project load/save, and both test suites.
 
 ## Where the port stands
 
