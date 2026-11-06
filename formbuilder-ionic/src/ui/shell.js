@@ -559,6 +559,11 @@ const importFormFile = (card) => {
             return;
         }
 
+        if (file.size > PARAMETERS.FORM_IMPORT_MAX_BYTES) {
+            notifyError(FORM_MESSAGES.FORM_FILE_TOO_LARGE);
+            return;
+        }
+
         const reader = new FileReader();
 
         showLoading();
@@ -587,7 +592,14 @@ const importFormFile = (card) => {
             // Legacy hides the overlay ANIMATION_SLOW after the import.
             hideLoading(500);
             setTimeout(() => {
-                notifySuccess(FORM_MESSAGES.FORM_IMPORTED);
+                // the import itself was valid, but the whole project may still
+                // hold runtime errors the import checks do not cover (R-67)
+                if (!result.project_valid) {
+                    notifyWarning(`${FORM_MESSAGES.FORM_IMPORTED} ${FORM_MESSAGES.PROJECT_INVALID}`);
+                }
+                else {
+                    notifySuccess(FORM_MESSAGES.FORM_IMPORTED);
+                }
             }, 500);
         };
 

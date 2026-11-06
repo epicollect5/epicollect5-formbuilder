@@ -2,6 +2,7 @@
 
 import { FORM_MESSAGES } from '@/config/strings.js';
 import { getContainerList } from '@/services/nesting.js';
+import { areFormInputsValid } from '@/services/validation.js';
 import { getForms } from '@/models/project-definition.js';
 import {
     countInputs,
@@ -115,5 +116,17 @@ export const prepareImportedForm = (text, project_definition, form_index) => {
         return { ok: false, error: FORM_MESSAGES.FORM_IS_INVALID };
     }
 
-    return { ok: true, inputs: imported };
+    /*
+     * The checks above only cover the imported list and the project caps. The
+     * runtime rules the schema leaves to the app (readme length, branch
+     * children, question text) can still fail, so report the whole-project
+     * state after the swap instead of letting the save gate surface it (R-67).
+     */
+    const project_valid = forms.every((candidate, index) => {
+        return areFormInputsValid(index === form_index ?
+            Object.assign({}, candidate, { inputs: imported }) :
+            candidate);
+    });
+
+    return { ok: true, inputs: imported, project_valid };
 };

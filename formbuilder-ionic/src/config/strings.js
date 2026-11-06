@@ -20,6 +20,7 @@ export const FORM_MESSAGES = {
     FORM_IMPORTED: 'Form import succeeded!',
     FORM_IMPORTING: 'Importing form…',
     FORM_FILE_INVALID: 'Form file is invalid',
+    FORM_FILE_TOO_LARGE: 'Form file is too large',
     FORM_IS_INVALID: 'Form is invalid',
     FORM_CANNOT_BE_DELETED: 'Form cannot be deleted',
     FORM_DELETE_CONFIRM: 'Delete this form and all its questions?',

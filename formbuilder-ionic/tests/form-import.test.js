@@ -148,6 +148,50 @@ describe('preparing an import', () => {
 
         expect(result).toEqual({ ok: false, error: FORM_MESSAGES.FORM_IS_INVALID });
     });
+
+    it('reports a valid project after a clean import', () => {
+        const result = prepareImportedForm(JSON.stringify(form_export), project_definition(), 0);
+
+        expect(result.ok).toBe(true);
+        expect(result.project_valid).toBe(true);
+    });
+
+    it('reports an invalid project when another form is invalid', () => {
+        const definition = project_definition();
+        const other_ref = 'e'.repeat(32) + '_' + 'd'.repeat(13);
+
+        definition.data.project.forms.push({
+            ref: other_ref,
+            name: 'Other form',
+            slug: 'other-form',
+            type: 'hierarchy',
+            inputs: [
+                {
+                    ref: other_ref + '_' + 'c'.repeat(13),
+                    type: 'text',
+                    question: ''
+                }
+            ]
+        });
+
+        const result = prepareImportedForm(JSON.stringify(form_export), definition, 0);
+
+        expect(result.ok).toBe(true);
+        expect(result.project_valid).toBe(false);
+    });
+
+    it('reports an invalid project when the import passes the schema but not the runtime rules', () => {
+        const payload = clone(form_export);
+
+        // the schema leaves the readme length to the app logic
+        payload.data.form.inputs[0].type = 'readme';
+        payload.data.form.inputs[0].question = 'x'.repeat(1001);
+
+        const result = prepareImportedForm(JSON.stringify(payload), project_definition(), 0);
+
+        expect(result.ok).toBe(true);
+        expect(result.project_valid).toBe(false);
+    });
 });
 
 describe('counts', () => {
