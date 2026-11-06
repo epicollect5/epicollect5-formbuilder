@@ -16,13 +16,16 @@ function read(relative_path) {
 }
 
 describe('Ionic entry point', () => {
-    it('loads the Ionic bundle and the vendored jQuery runtime', async () => {
+    it('loads the Vite-bundled Ionic theme and the native entry module', async () => {
         const html = await read('src/index.html');
 
-        expect(html).toContain('vendor/ionic/css/ionic.bundle.css');
-        expect(html).toContain('js/formbuilder-ionic.js');
-        expect(html).toContain('vendor/jquery.min.js');
-        expect(html).toContain('vendor/jquery-ui.min.js');
+        expect(html).toContain('theme/ionic-formbuilder.scss');
+        expect(html).toContain('src="./app.js"');
+        expect(html).toContain('type="module"');
+        expect(html).not.toContain('vendor/ionic/css/ionic.bundle.css');
+        expect(html).not.toContain('js/formbuilder-ionic.js');
+        expect(html).not.toContain('vendor/jquery.min.js');
+        expect(html).not.toContain('vendor/jquery-ui.min.js');
         expect(html).not.toContain('js/vendor-formbuilder.js');
         expect(html).not.toContain('code.jquery.com');
         expect(html).not.toContain('js/legacy-formbuilder.js');
@@ -138,17 +141,37 @@ describe('fixed markup views', () => {
 });
 
 describe('build boundary', () => {
-    it('bundles only the native entry for the Ionic build', async () => {
-        const build = await read('scripts/build.mjs');
+    it('builds stable app, ionic and vendor bundles with Vite', async () => {
+        const config = await read('vite.config.js');
 
-        expect(build).toContain("entryPoints: { 'formbuilder-ionic': path.join(root, 'src/app.js') }");
-        expect(build).not.toContain('legacy-formbuilder');
-        expect(build).not.toContain("path.join(repo, 'js/app.js')");
+        expect(config).toContain("root: src_root");
+        expect(config).toContain('fs: {');
+        expect(config).toContain("allow: [repo_root]");
+        expect(config).toContain("entryFileNames: 'js/[name].js'");
+        expect(config).toContain("chunkFileNames: 'js/[name].js'");
+        expect(config).toContain("return 'ionic'");
+        expect(config).toContain("return 'vendor'");
+        expect(config).not.toContain('[hash]');
+        expect(config).not.toContain('legacy-formbuilder');
+        expect(config).not.toContain("path.join(repo, 'js/app.js')");
+        expect(config).not.toContain('esbuild');
+    });
+
+    it('bundles jQuery and jQuery UI from npm in the native entry', async () => {
+        const entry = await read('src/app.js');
+        const jquery_setup = await read('src/jquery.js');
+
+        expect(entry).toContain("import './jquery.js'");
+        expect(entry).toContain('jquery-ui/dist/jquery-ui.min.js');
+        expect(entry).not.toContain('vendor/jquery');
+        expect(jquery_setup).toContain("from 'jquery'");
     });
 
     it('keeps the legacy page served for comparison', async () => {
-        const build = await read('scripts/build.mjs');
+        const routes = await read('scripts/comparison-server.mjs');
 
-        expect(build).toContain("prefix: '/epicollect5-formbuilder/public/'");
+        expect(routes).toContain('PUBLIC_PREFIX');
+        expect(routes).toContain("COMPARISON_BASE + '/public/'");
+        expect(routes).toContain('PROJECT_SAVE_PATH');
     });
 });
