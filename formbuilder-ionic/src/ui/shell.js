@@ -935,7 +935,9 @@ const renderProperties = () => {
 
     if (!input) {
         active_property_tab = 'basic';
-        card.querySelector('.builder__properties-actions-group').remove();
+        // Keep the actions group in layout but invisible: removing it shifts
+        // the heading and misaligns it with the questions column.
+        card.querySelector('.builder__properties-actions-group').style.visibility = 'hidden';
         tab_strip.remove();
         body.remove();
         empty.removeAttribute('hidden');

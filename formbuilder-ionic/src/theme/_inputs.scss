@@ -12,10 +12,10 @@
 
 /* One row metric for both the tools list and the question rows. */
 .input {
-    color: var(--fb-text);
+    color: var(--app-text);
     border: 1px solid #999999;
     border-radius: 8px;
-    background: var(--fb-surface);
+    background: var(--app-surface);
     min-height: 42px;
     padding: 7px 10px;
     cursor: grab;
@@ -122,7 +122,7 @@
 
 .active-branch .input,
 .active-group .input {
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
 }
 
 .exit-branch-editing {
@@ -216,11 +216,11 @@
 }
 
 .question-state.fa-exclamation-triangle {
-    color: var(--fb-amber);
+    color: var(--ion-color-warning);
 }
 
 .jump-state {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
 }
 
 .form-state.fa-check {
@@ -228,11 +228,11 @@
 }
 
 .form-state.fa-exclamation-triangle {
-    color: var(--fb-amber);
+    color: var(--ion-color-warning);
 }
 
 .project-state.fa-warning {
-    color: var(--fb-amber);
+    color: var(--ion-color-warning);
 }
 
 .project-state.fa-check {

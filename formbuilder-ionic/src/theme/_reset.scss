@@ -21,11 +21,11 @@ body {
 
 ion-card-title,
 ion-card-content {
-    color: var(--fb-text);
+    color: var(--app-text);
 }
 
 ion-note {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
 }
 
 h1,
@@ -42,7 +42,7 @@ a {
 }
 
 code {
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
     border-radius: 5px;
     padding: 1px 5px;
     font-size: 0.9em;
@@ -50,7 +50,7 @@ code {
 
 hr {
     border: 0;
-    border-top: 1px solid var(--fb-border);
+    border-top: 1px solid var(--app-border);
     margin: 14px 0;
 }
 
@@ -82,7 +82,7 @@ hr {
 }
 
 .text-warning {
-    color: var(--fb-amber);
+    color: var(--ion-color-warning);
 }
 
 .text-danger {
@@ -106,17 +106,25 @@ hr {
 }
 
 .warning-well {
-    background: var(--fb-warning-bg);
+    background: color-mix(in srgb, var(--ion-color-warning) 12%, white);
     border-radius: 10px;
-    color: var(--fb-label);
+    color: var(--app-text);
+    padding: 10px 12px;
+}
+
+/* Neutral well, the default: same shape, light grey wash. */
+.info-well {
+    background: color-mix(in srgb, var(--ion-color-medium) 16%, white);
+    border-radius: 10px;
+    color: var(--app-text);
     padding: 10px 12px;
 }
 
 /* Destructive variant of the well: same shape, danger wash. */
 .danger-well {
-    background: var(--fb-danger-bg);
+    background: color-mix(in srgb, var(--ion-color-danger) 10%, white);
     border-radius: 10px;
-    color: var(--fb-label);
+    color: var(--app-text);
     padding: 10px 12px;
 }
 
@@ -144,7 +152,7 @@ hr {
     height: 1px;
     margin: 6px 0;
     overflow: hidden;
-    background: var(--fb-border);
+    background: var(--app-border);
 }
 
 .table {
@@ -154,7 +162,7 @@ hr {
 
 .table th,
 .table td {
-    border-bottom: 1px solid var(--fb-border);
+    border-bottom: 1px solid var(--app-border);
     padding: 10px 8px;
     text-align: left;
     vertical-align: middle;
@@ -162,7 +170,7 @@ hr {
 }
 
 .bg-warning {
-    background: var(--fb-warning-bg);
+    background: color-mix(in srgb, var(--ion-color-warning) 12%, white);
     border-radius: 10px;
     padding: 10px 12px;
 }
@@ -181,7 +189,7 @@ hr {
     align-items: center;
     justify-content: center;
     background: var(--ion-background-color, #ffffff);
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     font-size: 18px;
 }
 

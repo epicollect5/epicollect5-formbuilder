@@ -9,11 +9,11 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
     /* the .main card draws the outer border; the strip only closes itself */
     border: 0;
-    border-bottom: 1px solid var(--fb-border);
-    border-radius: var(--fb-radius) var(--fb-radius) 0 0;
+    border-bottom: 1px solid var(--app-border);
+    border-radius: 14px 14px 0 0;
     overflow-x: auto;
 }
 
@@ -31,7 +31,7 @@
     padding: 0 14px;
     border: 0;
     border-bottom: 2px solid transparent;
-    color: var(--fb-label);
+    color: var(--app-text);
     font-size: 15px;
     font-weight: 600;
     text-decoration: none;
@@ -67,8 +67,8 @@
     margin: 0 0 12px;
     padding: 0;
     list-style: none;
-    background: var(--fb-surface-2);
-    border: 1px solid var(--fb-border);
+    background: var(--app-surface-muted);
+    border: 1px solid var(--app-border);
     border-radius: 8px;
     overflow-x: auto;
 }
@@ -87,7 +87,7 @@
     padding: 0 12px;
     border: 0;
     border-bottom: 2px solid transparent;
-    color: var(--fb-label);
+    color: var(--app-text);
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
@@ -140,16 +140,16 @@
 .input-properties__tabs {
     margin: 14px;
     padding: 0;
-    background: var(--fb-surface);
-    border: 1px solid var(--fb-border);
-    border-radius: var(--fb-radius);
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
 }
 
 .input-properties__tabs > .nav-tabs {
     margin: 0;
     border: 0;
-    border-bottom: 1px solid var(--fb-border);
-    border-radius: var(--fb-radius) var(--fb-radius) 0 0;
+    border-bottom: 1px solid var(--app-border);
+    border-radius: 14px 14px 0 0;
     /* spread Properties / Advanced / Jumps across the strip */
     justify-content: space-between;
 }

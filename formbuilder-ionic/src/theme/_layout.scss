@@ -59,9 +59,9 @@ ion-header ion-toolbar[color='primary'] ion-icon {
     flex-direction: column;
     min-height: 0;
     gap: 0;
-    background: var(--fb-surface);
-    border: 1px solid var(--fb-border);
-    border-radius: var(--fb-radius);
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
 }
 
 .main__tabs-content {

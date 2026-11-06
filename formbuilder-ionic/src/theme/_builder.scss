@@ -79,9 +79,9 @@
     min-height: 0;
     padding: 10px;
     overflow: auto;
-    background: var(--fb-surface);
-    border: 1px solid var(--fb-border);
-    border-radius: var(--fb-radius);
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
 }
 
 .builder__tool {
@@ -95,8 +95,8 @@
     padding: 6px 10px;
     border: 1px solid #999999;
     border-radius: 8px;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
     font: inherit;
     font-size: 14px;
     text-align: left;
@@ -106,7 +106,7 @@
 
 .builder__tool:hover,
 .builder__tool:focus-visible {
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
 }
 
 .builder__tool:active {
@@ -115,7 +115,7 @@
 
 .builder__tool ion-icon {
     flex: none;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     font-size: 20px;
 }
 
@@ -130,9 +130,9 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    background: var(--fb-surface);
-    border: 1px solid var(--fb-border);
-    border-radius: var(--fb-radius);
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
 }
 
 .builder__forms-row {
@@ -140,7 +140,7 @@
     align-items: center;
     gap: 8px;
     padding: 0 12px;
-    border-bottom: 1px solid var(--fb-border);
+    border-bottom: 1px solid var(--app-border);
 }
 
 .builder__forms {
@@ -167,10 +167,10 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 6px;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
     font: inherit;
     font-size: 13px;
     font-weight: 600;
@@ -184,7 +184,7 @@
 
 .builder__add-form:hover,
 .builder__action:hover:not(:disabled) {
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
 }
 
 .builder__form-actions {
@@ -195,7 +195,7 @@
 }
 
 .builder__action:disabled {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     cursor: not-allowed;
 }
 
@@ -212,10 +212,10 @@
     width: 32px;
     height: 28px;
     padding: 0;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 6px;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
     cursor: pointer;
 }
 
@@ -224,7 +224,7 @@
 }
 
 .builder__icon-btn:disabled {
-    color: var(--fb-border-strong);
+    color: var(--app-border);
     cursor: not-allowed;
 }
 
@@ -233,7 +233,7 @@
 }
 
 .builder__icon-btn:hover:not(:disabled) {
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
 }
 
 .builder__form-tab {
@@ -246,7 +246,7 @@
     --background: transparent;
     --background-checked: transparent;
     --background-hover: transparent;
-    --color: var(--fb-muted);
+    --color: var(--ion-color-medium-shade);
     --color-checked: var(--ion-color-primary);
     --indicator-color: transparent;
     --border-radius: 0;
@@ -292,9 +292,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    min-height: 44px;
+    min-height: 48px;
     padding: 8px 12px;
-    border-bottom: 1px solid var(--fb-border-strong);
+    border-bottom: 1px solid var(--app-border);
     background: #93cdafb5;
     font-size: 15px;
     font-weight: 600;
@@ -306,10 +306,10 @@
     flex: 1;
     min-height: 0;
     margin: 0;
-    border: 1px solid var(--fb-border);
+    border: 1px solid var(--app-border);
     border-radius: 12px;
     box-shadow: none;
-    background: var(--fb-surface);
+    background: var(--app-surface);
     overflow: hidden;
 }
 
@@ -331,18 +331,22 @@
     flex: 1 1 auto;
     min-width: 0;
     margin: 0;
+    --margin-top: 0;
+    --margin-bottom: 0;
+    padding: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 15px;
     font-weight: 600;
-    color: var(--fb-text);
+    line-height: 1.4;
+    color: var(--app-text);
 }
 
 .builder__questions-title {
     display: flex;
     align-items: center;
-    gap: 0;
+    gap: 4px;
 }
 
 .builder__questions-title-prefix,
@@ -386,10 +390,10 @@
     min-height: 30px;
     padding: 4px 8px;
     margin: 0;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 0;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
 }
 
 .builder__form-actions-group .builder__form-action-btn.builder__answers-more-btn:first-child {
@@ -419,7 +423,7 @@
 }
 
 .builder__count {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     font-size: 14px;
     font-weight: 400;
 }
@@ -432,9 +436,9 @@
     min-height: 30px;
     margin: 8px 10px 0;
     padding: 4px 10px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
-    background: var(--fb-surface);
+    background: var(--app-surface);
     color: var(--ion-color-primary);
     font: inherit;
     font-size: 13px;
@@ -447,7 +451,7 @@
 }
 
 .builder__questions-exit:hover {
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
 }
 
 .builder__questions-exit ion-icon {
@@ -455,12 +459,12 @@
 }
 
 .builder__questions-title-crumb {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     font-weight: 500;
 }
 
 .builder__questions-title-crumb.is-current {
-    color: var(--fb-text);
+    color: var(--app-text);
     font-weight: 700;
 }
 
@@ -472,8 +476,8 @@
     height: 20px;
     padding: 0 6px;
     border-radius: 10px;
-    background: var(--fb-surface-2);
-    color: var(--fb-muted);
+    background: var(--app-surface-muted);
+    color: var(--ion-color-medium-shade);
     font-size: 12px;
     font-weight: 600;
 }
@@ -493,7 +497,7 @@
 }
 
 .builder__question-enter:hover {
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
 }
 
 .builder__question-enter ion-icon {
@@ -523,9 +527,9 @@ ion-item.builder__question {
     --padding-bottom: 0;
     --inner-padding-end: 0;
     --inner-border-width: 0;
-    --background: var(--fb-surface);
+    --background: var(--app-surface);
     --background-hover-opacity: 0;
-    --color: var(--fb-text);
+    --color: var(--app-text);
     --border-width: 1px;
     --border-style: solid;
     --border-color: #999999;
@@ -560,7 +564,7 @@ ion-item.builder__question:focus-within {
     border: 1px solid #999999;
     border-radius: 8px;
     box-sizing: border-box;
-    background: var(--fb-surface);
+    background: var(--app-surface);
     cursor: grabbing;
     opacity: 0.9;
     box-shadow: 0 8px 24px rgba(28, 18, 40, 0.18);
@@ -585,9 +589,9 @@ ion-item.builder__question:focus-within {
     width: 32px;
     height: 28px;
     padding: 0;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 6px;
-    background: var(--fb-surface);
+    background: var(--app-surface);
     color: var(--ion-color-danger);
     cursor: pointer;
 }
@@ -598,7 +602,7 @@ ion-item.builder__question:focus-within {
 
 .builder__question ion-icon,
 .builder__question-type-icon ion-icon {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     font-size: 20px;
     flex: 0 0 auto;
 }
@@ -655,12 +659,12 @@ ion-item.builder__question[aria-current='true'] {
 
 .builder__question-status .question-state.is-invalid,
 .builder__question-status .question-state.is-invalid ion-icon {
-    color: var(--fb-amber);
+    color: var(--ion-color-warning);
 }
 
 .builder__question-status .jump-state,
 .builder__question-status .jump-state ion-icon {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
 }
 
 .builder__properties-card {
@@ -669,10 +673,10 @@ ion-item.builder__question[aria-current='true'] {
     flex: 1;
     min-height: 0;
     margin: 0;
-    border: 1px solid var(--fb-border);
+    border: 1px solid var(--app-border);
     border-radius: 12px;
     box-shadow: none;
-    background: var(--fb-surface);
+    background: var(--app-surface);
     overflow: hidden;
 }
 
@@ -696,6 +700,9 @@ ion-item.builder__question[aria-current='true'] {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
 }
 
 .builder__properties-actions-group {
@@ -715,7 +722,7 @@ ion-item.builder__question[aria-current='true'] {
     min-width: 0;
     margin: 0;
     padding: 0 12px;
-    border-bottom: 1px solid var(--fb-border);
+    border-bottom: 1px solid var(--app-border);
     background: transparent;
     --background: transparent;
 }
@@ -734,7 +741,7 @@ ion-item.builder__question[aria-current='true'] {
     --background: transparent;
     --background-checked: transparent;
     --background-hover: transparent;
-    --color: var(--fb-muted);
+    --color: var(--ion-color-medium-shade);
     --color-checked: var(--ion-color-primary);
     --indicator-color: transparent;
     --border-radius: 0;
@@ -823,8 +830,8 @@ ion-item.builder__question[aria-current='true'] {
 .builder__properties-body ion-input.builder__field {
     min-height: 40px;
     --min-height: 40px;
-    --background: var(--fb-surface);
-    --border-color: var(--fb-border-strong);
+    --background: var(--app-surface);
+    --border-color: var(--app-border);
     --border-radius: 4px;
     --border-width: 1px;
     --highlight-color-focused: var(--ion-color-primary);
@@ -843,7 +850,7 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 .builder__properties-body ion-input.builder__field::part(label) {
-    color: var(--fb-label);
+    color: var(--app-text);
     font-size: 12px;
     font-weight: 500;
     margin-bottom: 0;
@@ -866,20 +873,20 @@ ion-item.builder__question[aria-current='true'] {
 
 .builder__properties-body ion-select.builder__select {
     min-height: 42px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
-    background: var(--fb-surface);
+    background: var(--app-surface);
     --padding-start: 10px;
     --padding-end: 10px;
     --padding-top: 4px;
     --padding-bottom: 4px;
     --highlight-color-focused: var(--ion-color-primary);
     --highlight-color-valid: var(--ion-color-primary);
-    --placeholder-color: var(--fb-muted);
+    --placeholder-color: var(--ion-color-medium-shade);
 }
 
 .builder__properties-body ion-select.builder__select::part(label) {
-    color: var(--fb-label);
+    color: var(--app-text);
     font-size: 12px;
     font-weight: 500;
     margin-bottom: 0;
@@ -909,7 +916,7 @@ ion-item.builder__question[aria-current='true'] {
 .builder__properties-body ion-select.builder__select::part(icon) {
     flex: 0 0 auto;
     margin-inline-start: auto;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     opacity: 1;
 }
 
@@ -921,12 +928,12 @@ ion-item.builder__question[aria-current='true'] {
     padding: 0;
     font-size: 14px;
     line-height: 1.4;
-    color: var(--fb-text);
+    color: var(--app-text);
     justify-content: flex-start;
     --size: 16px;
-    --checkbox-background: var(--fb-surface);
+    --checkbox-background: var(--app-surface);
     --checkbox-background-checked: var(--ion-color-primary);
-    --border-color: var(--fb-border-strong);
+    --border-color: var(--app-border);
     --border-color-checked: var(--ion-color-primary);
     --border-radius: 3px;
     --border-width: 1px;
@@ -958,7 +965,7 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 .builder__field-label {
-    color: var(--fb-label);
+    color: var(--app-text);
     font-size: 13px;
     font-weight: 500;
     line-height: 1.3;
@@ -979,8 +986,8 @@ ion-item.builder__question[aria-current='true'] {
     margin: 0;
     font-size: 14px;
     line-height: 1.4;
-    color: var(--fb-text);
-    --color: var(--fb-border-strong);
+    color: var(--app-text);
+    --color: var(--app-border);
     --color-checked: var(--ion-color-primary);
 }
 
@@ -1006,22 +1013,22 @@ ion-item.builder__question[aria-current='true'] {
 
 .builder__hint {
     margin: 0;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     font-size: 14px;
 }
 
 .builder__answers-card {
     margin: 0;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
     box-shadow: none;
-    background: var(--fb-surface);
+    background: var(--app-surface);
 }
 
 .builder__answers-header {
     padding: 8px 10px;
-    background: var(--fb-surface-2);
-    border-bottom: 1px solid var(--fb-border);
+    background: var(--app-surface-muted);
+    border-bottom: 1px solid var(--app-border);
 }
 
 .builder__answers-heading {
@@ -1036,7 +1043,7 @@ ion-item.builder__question[aria-current='true'] {
     margin: 0;
     font-size: 14px;
     font-weight: 700;
-    color: var(--fb-text);
+    color: var(--app-text);
     line-height: 1.2;
 }
 
@@ -1050,9 +1057,9 @@ ion-item.builder__question[aria-current='true'] {
 .builder__answers-more-btn {
     min-height: 30px;
     margin: 0;
-    border: 1px solid var(--fb-border-strong);
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    border: 1px solid var(--app-border);
+    background: var(--app-surface);
+    color: var(--app-text);
     font: inherit;
     font-size: 13px;
     line-height: 1;
@@ -1061,7 +1068,7 @@ ion-item.builder__question[aria-current='true'] {
 .builder__answers-add-btn.builder__add-answer {
     padding: 4px 10px;
     border-radius: 4px 0 0 4px;
-    color: var(--fb-text);
+    color: var(--app-text);
     font-weight: 400;
 }
 
@@ -1079,7 +1086,7 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 .builder__answers-add-btn.builder__add-answer:disabled {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     cursor: not-allowed;
 }
 
@@ -1095,12 +1102,12 @@ ion-item.builder__question[aria-current='true'] {
    its items. */
 .builder__answers-popover {
     --width: 200px;
-    --background: var(--fb-surface);
+    --background: var(--app-surface);
 }
 
 .builder__answers-dropdown {
     padding: 4px 0;
-    background: var(--fb-surface);
+    background: var(--app-surface);
 }
 
 .builder__answers-dropdown-item {
@@ -1109,21 +1116,21 @@ ion-item.builder__question[aria-current='true'] {
     padding: 6px 12px;
     border: 0;
     background: transparent;
-    color: var(--fb-text);
+    color: var(--app-text);
     font: inherit;
     font-size: 13px;
     text-align: left;
 }
 
 .builder__answers-dropdown-item:disabled {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     cursor: not-allowed;
 }
 
 .builder__answers-dropdown-divider {
     height: 1px;
     margin: 4px 0;
-    background: var(--fb-border);
+    background: var(--app-border);
 }
 
 .builder__answer-list {
@@ -1156,7 +1163,7 @@ ion-item.builder__question[aria-current='true'] {
 
 .builder__answer > ion-icon {
     flex: none;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     font-size: 18px;
     cursor: grab;
 }
@@ -1164,8 +1171,8 @@ ion-item.builder__question[aria-current='true'] {
 .builder__answers-card ion-input.builder__answer-field {
     flex: 1;
     min-width: 0;
-    --background: var(--fb-surface);
-    --border-color: var(--fb-border-strong);
+    --background: var(--app-surface);
+    --border-color: var(--app-border);
     --border-radius: 4px;
     --border-width: 1px;
     --highlight-height: 0;
@@ -1181,7 +1188,7 @@ ion-item.builder__question[aria-current='true'] {
     min-height: 40px !important;
     height: 40px;
     --min-height: 40px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
     box-sizing: border-box;
     overflow: visible;
@@ -1230,7 +1237,7 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 .builder__answer-remove:disabled {
-    color: var(--fb-border-strong);
+    color: var(--app-border);
     cursor: not-allowed;
 }
 
@@ -1242,9 +1249,9 @@ ion-item.builder__question[aria-current='true'] {
     justify-self: start;
     min-height: 30px;
     padding: 4px 10px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
-    background: var(--fb-surface);
+    background: var(--app-surface);
     color: var(--ion-color-primary);
     font: inherit;
     font-size: 13px;
@@ -1253,18 +1260,33 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 .builder__add-answer:hover:not(:disabled) {
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
 }
 
 .builder__add-answer:disabled {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     cursor: not-allowed;
 }
 
 .builder__empty {
     padding: 16px;
-    color: var(--fb-muted);
+    color: #333;
     font-size: 14px;
+}
+
+/* The properties empty state sits below the column header, like the
+   title warning in the questions column. */
+.builder__empty[data-role="properties-empty"] {
+    margin: 10px 0 0 0;
+}
+
+/* The questions empty state is an info well: centered text with the import
+   action stacked on its own line. */
+.builder__question-list .builder__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
 }
 
 /* Legacy shows the resolution warning instead of the builder below 1024px. */
@@ -1295,7 +1317,7 @@ ion-item.builder__question[aria-current='true'] {
     margin: 8px 0 0;
     font-size: 12px;
     line-height: 1.4;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
 }
 
 .builder__answers-note[hidden] {
@@ -1325,21 +1347,21 @@ ion-item.builder__question[aria-current='true'] {
     width: 28px;
     height: 28px;
     padding: 0;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
     cursor: pointer;
 }
 
 .builder__answers-pager-button:disabled {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     cursor: not-allowed;
 }
 
 .builder__answers-pager-label {
     font-size: 12px;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
 }
 
 .builder__answers-csv {
@@ -1347,9 +1369,9 @@ ion-item.builder__question[aria-current='true'] {
     gap: 8px;
     margin-top: 12px;
     padding: 10px;
-    border: 1px solid var(--fb-border);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
 }
 
 .builder__answers-csv[hidden] {
@@ -1360,7 +1382,7 @@ ion-item.builder__question[aria-current='true'] {
     margin: 0;
     font-size: 12px;
     line-height: 1.4;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
 }
 
 .builder__answers-csv-file {
@@ -1376,17 +1398,17 @@ ion-item.builder__question[aria-current='true'] {
 .builder__answers-csv-button {
     min-height: 30px;
     padding: 4px 12px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
     font: inherit;
     font-size: 13px;
     cursor: pointer;
 }
 
 .builder__answers-csv-button:disabled {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     cursor: not-allowed;
 }
 
@@ -1395,9 +1417,9 @@ ion-item.builder__question[aria-current='true'] {
     gap: 8px;
     margin: 0 0 12px;
     padding: 10px;
-    border: 1px solid var(--fb-border);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
 }
 
 .builder__form-edit[hidden] {
@@ -1412,10 +1434,10 @@ ion-item.builder__question[aria-current='true'] {
 .builder__form-button {
     min-height: 30px;
     padding: 4px 12px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
     font: inherit;
     font-size: 13px;
     cursor: pointer;
@@ -1430,7 +1452,7 @@ ion-item.builder__question[aria-current='true'] {
     margin: 0;
     font-size: 13px;
     line-height: 1.4;
-    color: var(--fb-text);
+    color: var(--app-text);
 }
 
 .builder__form-file {
@@ -1446,7 +1468,7 @@ ion-item.builder__question[aria-current='true'] {
 /* The form tab warning is the same filled icon and size as the question row. */
 .builder__form-tab-state {
     margin-left: 6px;
-    color: var(--fb-amber);
+    color: var(--ion-color-warning);
     font-size: 20px;
     vertical-align: middle;
 }
@@ -1464,7 +1486,7 @@ ion-checkbox:not(.checkbox-checked) {
 }
 
 ion-checkbox:not(.checkbox-checked)::part(label) {
-    color: var(--fb-text);
+    color: var(--app-text);
 }
 
 .builder__info-button {
@@ -1478,7 +1500,7 @@ ion-checkbox:not(.checkbox-checked)::part(label) {
     border: 0;
     border-radius: 50%;
     background: none;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     cursor: pointer;
 }
 

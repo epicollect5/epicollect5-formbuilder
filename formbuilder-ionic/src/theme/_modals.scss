@@ -15,7 +15,7 @@ ion-modal.legacy-modal-host {
     position: static;
     overflow: auto;
     opacity: 1;
-    background: var(--fb-surface);
+    background: var(--app-surface);
 }
 
 .legacy-modal-host .modal-dialog {
@@ -27,7 +27,7 @@ ion-modal.legacy-modal-host {
 .modal-content {
     display: flex;
     flex-direction: column;
-    background: var(--fb-surface);
+    background: var(--app-surface);
 }
 
 .modal-header {
@@ -36,7 +36,7 @@ ion-modal.legacy-modal-host {
     justify-content: space-between;
     gap: 12px;
     padding: 16px 18px;
-    border-bottom: 1px solid var(--fb-border);
+    border-bottom: 1px solid var(--app-border);
 }
 
 .modal-title {
@@ -57,7 +57,7 @@ ion-modal.legacy-modal-host {
     justify-content: flex-end;
     gap: 8px;
     padding: 14px 18px;
-    border-top: 1px solid var(--fb-border);
+    border-top: 1px solid var(--app-border);
 }
 
 .modal-footer .pull-left {
@@ -68,7 +68,7 @@ ion-modal.legacy-modal-host {
     order: 2;
     border: 0;
     background: none;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     font-size: 28px;
     line-height: 1;
     cursor: pointer;
@@ -77,5 +77,5 @@ ion-modal.legacy-modal-host {
 }
 
 .close:hover {
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
 }

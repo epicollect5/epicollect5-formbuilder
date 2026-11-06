@@ -5,10 +5,10 @@
     gap: 6px;
     min-height: 36px;
     padding: 8px 12px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 10px;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
     font: inherit;
     font-size: 15px;
     line-height: 1.2;
@@ -17,8 +17,8 @@
 }
 
 .btn:hover {
-    background: var(--fb-surface-2);
-    border-color: var(--fb-border-strong);
+    background: var(--app-surface-muted);
+    border-color: var(--app-border);
 }
 
 .btn:focus-visible {
@@ -109,7 +109,7 @@ label {
     align-items: center;
     gap: 6px;
     margin-bottom: 6px;
-    color: var(--fb-label);
+    color: var(--app-text);
     font-size: 15px;
     font-weight: 500;
 }
@@ -119,10 +119,10 @@ label {
     width: 100%;
     min-height: 40px;
     padding: 9px 11px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 10px;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
     font: inherit;
     font-size: 16px;
 }
@@ -134,15 +134,15 @@ label {
 }
 
 .form-control[disabled] {
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
     opacity: 0.7;
 }
 
 select.form-control {
     appearance: none;
     padding-right: 32px;
-    background-image: linear-gradient(45deg, transparent 50%, var(--fb-muted) 50%),
-        linear-gradient(135deg, var(--fb-muted) 50%, transparent 50%);
+    background-image: linear-gradient(45deg, transparent 50%, var(--ion-color-medium-shade) 50%),
+        linear-gradient(135deg, var(--ion-color-medium-shade) 50%, transparent 50%);
     background-position: calc(100% - 16px) 55%, calc(100% - 11px) 55%;
     background-size: 5px 5px, 5px 5px;
     background-repeat: no-repeat;
@@ -184,7 +184,7 @@ select.input-sm {
     gap: 8px;
     margin: 0;
     font-weight: 400;
-    color: var(--fb-text);
+    color: var(--app-text);
 }
 
 input[type='checkbox'],
@@ -251,7 +251,7 @@ input[type='radio'] {
     justify-content: center;
     min-width: 30px;
     min-height: 30px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 8px;
     color: var(--ion-color-primary);
     text-decoration: none;
@@ -261,11 +261,11 @@ input[type='radio'] {
 .possible-answers__list_pager__total {
     display: inline;
     font-size: 15px;
-    color: var(--fb-label);
+    color: var(--app-text);
 }
 
 .builder__readme-editor {
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -274,8 +274,8 @@ input[type='radio'] {
     display: flex;
     align-items: center;
     gap: 4px;
-    background: var(--fb-surface-2);
-    border-bottom: 1px solid var(--fb-border);
+    background: var(--app-surface-muted);
+    border-bottom: 1px solid var(--app-border);
     padding: 6px;
 }
 
@@ -288,15 +288,15 @@ input[type='radio'] {
     border: 1px solid transparent;
     border-radius: 6px;
     background: transparent;
-    color: var(--fb-text);
+    color: var(--app-text);
     font: inherit;
     cursor: pointer;
 }
 
 .builder__readme-toolbar-button:hover,
 .builder__readme-toolbar-button[aria-pressed='true'] {
-    border-color: var(--fb-border-strong);
-    background: var(--fb-surface);
+    border-color: var(--app-border);
+    background: var(--app-surface);
 }
 
 .builder__readme-toolbar-button[aria-label='Bold'] {
@@ -320,8 +320,8 @@ input[type='radio'] {
     position: relative;
     min-height: 120px;
     padding: 10px 12px;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
     font: inherit;
     font-size: 15px;
     outline: none;
@@ -339,7 +339,7 @@ input[type='radio'] {
     position: absolute;
     top: 10px;
     left: 12px;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     content: attr(data-placeholder);
     pointer-events: none;
 }

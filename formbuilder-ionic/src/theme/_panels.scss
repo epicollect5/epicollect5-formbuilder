@@ -1,8 +1,8 @@
 .panel {
-    background: var(--fb-surface);
-    color: var(--fb-text);
-    border: 1px solid var(--fb-border);
-    border-radius: var(--fb-radius);
+    background: var(--app-surface);
+    color: var(--app-text);
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
     box-shadow: 0 1px 2px rgba(28, 18, 40, 0.06);
     margin: 0 0 14px;
     font-size: 16px;
@@ -14,8 +14,8 @@
     gap: 10px;
     padding: 10px 14px;
     background: #f5f5f5;
-    border-bottom: 1px solid var(--fb-border);
-    border-radius: var(--fb-radius) var(--fb-radius) 0 0;
+    border-bottom: 1px solid var(--app-border);
+    border-radius: 14px 14px 0 0;
 }
 
 /* The legacy header floats this group right; the header is a flex row, where a
@@ -65,7 +65,7 @@
 }
 
 .list-group-item {
-    border-bottom: 1px solid var(--fb-border);
+    border-bottom: 1px solid var(--app-border);
     padding: 8px 0;
 }
 
@@ -79,9 +79,9 @@
     flex: 1;
     min-height: 0;
     margin: 0;
-    background: var(--fb-surface);
-    border: 1px solid var(--fb-border);
-    border-radius: var(--fb-radius);
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
     box-shadow: 0 1px 2px rgba(28, 18, 40, 0.06);
 }
 
@@ -111,12 +111,12 @@
 }
 
 .inputs-collection__header__edit-state {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     font-weight: 500;
 }
 
 .inputs-collection__header__element-name {
-    color: var(--fb-text);
+    color: var(--app-text);
     font-weight: 700;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -141,14 +141,14 @@
     gap: 10px;
     padding: 26px 18px;
     text-align: center;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
 }
 
 .input-properties__no-input-selected {
     display: block;
     padding: 26px 18px;
     text-align: center;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
 }
 
 /* The properties card must be the only card in the column: the legacy tab panes
@@ -169,7 +169,7 @@
 .input_properties__forms_wrapper .panel > .panel-heading {
     padding: 10px 0;
     background: transparent;
-    border-bottom: 1px solid var(--fb-border);
+    border-bottom: 1px solid var(--app-border);
     border-radius: 0;
 }
 
@@ -181,14 +181,14 @@
    its body, instead of the flattened header the other nested panels use.
    No overflow clipping, so the "more" dropdown can still escape the card. */
 .input_properties__forms_wrapper .input-properties__form__possible-answers {
-    border: 1px solid var(--fb-border);
+    border: 1px solid var(--app-border);
     border-radius: 8px;
 }
 
 .input_properties__forms_wrapper .input-properties__form__possible-answers > .panel-heading {
     padding: 8px 12px;
     background: #93cdafb5;
-    border-bottom: 1px solid var(--fb-border-strong);
+    border-bottom: 1px solid var(--app-border);
     border-radius: 8px 8px 0 0;
 }
 
@@ -235,7 +235,7 @@
 .builder__jump-row {
     display: block;
     padding: 8px 0;
-    border-bottom: 1px solid var(--fb-border);
+    border-bottom: 1px solid var(--app-border);
 }
 
 .input-properties__form__jumps__list-item:last-child,
@@ -280,7 +280,7 @@
 .builder__jump-label {
     margin: 0;
     font-size: 14px;
-    color: var(--fb-label);
+    color: var(--app-text);
 }
 
 .dropdown {
@@ -299,10 +299,10 @@
     min-height: 34px;
     height: 34px;
     padding: 4px 10px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
     font: inherit;
     font-size: 14px;
     line-height: 1.3;
@@ -330,14 +330,14 @@
 }
 
 .dropdown__label--placeholder {
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
 }
 
 .dropdown__icon {
     flex: 0 0 auto;
     margin-inline-start: auto;
     font-size: 18px;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
     pointer-events: none;
 }
 
@@ -350,7 +350,7 @@
     width: var(--width, var(--trigger-width, 180px));
     min-width: var(--width, var(--trigger-width, 180px));
     max-width: min(420px, calc(100vw - 24px));
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
 }
 
@@ -360,7 +360,7 @@
     max-height: 260px;
     overflow-y: auto;
     padding: 4px 0;
-    background: var(--fb-surface);
+    background: var(--app-surface);
 }
 
 .dropdown__option {
@@ -370,7 +370,7 @@
     padding: 8px 12px;
     border: 0;
     background: transparent;
-    color: var(--fb-text);
+    color: var(--app-text);
     font: inherit;
     font-size: 14px;
     line-height: 1.3;
@@ -409,10 +409,10 @@
     gap: 6px;
     min-height: 34px;
     padding: 4px 10px;
-    border: 1px solid var(--fb-border-strong);
+    border: 1px solid var(--app-border);
     border-radius: 4px;
-    background: var(--fb-surface);
-    color: var(--fb-text);
+    background: var(--app-surface);
+    color: var(--app-text);
     font: inherit;
     font-size: 14px;
     cursor: pointer;
@@ -452,8 +452,8 @@
     margin: 0;
     padding: 6px;
     list-style: none;
-    background: var(--fb-surface);
-    border: 1px solid var(--fb-border-strong);
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
     border-radius: 8px;
     box-shadow: 0 14px 34px rgba(28, 18, 40, 0.16);
 }
@@ -466,14 +466,14 @@
     display: block;
     padding: 8px 10px;
     border-radius: 8px;
-    color: var(--fb-text);
+    color: var(--app-text);
     text-decoration: none;
     font-size: 15px;
 }
 
 .dropdown-menu > li > a:hover,
 .dropdown-menu > li > a:focus {
-    background: var(--fb-surface-2);
+    background: var(--app-surface-muted);
     outline: none;
 }
 
@@ -485,5 +485,5 @@
 .dropdown-header {
     padding: 6px 10px;
     font-size: 14px;
-    color: var(--fb-muted);
+    color: var(--ion-color-medium-shade);
 }
