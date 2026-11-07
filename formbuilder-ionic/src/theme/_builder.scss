@@ -1502,8 +1502,15 @@ ion-item.builder__question[aria-current='true'] {
 
 .builder__form-tab ion-label {
     display: inline-flex;
-    align-items: center;
+    /* baseline, not centre: centring the boxes puts the digit ink high and the
+       lowercase name ink low, which read as misaligned (seen at 3x zoom) */
+    align-items: baseline;
     gap: 6px;
+}
+
+.builder__form-tab .builder__form-tab-state,
+.builder__form-tab .builder__form-tab-dots {
+    align-self: center;
 }
 
 /* Long form names truncate inside the tab; names outside the current
