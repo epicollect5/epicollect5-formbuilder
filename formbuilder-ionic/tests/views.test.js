@@ -163,6 +163,12 @@ describe('fixed markup views', () => {
         expect(html).toContain('data-role="form-actions-trigger"');
         expect(shell).toContain("label: 'Print form'");
     });
+
+    it('keeps dropdown options at full height inside the scrolling list', async () => {
+        const styles = await read('src/theme/_panels.scss');
+
+        expect(styles).toMatch(/\.dropdown__option\s*\{[^}]*flex-shrink:\s*0;[^}]*\}/s);
+    });
 });
 
 describe('build boundary', () => {

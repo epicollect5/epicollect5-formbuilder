@@ -340,6 +340,7 @@ describe('properties panel', () => {
         select_first_question();
         open_tab('advanced');
 
+        document.querySelector('#properties [data-field="uniqueness"] .dropdown__trigger').click();
         const option = document.querySelector('#properties [data-field="uniqueness"] .dropdown__option[data-value="form"]');
 
         expect(option.textContent.trim()).toBe('Make answer unique to all Form entries');

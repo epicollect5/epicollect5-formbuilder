@@ -309,6 +309,7 @@ describe('branch and group rows', () => {
         open_tab('advanced');
         const uniqueness = document.querySelector('#properties [data-field="uniqueness"] .dropdown');
         expect(uniqueness).not.toBeNull();
+        uniqueness.querySelector('.dropdown__trigger').click();
         const form_option = uniqueness.querySelector('.dropdown__option[data-value="form"]');
         expect(form_option).not.toBeNull();
         expect(form_option.textContent.trim())

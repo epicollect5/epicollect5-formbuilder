@@ -332,6 +332,53 @@ describe('builder shell', () => {
         expect(document.querySelector('#properties .builder__add-jump').disabled).toBe(true);
     });
 
+    it('paginates jumps and keeps row actions on the current page', () => {
+        const definition = project_definition();
+        const input = definition.data.project.forms[0].inputs[0];
+        const total_jumps = PARAMETERS.JUMPS_PER_PAGE + 5;
+
+        input.possible_answers = Array.from({ length: total_jumps }, (_, index) => {
+            return { answer: 'Answer ' + (index + 1), answer_ref: 'answer_' + (index + 1) };
+        });
+        input.jumps = Array.from({ length: total_jumps }, (_, index) => {
+            return {
+                to: PARAMETERS.JUMP_TO_END_OF_FORM_REF,
+                when: 'IS',
+                answer_ref: 'answer_' + (index + 1)
+            };
+        });
+
+        setProject(definition);
+        renderApp();
+        select_first_question();
+
+        const segment = document.querySelector('#properties .builder__property-tabs');
+
+        segment.value = 'jumps';
+        segment.dispatchEvent(new CustomEvent('ionChange', { detail: { value: 'jumps' } }));
+
+        const rows = () => [...document.querySelectorAll('#properties .builder__jump-row')];
+
+        expect(rows()).toHaveLength(PARAMETERS.JUMPS_PER_PAGE);
+        expect(rows()[0].dataset.jumpIndex).toBe('0');
+        expect(document.querySelector('#properties [data-role="jumps-pager"]').hidden).toBe(false);
+        expect(document.querySelector('#properties [data-role="jumps-page"]').textContent).toBe('1');
+        expect(document.querySelector('#properties [data-role="jumps-pages"]').textContent).toBe('2');
+
+        document.querySelector('#properties [data-action="jumps-page-next"]').click();
+
+        expect(rows()).toHaveLength(5);
+        expect(rows()[0].dataset.jumpIndex).toBe(String(PARAMETERS.JUMPS_PER_PAGE));
+        expect(document.querySelector('#properties [data-role="jumps-page"]').textContent).toBe('2');
+        expect(document.querySelector('#properties [data-action="jumps-page-next"]').disabled).toBe(true);
+
+        rows()[0].querySelector('.builder__jump-remove').click();
+
+        expect(getCurrentInput().jumps).toHaveLength(total_jumps - 1);
+        expect(rows()).toHaveLength(4);
+        expect(rows()[0].dataset.jumpIndex).toBe(String(PARAMETERS.JUMPS_PER_PAGE));
+    });
+
     it('toasts that the selected question is valid', () => {
         vi.useFakeTimers();
         select_first_question();
