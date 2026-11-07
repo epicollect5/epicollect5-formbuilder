@@ -264,11 +264,13 @@
 }
 
 .builder__form-tab {
-    /* equal flex shares: names never set the width, they ellipsise instead */
+    /* equal flex shares: names never set the width, they ellipsise instead.
+       max-width caps a lonely tab so it behaves like a browser tab; the
+       container queries below still adapt narrow slices */
     flex: 1 1 0;
     width: 0;
     min-width: 44px;
-    max-width: none;
+    max-width: 220px;
     overflow: hidden;
     container-type: inline-size;
     min-height: 44px;
