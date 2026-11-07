@@ -34,7 +34,7 @@ export const PARAMETERS = {
     PROJECT_SCHEMA_ID: 'epicollect5-project',
 
     /* Import guard: refuse absurdly large files before reading them (R-71). */
-    FORM_IMPORT_MAX_BYTES: 5 * 1024 * 1024,
+    IMPORT_MAX_BYTES: 5 * 1024 * 1024,
 
     JUMP_TO_END_OF_FORM_REF: 'END'
 };

@@ -251,7 +251,11 @@ to regress; **fixed** — the concrete case found during the port is handled.
   300/1000 answer cap applies. A large or pathological file (quoted multi-line
   cells) freezes the tab.
 - **Impact:** unresponsive tab; possible memory spike.
-- **Status:** open.
+- **Status:** fixed (2026-11-07) — CSV files above
+  `PARAMETERS.IMPORT_MAX_BYTES` (5 MB, shared with the form import) are refused
+  before reading with a "CSV file is too large" error. The parse is still
+  synchronous; the cap bounds its cost. No unit test (the check lives in the
+  shell file-input handler). Legacy has no size cap, a deliberate divergence.
 - **Revisit when:** users report large imports, or a file-size guard is added.
 
 ### R-52 Sanitising on every keystroke can fight the input method
@@ -461,8 +465,9 @@ shows the dangling ref as "Unavailable answer".
   parsed and schema-validated synchronously, blocking the UI. There is no size
   cap and no MIME check.
 - **Impact:** a slow or frozen builder while the import runs.
-- **Status:** fixed (2026-11-07) — files above `PARAMETERS.FORM_IMPORT_MAX_BYTES`
-  (5 MB) are refused before reading with a "Form file is too large" error. The
+- **Status:** fixed (2026-11-07) — files above `PARAMETERS.IMPORT_MAX_BYTES`
+  (5 MB, shared with the CSV import) are refused before reading with a "Form
+  file is too large" error. The
   parse is still synchronous; the cap bounds its cost. No unit test (the check
   lives in the shell file-input handler). Legacy has no size cap (extension
   check only), so this is a deliberate divergence: a 300-question project is

@@ -130,7 +130,8 @@ Ported: add / rename / remove / reorder, default (initial answer) selection,
 CSV import (column picker, headers toggle, replace / append) and export,
 pagination at 100 per page, ordering A-Z / Z-A / shuffle, delete all, duplicate
 `answer_ref` detection, the 300 / 1000 answer limits, the 250-char cap and
-`<` / `>` sanitisation on every write.
+`<` / `>` sanitisation on every write. CSV and form imports refuse files above
+5 MB.
 
 - The CSV panel is rendered through `openModal` (auto-height) rather than
   inline in the answers card.

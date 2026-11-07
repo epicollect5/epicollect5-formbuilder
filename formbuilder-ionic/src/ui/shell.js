@@ -559,7 +559,7 @@ const importFormFile = (card) => {
             return;
         }
 
-        if (file.size > PARAMETERS.FORM_IMPORT_MAX_BYTES) {
+        if (file.size > PARAMETERS.IMPORT_MAX_BYTES) {
             notifyError(FORM_MESSAGES.FORM_FILE_TOO_LARGE);
             return;
         }
@@ -2198,6 +2198,13 @@ const pickAnswersCsv = (input) => {
         if (!/\.csv$/i.test(file.name)) {
             field.remove();
             notifyError(VALIDATION_MESSAGES.CSV_FILE_INVALID);
+            return;
+        }
+
+        // the same bound as the form import bounds the synchronous parse (R-51)
+        if (file.size > PARAMETERS.IMPORT_MAX_BYTES) {
+            field.remove();
+            notifyError(VALIDATION_MESSAGES.CSV_FILE_TOO_LARGE);
             return;
         }
 

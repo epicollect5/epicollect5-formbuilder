@@ -43,6 +43,7 @@ export const VALIDATION_MESSAGES = {
     POSSIBLE_ANSWER_EMPTY: 'Answer text cannot be empty',
     POSSIBLE_ANSWER_DUPLICATED_IDENTIFIER: 'Duplicated identifier, please remove',
     CSV_FILE_INVALID: 'CSV file is invalid!',
+    CSV_FILE_TOO_LARGE: 'CSV file is too large!',
     POSSIBLE_ANSWERS_IMPORTED: 'Possible answers import succeeded!',
     POSSIBLE_ANSWERS_INVALID: 'Some possible answers are invalid',
     VALUE_MUST_BE_INTEGER: 'Value must be an integer',
