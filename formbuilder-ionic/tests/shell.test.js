@@ -126,6 +126,40 @@ describe('builder shell', () => {
         expect(tabs[1].getAttribute('aria-selected')).toBe('false');
     });
 
+    it('collapses form names outside the prev/current/next window', () => {
+        const definition = project_definition();
+
+        for (let index = 3; index <= 5; index += 1) {
+            definition.data.project.forms.push({
+                ref: 'form_' + index,
+                name: 'Extra form ' + index,
+                type: 'hierarchy',
+                inputs: []
+            });
+        }
+
+        setProject(definition);
+        renderApp();
+
+        // select the middle form: only its neighbours keep their name
+        document.querySelectorAll('#form-tabs .builder__form-tab')[2].click();
+        renderApp();
+
+        const names = [...document.querySelectorAll('#form-tabs .builder__form-tab .builder__form-tab-name')]
+            .map((span) => span.textContent);
+
+        expect(names).toEqual(['...', 'Second form', 'Extra form 3', 'Extra form 4', '...']);
+        expect(document.querySelectorAll('#form-tabs .builder__form-tab')[2].getAttribute('aria-selected')).toBe('true');
+
+        // collapsed tabs keep their tooltip and stay clickable
+        const collapsed = document.querySelectorAll('#form-tabs .builder__form-tab')[4];
+
+        expect(collapsed.getAttribute('title')).toBe('Extra form 5');
+        collapsed.click();
+
+        expect(getSession().current_form_index).toBe(4);
+    });
+
     it('keeps the builder chrome', () => {
         expect(document.querySelector('[data-action="back"]')).not.toBeNull();
         expect(document.querySelector('[data-action="exit"]')).not.toBeNull();

@@ -1506,6 +1506,15 @@ ion-item.builder__question[aria-current='true'] {
     gap: 6px;
 }
 
+/* Long form names truncate inside the tab; names outside the current
+   prev/current/next window collapse to '...' but stay clickable. */
+.builder__form-tab .builder__form-tab-name {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* Unchecked boxes keep the readable surface background; the label always uses
    the body text color, checked or not. */
 ion-checkbox:not(.checkbox-checked) {

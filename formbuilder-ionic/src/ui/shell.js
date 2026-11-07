@@ -703,14 +703,19 @@ const renderForms = () => {
     segment.value = String(current_index);
     segment.disabled = isEditing();
 
+    // long names break the strip: only the previous, current and next tabs
+    // keep their name, the rest collapse to a placeholder that stays clickable
+    // and keeps its tooltip
     forms.forEach((form, form_index) => {
         const is_selected = form_index === current_index;
+        const in_window = Math.abs(form_index - current_index) <= 1;
         const tab = element('ion-segment-button', {
             class: 'builder__form-tab',
             value: String(form_index),
             role: 'tab',
-            'aria-selected': is_selected ? 'true' : 'false'
-        }, [buildFormTabLabel(form)]);
+            'aria-selected': is_selected ? 'true' : 'false',
+            title: form.name
+        }, [buildFormTabLabel(form, in_window ? form.name : '...')]);
 
         segment.append(tab);
     });
@@ -718,14 +723,14 @@ const renderForms = () => {
     bindFormSegment(segment);
 };
 
-const buildFormTabLabel = (form) => {
+const buildFormTabLabel = (form, display_name) => {
     // each tab carries its own live question count, on the left of the name
     const label = element('ion-label', {}, [
         element('ion-badge', {
             class: 'builder__question-count-badge',
             title: 'Questions in this form'
         }, [String(countInputs(getInputs(form)))]),
-        form.name
+        element('span', { class: 'builder__form-tab-name' }, [display_name])
     ]);
 
     if (!areFormInputsValid(form)) {
