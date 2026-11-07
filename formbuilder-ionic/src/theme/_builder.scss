@@ -206,12 +206,20 @@
     gap: 4px;
 }
 
-/* Live aggregate question count of the active form (the save-gate scope). */
+/* Live aggregate question count of the active form (the save-gate scope),
+   rendered as a pill aligned with the form name label. */
 .builder__question-count-badge {
+    align-self: center;
+    margin: 0;
+    padding: 3px 10px;
+    border-radius: 999px;
     --background: var(--app-surface-muted);
     --color: var(--app-text);
+    background: var(--background);
+    color: var(--color);
     font-size: 12px;
-    padding: 4px 8px;
+    font-weight: 600;
+    line-height: 1.4;
 }
 
 .builder__icon-btn {
