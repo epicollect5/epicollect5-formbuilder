@@ -30,3 +30,9 @@ ion-toast.fb-toast--warning {
     --color: var(--ion-color-warning-contrast);
     --button-color: var(--ion-color-warning-contrast);
 }
+
+/* Ionic 8 renders the cancel button with `color: inherit`, which ignores
+   --button-color; the part selector carries the theme colour through. */
+ion-toast.fb-toast::part(button) {
+    color: var(--button-color);
+}
