@@ -715,7 +715,7 @@ const renderForms = () => {
             role: 'tab',
             'aria-selected': is_selected ? 'true' : 'false',
             title: form.name
-        }, [buildFormTabLabel(form, in_window ? form.name : '...')]);
+        }, [buildFormTabLabel(form, in_window ? form.name : '···')]);
 
         segment.append(tab);
     });

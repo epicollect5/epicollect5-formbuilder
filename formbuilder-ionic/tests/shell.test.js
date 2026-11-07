@@ -148,7 +148,7 @@ describe('builder shell', () => {
         const names = [...document.querySelectorAll('#form-tabs .builder__form-tab .builder__form-tab-name')]
             .map((span) => span.textContent);
 
-        expect(names).toEqual(['...', 'Second form', 'Extra form 3', 'Extra form 4', '...']);
+        expect(names).toEqual(['···', 'Second form', 'Extra form 3', 'Extra form 4', '···']);
         expect(document.querySelectorAll('#form-tabs .builder__form-tab')[2].getAttribute('aria-selected')).toBe('true');
 
         // collapsed tabs keep their tooltip and stay clickable
