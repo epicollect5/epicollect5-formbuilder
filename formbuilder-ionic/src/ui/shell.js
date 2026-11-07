@@ -710,12 +710,8 @@ const renderForms = () => {
     segment.value = String(current_index);
     segment.disabled = isEditing();
 
-    // long names break the strip: the tabs render named, then collapse
-    // furthest-from-active while the strip overflows (measured); without
-    // layout (jsdom) the count rule stands: four or more forms collapse the
-    // inactive tabs
-    const collapse_others = forms.length >= 4;
-
+    // Every tab keeps its name; CSS gives each an equal share of the strip and
+    // ellipsises the name when space runs out (five forms maximum).
     forms.forEach((form, form_index) => {
         const is_selected = form_index === current_index;
         const tab = element('ion-segment-button', {
@@ -724,62 +720,23 @@ const renderForms = () => {
             role: 'tab',
             'aria-selected': is_selected ? 'true' : 'false',
             title: form.name
-        }, [buildFormTabLabel(form, collapse_others && !is_selected)]);
+        }, [buildFormTabLabel(form)]);
 
         segment.append(tab);
     });
 
-    if (segment.clientWidth > 0) {
-        const tabs = [...segment.querySelectorAll('.builder__form-tab')];
-
-        // upgrade the collapsed tabs back to names while the strip fits
-        tabs.forEach((tab, index) => {
-            if (index === current_index) {
-                return;
-            }
-            if (collapse_others) {
-                tab.querySelector('ion-label').replaceWith(buildFormTabLabel(forms[index], false));
-            }
-        });
-
-        const overflowing = () => segment.scrollWidth > segment.clientWidth + 1;
-
-        // collapse the tabs furthest from the active one until it fits
-        for (const index of forms
-            .map((form, index) => index)
-            .filter((index) => index !== current_index)
-            .sort((a, b) => Math.abs(b - current_index) - Math.abs(a - current_index))) {
-            if (!overflowing()) {
-                break;
-            }
-            tabs[index].querySelector('ion-label').replaceWith(buildFormTabLabel(forms[index], true));
-        }
-    }
-
     bindFormSegment(segment);
 };
 
-const buildFormTabLabel = (form, collapsed) => {
-    // each named tab carries its own live question count on the left of the
-    // name; a collapsed tab is just the placeholder and the validity icon, so
-    // five tabs always fit
-    const children = [];
-
-    if (collapsed) {
-        children.push(element('ion-icon', {
-            class: 'builder__form-tab-dots',
-            name: 'ellipsis-horizontal',
-            'aria-label': 'More forms'
-        }));
-    } else {
-        children.push(element('ion-badge', {
+const buildFormTabLabel = (form) => {
+    // Each tab carries its live question count on the left of the name.
+    const label = element('ion-label', {}, [
+        element('ion-badge', {
             class: 'builder__question-count-badge',
             title: 'Questions in this form'
-        }, [String(countInputs(getInputs(form)))]));
-        children.push(element('span', {class: 'builder__form-tab-name'}, [form.name]));
-    }
-
-    const label = element('ion-label', {}, children);
+        }, [String(countInputs(getInputs(form)))]),
+        element('span', {class: 'builder__form-tab-name'}, [form.name])
+    ]);
 
     if (!areFormInputsValid(form)) {
         label.append(element('ion-icon', {
