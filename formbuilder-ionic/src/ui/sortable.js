@@ -14,16 +14,15 @@
  */
 
 export function getJQuery() {
-    return window.jQuery || null;
+    if (!window.jQuery) {
+        throw new Error('Drag and drop requires jQuery, but window.jQuery is not available.');
+    }
+
+    return window.jQuery;
 };
 
 export function installToolDrag(tools_selector, list_selector, on_drop) {
     const $ = getJQuery();
-
-    if (!$) {
-        return;
-    }
-
     const $tools = $(tools_selector);
 
     if ($tools.hasClass('ui-draggable')) {
@@ -121,11 +120,6 @@ export function installToolDrag(tools_selector, list_selector, on_drop) {
 
 export function installQuestionSortable(list_selector, on_sync) {
     const $ = getJQuery();
-
-    if (!$) {
-        return;
-    }
-
     const $list = $(list_selector);
 
     if (!$list.length) {
@@ -153,11 +147,6 @@ export function installQuestionSortable(list_selector, on_sync) {
 
 export function installAnswerSortable(list_selector, on_sync) {
     const $ = getJQuery();
-
-    if (!$) {
-        return;
-    }
-
     const $list = $(list_selector);
 
     if (!$list.length) {
