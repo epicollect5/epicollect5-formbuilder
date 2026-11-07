@@ -1557,6 +1557,19 @@ ion-checkbox:not(.checkbox-checked)::part(label) {
     gap: 4px;
 }
 
+/* The edit button keeps the legacy content width: one third of the panel,
+   in the left column of the grid. */
+.builder__edit-container-grid {
+    margin: 0;
+    padding: 0;
+    --ion-grid-padding: 0;
+    --ion-grid-column-padding: 0;
+}
+
+.builder__edit-container-grid .builder__form-button {
+    width: 100%;
+}
+
 .builder__question-field-group {
     display: flex;
     flex-direction: column;

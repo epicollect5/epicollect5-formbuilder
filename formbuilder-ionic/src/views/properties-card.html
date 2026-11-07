@@ -86,10 +86,17 @@
                                hidden></p>
                         </div>
 
-                        <button type="button"
-                                class="builder__form-button builder__edit-container"
-                                data-role="edit-container"
-                                hidden>Edit Branch</button>
+                        <ion-grid class="builder__edit-container-grid"
+                                  data-role="edit-container-grid">
+                            <ion-row class="ion-no-padding">
+                                <ion-col size="4" class="ion-no-padding">
+                                    <button type="button"
+                                            class="builder__form-button builder__edit-container"
+                                            data-role="edit-container"
+                                            hidden>Edit Branch</button>
+                                </ion-col>
+                            </ion-row>
+                        </ion-grid>
 
                         <ion-checkbox class="builder__checkbox"
                                       label-placement="end"

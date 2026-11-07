@@ -1290,13 +1290,14 @@ const buildBasicPanel = (input, pane) => {
     const question_label = panel.querySelector('[data-role="question-label"]');
     const required_toggle = panel.querySelector('[data-field="required"]');
     const title_row = panel.querySelector('[data-field="title"]');
+    const edit_container_grid = panel.querySelector('[data-role="edit-container-grid"]');
     const edit_container = panel.querySelector('[data-role="edit-container"]');
 
     if (input.type === 'readme') {
         question_group.remove();
         required_toggle.remove();
         title_row.remove();
-        edit_container.remove();
+        edit_container_grid.remove();
 
         active_readme_editor = createReadmeEditor(input.question || '', (question, plain_text) => {
             if (getSession().current_input_ref !== input.ref) {
@@ -1342,7 +1343,8 @@ const buildBasicPanel = (input, pane) => {
         };
     }
     else {
-        edit_container.remove();
+        //the button lives in the first third of the grid, remove the whole grid
+        edit_container_grid.remove();
     }
 
     if (isMultipleAnswerType(input.type)) {
