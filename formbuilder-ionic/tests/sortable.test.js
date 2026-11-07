@@ -4,6 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import jQuery from 'jquery';
 import { getCurrentInputs, setProject } from '@/services/session.js';
 import { renderApp } from '@/ui/shell.js';
+import { installAnswerSortable, installQuestionSortable, installToolDrag } from '@/ui/sortable.js';
 
 /*
  * The shell only wires drag and drop when jQuery UI is on the page, so this
@@ -192,6 +193,25 @@ describe('question sortable', () => {
         expect(tools).toHaveLength(18);
         expect(tools.hasClass('ui-draggable')).toBe(true);
         expect(tools.first().attr('data-type')).toBe('text');
+    });
+
+    it('fails loudly when jQuery is missing instead of silently skipping', () => {
+        const jquery = window.jQuery;
+        const dollar = window.$;
+
+        delete window.jQuery;
+        delete window.$;
+
+        try {
+            const message = 'Drag and drop requires jQuery, but window.jQuery is not available.';
+
+            expect(() => installToolDrag('#tools .builder__tool', '#questions .builder__question-list', () => {})).toThrow(message);
+            expect(() => installQuestionSortable('#questions .builder__question-list', () => {})).toThrow(message);
+            expect(() => installAnswerSortable('#properties .builder__answer-list', () => {})).toThrow(message);
+        } finally {
+            window.jQuery = jquery;
+            window.$ = dollar;
+        }
     });
 
     it('refreshes validity after a reorder without a toast', () => {

@@ -332,6 +332,36 @@ describe('builder shell', () => {
         expect(document.querySelector('#properties .builder__add-jump').disabled).toBe(true);
     });
 
+    it('shows a dangling jump answer as unavailable without listing it as an option', () => {
+        const definition = project_definition();
+        const input = definition.data.project.forms[0].inputs[0];
+
+        input.jumps = [{
+            to: PARAMETERS.JUMP_TO_END_OF_FORM_REF,
+            when: 'IS',
+            answer_ref: 'answer_missing'
+        }];
+
+        setProject(definition);
+        renderApp();
+        select_first_question();
+
+        const segment = document.querySelector('#properties .builder__property-tabs');
+
+        segment.value = 'jumps';
+        segment.dispatchEvent(new CustomEvent('ionChange', { detail: { value: 'jumps' } }));
+
+        const answer = document.querySelector('#properties .builder__jump-answer');
+        const trigger = answer.querySelector('.dropdown__trigger');
+
+        expect(trigger.querySelector('.dropdown__label').textContent).toBe('Unavailable answer');
+
+        trigger.click();
+
+        expect([...answer.querySelectorAll('.dropdown__option')].map((option) => option.textContent)).toEqual(['Yes', 'No']);
+        expect(getCurrentInput().jumps[0].answer_ref).toBe('answer_missing');
+    });
+
     it('paginates jumps and keeps row actions on the current page', () => {
         const definition = project_definition();
         const input = definition.data.project.forms[0].inputs[0];
@@ -592,6 +622,50 @@ describe('possible answers', () => {
         expect(remove_button.disabled).toBe(true);
         remove_button.click();
         expect(getCurrentInput().possible_answers).toHaveLength(1);
+    });
+
+    it('keeps the possible answers badge in step with add and remove', () => {
+        const badge = () => document.querySelector('#properties .builder__answers-count-badge');
+
+        expect(badge().textContent).toBe('2');
+
+        document.querySelector('#properties .builder__add-answer').click();
+
+        expect(badge().textContent).toBe('3');
+
+        answer_rows()[2].querySelector('.builder__answer-remove').click();
+
+        expect(badge().textContent).toBe('2');
+    });
+
+    it('updates the possible answers badge after a CSV import', async () => {
+        const badge = () => document.querySelector('#properties .builder__answers-count-badge');
+
+        expect(badge().textContent).toBe('2');
+
+        document.querySelector('#properties [data-role="answers-actions-trigger"]').click();
+        document.querySelector('#properties [data-action="import"]').click();
+
+        // `pickAnswersCsv` appends its input to the body; the shell already
+        // holds a form-import file input, so take the last one.
+        const file_input = [...document.body.querySelectorAll('input[type="file"]')].pop();
+        const file = new File(['Answer\nOne\nTwo\nThree'], 'answers.csv', {type: 'text/csv'});
+
+        Object.defineProperty(file_input, 'files', {value: [file], configurable: true});
+        file_input.dispatchEvent(new Event('change'));
+
+        await new Promise((resolve) => { setTimeout(resolve, 100); });
+
+        const modal = document.querySelector('ion-modal');
+        const column = modal.querySelector('[data-role="csv-column"]');
+
+        column.querySelector('.dropdown__trigger').click();
+        column.querySelector('.dropdown__option[data-value="0"]').click();
+
+        modal.querySelector('.modal-footer .btn-primary').click();
+
+        expect(getCurrentInput().possible_answers.map((answer) => answer.answer)).toEqual(['One', 'Two', 'Three']);
+        expect(badge().textContent).toBe('3');
     });
 });
 

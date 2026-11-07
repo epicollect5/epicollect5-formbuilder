@@ -169,6 +169,18 @@ describe('fixed markup views', () => {
 
         expect(styles).toMatch(/\.dropdown__option\s*\{[^}]*flex-shrink:\s*0;[^}]*\}/s);
     });
+
+    it('spans the jump row error across the label and control columns', async () => {
+        const styles = await read('src/theme/_builder.scss');
+
+        expect(styles).toMatch(/\.builder__jump-row-error\s*\{[^}]*grid-column:\s*1\s*\/\s*-1;[^}]*\}/s);
+    });
+
+    it('renders the jump actions as a toolbar with the add button in the end slot', async () => {
+        const html = await read('src/views/properties-card.html');
+
+        expect(html).toMatch(/<ion-toolbar class="builder__jumps-actions">\s*<button[^>]*slot="end"[^>]*builder__add-jump/s);
+    });
 });
 
 describe('build boundary', () => {

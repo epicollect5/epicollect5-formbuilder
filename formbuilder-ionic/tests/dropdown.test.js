@@ -87,6 +87,51 @@ describe('dropdown', () => {
         expect(long.querySelector('.dropdown__search').hidden).toBe(false);
     });
 
+    it('labels a display-only selection without offering it as an option', () => {
+        const dropdown = mount({
+            options: [
+                { value: 'gone', label: 'Unavailable answer', display_only: true },
+                ...OPTIONS
+            ],
+            value: 'gone'
+        });
+
+        expect(dropdown.value).toBe('gone');
+        expect(dropdown.querySelector('.dropdown__label').textContent).toBe('Unavailable answer');
+
+        open_options(dropdown);
+
+        expect([...dropdown.querySelectorAll('.dropdown__option')].map((option) => option.textContent)).toEqual(['Alpha', 'Beta']);
+        expect(option_values(dropdown)).toEqual(['a', 'b']);
+    });
+
+    it('does not count a display-only selection towards the search threshold', () => {
+        const dropdown = mount({
+            options: [
+                { value: 'gone', label: 'Unavailable answer', display_only: true },
+                ...many_options(50)
+            ],
+            value: 'gone'
+        });
+
+        open_options(dropdown);
+
+        expect(dropdown.querySelector('.dropdown__search').hidden).toBe(true);
+        expect(dropdown.querySelectorAll('.dropdown__option')).toHaveLength(50);
+    });
+
+    it('does not dismiss the popover when the search field is clicked', () => {
+        const dropdown = mount({ options: many_options(60) });
+
+        open_options(dropdown);
+
+        // Ionic attaches a dismiss handler to the whole popover content when
+        // dismiss-on-select is set, so using the search field would close it.
+        // Selecting an option is the only click that dismisses, and the list
+        // handler calls dismiss() itself.
+        expect(dropdown.querySelector('ion-popover').hasAttribute('dismiss-on-select')).toBe(false);
+    });
+
     it('filters long lists and keeps the original option value', () => {
         const dropdown = mount({ options: many_options(60), value: 'value-0' });
 
