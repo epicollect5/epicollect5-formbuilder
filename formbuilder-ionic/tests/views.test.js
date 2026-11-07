@@ -136,6 +136,26 @@ describe('fixed markup views', () => {
         }
     });
 
+    it('gives every form tab an equal share and ellipsises its name', async () => {
+        const html = await read('src/index.html');
+        const styles = await read('src/theme/_builder.scss');
+
+        // a scrollable segment would scroll instead of shrinking the tabs
+        expect(html).not.toContain('scrollable="true"');
+
+        expect(styles).toMatch(/\.builder__forms\s*\{[^}]*flex:\s*1 1 auto;[^}]*\}/s);
+        expect(styles).toMatch(/\.builder__forms-segment\s*\{[^}]*width:\s*100%;[^}]*\}/s);
+        expect(styles).toMatch(/\.builder__form-tab\s*\{[^}]*flex:\s*1 1 0;[^}]*min-width:\s*44px;[^}]*\}/s);
+        expect(styles).toMatch(/\.builder__form-tab-name\s*\{[^}]*text-overflow:\s*ellipsis;[^}]*\}/s);
+
+        // no mixed sizing model: collapsed dots and fixed-width tabs are gone
+        expect(styles).not.toContain('.builder__form-tab-dots');
+
+        // at the narrowest tab only the name's ellipsis remains
+        expect(styles).toMatch(/@container \(max-width: 112px\)[\s\S]*?\.builder__question-count-badge\s*\{[^}]*display:\s*none;/);
+        expect(styles).toMatch(/@container \(max-width: 68px\)[\s\S]*?\.builder__form-tab-state\s*\{[^}]*display:\s*none;/);
+    });
+
     it('keeps the form menu trigger in the view and its actions in the shell', async () => {
         const html = await read('src/views/question-card.html');
         const shell = await read('src/ui/shell.js');

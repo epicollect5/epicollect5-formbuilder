@@ -126,7 +126,7 @@ describe('builder shell', () => {
         expect(tabs[1].getAttribute('aria-selected')).toBe('false');
     });
 
-    it('collapses every tab except the active one once there are four forms', () => {
+    it('keeps all five form tabs named with equal, ellipsised shares', () => {
         const definition = project_definition();
 
         for (let index = 3; index <= 5; index += 1) {
@@ -141,30 +141,26 @@ describe('builder shell', () => {
         setProject(definition);
         renderApp();
 
-        // select the middle form: only its neighbours keep their name
-        document.querySelectorAll('#form-tabs .builder__form-tab')[2].click();
-        renderApp();
-
         const tabs = [...document.querySelectorAll('#form-tabs .builder__form-tab')];
-        const name_of = (tab) => {
+
+        expect(tabs).toHaveLength(5);
+        expect(tabs.map((tab) => tab.querySelector('.builder__form-tab-name').textContent))
+            .toEqual(['Screening form', 'Second form', 'Extra form 3', 'Extra form 4', 'Extra form 5']);
+
+        // every tab keeps exactly one name (its tooltip) instead of a dots tab
+        tabs.forEach((tab) => {
             const name = tab.querySelector('.builder__form-tab-name');
-            return name ? name.textContent : '···';
-        };
 
-        // only the active tab keeps its name; the rest are centred dots icons
-        expect(name_of(tabs[0])).toBe('···');
-        expect(tabs[0].querySelector('.builder__form-tab-dots')).not.toBeNull();
-        expect(name_of(tabs[1])).toBe('···');
-        expect(name_of(tabs[2])).toBe('Extra form 3');
-        expect(name_of(tabs[3])).toBe('···');
-        expect(tabs[2].getAttribute('aria-selected')).toBe('true');
+            expect(tab.querySelectorAll('.builder__form-tab-name')).toHaveLength(1);
+            expect(tab.querySelector('.builder__form-tab-dots')).toBeNull();
+            expect(tab.getAttribute('title')).toBe(name.textContent);
+        });
 
-        // collapsed tabs keep their tooltip and stay clickable
-        const collapsed = tabs[4];
+        tabs[2].click();
 
-        expect(collapsed.getAttribute('title')).toBe('Extra form 5');
-        expect(collapsed.querySelector('.builder__form-tab-dots')).not.toBeNull();
-        collapsed.click();
+        expect(getSession().current_form_index).toBe(2);
+
+        document.querySelectorAll('#form-tabs .builder__form-tab')[4].click();
 
         expect(getSession().current_form_index).toBe(4);
     });
