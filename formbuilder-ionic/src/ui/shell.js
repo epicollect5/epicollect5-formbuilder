@@ -113,6 +113,7 @@ const DOUBLE_ENTRY_VERIFICATION_TYPES = ['text', 'phone'];
 let handlers = {};
 const answer_pages = new Map();
 const answer_notices = new Map();
+const jump_pages = new Map();
 let active_readme_editor = null;
 let active_property_tab = 'basic';
 let saving = false;
@@ -1516,6 +1517,55 @@ const buildAdvancedPanel = (input, pane) => {
     }
 };
 
+const getJumpPageCount = (jumps) => {
+    return Math.max(1, Math.ceil((jumps || []).length / PARAMETERS.JUMPS_PER_PAGE));
+};
+
+const getJumpsPage = (input, pages) => {
+    const page = Math.min(Math.max(jump_pages.get(input.ref) || 1, 1), pages);
+
+    jump_pages.set(input.ref, page);
+
+    return page;
+};
+
+const setJumpsPage = (input, page) => {
+    jump_pages.set(input.ref, page);
+};
+
+const installJumpsPager = (panel, input, page, pages) => {
+    const pager = panel.querySelector('[data-role="jumps-pager"]');
+
+    if (!pager) {
+        return;
+    }
+
+    if (pages <= 1) {
+        pager.hidden = true;
+        return;
+    }
+
+    pager.hidden = false;
+    pager.querySelector('[data-role="jumps-page"]').textContent = String(page);
+    pager.querySelector('[data-role="jumps-pages"]').textContent = String(pages);
+
+    const previous = pager.querySelector('[data-action="jumps-page-prev"]');
+    const next = pager.querySelector('[data-action="jumps-page-next"]');
+    const go_to = (target) => {
+        setJumpsPage(input, target);
+        renderProperties();
+    };
+
+    previous.disabled = page <= 1;
+    next.disabled = page >= pages;
+    previous.addEventListener('click', () => {
+        go_to(page - 1);
+    });
+    next.addEventListener('click', () => {
+        go_to(page + 1);
+    });
+};
+
 const buildJumpsPanel = (input, pane) => {
     const panel = pane.querySelector('.builder__jumps-panel');
     const add_button = panel.querySelector('.builder__add-jump');
@@ -1523,6 +1573,10 @@ const buildJumpsPanel = (input, pane) => {
     const list = panel.querySelector('.builder__jumps-list');
     const jumps = Array.isArray(input.jumps) ? input.jumps : [];
     const destinations = getJumpAvailableDestinations(input, getCurrentInputs());
+    const pages = getJumpPageCount(jumps);
+    const page = getJumpsPage(input, pages);
+    const start_index = (page - 1) * PARAMETERS.JUMPS_PER_PAGE;
+    const page_jumps = jumps.slice(start_index, start_index + PARAMETERS.JUMPS_PER_PAGE);
 
     list.replaceChildren();
 
@@ -1532,6 +1586,8 @@ const buildJumpsPanel = (input, pane) => {
     add_button.title = can_add ? 'Add jump' : 'No jump destinations available';
     add_button.addEventListener('click', () => {
         if (addJump(input, getCurrentInputs())) {
+            // Show the page holding the newly appended jump.
+            setJumpsPage(input, getJumpPageCount(input.jumps));
             recordChange();
             renderProperties();
             renderQuestions();
@@ -1541,6 +1597,7 @@ const buildJumpsPanel = (input, pane) => {
 
     if (jumps.length === 0) {
         no_jumps.removeAttribute('hidden');
+        installJumpsPager(panel, input, page, pages);
         return;
     }
 
@@ -1550,12 +1607,16 @@ const buildJumpsPanel = (input, pane) => {
     // offending field
     const jump_errors = getJumpErrors(input, getCurrentInputs());
 
-    jumps.forEach((jump, index) => {
-        list.append(buildJumpRow(input, jump, index, destinations,
+    page_jumps.forEach((jump, index) => {
+        const jump_index = start_index + index;
+
+        list.append(buildJumpRow(input, jump, jump_index, destinations,
             jump_errors.find((error) => {
-                return error.index === index;
+                return error.index === jump_index;
             }) || null));
     });
+
+    installJumpsPager(panel, input, page, pages);
 };
 
 const initDropdown = (control, options, value, on_change, disabled) => {

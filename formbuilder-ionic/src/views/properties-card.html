@@ -297,6 +297,33 @@
                            data-role="no-jumps">No jumps set yet</p>
 
                         <ul class="input-properties__form__jumps__list builder__jumps-list"></ul>
+
+                        <div class="builder__answers-pager builder__jumps-pager"
+                             data-role="jumps-pager"
+                             hidden>
+                            <button type="button"
+                                    class="builder__answers-pager-button"
+                                    data-action="jumps-page-prev"
+                                    aria-label="Previous jumps page">
+                                <ion-icon name="chevron-back-outline"
+                                          aria-hidden="true"></ion-icon>
+                            </button>
+
+                            <span class="builder__answers-pager-label">
+                                Page
+                                <span data-role="jumps-page">1</span>
+                                of
+                                <span data-role="jumps-pages">1</span>
+                            </span>
+
+                            <button type="button"
+                                    class="builder__answers-pager-button"
+                                    data-action="jumps-page-next"
+                                    aria-label="Next jumps page">
+                                <ion-icon name="chevron-forward-outline"
+                                          aria-hidden="true"></ion-icon>
+                            </button>
+                        </div>
                     </section>
                 </ion-segment-content>
             </ion-segment-view>

@@ -4,6 +4,8 @@ import { element, icon } from '@/ui/dom.js';
 
 let dropdown_id = 0;
 
+const SEARCH_THRESHOLD = 50;
+
 /*
  * Reusable dropdown: a trigger button + an ion-popover listbox. It replaces
  * ion-select where we need full control over the caret position and popover
@@ -33,6 +35,29 @@ export const createDropdown = (options) => {
         class: 'dropdown__list',
         role: 'listbox'
     });
+    const search_input = element('input', {
+        type: 'search',
+        class: 'dropdown__search-input',
+        placeholder: 'Search',
+        'aria-label': 'Search options',
+        'aria-controls': id + '-listbox',
+        autocomplete: 'off',
+        spellcheck: 'false'
+    });
+    const search = element('div', {
+        class: 'dropdown__search',
+        role: 'search'
+    }, [
+        icon('search-outline'),
+        search_input
+    ]);
+    const no_results = element('p', {
+        class: 'dropdown__list-empty'
+    }, ['No matching options']);
+
+    search.hidden = true;
+    no_results.hidden = true;
+
     const popover = element('ion-popover', {
         class: 'dropdown-popover',
         'no-router': '',
@@ -44,7 +69,7 @@ export const createDropdown = (options) => {
         size: 'cover',
         'show-backdrop': 'true',
         'dismiss-on-select': 'true'
-    }, [list]);
+    }, [search, list, no_results]);
 
     popover.trigger = trigger_id;
     popover.reference = 'trigger';
@@ -61,6 +86,7 @@ export const createDropdown = (options) => {
     let selected_value = config.value || '';
     let is_disabled = !!config.disabled;
     let on_change = typeof config.on_change === 'function' ? config.on_change : null;
+    let options_rendered = false;
 
     const find_item = (value) => {
         return items.find((item) => {
@@ -79,34 +105,56 @@ export const createDropdown = (options) => {
         label.classList.toggle('dropdown__label--placeholder', !selected);
     };
 
+    const visible_items = () => {
+        const query = search_input.value.trim().toLowerCase();
+        const matches = [];
+
+        items.forEach((item, index) => {
+            if (!query || String(item.label).toLowerCase().includes(query)) {
+                matches.push({item, index});
+            }
+        });
+
+        return matches;
+    };
+
     const render_options = () => {
         list.replaceChildren();
 
-        items.forEach((item) => {
+        const matches = visible_items();
+
+        matches.forEach(({item, index}) => {
             const selected = String(item.value) === String(selected_value);
             const option = element('button', {
                 type: 'button',
                 class: `dropdown__option${selected ? ' dropdown__option--selected' : ''}`,
                 role: 'option',
                 'aria-selected': selected ? 'true' : 'false',
-                'data-value': item.value
+                'data-value': item.value,
+                'data-option-index': String(index)
             }, [item.label || '']);
-
-            option.addEventListener('click', () => {
-                if (is_disabled) {
-                    return;
-                }
-
-                set_value(item.value, true);
-                if (popover.dismiss) {
-                    popover.dismiss();
-                }
-            });
 
             list.append(option);
         });
 
+        list.hidden = matches.length === 0;
+        no_results.hidden = matches.length > 0 || !search_input.value.trim();
+        options_rendered = true;
         render_label();
+    };
+
+    // Building the option buttons is deferred until the popover opens.
+    const ensure_options = () => {
+        if (!options_rendered) {
+            render_options();
+        }
+    };
+
+    const reset_options = () => {
+        search_input.value = '';
+        no_results.hidden = true;
+        options_rendered = false;
+        list.replaceChildren();
     };
 
     const set_value = (value, emit) => {
@@ -114,7 +162,11 @@ export const createDropdown = (options) => {
         const changed = String(selected_value) !== String(next);
 
         selected_value = next;
-        render_options();
+        render_label();
+
+        if (options_rendered) {
+            render_options();
+        }
 
         if (emit && changed) {
             const detail = { value: selected_value };
@@ -139,8 +191,41 @@ export const createDropdown = (options) => {
             return String(item.value) === String(value);
         });
         selected_value = has_value ? value : (items[0] ? items[0].value : '');
-        render_options();
+        search.hidden = items.length <= SEARCH_THRESHOLD;
+        reset_options();
+        render_label();
+
+        // Rebuild an open list immediately; a closed one rebuilds on next open.
+        if (popover.presented) {
+            render_options();
+        }
     };
+
+    search_input.addEventListener('input', () => {
+        render_options();
+        list.scrollTop = 0;
+    });
+
+    // One delegated listener for every option, no matter how often the list is rebuilt.
+    list.addEventListener('click', (event) => {
+        const option = event.target.closest('.dropdown__option');
+
+        if (!option || is_disabled) {
+            return;
+        }
+
+        const item = items[Number(option.getAttribute('data-option-index'))];
+
+        if (!item) {
+            return;
+        }
+
+        set_value(item.value, true);
+
+        if (popover.dismiss) {
+            popover.dismiss();
+        }
+    });
 
     const set_disabled = (disabled) => {
         is_disabled = !!disabled;
@@ -155,6 +240,7 @@ export const createDropdown = (options) => {
         }
 
         event.preventDefault();
+        ensure_options();
         trigger.setAttribute('aria-expanded', 'true');
         // Anchor to the trigger button (not the click point) so horizontal
         // alignment matches the control; size:'cover' matches trigger width.
@@ -169,8 +255,12 @@ export const createDropdown = (options) => {
         }
     });
 
+    // Covers Ionic's own trigger interaction (keyboard/activation) too.
+    popover.addEventListener('ionPopoverWillPresent', ensure_options);
+
     popover.addEventListener('didDismiss', () => {
         trigger.setAttribute('aria-expanded', 'false');
+        reset_options();
     });
 
     root.setOptions = (next_options, value) => {
@@ -234,6 +324,8 @@ export const createMenu = (trigger, items, on_select) => {
     trigger.setAttribute('aria-haspopup', 'menu');
     trigger.setAttribute('aria-expanded', 'false');
 
+    const menu_actions = [];
+
     (items || []).forEach((item) => {
         if (item.divider) {
             list.append(element('div', { class: 'builder__answers-dropdown-divider' }));
@@ -245,24 +337,35 @@ export const createMenu = (trigger, items, on_select) => {
             class: 'dropdown__option',
             role: 'menuitem',
             'data-action': item.data_action,
+            'data-menu-index': String(menu_actions.length),
             disabled: item.disabled ? 'disabled' : undefined
         }, [item.label]);
 
-        option.addEventListener('click', () => {
-            if (item.disabled) {
-                return;
-            }
-
-            if (popover.dismiss) {
-                popover.dismiss();
-            }
-
-            if (typeof on_select === 'function') {
-                on_select(item);
-            }
-        });
-
+        menu_actions.push(item);
         list.append(option);
+    });
+
+    // A menu has one delegated listener rather than one per action.
+    list.addEventListener('click', (event) => {
+        const option = event.target.closest('.dropdown__option');
+
+        if (!option) {
+            return;
+        }
+
+        const item = menu_actions[Number(option.getAttribute('data-menu-index'))];
+
+        if (!item || item.disabled) {
+            return;
+        }
+
+        if (popover.dismiss) {
+            popover.dismiss();
+        }
+
+        if (typeof on_select === 'function') {
+            on_select(item);
+        }
     });
 
     if (!trigger.parentNode) {
