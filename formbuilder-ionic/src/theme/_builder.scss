@@ -154,8 +154,11 @@
     min-width: 0;
     background: transparent;
     --background: transparent;
-    /* the segment is the flex row; every tab takes an equal share of it */
+    /* the segment is the flex row; every tab takes an equal share of it.
+       flex-start: Ionic defaults to center, which shows once the 220px tab
+       cap leaves empty space in a wide strip */
     display: flex;
+    justify-content: flex-start;
     width: 100%;
     overflow: hidden;
 }
