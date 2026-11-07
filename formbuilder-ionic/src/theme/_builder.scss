@@ -1502,15 +1502,17 @@ ion-item.builder__question[aria-current='true'] {
 
 .builder__form-tab ion-label {
     display: inline-flex;
-    /* baseline, not centre: centring the boxes puts the digit ink high and the
-       lowercase name ink low, which read as misaligned (seen at 3x zoom) */
-    align-items: baseline;
+    align-items: center;
     gap: 6px;
 }
 
+/* Optical alignment: lowercase name ink sits ~2px below its box centre while
+   the badge digit and the dots ink are box-centred, so both nudge down. */
 .builder__form-tab .builder__form-tab-state,
-.builder__form-tab .builder__form-tab-dots {
-    align-self: center;
+.builder__form-tab .builder__form-tab-dots,
+.builder__form-tab .builder__question-count-badge {
+    position: relative;
+    top: 2px;
 }
 
 /* Long form names truncate inside the tab; names outside the current
