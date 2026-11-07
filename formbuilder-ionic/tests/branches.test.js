@@ -346,8 +346,8 @@ describe('branch and group rows', () => {
 
         const warning = document.querySelector('#questions [data-role="title-warning"]');
 
-        expect(warning.hidden).toBe(false);
-        expect(warning.textContent).toContain('No title set for this branch yet');
+        // an empty list has nothing to title, so the warning waits for a question
+        expect(warning.hidden).toBe(true);
     });
 
     it('hides the branch no-title well when a branch child is checked as title', () => {

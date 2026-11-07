@@ -800,8 +800,10 @@ const renderQuestions = () => {
     }
 
     const branch_active = active_container && active_container.type === 'branch';
-    // Legacy warns on entering an empty branch, but only for a form with inputs.
-    const show_title_warning = countTitles(inputs) === 0 && (branch_active || (!active_container && inputs.length > 0));
+    // a list without questions has nothing to title: the warning waits for the
+    // first question, as it does at form level
+    const show_title_warning = inputs.length > 0 && countTitles(inputs) === 0 &&
+        (branch_active || !active_container);
 
     if (show_title_warning) {
         const warning = card.querySelector('[data-role="title-warning"]');
