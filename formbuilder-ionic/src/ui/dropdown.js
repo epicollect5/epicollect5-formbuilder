@@ -67,8 +67,7 @@ export const createDropdown = (options) => {
         side: 'bottom',
         alignment: 'start',
         size: 'cover',
-        'show-backdrop': 'true',
-        'dismiss-on-select': 'true'
+        'show-backdrop': 'true'
     }, [search, list, no_results]);
 
     popover.trigger = trigger_id;
@@ -110,6 +109,12 @@ export const createDropdown = (options) => {
         const matches = [];
 
         items.forEach((item, index) => {
+            // A display-only item labels the current selection (an answer that
+            // no longer exists); it must not be offered as a choice.
+            if (item.display_only) {
+                return;
+            }
+
             if (!query || String(item.label).toLowerCase().includes(query)) {
                 matches.push({item, index});
             }
@@ -183,15 +188,20 @@ export const createDropdown = (options) => {
         items = (next_options || []).map((item) => {
             return {
                 value: item.value === undefined || item.value === null ? '' : item.value,
-                label: item.label === undefined || item.label === null ? '' : String(item.label)
+                label: item.label === undefined || item.label === null ? '' : String(item.label),
+                display_only: item.display_only === true
             };
         });
 
         const has_value = items.some((item) => {
             return String(item.value) === String(value);
         });
+        const selectable_count = items.filter((item) => {
+            return !item.display_only;
+        }).length;
+
         selected_value = has_value ? value : (items[0] ? items[0].value : '');
-        search.hidden = items.length <= SEARCH_THRESHOLD;
+        search.hidden = selectable_count <= SEARCH_THRESHOLD;
         reset_options();
         render_label();
 

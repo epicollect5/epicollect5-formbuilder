@@ -1705,10 +1705,15 @@ const buildJumpRow = (input, jump, index, destinations, jump_error) => {
                 return String(option.value) === String(jump.answer_ref);
             });
 
-            // a stored ref that no longer matches an answer stays visible as
-            // unavailable instead of silently showing the first answer (R-30)
+            // a stored ref that no longer matches an answer stays visible on the
+            // trigger as unavailable (R-30), but is display-only: offering it in
+            // the list would let the user re-select a dead ref
             if (needs_answer && jump.answer_ref && !has_value) {
-                answer_options.unshift({value: jump.answer_ref, label: 'Unavailable answer'});
+                answer_options.unshift({
+                    value: jump.answer_ref,
+                    label: 'Unavailable answer',
+                    display_only: true
+                });
             }
 
             const answer_value = !needs_answer ?
@@ -2169,12 +2174,15 @@ const buildPossibleAnswers = (input) => {
     const answers = input.possible_answers;
     const card = createView(possible_answers_view);
     const list = card.querySelector('.builder__answer-list');
+    const count_badge = card.querySelector('.builder__answers-count-badge');
     const add_button = card.querySelector('.builder__add-answer');
     const page = getAnswersPage(input);
     const pages = getAnswerPageCount(answers);
     const page_answers = getAnswerPage(answers, page);
     const at_limit = answers.length >= getAnswerLimit(input.type);
     const notice = answer_notices.get(input.ref);
+
+    count_badge.textContent = String(answers.length);
 
     page_answers.forEach((answer, index) => {
         list.append(buildAnswerRow(input, answer, (page - 1) * PARAMETERS.ANSWERS_PER_PAGE + index, answers.length));
