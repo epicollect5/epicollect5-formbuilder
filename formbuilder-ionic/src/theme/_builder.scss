@@ -154,6 +154,17 @@
     min-width: 0;
     background: transparent;
     --background: transparent;
+    /* content-sized tabs in a flex row: with the 5-form cap and the
+       prev/current/next windowing the strip always fits, so the segment's
+       equal-width grid (and its scrollbar) is replaced outright */
+    display: flex;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.builder__forms-segment::-webkit-scrollbar {
+    display: none;
 }
 
 .builder__forms-segment::part(indicator) {
@@ -771,7 +782,13 @@ ion-item.builder__question[aria-current='true'] {
 .builder__property-tabs ion-label {
     /* see the form tab label: icons must not shift the label vertically */
     display: flex;
+    align-items: center;
     margin: 0;
+}
+
+.builder__property-tabs .builder__form-tab-state {
+    align-self: center;
+    margin-left: 2px;
 }
 
 .builder__property-tabs ion-segment-button::part(indicator),
@@ -1506,6 +1523,14 @@ ion-item.builder__question[aria-current='true'] {
     vertical-align: middle;
 }
 
+.builder__form-tab {
+    flex: none;
+}
+
+.builder__form-tab:has(.builder__form-tab-dots) {
+    max-width: 100px;
+}
+
 .builder__form-tab ion-label {
     /* flex, not inline-flex: an inline-level label rides the line box by its
        baseline, and an icon inside changes that baseline by ~6px.
@@ -1520,7 +1545,7 @@ ion-item.builder__question[aria-current='true'] {
 /* Long form names truncate inside the tab; names outside the current
    prev/current/next window collapse to a centred dots icon. */
 .builder__form-tab .builder__form-tab-name {
-    max-width: 150px;
+    max-width: 220px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
