@@ -6,7 +6,6 @@ import { areFormInputsValid } from '@/services/validation.js';
 import { getForms } from '@/models/project-definition.js';
 import {
     countInputs,
-    countSearchInputs,
     countTitles,
     eachInput
 } from '@/models/project-limits.js';
@@ -88,11 +87,13 @@ export const prepareImportedForm = (text, project_definition, form_index) => {
         return { ok: false, error: FORM_MESSAGES.FORM_FILE_INVALID };
     }
 
-    const inputs_total = forms.reduce((total, candidate, index) => {
-        return total + countInputs(index === form_index ? imported : candidate.inputs);
-    }, 0);
-
-    if (inputs_total > PARAMETERS.INPUTS_MAX_ALLOWED) {
+    /*
+     * Legacy import limits (import-form-click-callback.js): the imported form's
+     * own totals are refused, but the project-level caps are not — the search
+     * cap only raises a warning after a successful import. The project caps
+     * stay enforced on save (a deliberate port divergence).
+     */
+    if (countInputs(imported) > PARAMETERS.INPUTS_MAX_ALLOWED) {
         return { ok: false, error: FORM_MESSAGES.FORM_IS_INVALID };
     }
 
@@ -105,14 +106,6 @@ export const prepareImportedForm = (text, project_definition, form_index) => {
     });
 
     if (branch_titles_exceeded) {
-        return { ok: false, error: FORM_MESSAGES.FORM_IS_INVALID };
-    }
-
-    const search_total = forms.reduce((total, candidate, index) => {
-        return total + countSearchInputs(index === form_index ? imported : candidate.inputs);
-    }, 0);
-
-    if (search_total > PARAMETERS.SEARCH_INPUTS_MAX) {
         return { ok: false, error: FORM_MESSAGES.FORM_IS_INVALID };
     }
 

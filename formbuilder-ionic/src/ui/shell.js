@@ -597,6 +597,10 @@ const importFormFile = (card) => {
                 if (!result.project_valid) {
                     notifyWarning(`${FORM_MESSAGES.FORM_IMPORTED} ${FORM_MESSAGES.PROJECT_INVALID}`);
                 }
+                else if (countProjectSearchInputs(getSession().project_definition) >= PARAMETERS.SEARCH_INPUTS_MAX) {
+                    // legacy warns when an import fills the search-question cap
+                    notifyWarning(FORM_MESSAGES.SEARCH_INPUTS_LIMIT_REACHED);
+                }
                 else {
                     notifySuccess(FORM_MESSAGES.FORM_IMPORTED);
                 }

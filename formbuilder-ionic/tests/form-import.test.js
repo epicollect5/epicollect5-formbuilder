@@ -192,6 +192,32 @@ describe('preparing an import', () => {
         expect(result.ok).toBe(true);
         expect(result.project_valid).toBe(false);
     });
+
+    it('imports into a project that already holds the search-question cap', () => {
+        // legacy refuses only the imported form's own totals; the project-wide
+        // search cap warns after the import instead of blocking it
+        const definition = project_definition();
+        const other_ref = 'e'.repeat(32) + '_' + 'd'.repeat(13);
+        const search_inputs = [];
+
+        for (let index = 0; index < PARAMETERS.SEARCH_INPUTS_MAX; index += 1) {
+            search_inputs.push(input_with_ref(other_ref + '_' + suffix(index)));
+            search_inputs[index].type = 'searchsingle';
+            search_inputs[index].possible_answers = [{ answer: 'One', answer_ref: 'd'.repeat(13) }];
+        }
+
+        definition.data.project.forms.push({
+            ref: other_ref,
+            name: 'Other form',
+            slug: 'other-form',
+            type: 'hierarchy',
+            inputs: search_inputs
+        });
+
+        const result = prepareImportedForm(JSON.stringify(form_export), definition, 0);
+
+        expect(result.ok).toBe(true);
+    });
 });
 
 describe('counts', () => {

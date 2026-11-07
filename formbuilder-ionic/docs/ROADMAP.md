@@ -147,8 +147,10 @@ invalidates its branch), jump destinations and conditions, `areFormInputsValid`
 broken jump lights the container's Jumps badge as well.
 
 The project-level caps (300 inputs, 3 titles per list, 5 search questions) are
-enforced on save through `models/project-limits.js` and on import through the
-same counters.
+enforced on save through `models/project-limits.js`. The import checks only the
+imported form's own input and title totals, like legacy — a project-level
+search-cap overflow raises a warning after the import instead of blocking it,
+so an over-cap project can exist in the builder but cannot be saved.
 
 ### Modals, menus, toasts
 
