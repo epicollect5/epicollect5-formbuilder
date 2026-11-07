@@ -768,6 +768,12 @@ ion-item.builder__question[aria-current='true'] {
     border-bottom: 2px solid transparent;
 }
 
+.builder__property-tabs ion-label {
+    /* see the form tab label: icons must not shift the label vertically */
+    display: flex;
+    margin: 0;
+}
+
 .builder__property-tabs ion-segment-button::part(indicator),
 .builder__property-tabs ion-segment-button::part(indicator-background) {
     display: none;
@@ -1501,18 +1507,14 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 .builder__form-tab ion-label {
-    display: inline-flex;
+    /* flex, not inline-flex: an inline-level label rides the line box by its
+       baseline, and an icon inside changes that baseline by ~6px.
+       margin 0: Ionic rewrites the slotted label margins when the button
+       holds an icon (icon-top layout), which shifted the label ~6px */
+    display: flex;
     align-items: center;
     gap: 6px;
-}
-
-/* Optical alignment: lowercase name ink sits ~2px below its box centre while
-   the badge digit and the dots ink are box-centred, so both nudge down. */
-.builder__form-tab .builder__form-tab-state,
-.builder__form-tab .builder__form-tab-dots,
-.builder__form-tab .builder__question-count-badge {
-    position: relative;
-    top: 2px;
+    margin: 0;
 }
 
 /* Long form names truncate inside the tab; names outside the current
