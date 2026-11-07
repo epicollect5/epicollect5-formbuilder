@@ -457,7 +457,7 @@ const openFormNameModal = (form) => {
         title: 'Form name',
         body,
         buttons: [
-            { text: 'Close', class_name: 'btn-default' },
+            { text: 'Close', class_name: 'btn-default pull-left' },
             {
                 text: 'Save changes',
                 class_name: 'btn-primary',
@@ -2359,7 +2359,7 @@ const openAnswersCsvModal = (input, parsed) => {
         title: 'Possible answers csv import options',
         body,
         buttons: [
-            { text: 'Dismiss', class_name: 'btn-default' },
+            { text: 'Dismiss', class_name: 'btn-default pull-left' },
             {
                 text: 'Import',
                 class_name: 'btn-primary',
