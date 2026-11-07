@@ -254,6 +254,23 @@ constraints so it remains standalone; keep those declarations in sync with
 | Undo states | `MAX_UNDO_STATES` | 10 |
 | Undo typing throttle | `UNDO_THROTTLE_MS` | 500 ms |
 
+## Browser support
+
+The build target is `es2020` (Vite, no legacy plugin), the theme uses
+`::part()` and flex/grid, and the only runtime APIs outside that baseline are
+the Compression Streams — covered by the lazy ponyfill wherever
+`TransformStream` exists — and the `color-mix()` tints, which have static
+fallbacks. The effective support statement is:
+
+- Chrome / Edge 80+ (July 2020)
+- Firefox 103+ (June 2022)
+- Safari / iOS Safari 14.1+ (April 2021)
+- Android: evergreen Chromium
+
+Everything that auto-updates today is above this floor. Below it the builder
+still boots, but saving and loading fail with explicit errors; there is no IE
+support and no legacy plugin.
+
 ## Constraints and risks
 
 - **Contract frozen.** Keep exact field shapes and the 3 / 4 / 5-segment ref
