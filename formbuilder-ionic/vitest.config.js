@@ -15,6 +15,7 @@ export default defineConfig({
             }
         },
         include: ['tests/**/*.test.js'],
+        setupFiles: ['./tests/jquery-setup.js'],
         restoreMocks: true
     }
 });
