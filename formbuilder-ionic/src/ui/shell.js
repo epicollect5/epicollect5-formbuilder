@@ -2440,7 +2440,7 @@ const openAnswersCsvModal = (input, parsed) => {
         class_name: 'builder__csv-column-select',
         aria_label: 'Column to import',
         placeholder: 'Pick column',
-        options: [{value: '', label: 'Pick column'}, ...getCsvColumns(parsed, true)],
+        options: [...getCsvColumns(parsed, true)],
         value: '',
         on_change: (detail) => {
             selected_column = detail.value;
@@ -2457,7 +2457,7 @@ const openAnswersCsvModal = (input, parsed) => {
     headers.addEventListener('ionChange', () => {
         selected_column = '';
         column_dropdown.setOptions(
-            [{value: '', label: 'Pick column'}, ...getCsvColumns(parsed, headers.checked === true)],
+            [...getCsvColumns(parsed, headers.checked === true)],
             ''
         );
 

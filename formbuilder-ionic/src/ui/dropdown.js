@@ -200,7 +200,9 @@ export const createDropdown = (options) => {
             return !item.display_only;
         }).length;
 
-        selected_value = has_value ? value : (items[0] ? items[0].value : '');
+        // an unmatched value stays unmatched: the trigger falls back to the
+        // placeholder instead of pretending the first option is selected
+        selected_value = has_value ? value : '';
         search.hidden = selectable_count <= SEARCH_THRESHOLD;
         reset_options();
         render_label();

@@ -231,15 +231,18 @@ describe('dropdown', () => {
         expect(on_change).toHaveBeenCalledTimes(2);
     });
 
-    it('replaces its options and falls back to the first one', () => {
+    it('replaces its options and keeps the placeholder when the value no longer matches', () => {
         const dropdown = mount({ options: OPTIONS, value: 'b' });
 
         open_options(dropdown);
         expect(option_values(dropdown)).toEqual(['a', 'b']);
 
+        // the passed value no longer matches: the dropdown falls back to the
+        // placeholder instead of pretending the first option is selected
         dropdown.setOptions([{ value: 'x', label: 'X' }], 'b');
-        expect(dropdown.value).toBe('x');
-        expect(dropdown.querySelector('.dropdown__label').textContent).toBe('X');
+        expect(dropdown.value).toBe('');
+        expect(dropdown.querySelector('.dropdown__label').textContent).toBe('Select');
+        // the closed list empties by design and rebuilds when reopened
         expect(option_values(dropdown)).toEqual([]);
 
         open_options(dropdown);
@@ -251,9 +254,12 @@ describe('dropdown', () => {
         open_options(dropdown);
         expect(option_values(dropdown)).toEqual(['a', 'b']);
 
-        dropdown.setOptions([], 'b');
+        // an unmatched value leaves the dropdown on its placeholder instead of
+        // pretending the first option is selected
+        dropdown.setOptions([{ value: 'x', label: 'X' }], 'zz');
         expect(dropdown.value).toBe('');
         expect(option_values(dropdown)).toEqual([]);
+        expect(dropdown.querySelector('.dropdown__label').textContent).toBe('Select');
         expect(dropdown.querySelector('.dropdown__label').classList.contains('dropdown__label--placeholder')).toBe(true);
     });
 
