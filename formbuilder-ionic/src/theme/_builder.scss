@@ -145,22 +145,19 @@
 
 .builder__forms {
     display: flex;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     min-width: 0;
-    overflow-x: auto;
+    overflow: hidden;
 }
 
 .builder__forms-segment {
     min-width: 0;
     background: transparent;
     --background: transparent;
-    /* content-sized tabs in a flex row: with the 5-form cap and the
-       prev/current/next windowing the strip always fits, so the segment's
-       equal-width grid (and its scrollbar) is replaced outright */
+    /* the segment is the flex row; every tab takes an equal share of it */
     display: flex;
-    justify-content: flex-start;
-    overflow-x: auto;
-    scrollbar-width: none;
+    width: 100%;
+    overflow: hidden;
 }
 
 .builder__forms-segment::-webkit-scrollbar {
@@ -267,6 +264,13 @@
 }
 
 .builder__form-tab {
+    /* equal flex shares: names never set the width, they ellipsise instead */
+    flex: 1 1 0;
+    width: 0;
+    min-width: 44px;
+    max-width: none;
+    overflow: hidden;
+    container-type: inline-size;
     min-height: 44px;
     margin: 0;
     --margin-top: 0;
@@ -1522,23 +1526,6 @@ ion-item.builder__question[aria-current='true'] {
     vertical-align: middle;
 }
 
-.builder__form-tab {
-    /* named tabs share the strip and shrink via their ellipsis */
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-.builder__form-tab:has(.builder__form-tab-dots) {
-    /* collapsed tabs are a centred placeholder (plus the validity icon):
-       no count badge, so five of them always fit */
-    flex: 0 0 auto;
-    min-width: 56px;
-}
-
-.builder__form-tab:has(.builder__form-tab-dots) ion-label {
-    justify-content: center;
-}
-
 .builder__form-tab ion-label {
     /* flex, not inline-flex: an inline-level label rides the line box by its
        baseline, and an icon inside changes that baseline by ~6px.
@@ -1547,23 +1534,32 @@ ion-item.builder__question[aria-current='true'] {
     display: flex;
     align-items: center;
     gap: 6px;
+    width: 100%;
+    min-width: 0;
     margin: 0;
 }
 
-/* Long form names truncate inside the tab; names outside the current
-   prev/current/next window collapse to a centred dots icon. */
+/* The name takes the space left by the count/validity icons and truncates
+   with an ellipsis when the tab gets narrow. */
 .builder__form-tab .builder__form-tab-name {
-    max-width: 220px;
+    flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.builder__form-tab .builder__form-tab-dots {
-    flex: none;
-    color: var(--app-text);
-    font-size: 18px;
+/* At narrow widths the name is the only content left, so a tab reads as "...". */
+@container (max-width: 112px) {
+    .builder__question-count-badge {
+        display: none;
+    }
+}
+
+@container (max-width: 68px) {
+    .builder__form-tab-state {
+        display: none;
+    }
 }
 
 /* Unchecked boxes keep the readable surface background; the label always uses
