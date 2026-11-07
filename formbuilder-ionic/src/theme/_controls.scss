@@ -327,6 +327,13 @@ input[type='radio'] {
     outline: none;
 }
 
+/* The editable must fill the content box: otherwise it is a single text row
+   inside an empty taller box, and clicks below it never reach the editor. */
+.builder__readme-content .tiptap {
+    min-height: 100px;
+    outline: none;
+}
+
 .builder__readme-content p {
     margin: 0 0 10px;
 }

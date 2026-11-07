@@ -96,6 +96,15 @@ export const createReadmeEditor = (value, on_change) => {
         updatePlaceholderState(content, editor);
     });
 
+    // clicks on the wrapper's padding land outside the editable; prevent the
+    // mousedown default (which blurs the editor) and focus it instead
+    content.addEventListener('mousedown', (mouse_event) => {
+        if (mouse_event.target === content) {
+            mouse_event.preventDefault();
+            editor.commands.focus('end');
+        }
+    });
+
     return {
         element,
         destroy: () => {
