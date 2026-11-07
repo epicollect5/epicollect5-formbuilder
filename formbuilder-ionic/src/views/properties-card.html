@@ -36,18 +36,6 @@
     </ion-card-header>
 
     <ion-card-content class="builder__properties-content">
-        <div class="builder__editing-bar"
-             data-role="editing-bar"
-             hidden>
-            <button type="button"
-                    class="builder__form-button"
-                    data-role="exit-editing">
-                <ion-icon name="chevron-back-outline"
-                          aria-hidden="true"></ion-icon>
-                Exit Editing
-            </button>
-        </div>
-
         <div class="builder__empty info-well text-center"
              data-role="properties-empty"
              hidden>Select a question to edit it.</div>
@@ -93,7 +81,11 @@
                                     <button type="button"
                                             class="builder__form-button builder__edit-container"
                                             data-role="edit-container"
-                                            hidden>Edit Branch</button>
+                                            hidden>
+                                        <ion-icon name="create"
+                                                  aria-hidden="true"></ion-icon>
+                                        <span data-role="edit-container-label">Edit Branch</span>
+                                    </button>
                                 </ion-col>
                             </ion-row>
                         </ion-grid>

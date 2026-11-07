@@ -57,6 +57,7 @@ import {
     getCurrentForm,
     getCurrentInput,
     getCurrentInputs,
+    getEditingContainer,
     getEditingTrail,
     getSession,
     insertInput,
@@ -776,6 +777,24 @@ const renderQuestions = () => {
 
     title.setAttribute('title', [form_name, ...trail.map(getQuestionLabel)].join(' > '));
 
+    const editing_toolbar = card.querySelector('[data-role="editing-toolbar"]');
+
+    if (editing_toolbar) {
+        if (active_container) {
+            editing_toolbar.hidden = false;
+            editing_toolbar.querySelector('[data-role="exit-editing"]').onclick = () => {
+                exitEditing();
+                active_property_tab = 'basic';
+                renderApp(handlers);
+            };
+            editing_toolbar.querySelector('[data-role="editing-status"]')
+                .append(buildEditingStatus(active_container));
+        }
+        else {
+            editing_toolbar.remove();
+        }
+    }
+
     if (active_container) {
         empty.textContent = `No questions in this ${active_container.type} yet.`;
     }
@@ -867,6 +886,19 @@ const buildQuestionStatus = (input) => {
     return status;
 };
 
+/* The editing toolbar shows whether every question of the container is valid. */
+const buildEditingStatus = (container) => {
+    const valid = isInputValid(container, getCurrentInputs());
+
+    return element('span', {
+        class: `question-state ${valid ? 'is-valid' : 'is-invalid'}`,
+        'aria-label': valid ? 'All questions are valid' : 'Questions have errors',
+        title: valid ? 'All questions are valid' : 'Some questions need attention'
+    }, [
+        icon(valid ? 'checkmark-circle' : 'warning')
+    ]);
+};
+
 /* Rows belong to the active list, so that list is the jump-validation context. */
 const isInputRowValid = (input) => {
     return isInputValid(input, getCurrentInputs());
@@ -942,21 +974,6 @@ const renderProperties = () => {
     const tab_strip = card.querySelector('.builder__property-tabs');
     const body = card.querySelector('.builder__properties-body');
     const empty = card.querySelector('[data-role="properties-empty"]');
-    const editing_bar = card.querySelector('[data-role="editing-bar"]');
-
-    if (editing_bar) {
-        if (isEditing()) {
-            editing_bar.hidden = false;
-            editing_bar.querySelector('[data-role="exit-editing"]').onclick = () => {
-                exitEditing();
-                active_property_tab = 'basic';
-                renderApp(handlers);
-            };
-        }
-        else {
-            editing_bar.remove();
-        }
-    }
 
     if (!input) {
         active_property_tab = 'basic';
@@ -1235,6 +1252,14 @@ const refreshQuestionRows = () => {
             row.append(replacement);
         }
     });
+
+    // the container's validity icon follows the children's edits live
+    const status_slot = document.querySelector('[data-role="editing-status"]');
+    const editing_container = getEditingContainer();
+
+    if (status_slot && editing_container) {
+        status_slot.replaceChildren(buildEditingStatus(editing_container));
+    }
 };
 
 /* The form tabs live in the page shell and outlive question re-renders. */
@@ -1334,7 +1359,8 @@ const buildBasicPanel = (input, pane) => {
 
     if (isBranchOrGroup(input.type)) {
         edit_container.hidden = false;
-        edit_container.textContent = input.type === 'branch' ? 'Edit Branch' : 'Edit Group';
+        edit_container.querySelector('[data-role="edit-container-label"]').textContent =
+            input.type === 'branch' ? 'Edit Branch' : 'Edit Group';
         edit_container.disabled = String(input.question || '').trim() === '';
         edit_container.onclick = () => {
             enterInput(input.ref);

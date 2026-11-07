@@ -1558,7 +1558,8 @@ ion-checkbox:not(.checkbox-checked)::part(label) {
 }
 
 /* The edit button keeps the legacy content width: one third of the panel,
-   in the left column of the grid. */
+   in the left column of the grid. It is the panel's action button, so it uses
+   the theme's secondary role, with a visible disabled state. */
 .builder__edit-container-grid {
     margin: 0;
     padding: 0;
@@ -1568,6 +1569,65 @@ ion-checkbox:not(.checkbox-checked)::part(label) {
 
 .builder__edit-container-grid .builder__form-button {
     width: 100%;
+}
+
+.builder__edit-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--ion-color-secondary);
+    border-color: var(--ion-color-secondary);
+    color: var(--ion-color-secondary-contrast);
+}
+
+.builder__edit-container:hover:not(:disabled),
+.builder__edit-container:focus-visible {
+    background: var(--ion-color-secondary-shade);
+    border-color: var(--ion-color-secondary-shade);
+}
+
+.builder__edit-container:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.builder__edit-container ion-icon {
+    font-size: 16px;
+}
+
+/* Container editing: the exit button sits above the list, next to the
+   container's validity icon, as in legacy. */
+.builder__editing-toolbar {
+    --background: var(--app-surface);
+    --border-width: 0;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --min-height: 44px;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.builder__editing-toolbar .builder__form-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.builder__editing-status .question-state {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    font-size: 20px;
+}
+
+.builder__editing-status .question-state.is-valid ion-icon {
+    color: var(--ion-color-success);
+}
+
+.builder__editing-status .question-state.is-invalid ion-icon {
+    color: var(--ion-color-warning);
 }
 
 .builder__question-field-group {

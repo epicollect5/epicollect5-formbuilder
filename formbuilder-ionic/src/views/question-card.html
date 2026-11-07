@@ -33,6 +33,22 @@
         </div>
     </ion-card-header>
 
+    <ion-toolbar class="builder__editing-toolbar"
+                 data-role="editing-toolbar"
+                 hidden>
+        <button slot="start"
+                type="button"
+                class="builder__form-button"
+                data-role="exit-editing">
+            <ion-icon name="chevron-back-outline"
+                      aria-hidden="true"></ion-icon>
+            Exit Editing
+        </button>
+        <span slot="end"
+              class="builder__editing-status"
+              data-role="editing-status"></span>
+    </ion-toolbar>
+
     <ion-card-content class="builder__questions-content">
         <div class="warning-well builder__title-warning"
              data-role="title-warning"

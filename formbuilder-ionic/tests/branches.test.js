@@ -220,13 +220,14 @@ describe('branch and group rows', () => {
 
         expect(branch_edit.hidden).toBe(false);
         expect(branch_edit.disabled).toBe(false);
-        expect(branch_edit.textContent).toBe('Edit Branch');
+        expect(branch_edit.textContent).toContain('Edit Branch');
+        expect(branch_edit.querySelector('ion-icon[name="create"]')).not.toBeNull();
 
         rows()[1].click();
 
         const group_edit = document.querySelector('#properties [data-role="edit-container"]');
 
-        expect(group_edit.textContent).toBe('Edit Group');
+        expect(group_edit.textContent).toContain('Edit Group');
 
         rows()[2].click();
 
@@ -263,10 +264,11 @@ describe('branch and group rows', () => {
         expect(title.textContent).toContain('Screening form');
         expect(title.querySelector('.builder__questions-title-crumb.is-current').textContent).toBe('Household');
 
-        const exit = document.querySelector('#properties [data-role="exit-editing"]');
+        const exit = document.querySelector('#questions [data-role="exit-editing"]');
 
         expect(exit).not.toBeNull();
         expect(exit.textContent).toContain('Exit Editing');
+        expect(document.querySelector('#questions [data-role="editing-status"] .question-state')).not.toBeNull();
 
         const branch_tool = [...document.querySelectorAll('#tools .builder__tool')]
             .find((tool) => tool.getAttribute('data-type') === 'branch');
@@ -284,7 +286,7 @@ describe('branch and group rows', () => {
         expect(getEditingTrail().map((node) => node.question)).toEqual(['Household', 'Members']);
         expect(rows()).toHaveLength(1);
         expect(document.querySelector('#questions .builder__questions-title-crumb.is-current').textContent).toBe('Members');
-        expect(document.querySelector('#properties [data-role="exit-editing"]')).not.toBeNull();
+        expect(document.querySelector('#questions [data-role="exit-editing"]')).not.toBeNull();
     });
 
     it('labels form uniqueness as branch-scoped inside a branch', async () => {
@@ -323,13 +325,13 @@ describe('branch and group rows', () => {
 
         rows()[0].click();
         document.querySelector('#properties [data-role="edit-container"]').click();
-        document.querySelector('#properties [data-role="exit-editing"]').click();
+        document.querySelector('#questions [data-role="exit-editing"]').click();
 
         expect(isEditing()).toBe(false);
         expect(rows()).toHaveLength(3);
         expect(getSession().current_input_ref).toBe(branch_ref);
-        expect(document.querySelector('#properties [data-role="exit-editing"]')).toBeNull();
-        expect(document.querySelector('#properties .builder__properties-title').textContent).toBe('Household');
+        expect(document.querySelector('#questions [data-role="exit-editing"]')).toBeNull();
+        expect(document.querySelector('#questions [data-role="editing-toolbar"]')).toBeNull();
     });
 
     it('shows the container empty state', () => {
