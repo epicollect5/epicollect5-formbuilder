@@ -1,10 +1,17 @@
 <div class="builder__csv-import">
-    <div class="form-group possible_answers__selected-column">
-        <label>Select which dataset to import</label>
-        <div class="dropdown builder__csv-column"
-             data-role="csv-column"
-             aria-label="Column to import"></div>
-    </div>
+    <ion-grid class="builder__csv-dataset-grid"
+              data-role="csv-column-row">
+        <ion-row class="ion-align-items-center">
+            <ion-col size="8">
+                <label>Select which dataset to import</label>
+            </ion-col>
+            <ion-col size="4">
+                <div class="dropdown builder__csv-column"
+                     data-role="csv-column"
+                     aria-label="Column to import"></div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
 
     <hr>
 

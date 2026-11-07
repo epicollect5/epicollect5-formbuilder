@@ -79,3 +79,19 @@ ion-modal.legacy-modal-host {
 .close:hover {
     background: var(--app-surface-muted);
 }
+
+/* The CSV dataset picker shares a row with its label, as in legacy: the label
+   takes two thirds, the column dropdown the rest. */
+.builder__csv-dataset-grid {
+    margin: 0;
+    padding: 0;
+    --ion-grid-padding: 0;
+    --ion-grid-column-padding: 0;
+}
+
+.builder__csv-dataset-grid label {
+    margin: 0;
+    align-self: center;
+    font: inherit;
+    line-height: 1.4;
+}
