@@ -146,7 +146,8 @@ invalidates its branch), jump destinations and conditions, `areFormInputsValid`
 / Jumps tab badges. Each error carries the tab it belongs to, and a child's
 broken jump lights the container's Jumps badge as well.
 
-The project-level caps (300 inputs, 3 titles per list, 5 search questions) are
+The caps (300 inputs per form, 3 titles per list, 5 search questions per
+project) are
 enforced on save through `models/project-limits.js`. The import checks only the
 imported form's own input and title totals, like legacy — a project-level
 search-cap overflow raises a warning after the import instead of blocking it,
@@ -235,7 +236,7 @@ constraints so it remains standalone; keep those declarations in sync with
 
 | Limit | `PARAMETERS` key | Value |
 |---|---|---:|
-| Questions per project | `INPUTS_MAX_ALLOWED` | 300 |
+| Questions per form | `INPUTS_MAX_ALLOWED` | 300 |
 | Possible answers (radio, checkbox, dropdown) | `MAX_ANSWERS` | 300 |
 | Possible answers (searchsingle, searchmultiple) | `MAX_SEARCH_ANSWERS` | 1000 |
 | Possible answers per page | `ANSWERS_PER_PAGE` | 100 |

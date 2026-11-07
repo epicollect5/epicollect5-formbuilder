@@ -106,17 +106,19 @@ describe('project limits', () => {
             .toBe(FORM_MESSAGES.TOO_MANY_QUESTIONS);
     });
 
-    it('applies the question limit across forms and nesting', () => {
+    it('applies the question limit per form, across nesting', () => {
         const branch = input({ ref: 'branch', type: 'branch', branch: many(99, { ref: 'child' }) });
 
+        // two forms under the cap: the totals do not add up across forms
         expect(getProjectLimitsError(project([
             form([branch].concat(many(100, { ref: 'first' }))),
             form(many(100, { ref: 'second' }))
         ]))).toBeNull();
 
+        // one form over the cap is refused, whatever the other forms hold
         expect(getProjectLimitsError(project([
-            form([branch].concat(many(101, { ref: 'first' }))),
-            form(many(100, { ref: 'second' }))
+            form([branch].concat(many(201, { ref: 'first' }))),
+            form(many(10, { ref: 'second' }))
         ]))).toBe(FORM_MESSAGES.TOO_MANY_QUESTIONS);
     });
 

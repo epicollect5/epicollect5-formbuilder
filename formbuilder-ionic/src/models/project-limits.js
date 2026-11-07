@@ -76,11 +76,13 @@ const branchTitlesExceeded = (inputs) => {
 export const getProjectLimitsError = (project_definition) => {
     const forms = getForms(project_definition);
 
-    const inputs_total = forms.reduce((total, form) => {
-        return total + countInputs(getInputs(form));
-    }, 0);
+    // the question cap is per form, as in legacy (the current form's inputs
+    // are counted against INPUTS_MAX_ALLOWED, nesting included)
+    const form_over_limit = forms.some((form) => {
+        return countInputs(getInputs(form)) > PARAMETERS.INPUTS_MAX_ALLOWED;
+    });
 
-    if (inputs_total > PARAMETERS.INPUTS_MAX_ALLOWED) {
+    if (form_over_limit) {
         return FORM_MESSAGES.TOO_MANY_QUESTIONS;
     }
 
