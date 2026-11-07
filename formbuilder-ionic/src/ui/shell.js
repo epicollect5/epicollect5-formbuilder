@@ -801,9 +801,8 @@ const renderQuestions = () => {
 
     const branch_active = active_container && active_container.type === 'branch';
     // a list without questions has nothing to title: the warning waits for the
-    // first question, as it does at form level
-    const show_title_warning = inputs.length > 0 && countTitles(inputs) === 0 &&
-        (branch_active || !active_container);
+    // first question, and groups warn like branches do
+    const show_title_warning = inputs.length > 0 && countTitles(inputs) === 0;
 
     if (show_title_warning) {
         const warning = card.querySelector('[data-role="title-warning"]');
@@ -812,7 +811,7 @@ const renderQuestions = () => {
             warning.hidden = false;
             warning.querySelector('[data-role="title-warning-text"]').textContent = branch_active ?
                 'No title set for this branch yet' :
-                'No title set for this form yet';
+                (active_container ? 'No title set for this group yet' : 'No title set for this form yet');
         }
     }
 
@@ -1769,13 +1768,14 @@ const refreshTitleWarning = () => {
     const active_container = trail.length ? trail[trail.length - 1] : null;
     const branch_active = active_container && active_container.type === 'branch';
     const inputs = getCurrentInputs();
-    const show = countTitles(inputs) === 0 && (branch_active || (!active_container && inputs.length > 0));
+    const show = inputs.length > 0 && countTitles(inputs) === 0;
 
     warning.hidden = !show;
 
     if (show) {
         warning.querySelector('[data-role="title-warning-text"]').textContent =
-            branch_active ? 'No title set for this branch yet' : 'No title set for this form yet';
+            branch_active ? 'No title set for this branch yet' :
+                (active_container ? 'No title set for this group yet' : 'No title set for this form yet');
     }
 };
 

@@ -289,6 +289,17 @@ describe('branch and group rows', () => {
         expect(document.querySelector('#questions [data-role="exit-editing"]')).not.toBeNull();
     });
 
+    it('warns about a missing title inside a group with questions', () => {
+        rows()[1].click();
+        document.querySelector('#properties [data-role="edit-container"]').click();
+
+        // a group starts with a question, so the warning shows
+        const warning = document.querySelector('#questions [data-role="title-warning"]');
+
+        expect(warning.hidden).toBe(false);
+        expect(warning.textContent).toContain('No title set for this group yet');
+    });
+
     it('labels form uniqueness as branch-scoped inside a branch', async () => {
         rows()[0].click();
         document.querySelector('#properties [data-role="edit-container"]').click();
