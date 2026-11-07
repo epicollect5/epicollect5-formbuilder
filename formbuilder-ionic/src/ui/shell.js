@@ -225,15 +225,30 @@ const bindChrome = () => {
 };
 
 /* Snapshots are taken after a mutation, matching the legacy push points. */
+/* The save gate recomputes the whole project (R-41); typing only needs the
+   result after the pause, so the keystroke path debounces it. Every other
+   caller keeps the immediate update, and performSave re-validates anyway. */
+let save_gate_timer = null;
+const scheduleSaveButtonRefresh = () => {
+    if (save_gate_timer) {
+        clearTimeout(save_gate_timer);
+    }
+
+    save_gate_timer = setTimeout(() => {
+        save_gate_timer = null;
+        updateSaveButton();
+    }, 300);
+};
+
 const recordChange = (options) => {
     // The throttled push lands later, so the button gate has to follow it.
     pushUndoState(Object.assign({ on_change: updateUndoButton }, options || {}));
     change_revision += 1;
     unsaved_changes = true;
     updateUndoButton();
-    updateSaveButton();
+    scheduleSaveButtonRefresh();
     // Validity changes while editing, not only on select or sort.
-    refreshFormTabs();
+    refreshFormTabs(getSession().current_form_index);
 };
 const updateUndoButton = () => {
     const undo_button = document.getElementById('undo');
@@ -1288,8 +1303,10 @@ const refreshQuestionRows = () => {
     }
 };
 
-/* The form tabs live in the page shell and outlive question re-renders. */
-const refreshFormTabs = () => {
+/* The form tabs live in the page shell and outlive question re-renders.
+   A keystroke can only change the active form, so the callers on the typing
+   path pass its index and the other tabs keep their state. */
+const refreshFormTabs = (only_index) => {
     const forms = getForms(getSession().project_definition);
     const tabs = document.querySelectorAll('#form-tabs .builder__form-tab');
 
@@ -1298,6 +1315,11 @@ const refreshFormTabs = () => {
         const label = tab.querySelector('ion-label');
 
         if (!form || !label) {
+            return;
+        }
+
+        // a keystroke can only change the active form; the others are untouched
+        if (only_index !== undefined && only_index !== index) {
             return;
         }
 

@@ -209,7 +209,7 @@ describe('builder shell', () => {
         expect(document.querySelector('ion-toast')).toBeNull();
     });
 
-    it('flags the form tab and save gate as soon as a question edit invalidates it', () => {
+    it('flags the form tab as soon as a question edit invalidates it, and debounces the save gate', async () => {
         setProject(savable_project());
         renderApp();
         select_first_question();
@@ -222,11 +222,15 @@ describe('builder shell', () => {
         field.dispatchEvent(new CustomEvent('ionInput', { detail: { value: '' } }));
 
         expect(document.querySelector('#form-tabs .builder__form-tab .builder__form-tab-state')).not.toBeNull();
+
+        // the save gate recompute is debounced on the typing path (R-41)
+        await new Promise((resolve) => { setTimeout(resolve, 350); });
+
         expect(document.getElementById('save').disabled).toBe(true);
         expect(document.querySelector('ion-toast')).toBeNull();
     });
 
-    it('flags the form tab and save gate when a possible answer loses its text', () => {
+    it('flags the save gate when a possible answer loses its text', async () => {
         setProject(savable_choice_project());
         renderApp();
         select_first_question();
@@ -237,6 +241,8 @@ describe('builder shell', () => {
 
         field.value = '';
         field.dispatchEvent(new CustomEvent('ionInput', { detail: { value: '' } }));
+
+        await new Promise((resolve) => { setTimeout(resolve, 350); });
 
         expect(document.querySelector('#form-tabs .builder__form-tab .builder__form-tab-state')).not.toBeNull();
         expect(document.getElementById('save').disabled).toBe(true);

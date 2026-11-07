@@ -207,13 +207,21 @@ to regress; **fixed** — the concrete case found during the port is handled.
 
 ### R-41 Validity is recomputed on every keystroke, recursively
 - **Where:** `refreshCurrentProperties`, `updateCurrentQuestionStatus`,
-  `isInputValid` (recurses into branch/group children).
+  `isInputValid` (recurses into branch/group children), `refreshFormTabs`,
+  `updateSaveButton`.
 - **Risk:** each keystroke revalidates the question and, for containers, its whole
   subtree. With 300 questions and deep nesting this is repeated work; nothing
   caches it.
-- **Impact:** typing lag in large forms (not measured yet).
-- **Status:** open, low priority.
-- **Revisit when:** a large project feels slow; measure before changing.
+- **Impact:** typing lag in large forms.
+- **Status:** measured (2026-11-07, Node, worst case 5 forms x 300 questions,
+  ~447k answers, 25 MB serialized) and mitigated: `refreshFormTabs` now
+  revalidates only the edited form on the typing path, and the save-gate
+  recompute in `recordChange` is debounced by 300 ms (`performSave` still
+  revalidates). Keystroke steady state dropped from ~103 ms of JS to ~10 ms.
+  Remaining: the DOM badge pass over the visible rows and the selected
+  question's panel are browser costs, not measured here.
+- **Revisit when:** a large project feels slow in the browser; profile before
+  changing further.
 
 ### R-42 A copy can be born invalid
 - **Where:** `services/question-actions.js` — root jumps are dropped and child
@@ -353,7 +361,12 @@ to regress; **fixed** — the concrete case found during the port is handled.
   one per pause), and undo itself clones again. Memory and CPU grow with project
   size; nothing is measured yet.
 - **Impact:** lag on large projects, especially while typing across many edits.
-- **Status:** open, low priority.
+- **Status:** measured (2026-11-07, worst case 5 x 300 questions, 25 MB
+  serialized): the JSON clone costs ~180 ms and `structuredClone` is *worse*
+  (~275 ms), so the clone stays JSON; ten states ≈ 250 MB of heap on the worst
+  case. The cost lands once per 500 ms of continuous typing (the throttle) and
+  once per discrete action — noticeable but bounded. A structural fix (string
+  snapshots, deltas or immutable state) is deferred until real use complains.
 - **Revisit when:** large projects feel slow; measure before optimising.
 
 ### R-63 The baseline follows project identity
