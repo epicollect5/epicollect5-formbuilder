@@ -704,7 +704,14 @@ const renderForms = () => {
 };
 
 const buildFormTabLabel = (form) => {
-    const label = element('ion-label', {}, [form.name]);
+    // each tab carries its own live question count, on the left of the name
+    const label = element('ion-label', {}, [
+        element('ion-badge', {
+            class: 'builder__question-count-badge',
+            title: 'Questions in this form'
+        }, [String(countInputs(getInputs(form)))]),
+        form.name
+    ]);
 
     if (!areFormInputsValid(form)) {
         label.append(element('ion-icon', {
@@ -770,12 +777,6 @@ const renderQuestions = () => {
     const empty = card.querySelector('.builder__empty');
 
     title_name.textContent = form_name;
-
-    const count_badge = card.querySelector('[data-role="question-count"]');
-
-    if (count_badge) {
-        count_badge.textContent = String(countInputs(getInputs(form)));
-    }
 
     trail.forEach((node, index) => {
         title.append(element('span', { class: 'builder__questions-title-sep', 'aria-hidden': 'true' }, [' > ']));
@@ -1252,13 +1253,6 @@ const refreshFormMenuGates = () => {
 };
 
 const refreshQuestionRows = () => {
-    // the aggregate count follows the edits live, nesting included
-    const count_badge = document.querySelector('#questions [data-role="question-count"]');
-
-    if (count_badge) {
-        count_badge.textContent = String(countInputs(getInputs(getCurrentForm())));
-    }
-
     const inputs = getCurrentInputs();
 
     document.querySelectorAll(QUESTION_LIST + ' > .builder__question').forEach((row) => {
@@ -1309,6 +1303,13 @@ const refreshFormTabs = () => {
 
         const invalid = !areFormInputsValid(form);
         const warning = label.querySelector('.builder__form-tab-state');
+
+        // the tab's question count follows the edits live
+        const count = label.querySelector('.builder__question-count-badge');
+
+        if (count) {
+            count.textContent = String(countInputs(getInputs(form)));
+        }
 
         if (invalid && !warning) {
             label.append(element('ion-icon', {

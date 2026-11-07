@@ -120,7 +120,8 @@ describe('builder shell', () => {
         const tabs = document.querySelectorAll('#form-tabs .builder__form-tab');
 
         expect(tabs).toHaveLength(2);
-        expect(tabs[0].textContent).toBe('Screening form');
+        expect(tabs[0].textContent).toContain('Screening form');
+        expect(tabs[0].querySelector('.builder__question-count-badge').textContent).toBe('2');
         expect(tabs[0].getAttribute('aria-selected')).toBe('true');
         expect(tabs[1].getAttribute('aria-selected')).toBe('false');
     });
@@ -598,7 +599,10 @@ describe('form actions', () => {
             .click();
 
         expect(getCurrentForm().name).toBe('Renamed form');
-        expect(document.querySelectorAll('#form-tabs .builder__form-tab')[0].textContent).toBe('Renamed form');
+        const renamed_tab = document.querySelectorAll('#form-tabs .builder__form-tab')[0];
+
+        expect(renamed_tab.textContent).toContain('Renamed form');
+        expect(renamed_tab.querySelector('.builder__question-count-badge')).not.toBeNull();
         expect(document.querySelector('ion-modal.legacy-modal-host')).toBeNull();
     });
 

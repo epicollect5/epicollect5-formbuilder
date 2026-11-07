@@ -1503,6 +1503,7 @@ ion-item.builder__question[aria-current='true'] {
 .builder__form-tab ion-label {
     display: inline-flex;
     align-items: center;
+    gap: 6px;
 }
 
 /* Unchecked boxes keep the readable surface background; the label always uses
