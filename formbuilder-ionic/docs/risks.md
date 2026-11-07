@@ -464,7 +464,9 @@ shows the dangling ref as "Unavailable answer".
 - **Status:** fixed (2026-11-07) — files above `PARAMETERS.FORM_IMPORT_MAX_BYTES`
   (5 MB) are refused before reading with a "Form file is too large" error. The
   parse is still synchronous; the cap bounds its cost. No unit test (the check
-  lives in the shell file-input handler).
+  lives in the shell file-input handler). Legacy has no size cap (extension
+  check only), so this is a deliberate divergence: a 300-question project is
+  ~1–2 MB, so every realistic file behaves identically.
 - **Revisit when:** imports become common or large exports are expected.
 
 ### R-72 An edit made during a save is marked saved
@@ -529,9 +531,11 @@ shows the dangling ref as "Unavailable answer".
   clears the flag even if a throttled typing snapshot lands afterwards (the JSON
   is live, so the save itself is correct).
 - **Impact:** a spurious leave prompt, never a silent data loss.
-- **Status:** watch.
-- **Revisit when:** undo or dirty tracking changes; compare against a saved
-  snapshot instead of a flag.
+- **Status:** accepted (2026-11-07) — the false prompt is harmless by design
+  (confirming it costs nothing, the data equals the saved state) and the guard
+  never errs in the data-loss direction; R-72 covers the only hole in that
+  direction. A snapshot comparison is declined as polish.
+- **Revisit when:** the unload guard or dirty tracking changes anyway.
 
 ### R-78 The delete confirmation closes over the question object
 - **Where:** `src/ui/shell.js` `bindPropertyActions`, `src/ui/modal.js`.
