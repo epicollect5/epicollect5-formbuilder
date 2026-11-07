@@ -145,16 +145,25 @@ describe('builder shell', () => {
         document.querySelectorAll('#form-tabs .builder__form-tab')[2].click();
         renderApp();
 
-        const names = [...document.querySelectorAll('#form-tabs .builder__form-tab .builder__form-tab-name')]
-            .map((span) => span.textContent);
+        const tabs = [...document.querySelectorAll('#form-tabs .builder__form-tab')];
+        const name_of = (tab) => {
+            const name = tab.querySelector('.builder__form-tab-name');
+            return name ? name.textContent : '···';
+        };
 
-        expect(names).toEqual(['···', 'Second form', 'Extra form 3', 'Extra form 4', '···']);
-        expect(document.querySelectorAll('#form-tabs .builder__form-tab')[2].getAttribute('aria-selected')).toBe('true');
+        // collapsed tabs show the centred dots icon instead of a name
+        expect(name_of(tabs[0])).toBe('···');
+        expect(tabs[0].querySelector('.builder__form-tab-dots')).not.toBeNull();
+        expect(name_of(tabs[1])).toBe('Second form');
+        expect(name_of(tabs[2])).toBe('Extra form 3');
+        expect(name_of(tabs[3])).toBe('Extra form 4');
+        expect(tabs[2].getAttribute('aria-selected')).toBe('true');
 
         // collapsed tabs keep their tooltip and stay clickable
-        const collapsed = document.querySelectorAll('#form-tabs .builder__form-tab')[4];
+        const collapsed = tabs[4];
 
         expect(collapsed.getAttribute('title')).toBe('Extra form 5');
+        expect(collapsed.querySelector('.builder__form-tab-dots')).not.toBeNull();
         collapsed.click();
 
         expect(getSession().current_form_index).toBe(4);

@@ -1507,12 +1507,17 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 /* Long form names truncate inside the tab; names outside the current
-   prev/current/next window collapse to '...' but stay clickable. */
+   prev/current/next window collapse to a centred dots icon. */
 .builder__form-tab .builder__form-tab-name {
     max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.builder__form-tab .builder__form-tab-dots {
+    color: var(--app-text);
+    font-size: 18px;
 }
 
 /* Unchecked boxes keep the readable surface background; the label always uses

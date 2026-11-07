@@ -715,7 +715,7 @@ const renderForms = () => {
             role: 'tab',
             'aria-selected': is_selected ? 'true' : 'false',
             title: form.name
-        }, [buildFormTabLabel(form, in_window ? form.name : '···')]);
+        }, [buildFormTabLabel(form, !in_window)]);
 
         segment.append(tab);
     });
@@ -723,15 +723,28 @@ const renderForms = () => {
     bindFormSegment(segment);
 };
 
-const buildFormTabLabel = (form, display_name) => {
-    // each tab carries its own live question count, on the left of the name
-    const label = element('ion-label', {}, [
+const buildFormTabLabel = (form, collapsed) => {
+    // each tab carries its own live question count, on the left of the name;
+    // collapsed tabs show a dots icon instead, centred like the badge
+    const children = [
         element('ion-badge', {
             class: 'builder__question-count-badge',
             title: 'Questions in this form'
-        }, [String(countInputs(getInputs(form)))]),
-        element('span', { class: 'builder__form-tab-name' }, [display_name])
-    ]);
+        }, [String(countInputs(getInputs(form)))])
+    ];
+
+    if (collapsed) {
+        children.push(element('ion-icon', {
+            class: 'builder__form-tab-dots',
+            name: 'ellipsis-horizontal',
+            'aria-label': 'More forms'
+        }));
+    }
+    else {
+        children.push(element('span', { class: 'builder__form-tab-name' }, [form.name]));
+    }
+
+    const label = element('ion-label', {}, children);
 
     if (!areFormInputsValid(form)) {
         label.append(element('ion-icon', {
