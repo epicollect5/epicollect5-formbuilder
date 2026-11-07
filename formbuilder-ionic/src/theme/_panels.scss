@@ -485,8 +485,19 @@
     font-size: 18px;
 }
 
+/* The jump actions are a toolbar so the add button can use Ionic's end slot;
+   reset the toolbar chrome so it reads as an inline action row. */
 .builder__jumps-actions {
-    display: flex;
+    --background: transparent;
+    --border-width: 0;
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    --min-height: 34px;
+}
+
+.builder__jumps-actions::part(container) {
     justify-content: flex-end;
 }
 

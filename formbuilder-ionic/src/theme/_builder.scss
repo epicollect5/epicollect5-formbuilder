@@ -1091,12 +1091,25 @@ ion-item.builder__question[aria-current='true'] {
     min-height: 30px;
 }
 
+.builder__answers-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
 .builder__answers-title {
     margin: 0;
     font-size: 15px;
     font-weight: 700;
     color: var(--app-text);
     line-height: 1.2;
+}
+
+/* Same pill as the form question count; the surface tint gives it contrast
+   against the muted answers header. */
+.builder__answers-count-badge {
+    --background: var(--app-surface);
 }
 
 .builder__answers-btn-group {
@@ -1705,8 +1718,11 @@ ion-checkbox:not(.checkbox-checked)::part(label) {
     color: var(--ion-color-warning);
 }
 
-/* The jump row's own error, under the offending field, as in legacy. */
+/* The jump row's own error, under the offending field, as in legacy. It starts
+   a new grid row and spans both the label and the control column; without the
+   span it is auto-placed in the 56px label column and wraps over several lines. */
 .builder__jump-row-error {
+    grid-column: 1 / -1;
     margin: 2px 0 0;
     color: var(--ion-color-danger);
     font-size: 12px;
