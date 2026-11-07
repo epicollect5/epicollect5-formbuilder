@@ -270,3 +270,6 @@ constraints so it remains standalone; keep those declarations in sync with
   plain JSON. They must stay distinct.
 - **State model.** Save and undo assume a deep clone that survives a re-render;
   the in-place `session` model is the likely divergence point.
+- **Audit records.** Measurements and declined candidates live in
+  `docs/performance-audit.md`; remaining jQuery call sites are inventoried in
+  `docs/jquery-usage.md`. Re-measure before reopening a declined optimisation.
