@@ -786,10 +786,6 @@ ion-item.builder__question[aria-current='true'] {
     margin: 0;
 }
 
-.builder__property-tabs .builder__form-tab-state {
-    align-self: center;
-    margin-left: 2px;
-}
 
 .builder__property-tabs ion-segment-button::part(indicator),
 .builder__property-tabs ion-segment-button::part(indicator-background) {
@@ -811,10 +807,11 @@ ion-item.builder__question[aria-current='true'] {
 
 /* The tab error icon mirrors the legacy "!" on the affected tab. */
 .builder__property-tabs ion-segment-button .builder__property-tab-state {
+    flex: none;
+    align-self: center;
     margin-left: 4px;
     color: var(--ion-color-danger);
     font-size: 16px;
-    vertical-align: middle;
     font-weight: 700;
 }
 
@@ -1517,6 +1514,7 @@ ion-item.builder__question[aria-current='true'] {
 
 /* The form tab warning is the same filled icon and size as the question row. */
 .builder__form-tab-state {
+    flex: none;
     margin-left: 6px;
     color: var(--ion-color-warning);
     font-size: 20px;
@@ -1562,6 +1560,7 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 .builder__form-tab .builder__form-tab-dots {
+    flex: none;
     color: var(--app-text);
     font-size: 18px;
 }
