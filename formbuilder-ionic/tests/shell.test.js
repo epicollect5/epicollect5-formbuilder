@@ -645,7 +645,10 @@ describe('form actions', () => {
         wrapper.className = 'print-preview-wrapper';
         document.body.append(wrapper);
 
-        document.querySelector('#questions [data-action="form-print"]').click();
+        const print_button = document.querySelector('#questions [data-action="form-print"]');
+
+        expect(print_button.disabled).toBe(false);
+        print_button.click();
 
         expect(wrapper.innerHTML).toContain('<h2>Test mapping issue</h2>');
         expect(wrapper.innerHTML).toContain('Do you have children');
@@ -660,11 +663,18 @@ describe('form actions', () => {
         document.body.append(wrapper);
 
         document.querySelectorAll('#form-tabs .builder__form-tab')[1].click();
-        document.querySelector('#questions [data-action="form-print"]').click();
+
+        // an invalid form keeps export and print disabled, like legacy
+        const print_button = document.querySelector('#questions [data-action="form-print"]');
+        const export_button = document.querySelector('#questions [data-action="form-export"]');
+
+        expect(print_button.disabled).toBe(true);
+        expect(export_button.disabled).toBe(true);
+
+        print_button.click();
 
         expect(wrapper.innerHTML).toBe('');
         expect(print).not.toHaveBeenCalled();
-        expect(document.querySelector('ion-toast').message).toBe('Form is invalid');
     });
 
     it('deletes all questions without a confirmation', () => {

@@ -377,9 +377,6 @@ const installFormActions = (card, form) => {
     });
 
     const actions = {
-        'form-rename': () => {
-            openFormNameModal(form);
-        },
         'form-export': () => {
             const payload = buildFormExport(getSession().project_definition, form_index);
 
@@ -425,11 +422,13 @@ const installFormActions = (card, form) => {
     const menu_trigger = card.querySelector('[data-role="form-actions-trigger"]');
 
     if (menu_trigger) {
+        // the legacy menu: export and print wait for a valid form, rename and
+        // import live on their own controls
+        const form_valid = areFormInputsValid(form);
+
         createMenu(menu_trigger, [
-            { label: 'Rename form', data_action: 'form-rename', action: actions['form-rename'] },
-            { label: 'Export form', data_action: 'form-export', action: actions['form-export'] },
-            { label: 'Print form', data_action: 'form-print', action: actions['form-print'] },
-            { label: 'Import form', data_action: 'form-import', action: actions['form-import'], disabled: isEditing() },
+            { label: 'Export form', data_action: 'form-export', action: actions['form-export'], disabled: !form_valid },
+            { label: 'Print form', data_action: 'form-print', action: actions['form-print'], disabled: !form_valid },
             { divider: true },
             { label: 'Delete all questions', data_action: 'form-delete-all', action: actions['form-delete-all'] }
         ], (item) => {
@@ -1226,8 +1225,20 @@ const refreshCurrentProperties = () => {
 const runBackgroundValidation = () => {
     refreshQuestionRows();
     refreshFormTabs();
+    refreshFormMenuGates();
     updateSaveButton();
     refreshCurrentProperties();
+};
+
+/* The menu popover survives between renders; its export and print gates
+   follow the form's validity the way the save button does. */
+const refreshFormMenuGates = () => {
+    const form = getCurrentForm();
+    const valid = form ? areFormInputsValid(form) : false;
+
+    document.querySelectorAll('#questions [data-action="form-export"], #questions [data-action="form-print"]').forEach((control) => {
+        control.disabled = !valid;
+    });
 };
 
 const refreshQuestionRows = () => {
