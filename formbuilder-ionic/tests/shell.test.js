@@ -126,7 +126,7 @@ describe('builder shell', () => {
         expect(tabs[1].getAttribute('aria-selected')).toBe('false');
     });
 
-    it('collapses form names outside the prev/current/next window', () => {
+    it('collapses every tab except the active one', () => {
         const definition = project_definition();
 
         for (let index = 3; index <= 5; index += 1) {
@@ -151,12 +151,12 @@ describe('builder shell', () => {
             return name ? name.textContent : '···';
         };
 
-        // collapsed tabs show the centred dots icon instead of a name
+        // only the active tab keeps its name; the rest are centred dots icons
         expect(name_of(tabs[0])).toBe('···');
         expect(tabs[0].querySelector('.builder__form-tab-dots')).not.toBeNull();
-        expect(name_of(tabs[1])).toBe('Second form');
+        expect(name_of(tabs[1])).toBe('···');
         expect(name_of(tabs[2])).toBe('Extra form 3');
-        expect(name_of(tabs[3])).toBe('Extra form 4');
+        expect(name_of(tabs[3])).toBe('···');
         expect(tabs[2].getAttribute('aria-selected')).toBe('true');
 
         // collapsed tabs keep their tooltip and stay clickable
