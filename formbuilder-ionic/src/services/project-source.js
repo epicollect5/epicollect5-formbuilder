@@ -1,6 +1,7 @@
 'use strict';
 
 import { PARAMETERS } from '@/config/parameters.js';
+import { ensureCompressionStreams } from '@/services/streams-support.js';
 
 export const getProjectUrl = (base_url) => {
     return new URL(PARAMETERS.PROJECT_PATH, base_url || document.baseURI).href;
@@ -11,6 +12,8 @@ export const getProjectUrl = (base_url) => {
  * gzipped, base64-encoded body when the Laravel API serves it.
  */
 export const decodeProjectPayload = async (payload) => {
+    await ensureCompressionStreams();
+
     const trimmed = String(payload || '').trim();
 
     if (!trimmed) {

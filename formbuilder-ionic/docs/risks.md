@@ -419,8 +419,17 @@ shows the dangling ref as "Unavailable answer".
   Otherwise the save throws before the request and only a toast explains it.
   Export and import are unaffected.
 - **Impact:** older browsers cannot save at all.
-- **Status:** open (accepted: no polyfill is bundled).
-- **Revisit when:** the supported browser matrix changes.
+- **Status:** fixed (2026-11-07) — both directions are covered now: the save
+  side (`encodeProject`) and the load side (`decodeProjectPayload`) gate on a
+  lazily installed ponyfill (`compression-streams-polyfill`, fflate-based, MIT,
+  dynamic import so evergreen browsers never download it) that installs
+  `CompressionStream`/`DecompressionStream` where missing. The ponyfill needs
+  `TransformStream` (Safari 14.1+, Firefox 103+); below that the builder still
+  fails with an explicit error. The ponyfill was cross-checked against the
+  native implementation in both directions. The `color-mix()` well tints also
+  gained static fallbacks so pre-113 browsers keep their colours.
+- **Revisit when:** the supported browser matrix changes; drop the polyfill if
+  the floor ever rises above Safari 16.4 / Firefox 113.
 
 ### R-67 Import does not repair jumps that point at replaced inputs
 - **Where:** `services/form-import.js` `prepareImportedForm`, `ui/shell.js`

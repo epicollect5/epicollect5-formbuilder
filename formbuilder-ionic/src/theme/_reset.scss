@@ -106,6 +106,7 @@ hr {
 }
 
 .warning-well {
+    background: rgb(255, 244, 224);
     background: color-mix(in srgb, var(--ion-color-warning) 12%, white);
     border-radius: 10px;
     color: var(--app-text);
@@ -114,6 +115,7 @@ hr {
 
 /* Neutral well, the default: same shape, light grey wash. */
 .info-well {
+    background: rgb(238, 238, 239);
     background: color-mix(in srgb, var(--ion-color-medium) 16%, white);
     border-radius: 10px;
     color: var(--app-text);
@@ -122,6 +124,7 @@ hr {
 
 /* Destructive variant of the well: same shape, danger wash. */
 .danger-well {
+    background: rgb(246, 236, 236);
     background: color-mix(in srgb, var(--ion-color-danger) 10%, white);
     border-radius: 10px;
     color: var(--app-text);
@@ -170,6 +173,7 @@ hr {
 }
 
 .bg-warning {
+    background: rgb(255, 244, 224);
     background: color-mix(in srgb, var(--ion-color-warning) 12%, white);
     border-radius: 10px;
     padding: 10px 12px;

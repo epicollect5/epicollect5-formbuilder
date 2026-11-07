@@ -5,6 +5,7 @@ import { PARAMETERS } from '@/config/parameters.js';
 import { areAllInputsValid } from '@/services/validation.js';
 import { getJumpAvailableDestinations } from '@/services/jumps.js';
 import { getProjectLimitsError } from '@/models/project-limits.js';
+import { ensureCompressionStreams } from '@/services/streams-support.js';
 
 /*
  * Port of `actions/save/**` plus the export half of the form callbacks.
@@ -127,6 +128,8 @@ const readStream = async (readable) => {
 
 /* base64(gzip(JSON)), the body the Laravel endpoint decodes. */
 export const encodeProject = async (project_definition) => {
+    await ensureCompressionStreams();
+
     if (typeof CompressionStream === 'undefined') {
         throw new Error('This browser cannot compress the project definition');
     }
