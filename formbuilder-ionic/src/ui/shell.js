@@ -724,14 +724,10 @@ const renderForms = () => {
 };
 
 const buildFormTabLabel = (form, collapsed) => {
-    // each tab carries its own live question count, on the left of the name;
-    // collapsed tabs show a dots icon instead, centred like the badge
-    const children = [
-        element('ion-badge', {
-            class: 'builder__question-count-badge',
-            title: 'Questions in this form'
-        }, [String(countInputs(getInputs(form)))])
-    ];
+    // each named tab carries its own live question count on the left of the
+    // name; a collapsed tab is just the placeholder and the validity icon, so
+    // five tabs always fit
+    const children = [];
 
     if (collapsed) {
         children.push(element('ion-icon', {
@@ -741,6 +737,10 @@ const buildFormTabLabel = (form, collapsed) => {
         }));
     }
     else {
+        children.push(element('ion-badge', {
+            class: 'builder__question-count-badge',
+            title: 'Questions in this form'
+        }, [String(countInputs(getInputs(form)))]));
         children.push(element('span', { class: 'builder__form-tab-name' }, [form.name]));
     }
 

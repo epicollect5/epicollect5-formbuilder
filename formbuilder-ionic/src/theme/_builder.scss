@@ -1530,9 +1530,14 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 .builder__form-tab:has(.builder__form-tab-dots) {
-    /* collapsed tabs stay at their content width */
+    /* collapsed tabs are a centred placeholder (plus the validity icon):
+       no count badge, so five of them always fit */
     flex: 0 0 auto;
-    max-width: 100px;
+    min-width: 56px;
+}
+
+.builder__form-tab:has(.builder__form-tab-dots) ion-label {
+    justify-content: center;
 }
 
 .builder__form-tab ion-label {
