@@ -74,7 +74,7 @@ import { duplicateInput } from '@/services/question-actions.js';
 import { getFormNameError } from '@/services/form-management.js';
 import { prepareImportedForm } from '@/services/form-import.js';
 import { buildFormExport, getFormExportFilename, saveProject } from '@/services/save.js';
-import { areAllInputsValid, areFormInputsValid, getInputErrors, isInputValid } from '@/services/validation.js';
+import { areAllInputsValid, areFormInputsValid, getInputErrors, isInputValid, PROPERTIES_TAB } from '@/services/validation.js';
 import { canUndo, ensureUndoBaseline, pushUndoState, undo } from '@/services/undo.js';
 import { countProjectSearchInputs } from '@/models/project-limits.js';
 import { button, createView, element, icon, parseView } from '@/ui/dom.js';
@@ -1092,7 +1092,8 @@ const performInputValidation = () => {
     }, 600);
 };
 
-/* Shows the first error for the selected question, under the question field. */
+/* Shows the first error of the basic tab under the question field; errors of
+   the other tabs belong to their own badges, not to the question text. */
 const updatePropertyError = (card, input) => {
     const message = card.querySelector('[data-role="properties-error"]');
 
@@ -1100,15 +1101,17 @@ const updatePropertyError = (card, input) => {
         return;
     }
 
-    const errors = getInputErrors(input, getCurrentInputs());
+    const tab_errors = getInputErrors(input, getCurrentInputs()).filter((error) => {
+        return error.tab === PROPERTIES_TAB;
+    });
 
-    if (!errors.length) {
+    if (!tab_errors.length) {
         message.textContent = '';
         message.setAttribute('hidden', 'hidden');
         return;
     }
 
-    message.textContent = errors[0].message;
+    message.textContent = tab_errors[0].message;
     message.removeAttribute('hidden');
 };
 
