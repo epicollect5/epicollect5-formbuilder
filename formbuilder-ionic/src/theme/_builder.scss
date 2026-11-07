@@ -1524,10 +1524,14 @@ ion-item.builder__question[aria-current='true'] {
 }
 
 .builder__form-tab {
-    flex: none;
+    /* named tabs share the strip and shrink via their ellipsis */
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .builder__form-tab:has(.builder__form-tab-dots) {
+    /* collapsed tabs stay at their content width */
+    flex: 0 0 auto;
     max-width: 100px;
 }
 
@@ -1546,6 +1550,7 @@ ion-item.builder__question[aria-current='true'] {
    prev/current/next window collapse to a centred dots icon. */
 .builder__form-tab .builder__form-tab-name {
     max-width: 220px;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
