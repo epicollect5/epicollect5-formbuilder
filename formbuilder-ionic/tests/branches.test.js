@@ -70,7 +70,7 @@ function build_markup() {
         '<ion-toolbar><ion-buttons slot="start"><ion-button data-action="back">Back</ion-button></ion-buttons><ion-title><img id="project-logo" alt=""><span id="project-name"></span></ion-title><ion-buttons slot="end"><ion-button data-action="exit">Exit</ion-button></ion-buttons></ion-toolbar>',
         '<section id="tools"></section>',
         '<nav id="form-tabs" role="tablist"><ion-segment class="builder__forms-segment" value="0" scrollable="true"></ion-segment></nav>',
-        '<button type="button" id="add-form">Add form</button>',
+        '<button type="button" id="add-form">Add Form</button>',
         '<button type="button" id="undo" disabled>Undo</button>',
         '<button type="button" id="save" disabled>Save project</button>',
         '<section id="questions"></section>',

@@ -1,7 +1,7 @@
 'use strict';
 
-import { getForms, getInputs, getProject } from '@/models/project-definition.js';
-import { PARAMETERS } from '@/config/parameters.js';
+import {getForms, getInputs, getProject} from '@/models/project-definition.js';
+import {PARAMETERS} from '@/config/parameters.js';
 import {
     POSSIBLE_ANSWERS_ORDER,
     getAnswerLimit,
@@ -20,9 +20,9 @@ import {
     isBranchOrGroup,
     isMediaType
 } from '@/models/input-properties.js';
-import { FORM_MESSAGES, VALIDATION_MESSAGES } from '@/config/strings.js';
-import { getQuestionType } from '@/models/question-types.js';
-import { countTitles, getAdvancedFields } from '@/services/properties.js';
+import {FORM_MESSAGES, VALIDATION_MESSAGES} from '@/config/strings.js';
+import {getQuestionType} from '@/models/question-types.js';
+import {countTitles, getAdvancedFields} from '@/services/properties.js';
 import {
     addPossibleAnswer,
     deleteAllAnswers,
@@ -45,8 +45,8 @@ import {
     removeJump,
     updateJump
 } from '@/services/jumps.js';
-import { JUMP_CONDITIONS, jumpNeedsAnswer, usesAlwaysJump } from '@/models/jumps.js';
-import { goBack } from '@/services/navigation.js';
+import {JUMP_CONDITIONS, jumpNeedsAnswer, usesAlwaysJump} from '@/models/jumps.js';
+import {goBack} from '@/services/navigation.js';
 import {
     addForm,
     addInput,
@@ -70,19 +70,33 @@ import {
     selectInput,
     updateCurrentInput
 } from '@/services/session.js';
-import { duplicateInput } from '@/services/question-actions.js';
-import { getFormNameError } from '@/services/form-management.js';
-import { prepareImportedForm } from '@/services/form-import.js';
-import { buildFormExport, getFormExportFilename, saveProject } from '@/services/save.js';
-import { areAllInputsValid, areFormInputsValid, getInputErrors, getJumpErrors, isInputValid, PROPERTIES_TAB } from '@/services/validation.js';
-import { canUndo, ensureUndoBaseline, pushUndoState, undo } from '@/services/undo.js';
-import { countInputs, countProjectSearchInputs } from '@/models/project-limits.js';
-import { button, createView, element, icon, parseView } from '@/ui/dom.js';
-import { hideLoading, notifyError, notifySuccess, notifyWarning, openModal, showLoading } from '@/services/notifications.js';
-import { createDropdown, createMenu } from '@/ui/dropdown.js';
-import { printForm } from '@/ui/print.js';
-import { createReadmeEditor } from '@/ui/readme-editor.js';
-import { installAnswerSortable, installQuestionSortable, installToolDrag } from '@/ui/sortable.js';
+import {duplicateInput} from '@/services/question-actions.js';
+import {getFormNameError} from '@/services/form-management.js';
+import {prepareImportedForm} from '@/services/form-import.js';
+import {buildFormExport, getFormExportFilename, saveProject} from '@/services/save.js';
+import {
+    areAllInputsValid,
+    areFormInputsValid,
+    getInputErrors,
+    getJumpErrors,
+    isInputValid,
+    PROPERTIES_TAB
+} from '@/services/validation.js';
+import {canUndo, ensureUndoBaseline, pushUndoState, undo} from '@/services/undo.js';
+import {countInputs, countProjectSearchInputs} from '@/models/project-limits.js';
+import {button, createView, element, icon, parseView} from '@/ui/dom.js';
+import {
+    hideLoading,
+    notifyError,
+    notifySuccess,
+    notifyWarning,
+    openModal,
+    showLoading
+} from '@/services/notifications.js';
+import {createDropdown, createMenu} from '@/ui/dropdown.js';
+import {printForm} from '@/ui/print.js';
+import {createReadmeEditor} from '@/ui/readme-editor.js';
+import {installAnswerSortable, installQuestionSortable, installToolDrag} from '@/ui/sortable.js';
 import tools_view from '@/views/tools.html?raw';
 import question_card_view from '@/views/question-card.html?raw';
 import properties_card_view from '@/views/properties-card.html?raw';
@@ -134,8 +148,7 @@ const renderProjectName = () => {
 
     if (name) {
         name.textContent = project ? project.name : '';
-    }
-    else if (title && title.tagName && title.tagName.toLowerCase() === 'ion-title') {
+    } else if (title && title.tagName && title.tagName.toLowerCase() === 'ion-title') {
         title.textContent = project ? project.name : '';
     }
 
@@ -242,7 +255,7 @@ const scheduleSaveButtonRefresh = () => {
 
 const recordChange = (options) => {
     // The throttled push lands later, so the button gate has to follow it.
-    pushUndoState(Object.assign({ on_change: updateUndoButton }, options || {}));
+    pushUndoState(Object.assign({on_change: updateUndoButton}, options || {}));
     change_revision += 1;
     unsaved_changes = true;
     updateUndoButton();
@@ -331,7 +344,7 @@ const performSave = async () => {
     showLoading();
 
     try {
-        await saveProject(project_definition, { dev: isDevMode() });
+        await saveProject(project_definition, {dev: isDevMode()});
 
         // an edit or an undo made while the request was in flight is not in
         // the saved payload, so it stays marked unsaved (R-72)
@@ -343,14 +356,12 @@ const performSave = async () => {
         setTimeout(() => {
             notifySuccess(FORM_MESSAGES.PROJECT_SAVED);
         }, 500);
-    }
-    catch (error) {
+    } catch (error) {
         const message = error && error.message ? error.message : '';
 
         hideLoading();
         notifyError(`${FORM_MESSAGES.PROJECT_NOT_SAVED}${message ? ` ${message}` : ''}`);
-    }
-    finally {
+    } finally {
         saving = false;
         updateSaveButton();
     }
@@ -442,10 +453,10 @@ const installFormActions = (card, form) => {
         const form_valid = areFormInputsValid(form);
 
         createMenu(menu_trigger, [
-            { label: 'Export form', data_action: 'form-export', action: actions['form-export'], disabled: !form_valid },
-            { label: 'Print form', data_action: 'form-print', action: actions['form-print'], disabled: !form_valid },
-            { divider: true },
-            { label: 'Delete all questions', data_action: 'form-delete-all', action: actions['form-delete-all'] }
+            {label: 'Export form', data_action: 'form-export', action: actions['form-export'], disabled: !form_valid},
+            {label: 'Print form', data_action: 'form-print', action: actions['form-print'], disabled: !form_valid},
+            {divider: true},
+            {label: 'Delete all questions', data_action: 'form-delete-all', action: actions['form-delete-all']}
         ], (item) => {
             item.action();
         });
@@ -472,7 +483,7 @@ const openFormNameModal = (form) => {
         title: 'Form name',
         body,
         buttons: [
-            { text: 'Close', class_name: 'btn-default pull-left' },
+            {text: 'Close', class_name: 'btn-default pull-left'},
             {
                 text: 'Save changes',
                 class_name: 'btn-primary',
@@ -491,8 +502,7 @@ const openFormNameModal = (form) => {
                         if (!addForm(field.value)) {
                             return;
                         }
-                    }
-                    else {
+                    } else {
                         renameForm(form_index, field.value);
                     }
 
@@ -588,10 +598,9 @@ const importFormFile = (card) => {
 
             try {
                 result = prepareImportedForm(reader.result, getSession().project_definition, getSession().current_form_index);
-            }
-            catch (error) {
+            } catch (error) {
                 // Never leave the overlay up if the parser itself throws.
-                result = { ok: false, error: FORM_MESSAGES.FORM_FILE_INVALID };
+                result = {ok: false, error: FORM_MESSAGES.FORM_FILE_INVALID};
             }
 
             if (!result.ok) {
@@ -611,12 +620,10 @@ const importFormFile = (card) => {
                 // hold runtime errors the import checks do not cover (R-67)
                 if (!result.project_valid) {
                     notifyWarning(`${FORM_MESSAGES.FORM_IMPORTED} ${FORM_MESSAGES.PROJECT_INVALID}`);
-                }
-                else if (countProjectSearchInputs(getSession().project_definition) >= PARAMETERS.SEARCH_INPUTS_MAX) {
+                } else if (countProjectSearchInputs(getSession().project_definition) >= PARAMETERS.SEARCH_INPUTS_MAX) {
                     // legacy warns when an import fills the search-question cap
                     notifyWarning(FORM_MESSAGES.SEARCH_INPUTS_LIMIT_REACHED);
-                }
-                else {
+                } else {
                     notifySuccess(FORM_MESSAGES.FORM_IMPORTED);
                 }
             }, 500);
@@ -703,10 +710,10 @@ const renderForms = () => {
     segment.value = String(current_index);
     segment.disabled = isEditing();
 
-    // long names break the strip: from four forms on, only the active tab
-    // keeps its name and the others collapse to a placeholder that stays
-    // clickable and keeps its tooltip — with three or fewer there is room for
-    // every name
+    // long names break the strip: the tabs render named, then collapse
+    // furthest-from-active while the strip overflows (measured); without
+    // layout (jsdom) the count rule stands: four or more forms collapse the
+    // inactive tabs
     const collapse_others = forms.length >= 4;
 
     forms.forEach((form, form_index) => {
@@ -721,6 +728,33 @@ const renderForms = () => {
 
         segment.append(tab);
     });
+
+    if (segment.clientWidth > 0) {
+        const tabs = [...segment.querySelectorAll('.builder__form-tab')];
+
+        // upgrade the collapsed tabs back to names while the strip fits
+        tabs.forEach((tab, index) => {
+            if (index === current_index) {
+                return;
+            }
+            if (collapse_others) {
+                tab.querySelector('ion-label').replaceWith(buildFormTabLabel(forms[index], false));
+            }
+        });
+
+        const overflowing = () => segment.scrollWidth > segment.clientWidth + 1;
+
+        // collapse the tabs furthest from the active one until it fits
+        for (const index of forms
+            .map((form, index) => index)
+            .filter((index) => index !== current_index)
+            .sort((a, b) => Math.abs(b - current_index) - Math.abs(a - current_index))) {
+            if (!overflowing()) {
+                break;
+            }
+            tabs[index].querySelector('ion-label').replaceWith(buildFormTabLabel(forms[index], true));
+        }
+    }
 
     bindFormSegment(segment);
 };
@@ -737,13 +771,12 @@ const buildFormTabLabel = (form, collapsed) => {
             name: 'ellipsis-horizontal',
             'aria-label': 'More forms'
         }));
-    }
-    else {
+    } else {
         children.push(element('ion-badge', {
             class: 'builder__question-count-badge',
             title: 'Questions in this form'
         }, [String(countInputs(getInputs(form)))]));
-        children.push(element('span', { class: 'builder__form-tab-name' }, [form.name]));
+        children.push(element('span', {class: 'builder__form-tab-name'}, [form.name]));
     }
 
     const label = element('ion-label', {}, children);
@@ -814,7 +847,7 @@ const renderQuestions = () => {
     title_name.textContent = form_name;
 
     trail.forEach((node, index) => {
-        title.append(element('span', { class: 'builder__questions-title-sep', 'aria-hidden': 'true' }, [' > ']));
+        title.append(element('span', {class: 'builder__questions-title-sep', 'aria-hidden': 'true'}, [' > ']));
         title.append(element('span', {
             class: `builder__questions-title-crumb${index === trail.length - 1 ? ' is-current' : ''}`
         }, [getQuestionLabel(node)]));
@@ -834,8 +867,7 @@ const renderQuestions = () => {
             };
             editing_toolbar.querySelector('[data-role="editing-status"]')
                 .append(buildEditingStatus(active_container));
-        }
-        else {
+        } else {
             editing_toolbar.remove();
         }
     }
@@ -885,10 +917,10 @@ const buildQuestionRow = (input, is_current) => {
         'aria-current': is_current ? 'true' : 'false',
         'data-valid': isInputRowValid(input) ? 'true' : 'false'
     }, [
-        element('span', { class: 'builder__question-type-icon' }, [
+        element('span', {class: 'builder__question-type-icon'}, [
             icon(question_type ? question_type.icon : 'help-outline')
         ]),
-        element('span', { class: 'builder__question-text', title: getQuestionLabel(input) }, [getQuestionLabel(input)]),
+        element('span', {class: 'builder__question-text', title: getQuestionLabel(input)}, [getQuestionLabel(input)]),
         buildQuestionTail(input)
     ]);
 
@@ -908,7 +940,7 @@ const buildQuestionTail = (input) => {
 const buildQuestionStatus = (input) => {
     const valid = isInputRowValid(input);
     const has_jumps = Array.isArray(input.jumps) && input.jumps.length > 0;
-    const status = element('span', { class: 'builder__question-status' });
+    const status = element('span', {class: 'builder__question-status'});
     const validity = element('span', {
         class: `question-state ${valid ? 'is-valid' : 'is-invalid'}`,
         'aria-label': valid ? 'Valid question' : 'Question has errors',
@@ -1130,8 +1162,7 @@ const performInputValidation = () => {
 
         if (valid) {
             notifySuccess(VALIDATION_MESSAGES.INPUT_VALID);
-        }
-        else {
+        } else {
             notifyError(VALIDATION_MESSAGES.INPUT_NOT_VALID);
         }
     }, 600);
@@ -1216,8 +1247,7 @@ const markTabInvalid = (tab, invalid) => {
 
     if (invalid) {
         tab.setAttribute('aria-invalid', 'true');
-    }
-    else {
+    } else {
         tab.removeAttribute('aria-invalid');
     }
 
@@ -1231,8 +1261,7 @@ const markTabInvalid = (tab, invalid) => {
             name: 'alert',
             'aria-label': 'Tab has validation errors'
         }));
-    }
-    else if (!invalid && state_icon) {
+    } else if (!invalid && state_icon) {
         state_icon.remove();
     }
 };
@@ -1308,8 +1337,7 @@ const refreshQuestionRows = () => {
 
         if (status) {
             status.replaceWith(replacement);
-        }
-        else {
+        } else {
             row.append(replacement);
         }
     });
@@ -1359,8 +1387,7 @@ const refreshFormTabs = (only_index) => {
                 name: 'warning',
                 'aria-label': 'Form has validation errors'
             }));
-        }
-        else if (!invalid && warning) {
+        } else if (!invalid && warning) {
             warning.remove();
         }
     });
@@ -1375,8 +1402,7 @@ const setActivePropertyContent = (value) => {
         if (active) {
             content.removeAttribute('hidden');
             content.setAttribute('aria-hidden', 'false');
-        }
-        else {
+        } else {
             content.setAttribute('hidden', 'hidden');
             content.setAttribute('aria-hidden', 'true');
         }
@@ -1404,9 +1430,9 @@ const buildBasicPanel = (input, pane) => {
                 return;
             }
 
-            updateCurrentInput({ question });
+            updateCurrentInput({question});
             updateQuestionText(plain_text);
-            recordChange({ throttle: true });
+            recordChange({throttle: true});
         });
         panel.append(active_readme_editor.element);
 
@@ -1418,17 +1444,15 @@ const buildBasicPanel = (input, pane) => {
 
     if (allowsRequired(input.type)) {
         bindCheckboxToggle(required_toggle, input.is_required === true, (checked) => {
-            updateCurrentInput({ is_required: checked });
+            updateCurrentInput({is_required: checked});
         });
-    }
-    else {
+    } else {
         required_toggle.remove();
     }
 
     if (allowsTitle(input.type)) {
         bindTitleToggle(title_row, input);
-    }
-    else {
+    } else {
         title_row.remove();
     }
 
@@ -1442,8 +1466,7 @@ const buildBasicPanel = (input, pane) => {
             active_property_tab = 'basic';
             renderApp(handlers);
         };
-    }
-    else {
+    } else {
         //the button lives in the first third of the grid, remove the whole grid
         edit_container_grid.remove();
     }
@@ -1505,7 +1528,7 @@ const buildAdvancedPanel = (input, pane) => {
         }
 
         bindCheckboxToggle(panel.querySelector('[data-field="verify"]'), input.verify === true, (checked) => {
-            updateCurrentInput({ verify: checked });
+            updateCurrentInput({verify: checked});
         });
     }
 
@@ -1513,7 +1536,7 @@ const buildAdvancedPanel = (input, pane) => {
         // Imported date/time questions can arrive with a null format; legacy
         // checks its default radio, so the definition must carry it too.
         if (!input.datetime_format) {
-            updateCurrentInput({ datetime_format: getDefaultDatetimeFormat(input.type) });
+            updateCurrentInput({datetime_format: getDefaultDatetimeFormat(input.type)});
         }
 
         bindDatetimeFormatControl(panel.querySelector('[data-field="datetime_format"]'), input);
@@ -1640,13 +1663,12 @@ const buildJumpRow = (input, jump, index, destinations, jump_error) => {
     row.setAttribute('data-jump-index', String(index));
 
     if (always) {
-        initDropdown(when_placeholder, [{ value: 'ALL', label: 'always' }], 'ALL', null, true);
-    }
-    else {
+        initDropdown(when_placeholder, [{value: 'ALL', label: 'always'}], 'ALL', null, true);
+    } else {
         initDropdown(when_placeholder, JUMP_CONDITIONS.map((condition) => {
-            return { value: condition.key, label: condition.label };
+            return {value: condition.key, label: condition.label};
         }), jump.when || 'IS', (detail) => {
-            updateJump(input, index, { when: detail.value });
+            updateJump(input, index, {when: detail.value});
             recordChange();
             renderProperties();
             renderQuestions();
@@ -1668,7 +1690,7 @@ const buildJumpRow = (input, jump, index, destinations, jump_error) => {
             // a stored ref that no longer matches an answer stays visible as
             // unavailable instead of silently showing the first answer (R-30)
             if (needs_answer && jump.answer_ref && !has_value) {
-                answer_options.unshift({ value: jump.answer_ref, label: 'Unavailable answer' });
+                answer_options.unshift({value: jump.answer_ref, label: 'Unavailable answer'});
             }
 
             const answer_value = !needs_answer ?
@@ -1676,7 +1698,7 @@ const buildJumpRow = (input, jump, index, destinations, jump_error) => {
                 (jump.answer_ref ? jump.answer_ref : (answer_options[0] ? answer_options[0].value : ''));
 
             const answer_dropdown = initDropdown(answer_placeholder, answer_options, answer_value, needs_answer ? (detail) => {
-                updateJump(input, index, { answer_ref: detail.value || '' });
+                updateJump(input, index, {answer_ref: detail.value || ''});
                 recordChange();
                 renderProperties();
                 renderQuestions();
@@ -1707,12 +1729,14 @@ const buildJumpRow = (input, jump, index, destinations, jump_error) => {
         });
     }
 
-    if (!jump.to || !destination_options.some((option) => { return String(option.value) === String(jump.to); })) {
-        destination_options.unshift({ value: '', label: 'Select destination' });
+    if (!jump.to || !destination_options.some((option) => {
+        return String(option.value) === String(jump.to);
+    })) {
+        destination_options.unshift({value: '', label: 'Select destination'});
     }
 
     initDropdown(goto_placeholder, destination_options, jump.to || '', (detail) => {
-        updateJump(input, index, { to: detail.value || '' });
+        updateJump(input, index, {to: detail.value || ''});
         recordChange();
         renderQuestions();
         updateCurrentQuestionStatus();
@@ -1778,8 +1802,7 @@ const bindQuestionField = (field, input) => {
     // Legacy media text fields have no maxlength; every other question does.
     if (isMediaType(input.type)) {
         field.removeAttribute('maxlength');
-    }
-    else {
+    } else {
         field.setAttribute('maxlength', String(PARAMETERS.QUESTION_MAX_LENGTH));
     }
 
@@ -1791,12 +1814,12 @@ const bindQuestionField = (field, input) => {
             field.value = question;
         }
 
-        updateCurrentInput({ question });
+        updateCurrentInput({question});
         updateEditButtonState(input);
         updateQuestionText(question);
         updateCurrentQuestionStatus();
         refreshCurrentProperties();
-        recordChange({ throttle: true });
+        recordChange({throttle: true});
     });
 };
 
@@ -1890,9 +1913,9 @@ const bindTitleToggle = (row, input) => {
         // No re-render: the checkbox already shows its own state, and replacing
         // the card would drop focus and reset the panel's scroll position.
         // The title well lives in the question column, so sync it directly.
-        updateCurrentInput({ is_title: next_checked });
+        updateCurrentInput({is_title: next_checked});
         refreshTitleWarning();
-    }, { disabled: limit_reached });
+    }, {disabled: limit_reached});
 };
 
 const bindTextField = (field, value, property) => {
@@ -1907,7 +1930,7 @@ const bindTextField = (field, value, property) => {
 
         next[property] = text === '' ? null : text;
         updateCurrentInput(next);
-        recordChange({ throttle: true });
+        recordChange({throttle: true});
     });
 };
 
@@ -1929,7 +1952,7 @@ const bindNumberField = (field, value, property) => {
         updateCurrentInput(next);
         updateCurrentQuestionStatus();
         refreshCurrentProperties();
-        recordChange({ throttle: true });
+        recordChange({throttle: true});
     });
 };
 
@@ -1944,10 +1967,10 @@ const bindRegexField = (wrapper, input) => {
     field.addEventListener('ionInput', (event) => {
         const text = event.detail.value || '';
 
-        updateCurrentInput({ regex: text === '' ? null : text });
+        updateCurrentInput({regex: text === '' ? null : text});
         updateCurrentQuestionStatus();
         refreshCurrentProperties();
-        recordChange({ throttle: true });
+        recordChange({throttle: true});
     });
 
 };
@@ -1964,7 +1987,7 @@ const bindNumericTypeControl = (field_group, input) => {
             return;
         }
 
-        updateCurrentInput({ type: next_type });
+        updateCurrentInput({type: next_type});
         recordChange();
         renderQuestions();
         renderProperties();
@@ -1982,7 +2005,7 @@ const bindSearchTypeControl = (field_group, input) => {
             return;
         }
 
-        updateCurrentInput({ type: next_type });
+        updateCurrentInput({type: next_type});
         recordChange();
         renderQuestions();
         renderProperties();
@@ -2002,7 +2025,7 @@ const bindDatetimeFormatControl = (field_group, input) => {
 
         group.value = input.datetime_format || getDefaultDatetimeFormat(input.type);
         group.addEventListener('ionChange', (event) => {
-            updateCurrentInput({ datetime_format: event.detail.value });
+            updateCurrentInput({datetime_format: event.detail.value});
             recordChange();
         });
     });
@@ -2016,7 +2039,7 @@ const bindCurrentDatetimeToggle = (toggle, input) => {
         'Set initial answer to current time';
 
     bindCheckboxToggle(toggle, input.set_to_current_datetime === true, (checked) => {
-        updateCurrentInput({ set_to_current_datetime: checked });
+        updateCurrentInput({set_to_current_datetime: checked});
     });
 };
 
@@ -2025,7 +2048,7 @@ const bindDefaultChoiceControl = (control, input) => {
         return;
     }
 
-    const options = [{ value: '', label: 'None' }, ...(input.possible_answers || []).map((answer) => {
+    const options = [{value: '', label: 'None'}, ...(input.possible_answers || []).map((answer) => {
         return {
             value: answer.answer_ref,
             label: answer.answer || 'Untitled answer'
@@ -2042,7 +2065,7 @@ const bindDefaultChoiceControl = (control, input) => {
 
     if (dropdown_control) {
         initDropdown(dropdown_control, options, value, (detail) => {
-            updateCurrentInput({ default: detail.value ? detail.value : null });
+            updateCurrentInput({default: detail.value ? detail.value : null});
             recordChange();
         }, false);
         return;
@@ -2050,12 +2073,12 @@ const bindDefaultChoiceControl = (control, input) => {
 
     control.replaceChildren();
     options.forEach((option_data) => {
-        control.append(element('ion-select-option', { value: option_data.value }, [option_data.label]));
+        control.append(element('ion-select-option', {value: option_data.value}, [option_data.label]));
     });
     control.value = value;
     control.addEventListener('ionChange', (event) => {
         const next = event.detail.value;
-        updateCurrentInput({ default: next ? next : null });
+        updateCurrentInput({default: next ? next : null});
         recordChange();
     });
 };
@@ -2076,7 +2099,7 @@ const bindUniquenessControl = (control, input) => {
     const is_editing_branch = !!branch_container;
     const branch_header = branch_container && branch_container.question ? branch_container.question : 'branch';
 
-    const options = [{ value: 'none', label: 'No uniqueness' }];
+    const options = [{value: 'none', label: 'No uniqueness'}];
 
     if (is_editing_branch) {
         // Legacy branch uniqueness: contract value is 'form', label is branch-scoped.
@@ -2084,17 +2107,17 @@ const bindUniquenessControl = (control, input) => {
             value: 'form',
             label: `Make answer unique to all ${branch_header} entries of a ${form_name} entry`
         });
-    }
-    else if (form_index > 0) {
+    } else if (form_index > 0) {
         const parent_name = forms[form_index - 1] ? forms[form_index - 1].name : 'parent form';
-        options.push({ value: 'form', label: `All ${form_name} entries` });
-        options.push({ value: 'hierarchy', label: `Only ${form_name} children of a ${parent_name} parent entry` });
-    }
-    else {
-        options.push({ value: 'form', label: `Make answer unique to all ${form_name} entries` });
+        options.push({value: 'form', label: `All ${form_name} entries`});
+        options.push({value: 'hierarchy', label: `Only ${form_name} children of a ${parent_name} parent entry`});
+    } else {
+        options.push({value: 'form', label: `Make answer unique to all ${form_name} entries`});
     }
 
-    const value = options.some((option) => { return option.value === (input.uniqueness || 'none'); }) ?
+    const value = options.some((option) => {
+        return option.value === (input.uniqueness || 'none');
+    }) ?
         (input.uniqueness || 'none') : 'none';
 
     const dropdown_control = (typeof control.setOptions === 'function' || control.hasAttribute('data-dropdown')) ?
@@ -2103,7 +2126,7 @@ const bindUniquenessControl = (control, input) => {
 
     if (dropdown_control) {
         const dropdown = initDropdown(dropdown_control, options, value, (detail) => {
-            updateCurrentInput({ uniqueness: detail.value || 'none' });
+            updateCurrentInput({uniqueness: detail.value || 'none'});
             recordChange();
         }, false);
 
@@ -2115,11 +2138,11 @@ const bindUniquenessControl = (control, input) => {
 
     control.replaceChildren();
     options.forEach((option_data) => {
-        control.append(element('ion-select-option', { value: option_data.value }, [option_data.label]));
+        control.append(element('ion-select-option', {value: option_data.value}, [option_data.label]));
     });
     control.value = value;
     control.addEventListener('ionChange', (event) => {
-        updateCurrentInput({ uniqueness: event.detail.value || 'none' });
+        updateCurrentInput({uniqueness: event.detail.value || 'none'});
         recordChange();
     });
 };
@@ -2238,7 +2261,7 @@ const installAnswersPager = (card, input, page, pages, page_answers) => {
 };
 
 const downloadFile = (filename, contents, type) => {
-    const blob = new Blob([contents], { type });
+    const blob = new Blob([contents], {type});
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
 
@@ -2258,28 +2281,48 @@ const installAnswersMenu = (card, input) => {
     }
 
     createMenu(trigger, [
-        { label: 'Import CSV', data_action: 'import', action: () => { pickAnswersCsv(input); } },
-        { label: 'Export CSV', data_action: 'export', action: () => {
-            downloadFile(getCsvFilename(input), exportCsv(input), 'text/csv;charset=utf-8;');
-        } },
-        { divider: true },
-        { label: 'Order ascending', data_action: 'order-az', action: () => { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.AZ); } },
-        { label: 'Order descending', data_action: 'order-za', action: () => { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.ZA); } },
-        { label: 'Shuffle', data_action: 'shuffle', action: () => { orderAnswers(input, POSSIBLE_ANSWERS_ORDER.SHUFFLE); } },
-        { divider: true },
-        { label: 'Delete all answers', data_action: 'delete-all', action: () => {
-            showLoading();
-
-            if (deleteAllAnswers(input)) {
-                setAnswersPage(input, 1);
-                recordChange();
-                renderProperties();
-                updateCurrentQuestionStatus();
+        {
+            label: 'Import CSV', data_action: 'import', action: () => {
+                pickAnswersCsv(input);
             }
+        },
+        {
+            label: 'Export CSV', data_action: 'export', action: () => {
+                downloadFile(getCsvFilename(input), exportCsv(input), 'text/csv;charset=utf-8;');
+            }
+        },
+        {divider: true},
+        {
+            label: 'Order ascending', data_action: 'order-az', action: () => {
+                orderAnswers(input, POSSIBLE_ANSWERS_ORDER.AZ);
+            }
+        },
+        {
+            label: 'Order descending', data_action: 'order-za', action: () => {
+                orderAnswers(input, POSSIBLE_ANSWERS_ORDER.ZA);
+            }
+        },
+        {
+            label: 'Shuffle', data_action: 'shuffle', action: () => {
+                orderAnswers(input, POSSIBLE_ANSWERS_ORDER.SHUFFLE);
+            }
+        },
+        {divider: true},
+        {
+            label: 'Delete all answers', data_action: 'delete-all', action: () => {
+                showLoading();
 
-            // Legacy keeps the overlay up for ANIMATION_SUPER_SLOW.
-            hideLoading(1000);
-        } }
+                if (deleteAllAnswers(input)) {
+                    setAnswersPage(input, 1);
+                    recordChange();
+                    renderProperties();
+                    updateCurrentQuestionStatus();
+                }
+
+                // Legacy keeps the overlay up for ANIMATION_SUPER_SLOW.
+                hideLoading(1000);
+            }
+        }
     ], (item) => {
         item.action();
     });
@@ -2371,7 +2414,7 @@ const openAnswersCsvModal = (input, parsed) => {
         class_name: 'builder__csv-column-select',
         aria_label: 'Column to import',
         placeholder: 'Pick column',
-        options: [{ value: '', label: 'Pick column' }, ...getCsvColumns(parsed, true)],
+        options: [{value: '', label: 'Pick column'}, ...getCsvColumns(parsed, true)],
         value: '',
         on_change: (detail) => {
             selected_column = detail.value;
@@ -2388,7 +2431,7 @@ const openAnswersCsvModal = (input, parsed) => {
     headers.addEventListener('ionChange', () => {
         selected_column = '';
         column_dropdown.setOptions(
-            [{ value: '', label: 'Pick column' }, ...getCsvColumns(parsed, headers.checked === true)],
+            [{value: '', label: 'Pick column'}, ...getCsvColumns(parsed, headers.checked === true)],
             ''
         );
 
@@ -2401,7 +2444,7 @@ const openAnswersCsvModal = (input, parsed) => {
         title: 'Possible answers csv import options',
         body,
         buttons: [
-            { text: 'Dismiss', class_name: 'btn-default pull-left' },
+            {text: 'Dismiss', class_name: 'btn-default pull-left'},
             {
                 text: 'Import',
                 class_name: 'btn-primary',
@@ -2497,7 +2540,7 @@ const buildAnswerRow = (input, answer, index, total) => {
         renamePossibleAnswer(input, answer.answer_ref, value);
         updateCurrentQuestionStatus();
         refreshCurrentProperties();
-        recordChange({ throttle: true });
+        recordChange({throttle: true});
     });
 
     const remove_button = button({
@@ -2562,8 +2605,7 @@ const updateCurrentQuestionStatus = () => {
 
     if (status) {
         status.replaceWith(replacement);
-    }
-    else {
+    } else {
         row.append(replacement);
     }
 };
