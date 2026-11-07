@@ -126,7 +126,7 @@ describe('builder shell', () => {
         expect(tabs[1].getAttribute('aria-selected')).toBe('false');
     });
 
-    it('collapses every tab except the active one', () => {
+    it('collapses every tab except the active one once there are four forms', () => {
         const definition = project_definition();
 
         for (let index = 3; index <= 5; index += 1) {
@@ -167,6 +167,27 @@ describe('builder shell', () => {
         collapsed.click();
 
         expect(getSession().current_form_index).toBe(4);
+    });
+
+    it('keeps every tab named while there are three forms', () => {
+        const definition = project_definition();
+
+        definition.data.project.forms.push({
+            ref: 'form_3',
+            name: 'Third form',
+            type: 'hierarchy',
+            inputs: []
+        });
+
+        setProject(definition);
+        renderApp();
+        select_first_question();
+
+        const names = [...document.querySelectorAll('#form-tabs .builder__form-tab .builder__form-tab-name')]
+            .map((span) => span.textContent);
+
+        expect(names).toEqual(['Screening form', 'Second form', 'Third form']);
+        expect(document.querySelector('#form-tabs .builder__form-tab-dots')).toBeNull();
     });
 
     it('keeps the builder chrome', () => {

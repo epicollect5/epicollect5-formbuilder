@@ -703,9 +703,12 @@ const renderForms = () => {
     segment.value = String(current_index);
     segment.disabled = isEditing();
 
-    // long names break the strip: only the active tab keeps its name, every
-    // other tab collapses to a placeholder that stays clickable and keeps its
-    // tooltip, so any number of forms fits without scrolling
+    // long names break the strip: from four forms on, only the active tab
+    // keeps its name and the others collapse to a placeholder that stays
+    // clickable and keeps its tooltip — with three or fewer there is room for
+    // every name
+    const collapse_others = forms.length >= 4;
+
     forms.forEach((form, form_index) => {
         const is_selected = form_index === current_index;
         const tab = element('ion-segment-button', {
@@ -714,7 +717,7 @@ const renderForms = () => {
             role: 'tab',
             'aria-selected': is_selected ? 'true' : 'false',
             title: form.name
-        }, [buildFormTabLabel(form, !is_selected)]);
+        }, [buildFormTabLabel(form, collapse_others && !is_selected)]);
 
         segment.append(tab);
     });
