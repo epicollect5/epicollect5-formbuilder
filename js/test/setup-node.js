@@ -52,6 +52,20 @@ var set_global = function (name, value) {
 };
 
 set_global('window', window);
+
+/*
+    jsdom implements no canvas: the vendored summernote probes a 2D context
+    while evaluating and crashes on the null result, which would kill the whole
+    suite before any test runs. Hand back a permissive stub instead.
+ */
+window.HTMLCanvasElement.prototype.getContext = function () {
+    var noop = function () {};
+    return new Proxy({}, {
+        get: function () { return noop; },
+        set: function () { return true; }
+    });
+};
+
 set_global('document', window.document);
 set_global('navigator', window.navigator);
 set_global('location', window.location);
