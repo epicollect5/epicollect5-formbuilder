@@ -202,7 +202,16 @@
 .builder__heading-actions {
     display: flex;
     flex: none;
+    align-items: center;
     gap: 4px;
+}
+
+/* Live aggregate question count of the active form (the save-gate scope). */
+.builder__question-count-badge {
+    --background: var(--app-surface-muted);
+    --color: var(--app-text);
+    font-size: 12px;
+    padding: 4px 8px;
 }
 
 .builder__icon-btn {

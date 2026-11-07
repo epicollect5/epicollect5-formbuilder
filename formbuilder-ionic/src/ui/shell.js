@@ -1,6 +1,6 @@
 'use strict';
 
-import { getForms, getProject } from '@/models/project-definition.js';
+import { getForms, getInputs, getProject } from '@/models/project-definition.js';
 import { PARAMETERS } from '@/config/parameters.js';
 import {
     POSSIBLE_ANSWERS_ORDER,
@@ -76,7 +76,7 @@ import { prepareImportedForm } from '@/services/form-import.js';
 import { buildFormExport, getFormExportFilename, saveProject } from '@/services/save.js';
 import { areAllInputsValid, areFormInputsValid, getInputErrors, getJumpErrors, isInputValid, PROPERTIES_TAB } from '@/services/validation.js';
 import { canUndo, ensureUndoBaseline, pushUndoState, undo } from '@/services/undo.js';
-import { countProjectSearchInputs } from '@/models/project-limits.js';
+import { countInputs, countProjectSearchInputs } from '@/models/project-limits.js';
 import { button, createView, element, icon, parseView } from '@/ui/dom.js';
 import { hideLoading, notifyError, notifySuccess, notifyWarning, openModal, showLoading } from '@/services/notifications.js';
 import { createDropdown, createMenu } from '@/ui/dropdown.js';
@@ -771,6 +771,12 @@ const renderQuestions = () => {
 
     title_name.textContent = form_name;
 
+    const count_badge = card.querySelector('[data-role="question-count"]');
+
+    if (count_badge) {
+        count_badge.textContent = String(countInputs(getInputs(form)));
+    }
+
     trail.forEach((node, index) => {
         title.append(element('span', { class: 'builder__questions-title-sep', 'aria-hidden': 'true' }, [' > ']));
         title.append(element('span', {
@@ -1246,6 +1252,13 @@ const refreshFormMenuGates = () => {
 };
 
 const refreshQuestionRows = () => {
+    // the aggregate count follows the edits live, nesting included
+    const count_badge = document.querySelector('#questions [data-role="question-count"]');
+
+    if (count_badge) {
+        count_badge.textContent = String(countInputs(getInputs(getCurrentForm())));
+    }
+
     const inputs = getCurrentInputs();
 
     document.querySelectorAll(QUESTION_LIST + ' > .builder__question').forEach((row) => {
