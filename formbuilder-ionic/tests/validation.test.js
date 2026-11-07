@@ -192,6 +192,30 @@ describe('validation', () => {
         expect(messages(radio, list)).toEqual(['You must choose a condition']);
     });
 
+    it('attaches the offending field to each jump error', () => {
+        const first = input('form_1_a', {
+            type: 'radio',
+            possible_answers: [{ answer: 'Yes', answer_ref: 'a1' }]
+        });
+        const middle = input('form_1_b');
+        const target = input('form_1_c');
+        const list = [first, middle, target];
+
+        first.jumps = [{ to: 'missing', when: 'IS', answer_ref: 'a1' }];
+        expect(getInputErrors(first, list)[0]).toEqual({
+            index: 0,
+            field: 'to',
+            message: 'Invalid destination',
+            tab: 'jumps'
+        });
+
+        first.jumps = [{ to: target.ref, when: 'WHENEVER', answer_ref: 'a1' }];
+        expect(getInputErrors(first, list)[0].field).toBe('when');
+
+        first.jumps = [{ to: target.ref, when: 'IS', answer_ref: null }];
+        expect(getInputErrors(first, list)[0].field).toBe('answer');
+    });
+
     it('validates forms and the whole project, including nested groups', () => {
         const top = input('form_1_a', { question: 'Top level' });
         const nested_child = input('form_1_b_g_a', { question: '' });

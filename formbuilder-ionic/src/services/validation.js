@@ -42,12 +42,12 @@ export const getJumpErrors = (input, inputs) => {
 
     jumps.forEach((jump, index) => {
         if (!jump || !jump.to) {
-            errors.push({ index, message: M.JUMP_DESTINATION_NOT_SELECTED, tab: JUMPS_TAB });
+            errors.push({ index, field: 'to', message: M.JUMP_DESTINATION_NOT_SELECTED, tab: JUMPS_TAB });
             return;
         }
 
         if (destinations.indexOf(String(jump.to)) === -1) {
-            errors.push({ index, message: M.JUMP_DESTINATION_INVALID, tab: JUMPS_TAB });
+            errors.push({ index, field: 'to', message: M.JUMP_DESTINATION_INVALID, tab: JUMPS_TAB });
             return;
         }
 
@@ -56,12 +56,12 @@ export const getJumpErrors = (input, inputs) => {
         }
 
         if (!JUMP_WHEN[jump.when]) {
-            errors.push({ index, message: M.JUMP_CONDITION_NOT_SELECTED, tab: JUMPS_TAB });
+            errors.push({ index, field: 'when', message: M.JUMP_CONDITION_NOT_SELECTED, tab: JUMPS_TAB });
             return;
         }
 
         if (jumpNeedsAnswer(jump.when) && answers.indexOf(String(jump.answer_ref)) === -1) {
-            errors.push({ index, message: M.JUMP_ANSWER_NOT_SELECTED, tab: JUMPS_TAB });
+            errors.push({ index, field: 'answer', message: M.JUMP_ANSWER_NOT_SELECTED, tab: JUMPS_TAB });
         }
     });
 

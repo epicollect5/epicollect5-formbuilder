@@ -74,7 +74,7 @@ import { duplicateInput } from '@/services/question-actions.js';
 import { getFormNameError } from '@/services/form-management.js';
 import { prepareImportedForm } from '@/services/form-import.js';
 import { buildFormExport, getFormExportFilename, saveProject } from '@/services/save.js';
-import { areAllInputsValid, areFormInputsValid, getInputErrors, isInputValid, PROPERTIES_TAB } from '@/services/validation.js';
+import { areAllInputsValid, areFormInputsValid, getInputErrors, getJumpErrors, isInputValid, PROPERTIES_TAB } from '@/services/validation.js';
 import { canUndo, ensureUndoBaseline, pushUndoState, undo } from '@/services/undo.js';
 import { countProjectSearchInputs } from '@/models/project-limits.js';
 import { button, createView, element, icon, parseView } from '@/ui/dom.js';
@@ -1495,8 +1495,15 @@ const buildJumpsPanel = (input, pane) => {
 
     no_jumps.setAttribute('hidden', 'hidden');
 
+    // legacy shows the jump's own error message inside its row, under the
+    // offending field
+    const jump_errors = getJumpErrors(input, getCurrentInputs());
+
     jumps.forEach((jump, index) => {
-        list.append(buildJumpRow(input, jump, index, destinations));
+        list.append(buildJumpRow(input, jump, index, destinations,
+            jump_errors.find((error) => {
+                return error.index === index;
+            }) || null));
     });
 };
 
@@ -1551,7 +1558,7 @@ const initDropdown = (control, options, value, on_change, disabled) => {
     return dropdown;
 };
 
-const buildJumpRow = (input, jump, index, destinations) => {
+const buildJumpRow = (input, jump, index, destinations, jump_error) => {
     const always = usesAlwaysJump(input.type);
     const row = createView(always ? jump_row_always_view : jump_row_view);
     const when_placeholder = row.querySelector('.builder__jump-when');
@@ -1648,6 +1655,16 @@ const buildJumpRow = (input, jump, index, destinations) => {
             updateCurrentQuestionStatus();
         }
     });
+
+    // the jump's own error shows under the offending field, as in legacy
+    if (jump_error) {
+        const error_slot = row.querySelector(`[data-error-for="${jump_error.field}"]`);
+
+        if (error_slot) {
+            error_slot.textContent = jump_error.message;
+            error_slot.hidden = false;
+        }
+    }
 
     return row;
 };

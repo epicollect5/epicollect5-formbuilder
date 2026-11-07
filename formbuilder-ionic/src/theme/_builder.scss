@@ -1630,6 +1630,18 @@ ion-checkbox:not(.checkbox-checked)::part(label) {
     color: var(--ion-color-warning);
 }
 
+/* The jump row's own error, under the offending field, as in legacy. */
+.builder__jump-row-error {
+    margin: 2px 0 0;
+    color: var(--ion-color-danger);
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.builder__jump-row-error[hidden] {
+    display: none;
+}
+
 .builder__question-field-group {
     display: flex;
     flex-direction: column;
