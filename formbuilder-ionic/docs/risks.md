@@ -175,7 +175,8 @@ to regress; **fixed** — the concrete case found during the port is handled.
   level down.
 - **Status:** fixed (2026-11-07) — a child's jump error now lights the
   container's Jumps tab as well (the aggregate Properties entry stays, so both
-  tabs show the badge); the offending row itself is still one level down.
+  tabs show the badge), and the jump row itself renders its field-level message
+  under the offending select; the offending row is still one level down.
 - **Revisit when:** improving tab badges or row-level jump errors.
 
 ### R-33 Deleting or importing answers leaves jumps pointing at old refs

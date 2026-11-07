@@ -121,8 +121,8 @@ as "Unavailable answer" instead of silently falling back to the first answer.
 
 Remaining:
 
-- Marking the offending jump row itself, rather than the tab and the panel
-  message.
+- Highlighting the offending jump row itself (the row already shows its
+  field-level error message; there is no row-level red outline yet).
 
 ### Possible answers
 
