@@ -1746,18 +1746,18 @@ const buildJumpRow = (input, jump, index, destinations, jump_error) => {
     });
 
     if (jump.to && !has_destination) {
+        // a stored destination that no longer exists stays visible on the
+        // trigger as unavailable (R-31), but is display-only: offering it in
+        // the list would let the user re-select a dead ref
         destination_options.unshift({
             value: jump.to,
-            label: jump.to === PARAMETERS.JUMP_TO_END_OF_FORM_REF ? 'End of form' : 'Unavailable destination'
+            label: jump.to === PARAMETERS.JUMP_TO_END_OF_FORM_REF ? 'End of form' : 'Unavailable destination',
+            display_only: true
         });
     }
 
-    if (!jump.to || !destination_options.some((option) => {
-        return String(option.value) === String(jump.to);
-    })) {
-        destination_options.unshift({value: '', label: 'Select destination'});
-    }
-
+    // an empty destination shows the view's placeholder on the trigger; the
+    // placeholder itself is not a pickable option
     initDropdown(goto_placeholder, destination_options, jump.to || '', (detail) => {
         updateJump(input, index, {to: detail.value || ''});
         recordChange();
