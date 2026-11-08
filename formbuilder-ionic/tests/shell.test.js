@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCurrentForm, getCurrentInput, getCurrentInputs, getSession, setProject } from '@/services/session.js';
 import { PARAMETERS } from '@/config/parameters.js';
 import { renderApp } from '@/ui/shell.js';
+import { addQuestion } from '@/ui/input-tools.js';
 
 function build_markup() {
     document.body.innerHTML = [
@@ -441,10 +442,14 @@ describe('builder shell', () => {
         expect(document.querySelector('.builder__question[data-input-ref="input_1"]').getAttribute('data-valid')).toBe('false');
     });
 
-    it('adds a question from the tools and selects it', () => {
+    it('does not add a question on clicking tool palette buttons, but adding a question selects it', () => {
         const tools = [...document.querySelectorAll('#tools .builder__tool')];
 
         tools.find((tool) => tool.getAttribute('data-type') === 'radio').click();
+
+        expect(getCurrentInputs()).toHaveLength(2);
+
+        addQuestion('radio');
 
         const inputs = getCurrentInputs();
 
@@ -523,9 +528,7 @@ describe('builder shell', () => {
         window.dispatchEvent(clean);
         expect(clean.defaultPrevented).toBe(false);
 
-        [...document.querySelectorAll('#tools .builder__tool')]
-            .find((tool) => tool.getAttribute('data-type') === 'text')
-            .click();
+        addQuestion('text');
 
         const dirty = new Event('beforeunload', { cancelable: true });
 
@@ -685,9 +688,7 @@ describe('undo', () => {
 
         expect(undo_button.disabled).toBe(true);
 
-        [...document.querySelectorAll('#tools .builder__tool')]
-            .find((tool) => tool.getAttribute('data-type') === 'text')
-            .click();
+        addQuestion('text');
 
         expect(getCurrentInputs()).toHaveLength(3);
         expect(undo_button.disabled).toBe(false);

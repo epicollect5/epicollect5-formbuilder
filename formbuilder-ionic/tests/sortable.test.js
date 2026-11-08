@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import jQuery from 'jquery';
-import { getCurrentInputs, setProject } from '@/services/session.js';
+import { getCurrentInputs, getSession, setProject } from '@/services/session.js';
 import { renderApp } from '@/ui/shell.js';
 import { installAnswerSortable, installQuestionSortable, installToolDrag } from '@/ui/sortable.js';
 
@@ -162,6 +162,7 @@ describe('question sortable', () => {
         const rows = $list.find('> .builder__question');
 
         expect(instance.options.items).toBe('> .builder__question');
+        expect(instance.options.cursorAt).toEqual({ top: 21 });
         expect(rows).toHaveLength(2);
         expect(rows.map((_, row) => row.nodeName).get()).toEqual(['ION-ITEM', 'ION-ITEM']);
         expect(rows.map((_, row) => row.getAttribute('data-input-ref')).get())
@@ -187,12 +188,19 @@ describe('question sortable', () => {
         placeholder.remove();
     });
 
-    it('drags the palette tools into the list', () => {
+    it('drags the palette tools into the list with compact helper', () => {
         const tools = jQuery('#tools .builder__tool');
 
         expect(tools).toHaveLength(18);
         expect(tools.hasClass('ui-draggable')).toBe(true);
         expect(tools.first().attr('data-type')).toBe('text');
+
+        const helper_fn = tools.draggable('option', 'helper');
+        const $helper = helper_fn.call(tools[0]);
+
+        expect($helper[0].nodeName).toBe('DIV');
+        expect($helper.hasClass('builder__question--helper')).toBe(true);
+        expect($helper.attr('data-type')).toBe('text');
     });
 
     it('fails loudly when jQuery is missing instead of silently skipping', () => {
@@ -236,5 +244,24 @@ describe('question sortable', () => {
         expect(document.querySelector('#form-tabs .builder__form-tab .builder__form-tab-state')).not.toBeNull();
         expect(document.getElementById('save').disabled).toBe(true);
         expect(document.querySelector('ion-toast')).toBeNull();
+    });
+
+    it('selects the question on drag start and keeps it selected after drop', () => {
+        vi.useFakeTimers();
+        const $list = question_list();
+        const second_row = $list.find('> .builder__question').eq(1);
+
+        expect(getSession().current_input_ref).toBeNull();
+
+        $list.sortable('instance').options.start.call($list[0], {}, { item: second_row });
+
+        expect(getSession().current_input_ref).toBe('input_2');
+        expect(second_row.attr('aria-current')).toBe('true');
+
+        $list.sortable('instance').options.stop.call($list[0], {}, { item: second_row });
+        vi.advanceTimersByTime(1);
+
+        expect(getSession().current_input_ref).toBe('input_2');
+        expect(document.querySelector('.builder__question[aria-current="true"]').getAttribute('data-input-ref')).toBe('input_2');
     });
 });
