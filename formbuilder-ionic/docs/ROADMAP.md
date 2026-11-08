@@ -343,21 +343,87 @@ a Vue 3 binding over SortableJS, so the step-1 options (`ghostClass`,
 deferred: headless composables fit a state-driven render model better, but
 they would rewrite the drag behaviours step 1 just stabilised.
 
-What the evaluation answers:
+#### Phase A — evaluation spike (timebox: 2–3 days, one decision gate)
 
-- whether there are **clear benefits** over the vanilla prototype
-  (component model, reactivity, the ecosystem alignment below), or whether
-  the current architecture is already the product
-- how **intense the refactor** is: `ui/shell.js` (~2600 lines of imperative
-  DOM construction) is the real cost, not the services — those are already
-  framework-free modules
+Setup (half a day): add Vue 3 + Ionic Vue inside `formbuilder-ionic/` — the
+same Vite app, the same comparison server, the same `project/project.json`.
+Not a new repo: the services layer carries over, so the migration is
+UI-only. The first decision is the state shape: wrap the `session.js`
+singleton in `reactive()` (or a thin Pinia store, like the mobile app) —
+the services keep mutating it exactly as they do now.
 
-Ecosystem context: the **mobile app** and the new **dataviewer prototype**
-are both Ionic + Vue; the **server front end** is currently Bootstrap +
-jQuery with a planned migration to Ionic + vanilla JS like the formbuilder.
-The formbuilder sits in the middle of that landscape — its choice lands
-between an Ionic Vue ecosystem and a vanilla JS server front end, which is
-exactly why this is an evaluation and not a commitment.
+The vertical slice (1–2 days), deliberately narrow:
+
+1. the form tab strip (badges, the validity icon, active-only naming)
+2. the question list (rows, selection, row badges)
+3. the properties card for one input type only (text: question field,
+   required/title toggles, the basic-tab error message)
+4. the keystroke path: edit the text → validation surfaces → save gate
+   updates
+
+What to measure against the vanilla prototype:
+
+- the bug-class test: most of the session's UI defects were
+  imperative-DOM-layout bugs (the label margin rewrite, the tab widths,
+  the icon squeeze) — count how much of `shell.js`'s manual refresh
+  choreography the reactive model deletes
+- the reactivity test: computed validation + reactive state replacing the
+  manual `refresh*` passes (do the R-41 mitigations become unnecessary?)
+- the test story: `@vue/test-utils` component tests vs the jsdom
+  `renderApp` assertions
+- the drag question stays open: do not port drags in the spike
+
+**Decision gate:** proceed only if the Vue slice is smaller and clearer
+than the vanilla equivalent — not merely equal. The vanilla prototype
+works; the migration buys maintainability, not features.
+
+#### Phase B — the migration, ordered by dependency (if the gate passes)
+
+1. shell + boot (the Ionic Vue app shell, project load, the session as
+   store); the comparison-server middleware carries over untouched
+2. the form tab strip + Add Form (the naming threshold and container
+   queries become computed + CSS)
+3. the question list + selection + row badges
+4. the properties card, grouped by shape — text-like (text, textarea,
+   phone, barcode), choice (radio, checkbox, dropdown + possible answers
+   and CSV), numeric (integer/decimal with min/max/regex/verify), date and
+   time, media (photo, audio, video, location), readme (Tiptap inside a
+   component), search
+5. containers last: branch and group (nesting, the editing stack, exit
+   editing)
+6. jumps (per-row messages + tab badges)
+7. undo (the snapshot model onto store history; the revision gate)
+8. save / import / export (the services carry over; the flows become
+   store actions)
+9. delete the vanilla render layer (`shell.js` render half, the
+   `ui/dom.js` helpers where superseded) — the services stay
+
+What carries over unchanged — the payoff of the current architecture:
+`services/validation.js`, `models/validation.js`, `services/jumps.js`,
+`models/project-limits.js`, `services/nesting.js`,
+`services/form-import.js`, `services/save.js` (gates, cleaning, encode),
+`services/streams-support.js`, `services/question-actions.js`,
+`services/project-source.js`, and their tests. The UI tests are rewritten
+as component tests.
+
+#### The evaluation criteria
+
+"Clear benefits" has to mean, concretely:
+
+1. declarative rendering deletes the session's UI bug class — the
+   alignment, sizing and margin fixes were all imperative-DOM artifacts
+2. component isolation — `ui/shell.js` (~2600 lines) becomes per-surface
+   components instead of one module with manual refresh choreography
+3. reactive granularity — validation and gates derive from state instead
+   of hand-called refresh passes (R-41 changes shape)
+4. ecosystem alignment — Ionic Vue like the mobile app and the dataviewer
+   prototype; the server front end's own Bootstrap → Ionic migration gets
+   a same-stack sibling to copy from
+
+The honest costs: a two-codebases period on the branch, the 18 property
+panels as the bulk of the work, and R-41/R-62 changing shape rather than
+disappearing (measure again in Vue). The legacy harness tests keep gating
+behaviour intact throughout.
 
 ## Constraints and risks
 
