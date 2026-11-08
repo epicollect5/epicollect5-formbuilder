@@ -271,6 +271,37 @@ Everything that auto-updates today is above this floor. Below it the builder
 still boots, but saving and loading fail with explicit errors; there is no IE
 support and no legacy plugin.
 
+## Shell split (prerequisite for the Vue evaluation)
+
+`ui/shell.js` (~2600 lines) is the last monolith. The split is by scope, with
+one rule that keeps the dependency graph a star: **area modules never import
+each other or `shell.js`** — they import `ui/state.js` (the shared mutable
+state + `recordChange`), `services/*` and `models/*` only. Cross-area
+requests go through callbacks registered at bind time.
+
+Target layout:
+
+| Module | Contents |
+| --- | --- |
+| `ui/state.js` | the shared mutable state + accessors + `recordChange` (undo push, revision, unsaved flag, mutation notify) |
+| `ui/primary-toolbar.js` | the top bar: project name, logo, reveal, banner bindings, the Add Form button, hosting the tab strip |
+| `ui/save.js` | `performSave`, `performUndo`, the undo/save button updates, the debounced save gate, the unload guard |
+| `ui/form-actions.js` | `installFormActions`, the form name modal, delete question, import file picker |
+| `ui/input-tools.js` | the palette and `addQuestion` |
+| `ui/forms-tabs.js` | `renderForms`, `buildFormTabLabel`, `bindFormSegment`, `refreshFormTabs`, `refreshFormMenuGates` |
+| `ui/questions-list.js` | `renderQuestions`, the row builders, badges, selection, `bindQuestionField` |
+| `ui/properties.js` | `renderProperties`, the tab badges and gating, `performInputValidation`, `refreshCurrentProperties` |
+| `ui/properties-fields.js` | `buildBasicPanel`, `buildAdvancedPanel` and every `bind*` field helper |
+| `ui/jumps.js` | the jumps pane: pager, `buildJumpsPanel`, `buildJumpRow` |
+| `ui/possible-answers.js` | the answers card: pager, menu, CSV picker/modal, sortables, `buildAnswerRow` |
+| `ui/dropdown.js` | the component + `initDropdown` folded in |
+| `ui/download.js` | `downloadFile` |
+| `shell.js` | `renderApp`, the boot and the cross-area refresh chain — the only place area modules meet |
+
+`recordChange` moves into `ui/state.js` (undo push via `services/undo.js`,
+revision, unsaved flag, mutation notify) — `shell.js` registers the notify
+handler that does the UI refreshes, so no area module imports another.
+
 ## Migration path
 
 Two steps, in order. Step 1 is a committed plan; step 2 is an evaluation that
