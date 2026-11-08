@@ -271,14 +271,19 @@ Everything that auto-updates today is above this floor. Below it the builder
 still boots, but saving and loading fail with explicit errors; there is no IE
 support and no legacy plugin.
 
-## Potential migration: SortableJS
+## Migration path
+
+Two steps, in order. Step 1 is a committed plan; step 2 is an evaluation that
+starts once step 1 is done and the drag flows are browser-verified.
+
+### Step 1 — jQuery and jQuery UI → SortableJS
 
 jQuery 4 + jQuery UI 1.14.2 exist only for `ui/sortable.js` — the question
 list, the possible-answers rows and the tool-drag resolver. A swap to
 [SortableJS](https://sortablejs.github.io/Sortable/) would remove the last
 legacy runtime dependency.
 
-### Pros
+#### Pros
 
 1. **Total removal of jQuery and jQuery UI from the runtime.** Replacing
    `ui/sortable.js` allows deleting `src/jquery.js`, the two imports in
@@ -326,6 +331,33 @@ Suggested strategy:
 
 Until then, drag-and-drop stays on jQuery UI and the swap is out of scope;
 the full cost discussion lives in `docs/jquery-usage.md`.
+
+### Step 2 — vanilla JS → Vue 3 + vue-draggable-plus (evaluation)
+
+Once the drag layer is on SortableJS, the remaining step to the Vue port is
+the framework itself. The candidate is
+[vue-draggable-plus](https://github.com/Alfred-Skyblue/vue-draggable-plus) —
+a Vue 3 binding over SortableJS, so the step-1 options (`ghostClass`,
+`filter`, `group`) carry over into Vue with one variable changing at a time
+(the framework, not the drag engine). `@dnd-kit/vue` was considered and
+deferred: headless composables fit a state-driven render model better, but
+they would rewrite the drag behaviours step 1 just stabilised.
+
+What the evaluation answers:
+
+- whether there are **clear benefits** over the vanilla prototype
+  (component model, reactivity, the ecosystem alignment below), or whether
+  the current architecture is already the product
+- how **intense the refactor** is: `ui/shell.js` (~2600 lines of imperative
+  DOM construction) is the real cost, not the services — those are already
+  framework-free modules
+
+Ecosystem context: the **mobile app** and the new **dataviewer prototype**
+are both Ionic + Vue; the **server front end** is currently Bootstrap +
+jQuery with a planned migration to Ionic + vanilla JS like the formbuilder.
+The formbuilder sits in the middle of that landscape — its choice lands
+between an Ionic Vue ecosystem and a vanilla JS server front end, which is
+exactly why this is an evaluation and not a commitment.
 
 ## Constraints and risks
 

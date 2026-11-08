@@ -12,7 +12,7 @@ stacks, different architectures, different style rules. Never mix them.
 | Path | `js/`, `css/`, `public/` | `formbuilder-vue/` |
 | Stack | ES5 CommonJS, Browserify, jQuery 2.2.1, jQuery UI 1.11.4 | Vue 3, Pinia, Vite, Ionic Vue 8, `@vue-dnd-kit/core` (intended) |
 | UI | Bootstrap 3 markup + Font Awesome | Port-owned components + SCSS theme |
-| Tests | Mocha 2.5 + Chai + jsdom | Vitest (target) |
+| Tests | Mocha 2.5 + Chai + jsdom | Vitest 5 + jsdom |
 | Style rules | frozen, see `AGENTS.md` | `docs/CODE-STYLE.md` |
 | Status | in production | greenfield — no source on `master` |
 
@@ -677,7 +677,7 @@ a reference.
 | Build | Vite |
 | State | Pinia |
 | UI | Ionic Vue 8 |
-| Drag and drop | `@vue-dnd-kit/core` |
+| Drag and drop | vue-draggable-plus (Vue 3 binding over SortableJS) — candidate |
 | Tests | Vitest |
 
 ## Layout
