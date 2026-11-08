@@ -43,7 +43,9 @@ to regress; **fixed** — the concrete case found during the port is handled.
   jQuery 2.2.1 while this port bundles jQuery 4.
 - **Impact:** a sortable regression passes the suite and only shows in a browser.
 - **Status:** watch.
-- **Revisit when:** touching sortable options, placeholder, or the drop resolver;
+- **Revisit when:** touching sortable options, placeholder, or the drop
+  resolver. A costed SortableJS migration plan is in the ROADMAP
+  ("Potential migration: SortableJS").
   smoke-test question, answer and branch sorting in a real browser.
 
 ### R-04 Re-rendering the properties panel competes with typing and scrolling

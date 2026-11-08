@@ -271,6 +271,62 @@ Everything that auto-updates today is above this floor. Below it the builder
 still boots, but saving and loading fail with explicit errors; there is no IE
 support and no legacy plugin.
 
+## Potential migration: SortableJS
+
+jQuery 4 + jQuery UI 1.14.2 exist only for `ui/sortable.js` — the question
+list, the possible-answers rows and the tool-drag resolver. A swap to
+[SortableJS](https://sortablejs.github.io/Sortable/) would remove the last
+legacy runtime dependency.
+
+### Pros
+
+1. **Total removal of jQuery and jQuery UI from the runtime.** Replacing
+   `ui/sortable.js` allows deleting `src/jquery.js`, the two imports in
+   `app.js` and `jquery` / `jquery-ui` from the dev dependencies
+   (see `docs/jquery-usage.md`).
+2. **Bundle reduction.** jQuery (~86 KB min) + jQuery UI (~250 KB min) ≈
+   336 KB removed; SortableJS is ~40 KB min (~11 KB gzip) with zero runtime
+   dependencies.
+3. **No global pollution.** Eradicates `window.jQuery` and `window.$`.
+4. **Native mobile and touch support.** SortableJS handles touch and pointer
+   events across desktop and mobile without Touch Punch adapters.
+5. **Reuses the existing styling.** `ghostClass` maps directly onto
+   `.builder__question-placeholder` / `.builder__answer-placeholder`
+   (`theme/_builder.scss`).
+
+### Cons and gotchas
+
+1. **The palette tool drag is not a 1:1 concept.** SortableJS assumes the
+   dragged elements live in a list container. Dragging an independent
+   palette button into the sortable list needs a shared `group` with
+   `pull: 'clone', put: false`, or the tool drag stays on native pointer
+   events — `resolveDrop()` is already pure DOM math.
+2. **Test harness changes.** `tests/sortable.test.js` and
+   `tests/jquery-setup.js` evaluate the jQuery UI script and drive the
+   `.sortable('instance')` hooks. jsdom implements no drag engine, so the
+   tests would assert callback invocations directly
+   (`sortableInstance.options.onEnd()`) or mock the SortableJS instances.
+3. **Instance teardown on re-render.** `renderQuestions` re-runs
+   `installQuestionSortable` after every question-list update; SortableJS
+   instances must be tracked and destroyed via `Sortable.get(el)?.destroy()`
+   to prevent duplicate listeners and leaks.
+
+### Verdict and effort
+
+Recommended: **highly**. Estimated effort ~1 to 1.5 days.
+
+Suggested strategy:
+
+1. SortableJS for `installQuestionSortable` and `installAnswerSortable`.
+2. For `installToolDrag`, either SortableJS with
+   `group: { pull: 'clone', put: false }` or keep the tool drag on native
+   pointer events (the resolver is already pure DOM math).
+3. Remove `jquery`, `jquery-ui`, `src/jquery.js` and the jQuery setup in the
+   test harness.
+
+Until then, drag-and-drop stays on jQuery UI and the swap is out of scope;
+the full cost discussion lives in `docs/jquery-usage.md`.
+
 ## Constraints and risks
 
 - **Contract frozen.** Keep exact field shapes and the 3 / 4 / 5-segment ref
