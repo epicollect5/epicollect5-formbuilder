@@ -156,6 +156,12 @@ describe('fixed markup views', () => {
         expect(styles).toMatch(/@container \(max-width: 68px\)[\s\S]*?\.builder__form-tab-state\s*\{[^}]*display:\s*none;/);
     });
 
+    it('lets the hidden attribute override the tool palette flex layout', async () => {
+        const styles = await read('src/theme/_builder.scss');
+
+        expect(styles).toMatch(/\.builder__tool\[hidden\]\s*\{[^}]*display:\s*none;[^}]*\}/s);
+    });
+
     it('keeps the form menu trigger in the view and its actions in the form-actions module', async () => {
         const html = await read('src/views/question-card.html');
         const form_actions = await read('src/ui/form-actions.js');

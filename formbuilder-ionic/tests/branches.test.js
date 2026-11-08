@@ -277,6 +277,42 @@ describe('branch and group rows', () => {
         expect(document.querySelector('#form-tabs .builder__forms-segment').disabled).toBe(true);
     });
 
+    it('shows Branch and Group tools only where the active container allows them', () => {
+        const tool = (type) => {
+            return [...document.querySelectorAll('#tools .builder__tool')]
+                .find((candidate) => candidate.getAttribute('data-type') === type);
+        };
+        const expect_visible = (type, visible) => {
+            expect(tool(type).hidden).toBe(!visible);
+            expect(tool(type).disabled).toBe(!visible);
+        };
+
+        expect_visible('branch', true);
+        expect_visible('group', true);
+
+        rows()[0].click();
+        document.querySelector('#properties [data-role="edit-container"]').click();
+
+        expect_visible('branch', false);
+        expect_visible('group', true);
+
+        rows()[1].click();
+        document.querySelector('#properties [data-role="edit-container"]').click();
+
+        expect_visible('branch', false);
+        expect_visible('group', false);
+
+        document.querySelector('#questions [data-role="exit-editing"]').click();
+
+        expect_visible('branch', false);
+        expect_visible('group', true);
+
+        document.querySelector('#questions [data-role="exit-editing"]').click();
+
+        expect_visible('branch', true);
+        expect_visible('group', true);
+    });
+
     it('edits a nested group inside its branch', () => {
         rows()[0].click();
         document.querySelector('#properties [data-role="edit-container"]').click();
