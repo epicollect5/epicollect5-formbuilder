@@ -104,6 +104,12 @@
     box-sizing: border-box;
 }
 
+/* The palette hides tools the active container cannot hold; the display rule
+   above would otherwise override the hidden attribute. */
+.builder__tool[hidden] {
+    display: none;
+}
+
 .builder__tool:focus {
     outline: none;
 }
@@ -423,6 +429,11 @@
     align-self: stretch;
     min-height: 100%;
     box-sizing: border-box;
+    /* Ionic's contain: content makes ion-list the containing block for the
+       absolute sortable helper, while jQuery UI measures offsets from this
+       positioned card content. Nested branch/group lists sit below the
+       editing toolbar, so that mismatch drags the ghost below the pointer. */
+    contain: none;
 }
 
 .builder__form-actions-group {
