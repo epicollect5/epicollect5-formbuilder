@@ -39,9 +39,7 @@ export const element = (tag, attributes, children) => {
 };
 
 export const icon = (name) => {
-    const node = element('ion-icon', { name, 'aria-hidden': 'true' });
-
-    return node;
+    return element('ion-icon', {name, 'aria-hidden': 'true'});
 };
 
 export const button = (attributes, children) => {

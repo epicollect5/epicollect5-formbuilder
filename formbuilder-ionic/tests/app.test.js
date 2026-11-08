@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/pages/formbuilder.page.js', () => ({
-    bootFormbuilder: () => Promise.reject(new Error('offline'))
+vi.mock('@/services/project-source.js', () => ({
+    loadProject: () => Promise.reject(new Error('offline'))
 }));
 
 describe('app bootstrap', () => {

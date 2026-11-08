@@ -4,7 +4,7 @@ vi.mock('@/services/ionic-runtime.js', () => ({
     setupIonic: vi.fn()
 }));
 
-import { bootFormbuilder } from '@/pages/formbuilder.page.js';
+import { bootFormbuilder } from '@/app.js';
 import { getSession } from '@/services/session.js';
 import { setupIonic } from '@/services/ionic-runtime.js';
 
