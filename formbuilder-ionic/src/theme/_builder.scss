@@ -104,13 +104,22 @@
     box-sizing: border-box;
 }
 
+.builder__tool:focus {
+    outline: none;
+}
+
 .builder__tool:hover,
 .builder__tool:focus-visible {
     background: var(--app-surface-muted);
 }
 
+.builder__tool:focus-visible {
+    outline: 2px solid rgba(var(--ion-color-primary-rgb), 0.35);
+    outline-offset: 1px;
+}
+
 .builder__tool:active {
-    background: #c76abb33;
+    background: var(--app-surface);
 }
 
 .builder__tool ion-icon {
@@ -605,20 +614,28 @@ ion-item.builder__question:focus-within {
     box-sizing: border-box;
     background: var(--app-surface);
     cursor: grabbing;
-    opacity: 0.9;
+    opacity: 1 !important;
     box-shadow: 0 8px 24px rgba(28, 18, 40, 0.18);
 }
 
-/* Matches the tag of the rows so the drop preview is an item too. */
-.builder__question-placeholder {
-    --min-height: 42px;
-    --border-width: 1px;
+/* Matches the tag of the rows so the drop preview is an item too.
+   Unified to the question sortable placeholder (ghost) style. */
+.builder__question-placeholder,
+.ui-sortable-placeholder {
+    --min-height: 40px;
+    height: 42px;
+    min-height: 42px;
+    --border-width: 0;
     --border-style: dashed;
-    --border-color: var(--ion-color-primary);
+    --border-color: var(--ion-color-primary-tint);
     --border-radius: 8px;
-    --background: #c76abb22;
+    --background: rgba(var(--ion-color-primary-rgb), 0.08);
+    border: 2px dashed var(--ion-color-primary-tint);
+    border-radius: 8px;
+    background: rgba(var(--ion-color-primary-rgb), 0.08);
     margin: 0 0 6px;
     visibility: visible !important;
+    box-sizing: border-box;
 }
 
 .builder__delete {
@@ -656,7 +673,21 @@ ion-item.builder__question:focus-within {
 
 ion-item.builder__question[aria-current='true'] {
     --border-color: var(--ion-color-primary);
-    --background: #c76abb73;
+    --background: #e6bce0;
+}
+
+ion-item.builder__question.ui-sortable-helper {
+    opacity: 1 !important;
+    background: #ffffff !important;
+    --background: #ffffff !important;
+    box-shadow: 0 8px 24px rgba(28, 18, 40, 0.18);
+    cursor: grabbing;
+
+    &[aria-current='true'] {
+        opacity: 1 !important;
+        background: #e6bce0 !important;
+        --background: #e6bce0 !important;
+    }
 }
 
 .builder__question-text {
