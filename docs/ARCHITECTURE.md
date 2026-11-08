@@ -489,22 +489,43 @@ Consequences:
   triggers a re-render; no view keeps its own copy.
 - The editing stack holds refs, not objects — every read walks the
   definition again, so container edits can never go stale.
-- DOM-only state (answer pagination, notices, the open modal, scroll
-  positions) lives in `ui/shell.js`, keyed by input ref.
+- DOM-only state (answer pagination, notices, jump pages, the active
+  property tab, the readme editor handle) lives in `ui/state.js`, keyed by
+  input ref.
 - `change_revision` + `unsaved_changes` drive the beforeunload gate and the
   save button; the saved revision is bumped only by a successful save (R-72).
 
 ## Rendering
 
-`ui/shell.js` (~2600 lines) is the only view module.
+The view layer is split by scope; `ui/shell.js` (~100 lines) is the hub that
+wires it together and the only place area modules meet.
 
-- `renderApp()` → `renderForms()` (the tab strip), `renderQuestions()` (the
-  rows and the strip validity icon), `renderProperties()` (the properties
-  card: tabs, basic/advanced fields, possible answers, jumps), `bindChrome()`
-  (banner, undo, save).
-- Every change mutates the session state and calls `recordChange()`: the undo
-  push (500 ms typing throttle), the change revision, the debounced save gate,
-  the scoped form-tab refresh and a re-render of the affected card.
+- `ui/state.js` — the shared mutable state: handlers, answer/jump page maps,
+  the active property tab, the readme editor handle, the save/unsaved/revision
+  flags, and `recordChange()` (the undo push with the 500 ms typing throttle,
+  the revision bump, the unsaved flag, the mutation notify).
+- `ui/primary-toolbar.js` — the top bar: project name, logo, reveal, and the
+  static chrome bindings (back/exit, undo, save, Add Form).
+- `ui/save.js` — `performSave`/`performUndo`, the undo/save button updates,
+  the unload guard.
+- `ui/form-actions.js` — the form menu (export/print/delete all), the form
+  name modal, delete question, the import file picker.
+- `ui/input-tools.js` — the palette and `addQuestion`.
+- `ui/forms-tabs.js` — the tab strip, its labels and validity gates.
+- `ui/questions-list.js` — the rows, selection, live text updates.
+- `ui/properties.js` — the properties card, tabs, badges and validation
+  refreshes.
+- `ui/properties-fields.js` — the basic/advanced panels and every `bind*`
+  field helper.
+- `ui/jumps.js`, `ui/possible-answers.js` — the two tab panes.
+- `ui/download.js`, `ui/dropdown.js` (`initDropdown`) — small shared helpers.
+- `renderApp()` (in `shell.js`) → `renderProjectName()`, `revealBuilder()`,
+  `bindPrimaryToolbar()`, `renderTools()`, `renderForms()`,
+  `renderQuestions()`, `renderProperties()`.
+- Area modules never import each other; cross-area calls go through
+  `shell.js` re-exports, and every `recordChange()` mutation fans out through
+  the `onMutation` listener registered in `shell.js` (undo button, debounced
+  save gate, scoped form-tab refresh).
 - DOM preservation across re-renders: the properties scroll position, the
   active property tab and the per-form answer pages survive; the readme
   editor is destroyed and rebuilt.
@@ -631,9 +652,10 @@ sequenceDiagram
 - The session singleton + full re-render: a simple single-source-of-truth
   data flow, at the cost of DOM churn on large projects (R-41 numbers, R-62
   clone cost).
-- `ui/shell.js` is one large module: rendering, chrome binding, gates and
-  drag wiring in one place — easy to find, hard to split without a view
-  framework.
+- The view layer is a star graph around `ui/shell.js` (render orchestration,
+  mutation fan-out and the cross-area re-exports); each area is a module of
+  60–500 lines. The shape was chosen so the Vue port can lift one area at a
+  time.
 - jQuery UI is the drag layer and the last legacy runtime dependency; the
   swap options were evaluated and rejected until the drag flows are
   browser-verified.

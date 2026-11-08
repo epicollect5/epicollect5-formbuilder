@@ -271,15 +271,18 @@ Everything that auto-updates today is above this floor. Below it the builder
 still boots, but saving and loading fail with explicit errors; there is no IE
 support and no legacy plugin.
 
-## Shell split (prerequisite for the Vue evaluation)
+## Shell split (done — prerequisite for the Vue evaluation)
 
-`ui/shell.js` (~2600 lines) is the last monolith. The split is by scope, with
-one rule that keeps the dependency graph a star: **area modules never import
-each other or `shell.js`** — they import `ui/state.js` (the shared mutable
-state + `recordChange`), `services/*` and `models/*` only. Cross-area
-requests go through callbacks registered at bind time.
+`ui/shell.js` was the last monolith (~2600 lines). It is now split by scope,
+with one rule that keeps the dependency graph a star: **area modules never
+import each other** — they import `ui/state.js` (the shared mutable state +
+`recordChange`), `services/*`, `models/*`, and reach the other areas through
+`shell.js` re-exports only. `shell.js` (~100 lines) registers the
+`onMutation` fan-out that does the undo/save/tab refreshes, so no area module
+needs to know about another.
 
-Target layout:
+Landed layout (behaviour-preserving; verified by a per-function diff against
+the pre-split source plus the full suite):
 
 | Module | Contents |
 | --- | --- |
@@ -296,11 +299,9 @@ Target layout:
 | `ui/possible-answers.js` | the answers card: pager, menu, CSV picker/modal, sortables, `buildAnswerRow` |
 | `ui/dropdown.js` | the component + `initDropdown` folded in |
 | `ui/download.js` | `downloadFile` |
-| `shell.js` | `renderApp`, the boot and the cross-area refresh chain — the only place area modules meet |
+| `shell.js` | `renderApp`, `runBackgroundValidation`, the `onMutation` fan-out and the cross-area re-exports — the only place area modules meet |
 
-`recordChange` moves into `ui/state.js` (undo push via `services/undo.js`,
-revision, unsaved flag, mutation notify) — `shell.js` registers the notify
-handler that does the UI refreshes, so no area module imports another.
+(The boot itself lives in `app.js`, merged there earlier.)
 
 ## Migration path
 

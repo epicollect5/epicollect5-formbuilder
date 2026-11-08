@@ -156,12 +156,12 @@ describe('fixed markup views', () => {
         expect(styles).toMatch(/@container \(max-width: 68px\)[\s\S]*?\.builder__form-tab-state\s*\{[^}]*display:\s*none;/);
     });
 
-    it('keeps the form menu trigger in the view and its actions in the shell', async () => {
+    it('keeps the form menu trigger in the view and its actions in the form-actions module', async () => {
         const html = await read('src/views/question-card.html');
-        const shell = await read('src/ui/shell.js');
+        const form_actions = await read('src/ui/form-actions.js');
 
         expect(html).toContain('data-role="form-actions-trigger"');
-        expect(shell).toContain("label: 'Print form'");
+        expect(form_actions).toContain("label: 'Print form'");
     });
 
     it('keeps dropdown options at full height inside the scrolling list', async () => {

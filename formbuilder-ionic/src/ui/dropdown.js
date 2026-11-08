@@ -430,3 +430,59 @@ export const populateDropdown = (dropdown, options, value, on_change) => {
     });
     dropdown.value = value;
 };
+
+/*
+ * Binds a dropdown component onto a placeholder element: an existing component
+ * instance is reused, a bare `[data-dropdown]` placeholder is replaced by a
+ * fresh one reading its `data-dropdown-placeholder` attribute.
+ */
+export const initDropdown = (control, options, value, on_change, disabled) => {
+    if (!control) {
+        return null;
+    }
+
+    const is_dropdown = typeof control.setOptions === 'function' || control.classList && control.classList.contains('dropdown') && !control.hasAttribute('data-dropdown');
+    if (is_dropdown && typeof control.setOptions === 'function') {
+        if (on_change) {
+            control.onChange(on_change);
+        }
+        control.setOptions(options, value);
+        control.setDisabled(!!disabled);
+        return control;
+    }
+
+    const placeholder = control.hasAttribute('data-dropdown') ?
+        control :
+        control.querySelector('[data-dropdown]');
+
+    if (!placeholder) {
+        return null;
+    }
+
+    if (typeof placeholder.setOptions === 'function') {
+        if (on_change) {
+            placeholder.onChange(on_change);
+        }
+        placeholder.setOptions(options, value);
+        placeholder.setDisabled(!!disabled);
+        return placeholder;
+    }
+
+    const dropdown = createDropdown({
+        class_name: placeholder.className.replace(/\bdropdown\b/g, '').trim(),
+        aria_label: placeholder.getAttribute('aria-label') || control.getAttribute('aria-label') || 'Select option',
+        placeholder: placeholder.hasAttribute('data-dropdown-placeholder') ?
+            placeholder.getAttribute('data-dropdown-placeholder') :
+            'Select',
+        options,
+        value,
+        disabled: !!disabled,
+        on_change: on_change
+    });
+
+    if (placeholder.parentNode) {
+        placeholder.replaceWith(dropdown);
+    }
+
+    return dropdown;
+};
