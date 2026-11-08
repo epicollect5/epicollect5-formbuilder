@@ -18,26 +18,30 @@ stacks, different architectures, different style rules. Never mix them.
 
 ## Ionic prototype (`formbuilder-ionic/`)
 
-A presentation-layer prototype that runs **next to** the legacy entry point
-against the same session and the same project-definition JSON. It does not fork
-behaviour: the frozen `js/app_modules/**` modules are bundled through esbuild
-aliases, so rendering, validation, jumps, possible answers, undo, save, import
-and export execute the legacy code. Only the presentation layer is replaced:
+The active codebase: a full re-implementation of the formbuilder services and
+UI over Ionic components. The legacy app is the behavioural reference and runs
+side-by-side in development, but none of its modules are bundled — the only
+inherited runtime dependency is jQuery UI for drag-and-drop:
 
-- `src/views/**` re-authors the Bootstrap containers and partials as Ionic
-  markup (bundled via `?raw` imports); nothing is reused from
-  `public/views/properties/**`.
-- `src/theme/**` styles the legacy hook classes on Ionic tokens; no Bootstrap
+- `src/services/**` and `src/models/**` re-implement validation, jumps, limits,
+  undo, save, import and export against the same project-definition contract.
+- `src/views/**` re-authors the containers and partials as Ionic markup
+  (bundled via `?raw` imports).
+- `src/theme/**` styles the port's own classes on Ionic tokens; no Bootstrap
   stylesheet is loaded.
-- `src/ui/**` provides the Bootstrap JS replacements: `ui/modal.js` hosts the
-  legacy `.modal` element, tabs are ARIA controllers firing
-  `show/shown.bs.tab`, and dropdowns are accessible menus. Icons are Ionicons
-  only (`<ion-icon>`); no Font Awesome.
+- `src/ui/**` provides the interaction layer: drag-and-drop over jQuery UI,
+  modals hosting the legacy `.modal` markup, dropdowns, toasts, the wait
+  overlay and the Tiptap readme editor. Icons are Ionicons only
+  (`<ion-icon>`); no Font Awesome.
+- Tests are Vitest 5 + jsdom; harness suites drive the legacy modules directly
+  as the behavioural gate.
 
-jQuery 2.2.1 and jQuery UI stay in place for drag-and-drop and delegated events.
-The output is `formbuilder-ionic/dist/`, served with the legacy `public/` and the
-shared `project/` mount so both entries resolve `../project/project.json`
-identically. See `formbuilder-ionic/README.md` for the build and test commands.
+jQuery UI stays for drag-and-drop only. The output is `formbuilder-ionic/dist/`,
+served with the legacy `public/` and the shared `project/` mount so both entries
+resolve `../project/project.json` identically. The prototype's architecture is
+documented in **Part 2**; its risk register is
+`formbuilder-ionic/docs/risks.md` and `formbuilder-ionic/README.md` carries the
+build and test commands.
 
 ---
 
@@ -430,7 +434,226 @@ unregistered `isJumpValid.test.js`, are listed in
 
 ---
 
-# Part 2 — Vue port (`formbuilder-vue/`) — target
+# Part 2 — Ionic prototype (`formbuilder-ionic/`)
+
+An Ionic-component builder over a TypeScript-free re-implementation of the
+formbuilder services. One execution context — the browser — and two serving
+contexts: the **comparison dev server** (Vite middleware serving the legacy
+builder side-by-side, the shared `project/project.json` and a local save
+endpoint) and the **built bundle** (static files served by the Laravel app,
+posting to its internal endpoints).
+
+## Stack
+
+| Concern | Choice |
+| --- | --- |
+| Build | Vite 8.3.6 (Rolldown), `target: 'es2020'`, no legacy plugin |
+| Tests | Vitest 5.0.5 + jsdom |
+| UI | Ionic 8.8.4 components consumed as custom elements — the DOM is built with `element()`/`createView()` helpers, no Angular/React/Vue binding |
+| Editor | Tiptap 3.31.3 (readme) |
+| Import validation | Ajv 8.20 + ajv-formats against `schemas/project.schema.json` |
+| Drag and drop | jQuery 4.0.0 + jQuery UI 1.14.2 |
+| Styling | Sass 1.108 |
+| Language | Plain ESM JavaScript — no TypeScript, no router, no state library |
+
+## High-Level Architecture
+
+```mermaid
+flowchart TD
+    A[src/app.js] --> B[bootFormbuilder]
+    B --> C[setupIonic]
+    C --> D[loadProject: JSON or gzip/base64]
+    D --> E[setProject: session singleton]
+    E --> F[renderApp]
+    F --> G[renderForms: tab strip]
+    F --> H[renderQuestions: rows + strip validity]
+    F --> I[renderProperties: properties card, answers, jumps]
+    F --> J[bindChrome: banner, undo, save, modals]
+    H --> K[jQuery UI drag-and-drop]
+    I --> L[validation + save/import services]
+```
+
+## The State Model
+
+`src/services/session.js` is the single state container. There is no store
+library and no event bus.
+
+- `session.project_definition` — the project JSON currently being edited
+- `session.current_form_index` — the active form
+- `session.current_input_ref` — the selected question
+- `session.editing` — a stack of container refs (branch/group), outermost first
+
+Consequences:
+
+- The project definition is **the** state: every change mutates it and
+  triggers a re-render; no view keeps its own copy.
+- The editing stack holds refs, not objects — every read walks the
+  definition again, so container edits can never go stale.
+- DOM-only state (answer pagination, notices, the open modal, scroll
+  positions) lives in `ui/shell.js`, keyed by input ref.
+- `change_revision` + `unsaved_changes` drive the beforeunload gate and the
+  save button; the saved revision is bumped only by a successful save (R-72).
+
+## Rendering
+
+`ui/shell.js` (~2600 lines) is the only view module.
+
+- `renderApp()` → `renderForms()` (the tab strip), `renderQuestions()` (the
+  rows and the strip validity icon), `renderProperties()` (the properties
+  card: tabs, basic/advanced fields, possible answers, jumps), `bindChrome()`
+  (banner, undo, save).
+- Every change mutates the session state and calls `recordChange()`: the undo
+  push (500 ms typing throttle), the change revision, the debounced save gate,
+  the scoped form-tab refresh and a re-render of the affected card.
+- DOM preservation across re-renders: the properties scroll position, the
+  active property tab and the per-form answer pages survive; the readme
+  editor is destroyed and rebuilt.
+- The form tab strip: content-sized flex tabs (max 220px, min 44px), the
+  active tab keeps its name and count badge, inactive tabs collapse to a
+  centred dots placeholder (plus the validity icon when invalid) once there
+  are four or more forms, container queries collapse narrow tabs further, no
+  scrollbar.
+- Alignment rules: tab labels are flex (never inline) and their margins are
+  zeroed — Ionic rewrites the slotted label margins when a button holds an
+  icon (icon-top layout), which shifted labels ~6px.
+
+## Validation architecture
+
+Two layers, mirroring the data shape:
+
+- `models/validation.js` — object-level rules per input: question text and
+  length, possible answers (count, empties, duplicate refs), numeric ranges,
+  initial answer vs min/max and regex, container children.
+- `services/validation.js` — list-aware rules that need the surrounding list:
+  jump destinations and conditions, container validity, form and project
+  aggregations (`areFormInputsValid`, `areAllInputsValid`).
+
+Every error carries the tab it belongs to (basic / advanced / jumps), so
+surfacing is data-driven:
+
+- the row badges and the strip validity icon,
+- the tab badges (red text + the alert icon; from four forms on the inactive
+  tabs collapse to dots),
+- the message under the question text (basic-tab errors only),
+- the per-jump-row messages under the offending field,
+- the container toolbar icon and the debounced save gate.
+
+The keystroke path is scoped to the edited form and the save-gate recompute is
+debounced (R-41); the Validate button re-checks the selected question and
+toasts.
+
+## Save flow
+
+```mermaid
+sequenceDiagram
+    participant UI as Save click
+    participant Gate as gates
+    participant Clean as cleanProject
+    participant Encode as encodeProject
+    participant Server as project.json / Laravel
+
+    UI->>Gate: areAllInputsValid + getProjectLimitsError
+    Gate->>Clean: cleanProject (deep copy)
+    Clean->>Clean: replaceWordChars, jump rebuild, dom strip
+    Clean->>Encode: base64(gzip(JSON))
+    Encode->>Server: POST (dev: comparison file, prod: internal endpoint)
+    Server-->>UI: saved toast / errors
+```
+
+- The gates run the whole contract: per-input validation, project caps (300
+  inputs per form, 3 titles per list, 5 search questions per project), and a
+  second jump-destination pass during cleaning.
+- The payload is `base64(gzip(JSON))`; the comparison dev server writes
+  `project/project.json`, production posts to the Laravel internal endpoint.
+- No queue, no retry; the click is guarded by the `saving` flag and an edit or
+  an undo during the POST keeps the project marked unsaved (R-72).
+- The Compression Streams are polyfilled lazily on browsers missing them
+  (R-66).
+
+## Import and export
+
+- **Export** gates on form validity and downloads the
+  `{ data: { id, type: 'form', form } }` envelope as plain JSON.
+- **Import** caps the file at 5 MB, validates it against
+  `schemas/project.schema.json` (envelope, input tree, refs, possible
+  answers, jumps, legacy end jumps), remaps the imported refs onto the
+  current form ref, checks the imported form's own limits, and reports the
+  whole-project runtime validity. It replaces the current form's inputs; it
+  does not append them (R-67).
+
+## Undo
+
+- Up to 10 snapshots of the project definition (JSON deep clones) with a
+  500 ms typing throttle; a push that changes nothing is skipped.
+- The baseline follows project identity: a fresh `loadProject` resets the
+  stack.
+- Undo restores the definition; the form index is clamped and the property
+  tab resets to basic. Measured cost and limits: R-62.
+
+## Drag and drop
+
+- `ui/sortable.js` is the only jQuery consumer (jQuery 4 + jQuery UI 1.14.2):
+  `installToolDrag` (palette buttons drop into the question list; the drop
+  index is resolved from the pointer because jQuery UI's
+  `connectToSortable` never transfers the helper), `installQuestionSortable`
+  (the question list, contained to the strip) and `installAnswerSortable`
+  (the possible-answers rows, page-local, with a cancel selector so typing
+  never starts a drag).
+- jsdom cannot drive jQuery UI: the suite asserts init and calls the stop
+  handlers directly (R-03); the behaviour is verified in the browser.
+- The swap options (SortableJS, Pragmatic DnD, hcg-sortable) were evaluated
+  and rejected for this prototype — see the audit in `docs/jquery-usage.md`.
+
+## The legacy boundary
+
+- The legacy app is frozen and is **not** bundled: the comparison server
+  serves it side-by-side and both entries read the same
+  `project/project.json`.
+- The harness suites (`tests/support/properties-panel.js`) drive the legacy
+  modules directly as the behavioural gate for jumps, possible answers and
+  the properties panel.
+- `docs/PORTING.md` and `docs/legacy-known-defects.md` document what is
+  ported and what is deliberately not (the port does not reproduce legacy
+  defects).
+
+## Error handling
+
+- `notifyError` / `notifyWarning` / `notifySuccess`: one `ion-toast` at a
+  time at the top of the page (R-74).
+- Field-level errors: the message under the question text (basic-tab errors
+  only), per-jump-row messages under the offending field, the tab badges and
+  the row badges.
+- The wait overlay wraps save/import/undo; every show has a hide on both
+  branches (R-75).
+
+## Constraints and tradeoffs
+
+- The session singleton + full re-render: a simple single-source-of-truth
+  data flow, at the cost of DOM churn on large projects (R-41 numbers, R-62
+  clone cost).
+- `ui/shell.js` is one large module: rendering, chrome binding, gates and
+  drag wiring in one place — easy to find, hard to split without a view
+  framework.
+- jQuery UI is the drag layer and the last legacy runtime dependency; the
+  swap options were evaluated and rejected until the drag flows are
+  browser-verified.
+- No TypeScript and no router: the URL is static; the beforeunload gate is
+  the only navigation guard.
+- The prototype scope is the formbuilder itself: five forms, 300 questions
+  per form, the caps in `PARAMETERS` — enforced by the save gate.
+
+## Mental model
+
+1. The project definition in the session is the only state; services mutate it.
+2. Every mutation goes through `recordChange`: undo push, revision, gates.
+3. Rendering reads the state and rebuilds the cards; nothing caches.
+4. Validation is derived, never stored; every error carries where it surfaces.
+5. Save, import and export are the only IO; all of them validate the whole
+   contract first.
+
+---
+
+# Part 3 — Vue port (`formbuilder-vue/`) — target
 
 A Vue 3 rewrite of the same formbuilder. **Greenfield: there is no port source on
 `master`.** The existing `formbuilder-vue` branch content is disposable and is not
