@@ -103,7 +103,7 @@ export const renderQuestions = () => {
 
     installFormActions(card, form);
 
-    installQuestionSortable('#questions .builder__question-list', syncAfterDrop);
+    installQuestionSortable('#questions .builder__question-list', syncAfterDrop, handleDragStart);
 };
 
 /* ion-item with `button` supplies the button role and keyboard activation, so
@@ -181,8 +181,24 @@ const isInputRowValid = (input) => {
     return isInputValid(input, getCurrentInputs());
 };
 
-/* Persists the order the sortable left in the DOM. */
-const syncAfterDrop = () => {
+/* When dragging starts, select the question so it is active immediately. */
+const handleDragStart = (row) => {
+    if (!row) {
+        return;
+    }
+
+    const ref = row.getAttribute('data-input-ref');
+
+    if (ref) {
+        selectInput(ref);
+        setActivePropertyTab('basic');
+        updateSelection();
+        renderProperties();
+    }
+};
+
+/* Persists the order the sortable left in the DOM and keeps the dragged row selected. */
+const syncAfterDrop = (dragged_element) => {
     const list = document.querySelector('#questions .builder__question-list');
 
     if (!list) {
@@ -192,6 +208,14 @@ const syncAfterDrop = () => {
     const reordered = reorderInputs([...list.querySelectorAll('.builder__question')].map((row) => {
         return row.getAttribute('data-input-ref');
     }));
+
+    if (dragged_element) {
+        const ref = dragged_element.getAttribute('data-input-ref');
+        if (ref) {
+            selectInput(ref);
+            setActivePropertyTab('basic');
+        }
+    }
 
     if (reordered) {
         recordChange();

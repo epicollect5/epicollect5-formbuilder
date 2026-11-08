@@ -30,9 +30,9 @@ export const renderTools = () => {
         tool.hidden = !allowed;
         tool.disabled = !allowed;
 
-        tool.onclick = () => {
-            addQuestion(type);
-        };
+        tool.addEventListener('click', (event) => {
+            event.currentTarget.blur();
+        });
     });
 
     installToolDrag('#tools .builder__tool', '#questions .builder__question-list', (type, index) => {

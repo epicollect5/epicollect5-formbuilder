@@ -46,7 +46,7 @@ export function installToolDrag(tools_selector, list_selector, on_drop) {
             const row = drop.list.querySelector('.builder__question');
 
             placeholder = document.createElement(row ? row.nodeName.toLowerCase() : 'ion-item');
-            placeholder.className = 'builder__question-placeholder';
+            placeholder.className = 'builder__question-placeholder ui-sortable-placeholder';
         }
 
         const rows = drop.list.querySelectorAll('.builder__question');
@@ -78,6 +78,7 @@ export function installToolDrag(tools_selector, list_selector, on_drop) {
 
     $tools.draggable({
         cancel: '[data-no-drag]',
+        appendTo: 'body',
         helper: function () {
             const $tool = $(this);
 
@@ -103,6 +104,8 @@ export function installToolDrag(tools_selector, list_selector, on_drop) {
             }
         },
         stop: function () {
+            $(this).blur();
+
             // The stop event does not carry the release coordinates, and the
             // helper has already started reverting, so the last drag position
             // is the drop the user saw.
@@ -118,7 +121,7 @@ export function installToolDrag(tools_selector, list_selector, on_drop) {
     });
 };
 
-export function installQuestionSortable(list_selector, on_sync) {
+export function installQuestionSortable(list_selector, on_sync, on_start) {
     const $ = getJQuery();
     const $list = $(list_selector);
 
@@ -136,11 +139,32 @@ export function installQuestionSortable(list_selector, on_sync) {
         forcePlaceholderSize: true,
         tolerance: 'pointer',
         axis: 'y',
+        // Center the dragged row vertically on the pointer so it does not jump
+        cursorAt: { top: 21 },
         // as in legacy, keep the dragged row inside the list so it cannot
         // slide up under the questions header while sorting
         containment: 'parent',
-        stop: function () {
-            on_sync();
+        start: function (event, ui) {
+            const inst = $(this).sortable('instance');
+            const height = ui && ui.item ? ui.item.outerHeight() : 42;
+
+            if (inst) {
+                if (inst.offset && inst.offset.click) {
+                    inst.offset.click.top = Math.round(height / 2);
+                }
+                if (typeof inst._generatePosition === 'function' && event && event.type) {
+                    inst.originalPosition = inst._generatePosition(event);
+                }
+            }
+
+            if (on_start && ui && ui.item && ui.item[0]) {
+                on_start(ui.item[0]);
+            }
+        },
+        stop: function (event, ui) {
+            const item = ui && ui.item && ui.item[0] ? ui.item[0] : null;
+
+            on_sync(item);
         }
     });
 };
