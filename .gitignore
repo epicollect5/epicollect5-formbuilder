@@ -12,3 +12,4 @@ project/project.json
 docs/QA-*
 public/js/formbuilder.js
 public/js/vendor-formbuilder.js
+/formbuilder-ionic/legacy_projects.csv
