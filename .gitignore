@@ -13,3 +13,5 @@ docs/QA-*
 public/js/formbuilder.js
 public/js/vendor-formbuilder.js
 /formbuilder-ionic/legacy_projects.csv
+/formbuilder-ionic/legacy-projects-audit.jsonl
+/formbuilder-ionic/legacy-projects-audit.log
