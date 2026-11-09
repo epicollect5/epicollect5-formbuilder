@@ -250,12 +250,11 @@
     justify-content: flex-start;
 }
 
-/* unselected tabs reveal their clickable boundary on hover: a primary
-   hairline around the tab (inset, so the baseline never shifts) */
+/* unselected tabs preview the selected state on hover: primary text and the
+   same bottom border, so the clickable extent is visible */
 .builder__form-tab:not(.segment-button-checked):not([aria-selected='true']):hover {
     color: var(--ion-color-primary);
     --color: var(--ion-color-primary);
-    box-shadow: inset 0 0 0 1px var(--ion-color-primary);
     border-bottom-color: var(--ion-color-primary);
 }
 
