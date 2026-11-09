@@ -14,7 +14,7 @@
 .input {
     color: var(--app-text);
     border: 1px solid #999999;
-    border-radius: 8px;
+    border-radius: 4px;
     background: var(--app-surface);
     min-height: 42px;
     padding: 7px 10px;
@@ -32,9 +32,11 @@
 }
 
 /* The selected question in the middle column carries a filled tint; scoped to
-   the collection so the tool rows keep the plain active outline. */
+   the collection so the tool rows keep the plain active outline. The tint is a
+   translucent tertiary so it stays subtle now that --ion-color-tertiary-tint
+   matches the mobile app's mid-pink text tint (#c76abb). */
 .inputs-collection .input.active {
-    background: var(--ion-color-tertiary-tint)
+    background: rgba(var(--ion-color-tertiary-rgb), 0.12)
 }
 
 .input-inner {
@@ -99,7 +101,7 @@
     min-height: 64px;
     margin: 6px 0 0;
     padding: 6px;
-    border-radius: 8px;
+    border-radius: 4px;
     border: 1px dashed transparent;
 }
 
@@ -107,7 +109,7 @@
 .active-group {
     outline: 2px solid var(--ion-color-primary);
     outline-offset: 2px;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 .active-branch .input,
@@ -121,7 +123,7 @@
 
 .input-collection-drop-placeholder {
     border: 2px dashed var(--ion-color-primary-tint);
-    border-radius: 8px;
+    border-radius: 4px;
     background: rgba(var(--ion-color-primary-rgb), 0.08);
     /* matches a question row so the list does not jump when it appears */
     height: 42px;
@@ -138,7 +140,7 @@
 .ui-sortable-placeholder {
     visibility: visible !important;
     border: 2px dashed var(--ion-color-primary-tint);
-    border-radius: 8px;
+    border-radius: 4px;
     background: rgba(var(--ion-color-primary-rgb), 0.08);
 }
 
@@ -182,7 +184,7 @@
     box-sizing: border-box;
     min-height: 48px;
     border: 2px dashed var(--ion-color-primary-tint);
-    border-radius: 8px;
+    border-radius: 4px;
     background: rgba(var(--ion-color-primary-rgb), 0.08);
     list-style: none;
 }

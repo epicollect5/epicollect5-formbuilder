@@ -6,7 +6,7 @@ ion-modal.legacy-modal-host {
     --width: min(560px, 94vw);
     --height: auto;
     --max-height: 84vh;
-    --border-radius: 16px;
+    --border-radius: 4px;
     --backdrop-opacity: 0.55;
 }
 
@@ -73,7 +73,7 @@ ion-modal.legacy-modal-host {
     line-height: 1;
     cursor: pointer;
     padding: 2px 6px;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 .close:hover {

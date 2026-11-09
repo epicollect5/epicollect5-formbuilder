@@ -13,7 +13,7 @@
     /* the .main card draws the outer border; the strip only closes itself */
     border: 0;
     border-bottom: 1px solid var(--app-border);
-    border-radius: 14px 14px 0 0;
+    border-radius: 4px 4px 0 0;
     overflow-x: auto;
 }
 
@@ -69,7 +69,7 @@
     list-style: none;
     background: var(--app-surface-muted);
     border: 1px solid var(--app-border);
-    border-radius: 8px;
+    border-radius: 4px;
     overflow-x: auto;
 }
 
@@ -142,14 +142,14 @@
     padding: 0;
     background: var(--app-surface);
     border: 1px solid var(--app-border);
-    border-radius: 14px;
+    border-radius: 4px;
 }
 
 .input-properties__tabs > .nav-tabs {
     margin: 0;
     border: 0;
     border-bottom: 1px solid var(--app-border);
-    border-radius: 14px 14px 0 0;
+    border-radius: 4px 4px 0 0;
     /* spread Properties / Advanced / Jumps across the strip */
     justify-content: space-between;
 }

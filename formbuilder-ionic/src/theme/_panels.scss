@@ -2,7 +2,7 @@
     background: var(--app-surface);
     color: var(--app-text);
     border: 1px solid var(--app-border);
-    border-radius: 14px;
+    border-radius: 4px;
     box-shadow: 0 1px 2px rgba(28, 18, 40, 0.06);
     margin: 0 0 14px;
     font-size: 16px;
@@ -15,7 +15,7 @@
     padding: 10px 14px;
     background: #f5f5f5;
     border-bottom: 1px solid var(--app-border);
-    border-radius: 14px 14px 0 0;
+    border-radius: 4px 4px 0 0;
 }
 
 /* The legacy header floats this group right; the header is a flex row, where a
@@ -55,7 +55,8 @@
 }
 
 .panel-body {
-    padding: 14px;
+    /* matches the mobile app's md card-content padding (core.scss: 16px) */
+    padding: 16px;
 }
 
 .list-group {
@@ -81,7 +82,7 @@
     margin: 0;
     background: var(--app-surface);
     border: 1px solid var(--app-border);
-    border-radius: 14px;
+    border-radius: 4px;
     box-shadow: 0 1px 2px rgba(28, 18, 40, 0.06);
 }
 
@@ -182,14 +183,14 @@
    No overflow clipping, so the "more" dropdown can still escape the card. */
 .input_properties__forms_wrapper .input-properties__form__possible-answers {
     border: 1px solid var(--app-border);
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 .input_properties__forms_wrapper .input-properties__form__possible-answers > .panel-heading {
     padding: 8px 12px;
     background: #93cdafb5;
     border-bottom: 1px solid var(--app-border);
-    border-radius: 8px 8px 0 0;
+    border-radius: 4px 4px 0 0;
 }
 
 /* The properties card header carries the same tint as the possible answers
@@ -522,7 +523,7 @@
     list-style: none;
     background: var(--app-surface);
     border: 1px solid var(--app-border);
-    border-radius: 8px;
+    border-radius: 4px;
     box-shadow: 0 14px 34px rgba(28, 18, 40, 0.16);
 }
 
@@ -533,7 +534,7 @@
 .dropdown-menu > li > a {
     display: block;
     padding: 8px 10px;
-    border-radius: 8px;
+    border-radius: 4px;
     color: var(--app-text);
     text-decoration: none;
     font-size: 15px;

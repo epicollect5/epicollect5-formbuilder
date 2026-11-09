@@ -108,7 +108,7 @@ hr {
 .warning-well {
     background: rgb(255, 244, 224);
     background: color-mix(in srgb, var(--ion-color-warning) 12%, white);
-    border-radius: 10px;
+    border-radius: 4px;
     color: var(--app-text);
     padding: 10px 12px;
 }
@@ -117,7 +117,7 @@ hr {
 .info-well {
     background: rgb(238, 238, 239);
     background: color-mix(in srgb, var(--ion-color-medium) 16%, white);
-    border-radius: 10px;
+    border-radius: 4px;
     color: var(--app-text);
     padding: 10px 12px;
 }
@@ -126,7 +126,7 @@ hr {
 .danger-well {
     background: rgb(246, 236, 236);
     background: color-mix(in srgb, var(--ion-color-danger) 10%, white);
-    border-radius: 10px;
+    border-radius: 4px;
     color: var(--app-text);
     padding: 10px 12px;
 }
@@ -175,7 +175,7 @@ hr {
 .bg-warning {
     background: rgb(255, 244, 224);
     background: color-mix(in srgb, var(--ion-color-warning) 12%, white);
-    border-radius: 10px;
+    border-radius: 4px;
     padding: 10px 12px;
 }
 
