@@ -89,7 +89,9 @@ export const setupIonic = () => {
     setAssetPath(asset_path);
     setIoniconAssetPath(asset_path);
 
-    initialize();
+    // Force Material Design mode to match the mobile app (main.js sets mode: 'md');
+    // the builder is a desktop tool, so never fall back to the iOS look.
+    initialize({ mode: 'md' });
 
     IONIC_COMPONENTS.forEach((defineComponent) => {
         defineComponent();
