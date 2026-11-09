@@ -245,9 +245,15 @@
     border-bottom: 2px solid transparent;
 }
 
-/* names read from the left edge, like the question rows */
+/* names read from the left edge, like the question rows: flex packs the
+   content left and the label itself must not center its text */
 .builder__form-tab::part(native) {
     justify-content: flex-start;
+    text-align: start;
+}
+
+.builder__form-tab ion-label {
+    text-align: start;
 }
 
 /* unselected tabs preview the selected state on hover: primary text and the
