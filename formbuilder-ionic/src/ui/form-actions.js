@@ -153,10 +153,9 @@ export const openFormNameModal = (form) => {
         title: 'Form name',
         body,
         buttons: [
-            {text: 'Close', class_name: 'btn-default pull-left'},
+            {text: 'Close'},
             {
                 text: 'Save changes',
-                class_name: 'btn-primary',
                 on_click: (close) => {
                     const forms = getForms(getSession().project_definition);
                     const form_index = getSession().current_form_index;
@@ -225,7 +224,6 @@ export const openDeleteQuestion = (input) => {
         body: createView(delete_question_modal_body_view),
         buttons: [{
             text: 'Confirm',
-            class_name: 'btn-danger',
             on_click: (close) => {
                 close();
                 deleteQuestion(input);

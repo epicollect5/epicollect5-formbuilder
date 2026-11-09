@@ -325,10 +325,9 @@ export const openAnswersCsvModal = (input, parsed) => {
         title: 'Possible answers csv import options',
         body,
         buttons: [
-            {text: 'Dismiss', class_name: 'btn-default pull-left'},
+            {text: 'Dismiss'},
             {
                 text: 'Import',
-                class_name: 'btn-primary',
                 disabled: true,
                 on_click: (close) => {
                     if (!selected_column) {
