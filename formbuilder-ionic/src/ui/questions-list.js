@@ -22,7 +22,7 @@ import {createView, element, icon, button} from '@/ui/dom.js';
 import question_card_view from '@/views/question-card.html?raw';
 import {installQuestionSortable} from '@/ui/sortable.js';
 import {getActivePropertyTab, getHandlers, setActivePropertyTab, recordChange} from '@/ui/state.js';
-import {renderApp, renderProperties, runBackgroundValidation, installFormActions, refreshCurrentProperties} from '@/ui/shell.js';
+import {renderApp, renderProperties, runBackgroundValidation, installFormActions, refreshCurrentProperties, refreshCurrentJumps, setActivePropertyContent} from '@/ui/shell.js';
 
 export const renderQuestions = () => {
     const container = document.getElementById('questions');
@@ -214,6 +214,7 @@ const syncAfterDrop = (dragged_element) => {
         if (ref) {
             selectInput(ref);
             setActivePropertyTab('basic');
+            setActivePropertyContent('basic');
         }
     }
 
@@ -221,12 +222,12 @@ const syncAfterDrop = (dragged_element) => {
         recordChange();
     }
 
-    // jQuery UI is still unwinding its own drop when stop fires, so the
-    // re-render waits for the next task.
+    /* The sortable already left the rows in the right order; only the
+       order-dependent views need refreshing. Rebuilding the list here would
+       reset its scroll and destroy the rows for nothing. */
     setTimeout(() => {
-        renderQuestions();
-        renderProperties();
         runBackgroundValidation();
+        refreshCurrentJumps();
     }, 0);
 };
 

@@ -316,6 +316,17 @@ export const refreshCurrentProperties = () => {
     }
 };
 
+/* Jump destinations depend on the question order; rebuild the panel after a
+   reorder so its dropdowns offer the new destinations. */
+export const refreshCurrentJumps = () => {
+    const card = document.querySelector('#properties ion-card');
+    const input = getCurrentInput();
+
+    if (card && input) {
+        buildJumpsPanel(input, card.querySelector('#property-content-jumps'));
+    }
+};
+
 export const setActivePropertyContent = (value) => {
     document.querySelectorAll('#properties .builder__property-content').forEach((content) => {
         const active = content.id === `property-content-${value}`;

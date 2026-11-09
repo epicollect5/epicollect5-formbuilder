@@ -95,6 +95,6 @@ export {
     sanitizeQuestion,
     getQuestionLabel
 } from '@/ui/questions-list.js';
-export {renderProperties, refreshCurrentProperties} from '@/ui/properties.js';
+export {renderProperties, refreshCurrentProperties, refreshCurrentJumps, setActivePropertyContent} from '@/ui/properties.js';
 export {installFormActions, openFormNameModal} from '@/ui/form-actions.js';
 export {performSave, performUndo, updateSaveButton, updateUndoButton, installUnloadGuard} from '@/ui/save.js';

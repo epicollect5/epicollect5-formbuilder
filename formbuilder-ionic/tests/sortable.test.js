@@ -244,6 +244,9 @@ describe('question sortable', () => {
         expect(document.querySelector('#form-tabs .builder__form-tab .builder__form-tab-state')).not.toBeNull();
         expect(document.getElementById('save').disabled).toBe(true);
         expect(document.querySelector('ion-toast')).toBeNull();
+
+        // the drop refreshes in place: the list element survives the reorder
+        expect(document.querySelector('#questions .builder__question-list')).toBe(list);
     });
 
     it('selects the question on drag start and keeps it selected after drop', () => {
