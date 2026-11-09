@@ -484,8 +484,8 @@ describe('builder shell', () => {
 
         const modal = document.querySelector('ion-modal.legacy-modal-host');
 
-        expect(modal.querySelector('.modal-title').textContent).toBe('Warning');
-        [...modal.querySelectorAll('.modal-footer ion-button')]
+        expect(modal.querySelector('.builder__modal-title').textContent).toBe('Warning');
+        [...modal.querySelectorAll('.builder__modal-footer ion-button')]
             .find((button) => button.textContent === 'Confirm')
             .click();
 
@@ -550,10 +550,10 @@ describe('builder shell', () => {
         document.getElementById('add-form').click();
 
         const modal = document.querySelector('ion-modal.legacy-modal-host');
-        const field = modal.querySelector('.modal-body input');
+        const field = modal.querySelector('.builder__modal-body input');
 
         field.value = 'Third form';
-        [...modal.querySelectorAll('.modal-footer ion-button')]
+        [...modal.querySelectorAll('.builder__modal-footer ion-button')]
             .find((button) => button.textContent === 'Save changes')
             .click();
 
@@ -667,7 +667,7 @@ describe('possible answers', () => {
         column.querySelector('.dropdown__trigger').click();
         column.querySelector('.dropdown__option[data-value="0"]').click();
 
-        [...modal.querySelectorAll('.modal-footer ion-button')]
+        [...modal.querySelectorAll('.builder__modal-footer ion-button')]
             .find((button) => button.textContent === 'Import')
             .click();
 
@@ -720,10 +720,10 @@ describe('undo', () => {
         document.getElementById('add-form').click();
 
         const modal = document.querySelector('ion-modal.legacy-modal-host');
-        const field = modal.querySelector('.modal-body input');
+        const field = modal.querySelector('.builder__modal-body input');
 
         field.value = 'Third form';
-        [...modal.querySelectorAll('.modal-footer ion-button')]
+        [...modal.querySelectorAll('.builder__modal-footer ion-button')]
             .find((button) => button.textContent === 'Save changes')
             .click();
 
@@ -781,12 +781,12 @@ describe('form actions', () => {
         document.querySelector('#questions .builder__form-action-btn--edit').click();
 
         const modal = document.querySelector('ion-modal.legacy-modal-host');
-        const field = modal.querySelector('.modal-body input');
+        const field = modal.querySelector('.builder__modal-body input');
 
         expect(field.value).toBe('Screening form');
 
         field.value = 'Renamed form';
-        [...modal.querySelectorAll('.modal-footer ion-button')]
+        [...modal.querySelectorAll('.builder__modal-footer ion-button')]
             .find((button) => button.textContent === 'Save changes')
             .click();
 
@@ -802,11 +802,11 @@ describe('form actions', () => {
         document.querySelector('#questions .builder__form-action-btn--edit').click();
 
         const modal = document.querySelector('ion-modal.legacy-modal-host');
-        const field = modal.querySelector('.modal-body input');
+        const field = modal.querySelector('.builder__modal-body input');
         const error = modal.querySelector('[data-role="form-name-error"]');
 
         field.value = 'Second form';
-        [...modal.querySelectorAll('.modal-footer ion-button')]
+        [...modal.querySelectorAll('.builder__modal-footer ion-button')]
             .find((button) => button.textContent === 'Save changes')
             .click();
 
@@ -885,10 +885,10 @@ describe('form actions', () => {
             document.getElementById('add-form').click();
 
             const modal = document.querySelector('ion-modal.legacy-modal-host');
-            const field = modal.querySelector('.modal-body input');
+            const field = modal.querySelector('.builder__modal-body input');
 
             field.value = 'Extra form ' + index;
-            [...modal.querySelectorAll('.modal-footer ion-button')]
+            [...modal.querySelectorAll('.builder__modal-footer ion-button')]
                 .find((button) => button.textContent === 'Save changes')
                 .click();
         }

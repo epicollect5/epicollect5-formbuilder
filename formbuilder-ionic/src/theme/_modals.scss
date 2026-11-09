@@ -10,7 +10,7 @@ ion-modal.legacy-modal-host {
     --backdrop-opacity: 0.55;
 }
 
-.legacy-modal-host .modal {
+.legacy-modal-host .builder__modal {
     display: block;
     position: static;
     overflow: auto;
@@ -18,19 +18,19 @@ ion-modal.legacy-modal-host {
     background: var(--app-surface);
 }
 
-.legacy-modal-host .modal-dialog {
+.legacy-modal-host .builder__modal-dialog {
     margin: 0;
     width: 100%;
     max-width: 100%;
 }
 
-.modal-content {
+.builder__modal-content {
     display: flex;
     flex-direction: column;
     background: var(--app-surface);
 }
 
-.modal-header {
+.builder__modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -39,20 +39,20 @@ ion-modal.legacy-modal-host {
     border-bottom: 1px solid var(--app-border);
 }
 
-.modal-title {
+.builder__modal-title {
     margin: 0;
     font-size: 20px;
     font-weight: 600;
 }
 
-.modal-body {
+.builder__modal-body {
     flex: 1;
     overflow: auto;
     padding: 18px;
     line-height: 1.55;
 }
 
-.modal-footer {
+.builder__modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
@@ -60,11 +60,7 @@ ion-modal.legacy-modal-host {
     border-top: 1px solid var(--app-border);
 }
 
-.modal-footer .pull-left {
-    margin-right: auto;
-}
-
-.close {
+.builder__modal-close {
     order: 2;
     border: 0;
     background: none;
@@ -76,7 +72,7 @@ ion-modal.legacy-modal-host {
     border-radius: 4px;
 }
 
-.close:hover {
+.builder__modal-close:hover {
     background: var(--app-surface-muted);
 }
 

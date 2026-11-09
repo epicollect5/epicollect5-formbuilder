@@ -19,10 +19,10 @@ export const openModal = (options) => {
     modal.className = `legacy-modal-host${config.class_name ? ` ${config.class_name}` : ''}`;
 
     const shell = createView(modal_view);
-    const body = shell.querySelector('.modal-body');
-    const footer = shell.querySelector('.modal-footer');
+    const body = shell.querySelector('.builder__modal-body');
+    const footer = shell.querySelector('.builder__modal-footer');
 
-    shell.querySelector('.modal-title').textContent = config.title || '';
+    shell.querySelector('.builder__modal-title').textContent = config.title || '';
 
     if (config.body) {
         body.append(config.body);
@@ -46,7 +46,7 @@ export const openModal = (options) => {
         remove();
     };
 
-    shell.querySelector('.close').addEventListener('click', close);
+    shell.querySelector('.builder__modal-close').addEventListener('click', close);
 
     (config.buttons || []).forEach((button_config) => {
         // Use Ionic button with clear fill and uppercase text to match mobile app
