@@ -245,6 +245,20 @@
     border-bottom: 2px solid transparent;
 }
 
+/* names read from the left edge, like the question rows */
+.builder__form-tab::part(native) {
+    justify-content: flex-start;
+}
+
+/* unselected tabs reveal their clickable boundary on hover: a primary
+   hairline around the tab (inset, so the baseline never shifts) */
+.builder__form-tab:not(.segment-button-checked):not([aria-selected='true']):hover {
+    color: var(--ion-color-primary);
+    --color: var(--ion-color-primary);
+    box-shadow: inset 0 0 0 1px var(--ion-color-primary);
+    border-bottom-color: var(--ion-color-primary);
+}
+
 .builder__form-tab::part(indicator),
 .builder__form-tab::part(indicator-background) {
     display: none;
