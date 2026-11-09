@@ -1,45 +1,34 @@
 .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-height: 36px;
-    padding: 8px 12px;
+    display: inline-block;
+    padding: 6px 12px;
     border: 1px solid var(--app-border);
     border-radius: 4px;
     background: var(--app-surface);
     color: var(--app-text);
     font: inherit;
-    font-size: 15px;
-    line-height: 1.2;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
     cursor: pointer;
-    transition: background 120ms ease, border-color 120ms ease;
+    touch-action: manipulation;
 }
 
 .btn:hover {
-    background: var(--app-surface-muted);
-    border-color: var(--app-border);
+    text-decoration: none;
 }
 
 .btn:focus-visible {
-    outline: 2px solid var(--ion-color-primary);
-    outline-offset: 2px;
+    outline: 2px solid rgba(var(--ion-color-primary-rgb), 0.35);
+    outline-offset: 1px;
 }
 
 .btn[disabled] {
-    opacity: 0.45;
+    opacity: 0.55;
     cursor: not-allowed;
-    pointer-events: none;
-}
-
-.btn-sm {
-    min-height: 30px;
-    padding: 6px 9px;
-    font-size: 14px;
 }
 
 /* Action buttons use the app theme's secondary role, not primary. */
-.btn-primary,
 .btn-action {
     background: var(--ion-color-secondary);
     border-color: var(--ion-color-secondary);
@@ -50,57 +39,9 @@
     letter-spacing: .05em;
 }
 
-.btn-primary:hover,
 .btn-action:hover {
     background: var(--ion-color-secondary-shade);
     border-color: var(--ion-color-secondary-shade);
-}
-
-.btn-action-inverse {
-    background: var(--ion-color-secondary);
-    color: var(--ion-color-secondary-contrast);
-    border-color: var(--ion-color-secondary);
-}
-
-.btn-action-inverse:hover {
-    background: var(--ion-color-secondary-shade);
-    border-color: var(--ion-color-secondary-shade);
-}
-
-.btn-danger {
-    background: var(--ion-color-danger);
-    border-color: var(--ion-color-danger);
-    color: var(--ion-color-danger-contrast);
-}
-
-.btn-group {
-    display: inline-flex;
-    position: relative;
-    align-items: stretch;
-}
-
-.btn-group > .btn {
-    border-radius: 0;
-    margin: 0;
-}
-
-.btn-group > .btn:first-child {
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
-}
-
-/* Last button of the group, ignoring a trailing .dropdown-menu sibling. */
-.btn-group > .btn:last-of-type {
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-}
-
-.btn-group > .btn + .btn {
-    margin-left: -1px;
-}
-
-.btn-group > .dropdown-menu + .btn {
-    margin-left: 0;
 }
 
 .form-group {
@@ -142,130 +83,11 @@ label {
     opacity: 0.7;
 }
 
-select.form-control {
-    appearance: none;
-    padding-right: 32px;
-    background-image: linear-gradient(45deg, transparent 50%, var(--ion-color-medium-shade) 50%),
-        linear-gradient(135deg, var(--ion-color-medium-shade) 50%, transparent 50%);
-    background-position: calc(100% - 16px) 55%, calc(100% - 11px) 55%;
-    background-size: 5px 5px, 5px 5px;
-    background-repeat: no-repeat;
-}
-
-textarea.form-control {
-    min-height: 96px;
-    resize: vertical;
-}
-
-/* The legacy views mark dense controls with .input-sm (jumps, advanced
-   properties). Bootstrap sized those at 30px with one 12px line; keep that
-   proportion against the 16px base instead of inheriting the full field size. */
-.input-sm {
-    height: 30px;
-    min-height: 30px;
-    padding: 5px 10px;
-    font-size: 14px;
-    border-radius: 4px;
-}
-
-select.input-sm {
-    padding-right: 28px;
-    background-position: calc(100% - 14px) 52%, calc(100% - 9px) 52%;
-}
-
-.checkbox,
-.radio {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 6px 0;
-}
-
-.checkbox > label,
-.radio > label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    font-weight: 400;
-    color: var(--app-text);
-}
-
-input[type='checkbox'],
-input[type='radio'] {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--ion-color-primary);
-}
-
-.input-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.input-group > .form-control {
-    flex: 1;
-    min-width: 0;
-}
-
-.input-group-btn {
-    display: inline-flex;
-}
-
 .input-properties__form__error {
     display: block;
     margin-top: 4px;
     color: var(--ion-color-danger);
     font-size: 15px;
-}
-
-.input-properties__form__error--branch-error,
-.input-properties__form__error--group-error {
-    display: block;
-    margin-top: 6px;
-    color: var(--ion-color-danger);
-    font-size: 15px;
-}
-
-/* The legacy views keep a Bootstrap feedback icon next to validated fields,
-   but the app only ever showed the error text under the field. The glyph is
-   left in the markup for the legacy hooks, not rendered. */
-.form-control-feedback {
-    display: none !important;
-}
-
-.disabled-checkbox {
-    opacity: 0.5;
-}
-
-.pager {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin: 0;
-    padding: 10px 0;
-    list-style: none;
-}
-
-.pager a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 30px;
-    min-height: 30px;
-    border: 1px solid var(--app-border);
-    border-radius: 4px;
-    color: var(--ion-color-primary);
-    text-decoration: none;
-}
-
-.possible-answers__list_pager__current,
-.possible-answers__list_pager__total {
-    display: inline;
-    font-size: 15px;
-    color: var(--app-text);
 }
 
 .builder__readme-editor {
