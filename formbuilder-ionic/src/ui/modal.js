@@ -49,13 +49,12 @@ export const openModal = (options) => {
     shell.querySelector('.builder__modal-close').addEventListener('click', close);
 
     (config.buttons || []).forEach((button_config) => {
-        // Use Ionic button with clear fill and uppercase text to match mobile app
-        // Use Ionic button with clear fill and uppercase text for all modal actions
+        // Ionic button with clear fill and uppercase text to match mobile app;
+        // `align: 'start'` pulls a dismiss action to the leading footer edge.
         const control = element('ion-button', {
             type: 'button',
             fill: 'clear',
-            // No class-based styling – ensure uniform appearance
-            class: '',
+            class: button_config.align === 'start' ? 'builder__modal-btn--start' : '',
             disabled: button_config.disabled ? true : undefined,
             style: 'text-transform: uppercase;'
         }, [button_config.text || '']);

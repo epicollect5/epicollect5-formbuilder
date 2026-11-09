@@ -152,7 +152,7 @@ export const openFormNameModal = (form) => {
         title: 'Form name',
         body,
         buttons: [
-            {text: 'Close'},
+            {text: 'Dismiss', align: 'start'},
             {
                 text: 'Save changes',
                 on_click: (close) => {

@@ -60,6 +60,11 @@ ion-modal.legacy-modal-host {
     border-top: 1px solid var(--app-border);
 }
 
+/* Dismiss actions sit on the leading edge of the footer. */
+.builder__modal-footer .builder__modal-btn--start {
+    margin-inline-end: auto;
+}
+
 .builder__modal-close {
     order: 2;
     border: 0;

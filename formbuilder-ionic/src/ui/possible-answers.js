@@ -325,7 +325,7 @@ export const openAnswersCsvModal = (input, parsed) => {
         title: 'Possible answers csv import options',
         body,
         buttons: [
-            {text: 'Dismiss'},
+            {text: 'Dismiss', align: 'start'},
             {
                 text: 'Import',
                 disabled: true,
