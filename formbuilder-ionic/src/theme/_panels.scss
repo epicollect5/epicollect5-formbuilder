@@ -78,7 +78,8 @@
     min-height: 34px;
     height: 34px;
     padding: 4px 10px;
-    border: 1px solid var(--app-border);
+    /* a visible border so the control never reads as disabled */
+    border: 1px solid var(--ion-color-medium-shade);
     border-radius: 4px;
     background: var(--app-surface);
     color: var(--app-text);
@@ -109,7 +110,7 @@
 }
 
 .dropdown__label--placeholder {
-    color: var(--ion-color-medium-shade);
+    color: var(--app-text);
 }
 
 .dropdown__icon {
