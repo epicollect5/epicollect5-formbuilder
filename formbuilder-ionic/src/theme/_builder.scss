@@ -455,7 +455,9 @@
     color: var(--app-text);
 }
 
-.builder__form-actions-group .builder__form-action-btn.builder__answers-more-btn:first-child {
+/* The dropdown adapter appends the ion-popover host into this group, so the
+   end caps must match by type, not by child position. */
+.builder__form-actions-group .builder__form-action-btn.builder__answers-more-btn:first-of-type {
     border-radius: 4px 0 0 4px;
 }
 
@@ -463,7 +465,7 @@
     margin-left: -1px;
 }
 
-.builder__form-actions-group .builder__form-action-btn.builder__answers-more-btn:last-child {
+.builder__form-actions-group .builder__form-action-btn.builder__answers-more-btn:last-of-type {
     border-radius: 0 4px 4px 0;
 }
 
