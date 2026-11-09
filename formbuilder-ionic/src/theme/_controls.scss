@@ -1,47 +1,38 @@
-.btn {
+/* The form-import action: the last Bootstrap-styled button, now under the
+   builder namespace with the theme's secondary role. */
+.builder__import-btn {
     display: inline-block;
     padding: 6px 12px;
-    border: 1px solid var(--app-border);
+    border: 1px solid var(--ion-color-secondary);
     border-radius: 4px;
-    background: var(--app-surface);
-    color: var(--app-text);
+    background: var(--ion-color-secondary);
+    color: var(--ion-color-secondary-contrast);
     font: inherit;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .05em;
     line-height: 1.4;
     text-align: center;
     text-decoration: none;
+    text-transform: uppercase;
     cursor: pointer;
     touch-action: manipulation;
 }
 
-.btn:hover {
+.builder__import-btn:hover {
+    background: var(--ion-color-secondary-shade);
+    border-color: var(--ion-color-secondary-shade);
     text-decoration: none;
 }
 
-.btn:focus-visible {
+.builder__import-btn:focus-visible {
     outline: 2px solid rgba(var(--ion-color-primary-rgb), 0.35);
     outline-offset: 1px;
 }
 
-.btn[disabled] {
+.builder__import-btn[disabled] {
     opacity: 0.55;
     cursor: not-allowed;
-}
-
-/* Action buttons use the app theme's secondary role, not primary. */
-.btn-action {
-    background: var(--ion-color-secondary);
-    border-color: var(--ion-color-secondary);
-    color: var(--ion-color-secondary-contrast);
-    text-transform: uppercase;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: .05em;
-}
-
-.btn-action:hover {
-    background: var(--ion-color-secondary-shade);
-    border-color: var(--ion-color-secondary-shade);
 }
 
 .builder__modal-field-group {
@@ -82,7 +73,7 @@ label {
     gap: 0;
 }
 
-.input-properties__form__error {
+.builder__field-error {
     display: block;
     margin-top: 4px;
     color: var(--ion-color-danger);
