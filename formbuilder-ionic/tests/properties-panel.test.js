@@ -158,8 +158,8 @@ describe('properties panel', () => {
         open_tab('advanced');
 
         const inputs = [...document.querySelectorAll('#properties ion-input')];
-        const min_field = inputs.find((field) => field.getAttribute('label') === 'Min value');
-        const regex_field = inputs.find((field) => field.getAttribute('label') === 'Match REGEX');
+        const min_field = inputs.find((field) => field.getAttribute('data-field') === 'min');
+        const regex_field = document.querySelector('[data-field="regex"] ion-input');
 
         min_field.value = '5';
         min_field.dispatchEvent(new CustomEvent('ionInput', { detail: { value: '5' } }));

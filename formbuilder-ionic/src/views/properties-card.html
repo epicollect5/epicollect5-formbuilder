@@ -140,42 +140,52 @@
                             </ion-radio-group>
                         </div>
 
-                        <ion-input class="builder__field"
-                                   data-field="default_number"
-                                   label="Initial answer"
-                                   label-placement="stacked"
-                                   fill="outline"
-                                   type="text"
-                                   inputmode="decimal"></ion-input>
+                        <div class="builder__field-group">
+                            <div class="builder__field-label">Initial answer</div>
+                            <ion-input class="builder__field"
+                                       data-field="default_number"
+                                       aria-label="Initial answer"
+                                       fill="outline"
+                                       type="text"
+                                       inputmode="decimal"></ion-input>
+                        </div>
 
-                        <ion-input class="builder__field"
-                                   data-field="min"
-                                   label="Min value"
-                                   label-placement="stacked"
-                                   fill="outline"
-                                   type="text"
-                                   inputmode="decimal"></ion-input>
+                        <div class="builder__field-group">
+                            <div class="builder__field-label">Min value</div>
+                            <ion-input class="builder__field"
+                                       data-field="min"
+                                       aria-label="Min value"
+                                       fill="outline"
+                                       type="text"
+                                       inputmode="decimal"></ion-input>
+                        </div>
 
-                        <ion-input class="builder__field"
-                                   data-field="max"
-                                   label="Max value"
-                                   label-placement="stacked"
-                                   fill="outline"
-                                   type="text"
-                                   inputmode="decimal"></ion-input>
+                        <div class="builder__field-group">
+                            <div class="builder__field-label">Max value</div>
+                            <ion-input class="builder__field"
+                                       data-field="max"
+                                       aria-label="Max value"
+                                       fill="outline"
+                                       type="text"
+                                       inputmode="decimal"></ion-input>
+                        </div>
 
-                        <ion-input class="builder__field"
-                                   data-field="default_text"
-                                   label="Initial answer"
-                                   label-placement="stacked"
-                                   fill="outline"></ion-input>
+                        <div class="builder__field-group">
+                            <div class="builder__field-label">Initial answer</div>
+                            <ion-input class="builder__field"
+                                       data-field="default_text"
+                                       aria-label="Initial answer"
+                                       fill="outline"></ion-input>
+                        </div>
 
                         <div class="builder__regex-field"
                              data-field="regex">
-                            <ion-input class="builder__field"
-                                       label="Match REGEX"
-                                       label-placement="stacked"
-                                       fill="outline"></ion-input>
+                            <div class="builder__field-group">
+                                <div class="builder__field-label">Match REGEX</div>
+                                <ion-input class="builder__field"
+                                           aria-label="Match REGEX"
+                                           fill="outline"></ion-input>
+                            </div>
                         </div>
 
                         <ion-checkbox justify="start" class="builder__checkbox"

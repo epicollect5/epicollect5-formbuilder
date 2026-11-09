@@ -117,7 +117,10 @@ export const buildAdvancedPanel = (input, pane) => {
 
     panel.querySelectorAll('[data-field]').forEach((field) => {
         if (fields.indexOf(field.getAttribute('data-field')) === -1) {
-            field.remove();
+            // The external field label lives in a .builder__field-group wrapper,
+            // so remove the whole group or the label would be left behind.
+            const group = field.closest('.builder__field-group');
+            (group || field).remove();
         }
     });
 
