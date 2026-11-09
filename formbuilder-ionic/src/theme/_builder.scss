@@ -1802,6 +1802,6 @@ ion-checkbox:not(.checkbox-checked)::part(label) {
     --width: 220px;
 }
 
-.builder__delete-question-modal .warning-well {
+.builder__delete-question-modal .builder__notice--warning {
     color: var(--ion-color-danger);
 }

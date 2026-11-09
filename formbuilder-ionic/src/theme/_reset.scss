@@ -77,10 +77,6 @@ hr {
     float: left;
 }
 
-.text-center {
-    text-align: center;
-}
-
 .text-warning {
     color: var(--ion-color-warning);
 }
@@ -105,7 +101,9 @@ hr {
     border: 0;
 }
 
-.warning-well {
+/* Inline notice boxes (no Ionic component in this role; the mobile app also
+   styles its own warning treatment on top of Ionic primitives). */
+.builder__notice--warning {
     background: rgb(255, 244, 224);
     background: color-mix(in srgb, var(--ion-color-warning) 12%, white);
     border-radius: 4px;
@@ -113,8 +111,8 @@ hr {
     padding: 10px 12px;
 }
 
-/* Neutral well, the default: same shape, light grey wash. */
-.info-well {
+/* Neutral notice, the default: same shape, light grey wash. */
+.builder__notice--info {
     background: rgb(238, 238, 239);
     background: color-mix(in srgb, var(--ion-color-medium) 16%, white);
     border-radius: 4px;
@@ -122,8 +120,8 @@ hr {
     padding: 10px 12px;
 }
 
-/* Destructive variant of the well: same shape, danger wash. */
-.danger-well {
+/* Destructive variant of the notice: same shape, danger wash. */
+.builder__notice--danger {
     background: rgb(246, 236, 236);
     background: color-mix(in srgb, var(--ion-color-danger) 10%, white);
     border-radius: 4px;
