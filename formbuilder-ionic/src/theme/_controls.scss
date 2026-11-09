@@ -44,7 +44,7 @@
     border-color: var(--ion-color-secondary-shade);
 }
 
-.form-group {
+.builder__modal-field-group {
     position: relative;
     margin: 0 0 14px;
 }
@@ -59,7 +59,7 @@ label {
     font-weight: 500;
 }
 
-.form-control {
+.builder__modal-input {
     display: block;
     width: 100%;
     min-height: 40px;
@@ -72,13 +72,13 @@ label {
     font-size: 16px;
 }
 
-.form-control:focus {
+.builder__modal-input:focus {
     outline: none;
     border-color: var(--ion-color-primary);
     box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.18);
 }
 
-.form-control[disabled] {
+.builder__modal-input[disabled] {
     background: var(--app-surface-muted);
     opacity: 0.7;
 }
