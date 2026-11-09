@@ -1232,7 +1232,8 @@ ion-item.builder__question.ui-sortable-helper {
     --border-radius: 4px;
     --border-width: 1px;
     --highlight-height: 0;
-    --highlight-color-focused: transparent;
+    /* v9 wires the caret to --highlight-color; keep it visible on focus */
+    --highlight-color-focused: var(--ion-color-primary);
     --highlight-color-valid: transparent;
     --padding-start: 16px;
     --padding-end: 10px;
@@ -1251,9 +1252,8 @@ ion-item.builder__question.ui-sortable-helper {
     display: block;
 }
 
-/* Ionic 9 renders ion-input in light DOM (no shadow parts). */
-.builder__answers-card ion-input.builder__answer-field .native-input {
-    padding-inline-start: 16px !important;
+.builder__answers-card ion-input.builder__answer-field:focus-within {
+    border-color: var(--ion-color-primary);
 }
 
 .builder__answer--dragging {
