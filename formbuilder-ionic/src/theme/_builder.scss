@@ -882,10 +882,12 @@ ion-item.builder__question.ui-sortable-helper {
 }
 
 /* Ionic 9's .input-wrapper reserves a 6px bottom margin for helper text the
-   builder fields never show; drop it so the field keeps its 40px metric. */
+   builder fields never show, and its 6px flex gap pads the empty .input-start
+   slot; drop both so the field keeps its 40px metric and 16px text inset. */
 .builder__properties-body ion-input.builder__field .input-wrapper,
 .builder__answers-card ion-input.builder__answer-field .input-wrapper {
     margin-bottom: 0;
+    gap: 0;
 }
 
 /* Ionic 9 renders ion-input in light DOM (scoped encapsulation, no shadow
