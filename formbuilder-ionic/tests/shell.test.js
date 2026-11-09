@@ -460,6 +460,20 @@ describe('builder shell', () => {
         expect(document.querySelector('#questions .builder__question[aria-current="true"] .builder__question-text').textContent).toBe('Untitled question');
     });
 
+    it('opens a newly added question on the basic tab, not the previous tab', () => {
+        select_first_question();
+
+        // land on the Jumps tab of the current question
+        const segment = document.querySelector('#properties .builder__property-tabs');
+        segment.dispatchEvent(new CustomEvent('ionChange', { detail: { value: 'jumps' } }));
+        expect(document.querySelector('#property-content-jumps').getAttribute('aria-hidden')).toBe('false');
+
+        addQuestion('text');
+
+        expect(document.querySelector('#property-content-basic').getAttribute('aria-hidden')).toBe('false');
+        expect(document.querySelector('#property-content-jumps').getAttribute('aria-hidden')).toBe('true');
+    });
+
     it('deletes the selected question immediately, with undo as the safety net', () => {
         select_first_question();
         document.querySelector('#properties .builder__icon-btn--danger').click();

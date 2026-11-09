@@ -9,7 +9,7 @@ import {notifyWarning} from '@/services/notifications.js';
 import {parseView} from '@/ui/dom.js';
 import tools_view from '@/views/tools.html?raw';
 import {installToolDrag} from '@/ui/sortable.js';
-import {recordChange} from '@/ui/state.js';
+import {recordChange, setActivePropertyTab} from '@/ui/state.js';
 import {renderProperties, renderQuestions} from '@/ui/shell.js';
 
 /* The tool catalogue is static markup; only the click and drag wiring changes. */
@@ -40,6 +40,8 @@ export const renderTools = () => {
             return;
         }
 
+        // a freshly dropped question opens on the basic tab, like any selection
+        setActivePropertyTab('basic');
         recordChange();
         renderQuestions();
         renderProperties();
@@ -51,6 +53,7 @@ export const addQuestion = (type) => {
         return;
     }
 
+    setActivePropertyTab('basic');
     recordChange();
     renderQuestions();
     renderProperties();
