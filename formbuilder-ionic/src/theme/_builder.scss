@@ -1693,8 +1693,8 @@ ion-checkbox:not(.checkbox-checked)::part(label) {
 }
 
 /* The edit button keeps the legacy content width: one third of the panel,
-   in the left column of the grid. It is the panel's action button, so it uses
-   the theme's secondary role, with a visible disabled state. */
+   in the left column of the grid. It is styled like the toolbar's neutral
+   .builder__add-form action button, with a visible disabled state. */
 .builder__edit-container-grid {
     margin: 0;
     padding: 0;
@@ -1706,24 +1706,26 @@ ion-checkbox:not(.checkbox-checked)::part(label) {
     width: 100%;
 }
 
+/* Same neutral action-button style as .builder__add-form. */
 .builder__edit-container {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    background: var(--ion-color-secondary);
-    border-color: var(--ion-color-secondary);
-    color: var(--ion-color-secondary-contrast);
+    padding: 6px 12px;
+    background: var(--app-surface);
+    border-color: var(--app-border);
+    color: var(--app-text);
 }
 
 .builder__edit-container:hover:not(:disabled),
 .builder__edit-container:focus-visible {
-    background: var(--ion-color-secondary-shade);
-    border-color: var(--ion-color-secondary-shade);
+    background: var(--app-surface-muted);
+    border-color: var(--app-border);
 }
 
 .builder__edit-container:disabled {
-    opacity: 0.45;
+    color: var(--ion-color-medium-shade);
     cursor: not-allowed;
 }
 
