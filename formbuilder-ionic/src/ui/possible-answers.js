@@ -389,8 +389,38 @@ export const installAnswersSortable = (input) => {
 
         recordChange();
 
+        /* Re-rendering the properties card rebuilds the answers card and resets
+           every scroll position; snapshot them from the outgoing list and
+           restore them on the fresh one so a drop keeps its place. */
+        const signature = (el) => el.tagName + '.' + String(el.className).split(' ').slice(0, 2).join('.');
+        const scroll_tops = [];
+        let ancestor = answers_list.parentElement;
+        while (ancestor && ancestor !== document.body) {
+            scroll_tops.push({ signature: signature(ancestor), top: ancestor.scrollTop });
+            ancestor = ancestor.parentElement;
+        }
+
         setTimeout(() => {
             renderProperties();
+
+            const fresh_list = document.querySelector('#properties .builder__answer-list');
+
+            if (!fresh_list) {
+                return;
+            }
+
+            ancestor = fresh_list.parentElement;
+            while (ancestor && ancestor !== document.body) {
+                const captured = scroll_tops.find((position) => {
+                    return position.signature === signature(ancestor) && position.top > 0;
+                });
+
+                if (captured) {
+                    ancestor.scrollTop = captured.top;
+                }
+
+                ancestor = ancestor.parentElement;
+            }
         }, 0);
     });
 };

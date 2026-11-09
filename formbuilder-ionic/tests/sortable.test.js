@@ -264,4 +264,37 @@ describe('question sortable', () => {
         expect(getSession().current_input_ref).toBe('input_2');
         expect(document.querySelector('.builder__question[aria-current="true"]').getAttribute('data-input-ref')).toBe('input_2');
     });
+
+    it('keeps the answers card scroll position after an answer drop', () => {
+        vi.useFakeTimers();
+        setProject(jump_project());
+        renderApp();
+
+        // select the radio question: its basic panel holds the answers card
+        document.querySelector('.builder__question').click();
+
+        const card = document.querySelector('.builder__answers-card');
+
+        expect(card).not.toBeNull();
+
+        const answers_list = card.querySelector('.builder__answer-list');
+
+        expect(answers_list.querySelectorAll('.builder__answer')).toHaveLength(2);
+
+        // force the card into a scrolled state, as with enough answers
+        card.scrollTop = 100;
+        expect(card.scrollTop).toBe(100);
+
+        // the sortable leaves the rows in their new order; its stop persists it
+        const first_answer = answers_list.querySelector('.builder__answer');
+
+        answers_list.append(first_answer);
+        window.$(answers_list).sortable('instance').options.stop();
+        vi.advanceTimersByTime(1);
+
+        const fresh_card = document.querySelector('.builder__answers-card');
+
+        expect(fresh_card.querySelectorAll('.builder__answer')[0].getAttribute('data-answer-ref')).toBe('answer_2');
+        expect(fresh_card.scrollTop).toBe(100);
+    });
 });
