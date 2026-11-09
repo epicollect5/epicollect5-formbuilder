@@ -59,28 +59,27 @@ label {
     font-weight: 500;
 }
 
-.builder__modal-input {
-    display: block;
+.builder__modal-body ion-input.builder__modal-input {
     width: 100%;
     min-height: 40px;
-    padding: 9px 11px;
-    border: 1px solid var(--app-border);
-    border-radius: 4px;
-    background: var(--app-surface);
-    color: var(--app-text);
-    font: inherit;
+    --min-height: 40px;
+    --background: var(--app-surface);
+    --border-color: var(--app-border);
+    --border-radius: 4px;
+    --border-width: 1px;
+    --highlight-color-focused: var(--ion-color-primary);
+    --highlight-color-valid: var(--ion-color-primary);
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 0;
+    --padding-bottom: 0;
     font-size: 16px;
 }
 
-.builder__modal-input:focus {
-    outline: none;
-    border-color: var(--ion-color-primary);
-    box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.18);
-}
-
-.builder__modal-input[disabled] {
-    background: var(--app-surface-muted);
-    opacity: 0.7;
+/* same wrapper trim as the other builder fields */
+.builder__modal-body ion-input.builder__modal-input .input-wrapper {
+    margin-bottom: 0;
+    gap: 0;
 }
 
 .input-properties__form__error {

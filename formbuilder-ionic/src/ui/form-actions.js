@@ -140,12 +140,11 @@ export const installFormActions = (card, form) => {
 export const openFormNameModal = (form) => {
     const adding = !form;
     const body = createView(form_name_modal_body_view);
-    const field = body.querySelector('input');
+    const field = body.querySelector('ion-input');
     const error = body.querySelector('[data-role="form-name-error"]');
 
-    field.maxLength = PARAMETERS.FORM_NAME_MAX_LENGTH;
-    field.value = form ? form.name || '' : '';
-    field.addEventListener('input', () => {
+    field.setAttribute('maxlength', String(PARAMETERS.FORM_NAME_MAX_LENGTH));
+    field.addEventListener('ionInput', () => {
         error.hidden = true;
     });
 
@@ -183,7 +182,16 @@ export const openFormNameModal = (form) => {
         ]
     });
 
-    field.focus();
+    // The prefill must land after the field is in the document: a value set on
+    // the not-yet-upgraded element is dropped when the component upgrades.
+    field.value = form ? form.name || '' : '';
+
+    if (typeof field.setFocus === 'function') {
+        field.setFocus();
+    }
+    else {
+        field.focus();
+    }
 
     return modal;
 };

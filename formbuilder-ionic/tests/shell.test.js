@@ -564,7 +564,7 @@ describe('builder shell', () => {
         document.getElementById('add-form').click();
 
         const modal = document.querySelector('ion-modal.legacy-modal-host');
-        const field = modal.querySelector('.builder__modal-body input');
+        const field = modal.querySelector('.builder__modal-body ion-input');
 
         field.value = 'Third form';
         [...modal.querySelectorAll('.builder__modal-footer ion-button')]
@@ -734,7 +734,7 @@ describe('undo', () => {
         document.getElementById('add-form').click();
 
         const modal = document.querySelector('ion-modal.legacy-modal-host');
-        const field = modal.querySelector('.builder__modal-body input');
+        const field = modal.querySelector('.builder__modal-body ion-input');
 
         field.value = 'Third form';
         [...modal.querySelectorAll('.builder__modal-footer ion-button')]
@@ -795,7 +795,7 @@ describe('form actions', () => {
         document.querySelector('#questions .builder__form-action-btn--edit').click();
 
         const modal = document.querySelector('ion-modal.legacy-modal-host');
-        const field = modal.querySelector('.builder__modal-body input');
+        const field = modal.querySelector('.builder__modal-body ion-input');
 
         expect(field.value).toBe('Screening form');
 
@@ -816,7 +816,7 @@ describe('form actions', () => {
         document.querySelector('#questions .builder__form-action-btn--edit').click();
 
         const modal = document.querySelector('ion-modal.legacy-modal-host');
-        const field = modal.querySelector('.builder__modal-body input');
+        const field = modal.querySelector('.builder__modal-body ion-input');
         const error = modal.querySelector('[data-role="form-name-error"]');
 
         field.value = 'Second form';
@@ -899,7 +899,7 @@ describe('form actions', () => {
             document.getElementById('add-form').click();
 
             const modal = document.querySelector('ion-modal.legacy-modal-host');
-            const field = modal.querySelector('.builder__modal-body input');
+            const field = modal.querySelector('.builder__modal-body ion-input');
 
             field.value = 'Extra form ' + index;
             [...modal.querySelectorAll('.builder__modal-footer ion-button')]
