@@ -1234,7 +1234,8 @@ ion-item.builder__question.ui-sortable-helper {
     --border-radius: 4px;
     --border-width: 1px;
     --highlight-height: 0;
-    /* v9 wires the caret to --highlight-color; keep it visible on focus */
+    /* v9 wires the caret and the outline focus colour to --highlight-color;
+       keep both visible on focus */
     --highlight-color-focused: var(--ion-color-primary);
     --highlight-color-valid: transparent;
     --padding-start: 16px;
@@ -1247,15 +1248,11 @@ ion-item.builder__question.ui-sortable-helper {
     min-height: 40px !important;
     height: 40px;
     --min-height: 40px;
-    border: 1px solid var(--app-border);
-    border-radius: 4px;
+    /* The visible box is Ionic's fill=outline container; the host must not
+       draw a second border around it (it clipped the outline's bottom edge). */
     box-sizing: border-box;
     overflow: visible;
     display: block;
-}
-
-.builder__answers-card ion-input.builder__answer-field:focus-within {
-    border-color: var(--ion-color-primary);
 }
 
 .builder__answer--dragging {
