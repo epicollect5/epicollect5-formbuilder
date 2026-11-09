@@ -875,10 +875,17 @@ ion-item.builder__question.ui-sortable-helper {
     --highlight-color-valid: var(--ion-color-primary);
     --padding-start: 12px;
     --padding-end: 12px;
-    --padding-top: 4px;
-    --padding-bottom: 4px;
+    --padding-top: 0;
+    --padding-bottom: 0;
     --placeholder-color: transparent;
     --placeholder-opacity: 0;
+}
+
+/* Ionic 9's .input-wrapper reserves a 6px bottom margin for helper text the
+   builder fields never show; drop it so the field keeps its 40px metric. */
+.builder__properties-body ion-input.builder__field .input-wrapper,
+.builder__answers-card ion-input.builder__answer-field .input-wrapper {
+    margin-bottom: 0;
 }
 
 /* Ionic 9 renders ion-input in light DOM (scoped encapsulation, no shadow
