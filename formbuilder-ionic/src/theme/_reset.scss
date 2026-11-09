@@ -54,53 +54,6 @@ hr {
     margin: 14px 0;
 }
 
-/* Legacy utility hooks (previously supplied by Bootstrap). */
-.hidden {
-    display: none !important;
-}
-
-.invisible {
-    visibility: hidden !important;
-}
-
-.clearfix::after {
-    content: '';
-    display: block;
-    clear: both;
-}
-
-.pull-right {
-    float: right;
-}
-
-.pull-left {
-    float: left;
-}
-
-.text-warning {
-    color: var(--ion-color-warning);
-}
-
-.text-danger {
-    color: var(--ion-color-danger);
-}
-
-.text-underline {
-    text-decoration: underline;
-}
-
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
 /* Inline notice boxes (no Ionic component in this role; the mobile app also
    styles its own warning treatment on top of Ionic primitives). */
 .builder__notice--warning {
@@ -138,48 +91,6 @@ hr {
         display: block;
         margin: 16px;
     }
-}
-
-.caret {
-    display: inline-block;
-    width: 0;
-    height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 5px solid currentColor;
-}
-
-.divider {
-    height: 1px;
-    margin: 6px 0;
-    overflow: hidden;
-    background: var(--app-border);
-}
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.table th,
-.table td {
-    border-bottom: 1px solid var(--app-border);
-    padding: 10px 8px;
-    text-align: left;
-    vertical-align: middle;
-    font-weight: 400;
-}
-
-.bg-warning {
-    background: rgb(255, 244, 224);
-    background: color-mix(in srgb, var(--ion-color-warning) 12%, white);
-    border-radius: 4px;
-    padding: 10px 12px;
-}
-
-.lead {
-    font-size: 17px;
-    line-height: 1.5;
 }
 
 /* Legacy overlay/loader primitives. */
