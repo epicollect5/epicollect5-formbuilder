@@ -681,9 +681,18 @@ describe('possible answers', () => {
         column.querySelector('.dropdown__trigger').click();
         column.querySelector('.dropdown__option[data-value="0"]').click();
 
-        [...modal.querySelectorAll('.builder__modal-footer ion-button')]
-            .find((button) => button.textContent === 'Import')
-            .click();
+        const import_button = [...modal.querySelectorAll('.builder__modal-footer ion-button')]
+            .find((button) => button.textContent === 'Import');
+
+        // the footer action starts disabled and unlocks once a column is picked
+        expect(import_button.hasAttribute('disabled')).toBe(true);
+
+        column.querySelector('.dropdown__trigger').click();
+        column.querySelector('.dropdown__option[data-value="0"]').click();
+
+        expect(import_button.disabled).toBe(false);
+
+        import_button.click();
 
         expect(getCurrentInput().possible_answers.map((answer) => answer.answer)).toEqual(['One', 'Two', 'Three']);
         expect(badge().textContent).toBe('3');

@@ -365,7 +365,8 @@ export const openAnswersCsvModal = (input, parsed) => {
         ]
     });
 
-    import_button = modal.footer.querySelectorAll('button')[1];
+    // Footer actions are ion-button elements, not <button> tags.
+    import_button = modal.footer.querySelectorAll('ion-button')[1];
 };
 
 /* The list has to be in the document before jQuery UI can hold on to it. */
