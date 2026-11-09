@@ -292,9 +292,17 @@ describe('question sortable', () => {
         window.$(answers_list).sortable('instance').options.stop();
         vi.advanceTimersByTime(1);
 
+        // the drop must not re-render the panel: same card, scroll intact
         const fresh_card = document.querySelector('.builder__answers-card');
 
+        expect(fresh_card).toBe(card);
         expect(fresh_card.querySelectorAll('.builder__answer')[0].getAttribute('data-answer-ref')).toBe('answer_2');
         expect(fresh_card.scrollTop).toBe(100);
+
+        // visible rows are renumbered in place to match the new order
+        const labels = [...fresh_card.querySelectorAll('.builder__answer ion-input')]
+            .map((field) => field.getAttribute('aria-label'));
+
+        expect(labels).toEqual(['Answer 1', 'Answer 2']);
     });
 });
