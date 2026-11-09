@@ -93,10 +93,6 @@ export const hasAdvancedTab = (type) => {
     return true;
 };
 
-export const hasJumpsTab = (type) => {
-    return !isBranchOrGroup(type);
-};
-
 export const getDefaultDatetimeFormat = (type) => {
     if (type === 'date') {
         return PARAMETERS.DATE_FORMATS_DEFAULT;

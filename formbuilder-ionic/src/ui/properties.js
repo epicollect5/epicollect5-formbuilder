@@ -3,7 +3,6 @@
 import {FORM_MESSAGES, VALIDATION_MESSAGES} from '@/config/strings.js';
 import {
     hasAdvancedTab,
-    hasJumpsTab,
     isBranchOrGroup
 } from '@/models/input-properties.js';
 import {isMultipleAnswerType} from '@/models/possible-answers.js';
@@ -47,9 +46,10 @@ import {buildJumpsPanel} from '@/ui/jumps.js';
 import {buildPossibleAnswers, installAnswersSortable} from '@/ui/possible-answers.js';
 import {openDeleteQuestion} from '@/ui/form-actions.js';
 
-/* Legacy disables Jumps for anything edited inside a group. */
-const canUseJumpsTab = (input) => {
-    return hasJumpsTab(input.type) && !isEditingInsideGroup();
+/* Legacy disables Jumps for anything edited inside a group; branch and group
+   parents keep the tab, so they can take an "always" jump. */
+const canUseJumpsTab = () => {
+    return !isEditingInsideGroup();
 };
 
 const isEditingInsideGroup = () => {

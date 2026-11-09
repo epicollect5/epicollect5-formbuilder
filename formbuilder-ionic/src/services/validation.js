@@ -2,7 +2,7 @@
 
 import { getForms, getInputs } from '@/models/project-definition.js';
 import { getContainerList } from '@/services/nesting.js';
-import { hasJumpsTab, isBranchOrGroup } from '@/models/input-properties.js';
+import { isBranchOrGroup } from '@/models/input-properties.js';
 import { isMultipleAnswerType } from '@/models/possible-answers.js';
 import { jumpNeedsAnswer, JUMP_WHEN } from '@/models/jumps.js';
 import { getInputObjectErrors } from '@/models/validation.js';
@@ -28,7 +28,7 @@ const destinationRefs = (input, inputs) => {
 };
 
 export const getJumpErrors = (input, inputs) => {
-    if (!input || !hasJumpsTab(input.type)) {
+    if (!input) {
         return [];
     }
 

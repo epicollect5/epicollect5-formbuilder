@@ -368,6 +368,22 @@ describe('branch and group rows', () => {
         expect(document.querySelector('#property-content-jumps').getAttribute('aria-hidden')).toBe('true');
     });
 
+    it('keeps the Jumps tab on the branch parent for an always jump', () => {
+        rows()[0].click();
+
+        const jumps_tab = document.querySelector('#properties .builder__property-tabs ion-segment-button[value="jumps"]');
+
+        expect(jumps_tab.hasAttribute('disabled')).toBe(false);
+
+        open_tab('jumps');
+
+        document.querySelector('#properties [data-role="jumps-add"], #properties .builder__add-jump').click();
+
+        const jump = getCurrentInput().jumps[0];
+
+        expect(jump).toEqual({ to: '', when: 'ALL', answer_ref: null });
+    });
+
     it('exits back to the form list and reselects the branch', () => {
         const branch_ref = rows()[0].getAttribute('data-input-ref');
 

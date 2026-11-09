@@ -1,7 +1,6 @@
 'use strict';
 
 import { createJump, jumpNeedsAnswer, JUMP_TO_END_OF_FORM_LABEL, JUMP_WHEN, usesAlwaysJump } from '@/models/jumps.js';
-import { hasJumpsTab } from '@/models/input-properties.js';
 import { isMultipleAnswerType } from '@/models/possible-answers.js';
 import { PARAMETERS } from '@/config/parameters.js';
 
@@ -123,7 +122,7 @@ export const sanitizeJump = (jump, input) => {
 };
 
 export const canAddJump = (input, inputs) => {
-    if (!input || !hasJumpsTab(input.type)) {
+    if (!input) {
         return false;
     }
 
