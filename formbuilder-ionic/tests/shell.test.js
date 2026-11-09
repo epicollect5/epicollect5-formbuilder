@@ -485,7 +485,9 @@ describe('builder shell', () => {
         const modal = document.querySelector('ion-modal.legacy-modal-host');
 
         expect(modal.querySelector('.modal-title').textContent).toBe('Warning');
-        modal.querySelector('.modal-footer .btn-danger').click();
+        [...modal.querySelectorAll('.modal-footer ion-button')]
+            .find((button) => button.textContent === 'Confirm')
+            .click();
 
         expect(getCurrentInputs()).toHaveLength(1);
         expect(getSession().current_input_ref).toBeNull();
@@ -551,7 +553,7 @@ describe('builder shell', () => {
         const field = modal.querySelector('.modal-body input');
 
         field.value = 'Third form';
-        [...modal.querySelectorAll('.modal-footer button')]
+        [...modal.querySelectorAll('.modal-footer ion-button')]
             .find((button) => button.textContent === 'Save changes')
             .click();
 
@@ -665,7 +667,9 @@ describe('possible answers', () => {
         column.querySelector('.dropdown__trigger').click();
         column.querySelector('.dropdown__option[data-value="0"]').click();
 
-        modal.querySelector('.modal-footer .btn-primary').click();
+        [...modal.querySelectorAll('.modal-footer ion-button')]
+            .find((button) => button.textContent === 'Import')
+            .click();
 
         expect(getCurrentInput().possible_answers.map((answer) => answer.answer)).toEqual(['One', 'Two', 'Three']);
         expect(badge().textContent).toBe('3');
@@ -719,7 +723,7 @@ describe('undo', () => {
         const field = modal.querySelector('.modal-body input');
 
         field.value = 'Third form';
-        [...modal.querySelectorAll('.modal-footer button')]
+        [...modal.querySelectorAll('.modal-footer ion-button')]
             .find((button) => button.textContent === 'Save changes')
             .click();
 
@@ -782,7 +786,7 @@ describe('form actions', () => {
         expect(field.value).toBe('Screening form');
 
         field.value = 'Renamed form';
-        [...modal.querySelectorAll('.modal-footer button')]
+        [...modal.querySelectorAll('.modal-footer ion-button')]
             .find((button) => button.textContent === 'Save changes')
             .click();
 
@@ -802,7 +806,7 @@ describe('form actions', () => {
         const error = modal.querySelector('[data-role="form-name-error"]');
 
         field.value = 'Second form';
-        [...modal.querySelectorAll('.modal-footer button')]
+        [...modal.querySelectorAll('.modal-footer ion-button')]
             .find((button) => button.textContent === 'Save changes')
             .click();
 
@@ -884,7 +888,7 @@ describe('form actions', () => {
             const field = modal.querySelector('.modal-body input');
 
             field.value = 'Extra form ' + index;
-            [...modal.querySelectorAll('.modal-footer button')]
+            [...modal.querySelectorAll('.modal-footer ion-button')]
                 .find((button) => button.textContent === 'Save changes')
                 .click();
         }

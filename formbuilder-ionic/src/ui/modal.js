@@ -49,10 +49,15 @@ export const openModal = (options) => {
     shell.querySelector('.close').addEventListener('click', close);
 
     (config.buttons || []).forEach((button_config) => {
-        const control = element('button', {
+        // Use Ionic button with clear fill and uppercase text to match mobile app
+        // Use Ionic button with clear fill and uppercase text for all modal actions
+        const control = element('ion-button', {
             type: 'button',
-            class: `btn ${button_config.class_name || 'btn-default'}`,
-            disabled: button_config.disabled ? 'disabled' : undefined
+            fill: 'clear',
+            // No class-based styling – ensure uniform appearance
+            class: '',
+            disabled: button_config.disabled ? true : undefined,
+            style: 'text-transform: uppercase;'
         }, [button_config.text || '']);
 
         control.addEventListener('click', () => {
