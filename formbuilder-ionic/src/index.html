@@ -18,10 +18,6 @@
           sizes="96x96"
           href="favicons/favicon-96x96.png">
 
-    <link href="https://fonts.googleapis.com/css?family=Arimo"
-          rel="stylesheet"
-          type="text/css">
-
     <!-- Ionic Core CSS and the prototype theme, bundled by Vite. -->
     <link rel="stylesheet"
           href="./ionic.css">
@@ -44,14 +40,16 @@
                 </ion-button>
             </ion-buttons>
             <ion-title>
-                <span style="display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;">
-                    <img id="project-logo" alt="" width="32" height="32" style="border-radius:50%;object-fit:cover;">
+                <span class="builder__toolbar-project">
+                    <ion-avatar class="builder__project-avatar">
+                        <img id="project-logo" alt="">
+                    </ion-avatar>
                     <span id="project-name"></span>
                 </span>
             </ion-title>
             <ion-buttons slot="end">
                 <ion-button data-action="exit">
-                    <ion-icon slot="start" name="power-outline"></ion-icon>
+                    <ion-icon slot="start" name="power"></ion-icon>
                     Exit
                 </ion-button>
             </ion-buttons>

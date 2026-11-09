@@ -2,6 +2,7 @@
 
 import { initialize, setAssetPath } from '@ionic/core/components';
 import { defineCustomElement as defineIonApp } from '@ionic/core/components/ion-app.js';
+import { defineCustomElement as defineIonAvatar } from '@ionic/core/components/ion-avatar.js';
 import { defineCustomElement as defineIonButtons } from '@ionic/core/components/ion-buttons.js';
 import { defineCustomElement as defineIonHeader } from '@ionic/core/components/ion-header.js';
 import { defineCustomElement as defineIonTitle } from '@ionic/core/components/ion-title.js';
@@ -38,6 +39,7 @@ import { defineCustomElement as defineIoniconIcon } from 'ionicons/components/io
 
 const IONIC_COMPONENTS = [
     defineIonApp,
+    defineIonAvatar,
     defineIonButtons,
     defineIonHeader,
     defineIonTitle,

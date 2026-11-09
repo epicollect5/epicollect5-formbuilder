@@ -10,6 +10,28 @@ ion-header ion-toolbar[color='primary'] ion-icon {
     font-size: 24px;
 }
 
+/* Toolbar project identity, mirroring the mobile app's avatar rules
+   (core.scss: 32x32 avatar, 1px primary border on the image). */
+.builder__toolbar-project {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+ion-avatar.builder__project-avatar {
+    width: 32px;
+    height: 32px;
+    position: relative;
+}
+
+ion-avatar.builder__project-avatar img {
+    border: 1px solid var(--ion-color-primary);
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .formbuilder-content::part(scroll) {
     display: flex;
     flex-direction: column;
@@ -61,7 +83,7 @@ ion-header ion-toolbar[color='primary'] ion-icon {
     gap: 0;
     background: var(--app-surface);
     border: 1px solid var(--app-border);
-    border-radius: 14px;
+    border-radius: 4px;
 }
 
 .main__tabs-content {
