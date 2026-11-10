@@ -1,0 +1,16 @@
+/*
+ * Jumps panel — the shared builder classes in src/theme/_builder.scss carry
+ * the look; this file holds only component-scoped additions.
+ */
+
+/*
+ * The Add jump toolbar stays pinned to the top of the scrolling properties
+ * body while the jump rows scroll under it.
+ */
+.builder__jumps-actions {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: var(--app-surface, #ffffff);
+    --background: var(--app-surface, #ffffff);
+}

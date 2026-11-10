@@ -86,12 +86,20 @@ export const getJumpAvailableDestinations = (input, inputs) => {
 const normalizeJump = (jump, input) => {
     const next = {
         to: jump && jump.to !== undefined && jump.to !== null ? String(jump.to) : '',
-        when: jump && jump.when ? jump.when : (usesAlwaysJump(input && input.type) ? JUMP_WHEN.ALL : JUMP_WHEN.IS),
+        when: jump && JUMP_WHEN[jump.when] ? jump.when : (jump && jump.when === '' ? '' : JUMP_WHEN.IS),
         answer_ref: jump && jump.answer_ref !== undefined ? jump.answer_ref : null
     };
 
     if (usesAlwaysJump(input && input.type)) {
         next.when = JUMP_WHEN.ALL;
+        next.answer_ref = null;
+        return next;
+    }
+
+    // A neutral row (no condition picked yet — the deliberate divergence from
+    // the legacy pre-fill) stays neutral: no condition and no answer are
+    // filled in behind the user's back. Validation flags the missing pieces.
+    if (next.when === '') {
         next.answer_ref = null;
         return next;
     }

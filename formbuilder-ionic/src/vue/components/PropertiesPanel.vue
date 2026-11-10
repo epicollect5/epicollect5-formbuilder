@@ -105,6 +105,23 @@
                                         <ion-icon name="help-circle" aria-hidden="true"></ion-icon>
                                     </a>
                                 </div>
+
+                                <ion-grid class="builder__edit-container-grid"
+                                          data-role="edit-container-grid"
+                                          v-if="isBranchOrGroupType">
+                                    <ion-row class="ion-no-padding">
+                                        <ion-col size="4" class="ion-no-padding">
+                                            <button type="button"
+                                                    class="builder__form-button builder__edit-container"
+                                                    data-role="edit-container"
+                                                    :disabled="editContainerDisabled"
+                                                    @click="enterContainer()">
+                                                <ion-icon name="create" aria-hidden="true"></ion-icon>
+                                                <span data-role="edit-container-label">{{ editContainerLabel }}</span>
+                                            </button>
+                                        </ion-col>
+                                    </ion-row>
+                                </ion-grid>
                             </template>
 
                             <PossibleAnswers v-if="showPossibleAnswers"
@@ -114,10 +131,8 @@
                         <AdvancedFields v-else-if="activeTab === 'advanced'"
                                         :key="currentInput.ref + '-advanced'"></AdvancedFields>
 
-                        <section class="builder__properties-panel builder__jumps-panel" v-else>
-                            <p class="input-properties__form__jumps__no-jumps-message builder__empty"
-                               data-role="no-jumps">No jumps set yet</p>
-                        </section>
+                        <JumpsPanel v-else
+                                    :key="currentInput.ref + '-jumps'"></JumpsPanel>
                     </div>
                 </template>
             </ion-card-content>
@@ -144,6 +159,7 @@ import { usePossibleAnswersStore } from '@/vue/stores/possibleAnswers.js';
 import AdvancedFields from '@/vue/components/AdvancedFields.vue';
 import ReadmeEditor from '@/vue/components/ReadmeEditor.vue';
 import PossibleAnswers from '@/vue/components/PossibleAnswers.vue';
+import JumpsPanel from '@/vue/components/JumpsPanel.vue';
 
 /* Legacy disables Jumps for anything edited inside a group; branch and group
    parents keep the tab, so they can take an "always" jump. */
@@ -162,11 +178,12 @@ export default {
     components: {
         AdvancedFields,
         ReadmeEditor,
-        PossibleAnswers
+        PossibleAnswers,
+        JumpsPanel
     },
     setup() {
         const store = useBuilderStore();
-        const answers = usePossibleAnswersStore();
+        const possibleAnswers = usePossibleAnswersStore();
 
         const state = reactive({
             // the vanilla refuses a fourth title and resets the checkbox (R-12);
@@ -177,6 +194,9 @@ export default {
         const methods = {
             onQuestionInput(event) {
                 store.editQuestion(event.detail.value || '');
+            },
+            enterContainer() {
+                store.enterContainer(store.currentInput.ref);
             },
             onRequiredChange(event) {
                 store.toggleRequired(event.detail.checked);
@@ -258,8 +278,18 @@ export default {
             isReadme: computed(() => {
                 return !!currentInput.value && currentInput.value.type === 'readme';
             }),
+            isBranchOrGroupType: computed(() => {
+                return !!currentInput.value && isBranchOrGroup(currentInput.value.type);
+            }),
+            editContainerLabel: computed(() => {
+                return currentInput.value && currentInput.value.type === 'branch' ? 'Edit Branch' : 'Edit Group';
+            }),
+            /* Legacy disables Edit while a branch/group header is empty. */
+            editContainerDisabled: computed(() => {
+                return !currentInput.value || String(currentInput.value.question || '').trim() === '';
+            }),
             showPossibleAnswers: computed(() => {
-                return answers.showPossibleAnswers;
+                return possibleAnswers.showPossibleAnswers;
             }),
             questionLabel: computed(() => {
                 return currentInput.value ? getQuestionLabelText(currentInput.value.type) : 'Question';

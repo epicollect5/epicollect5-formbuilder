@@ -75,6 +75,10 @@ export const createDropdown = (options) => {
     popover.side = 'bottom';
     popover.alignment = 'start';
     popover.size = 'cover';
+    // Ionic adds overlay-hidden only to controller-created overlays; a
+    // directly built popover would otherwise cover the page invisibly
+    // until its first present.
+    popover.classList.add('overlay-hidden');
 
     const root = element('div', {
         class: (config.class_name ? config.class_name + ' ' : '') + 'dropdown',

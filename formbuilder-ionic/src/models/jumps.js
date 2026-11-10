@@ -28,14 +28,6 @@ export const jumpNeedsAnswer = (when) => {
     return when === JUMP_WHEN.IS || when === JUMP_WHEN.IS_NOT;
 };
 
-const firstAnswerRef = (possible_answers) => {
-    if (!Array.isArray(possible_answers) || possible_answers.length === 0) {
-        return '';
-    }
-
-    return possible_answers[0].answer_ref || '';
-};
-
 export const createJump = (type, possible_answers) => {
     if (usesAlwaysJump(type)) {
         return {
@@ -45,9 +37,14 @@ export const createJump = (type, possible_answers) => {
         };
     }
 
+    /*
+     * A new jump starts neutral: no condition and no answer pre-selected, so
+     * the row is only valid once the user completes it. Deliberate divergence
+     * from the legacy pre-fill (which picked "answer is" + the first answer).
+     */
     return {
         to: '',
-        when: JUMP_WHEN.IS,
-        answer_ref: firstAnswerRef(possible_answers)
+        when: '',
+        answer_ref: null
     };
 };
