@@ -779,7 +779,9 @@ ion-item.builder__question.ui-sortable-helper {
     --background: transparent;
     --background-checked: transparent;
     --background-hover: transparent;
-    --color: var(--ion-color-medium-shade);
+    /* an unselected tab reads as active, not disabled: body text colour,
+       not the medium shade the disabled controls use */
+    --color: var(--app-text);
     --color-checked: var(--ion-color-primary);
     --indicator-color: transparent;
     --border-radius: 0;

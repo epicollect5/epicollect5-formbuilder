@@ -11,22 +11,23 @@
                         <button type="button"
                                 class="builder__answers-more-btn builder__form-action-btn builder__form-action-btn--delete"
                                 aria-label="Delete form"
-                                title="Delete form"
-                                disabled>
+                                :title="formDeletable ? 'Delete form' : cannotDeleteTitle"
+                                :disabled="!formDeletable"
+                                @click="deleteForm()">
                             <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
                         </button>
                         <button type="button"
                                 class="builder__answers-more-btn builder__form-action-btn builder__form-action-btn--edit"
                                 aria-label="Edit form name"
                                 title="Edit form name"
-                                disabled>
+                                @click="editFormName()">
                             <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
                         </button>
                         <button type="button"
                                 class="builder__answers-more-btn builder__form-action-btn builder__form-action-btn--more"
+                                data-role="form-actions-trigger"
                                 aria-label="Form actions"
-                                title="Form actions"
-                                disabled>
+                                title="Form actions">
                             <ion-icon name="chevron-down-outline" aria-hidden="true"></ion-icon>
                         </button>
                     </div>
@@ -66,18 +67,13 @@
                     </a>
                 </div>
 
-                <input type="file"
-                       class="builder__form-file"
-                       data-role="form-file"
-                       accept=".json,application/json"
-                       hidden>
-
                 <VueDraggable tag="ion-list"
                               class="builder__question-list"
                               v-model="activeInputs"
                               :group="builderQuestions"
                               ghost-class="builder__question-placeholder"
                               filter=".builder__empty"
+                              :move="onMove"
                               @start="onDragStart($event)"
                               @end="onDragEnd($event)">
                     <div class="builder__empty builder__notice builder__notice--info ion-text-center"
@@ -85,7 +81,9 @@
                         <span>Drag and drop questions from the sidebar <br/> (or import an Epicollect5 form file)</span>
                         <button type="button"
                                 class="builder__import-btn builder__import-form"
-                                disabled>
+                                :disabled="editing"
+                                :title="editing ? 'Return to the form to import' : 'Import form'"
+                                @click="importForm()">
                             <ion-icon name="cloud-upload" aria-hidden="true"></ion-icon>
                             Import
                         </button>
@@ -102,12 +100,15 @@
 </template>
 
 <script>
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus';
+import { FORM_MESSAGES } from '@/config/strings.js';
 import { countTitles } from '@/models/project-limits.js';
 import { getQuestionLabel } from '@/models/question-text.js';
-import { isInputValid } from '@/services/validation.js';
+import { areFormInputsValid, isInputValid } from '@/services/validation.js';
 import { useBuilderStore } from '@/vue/stores/builder.js';
+import { useFormStore } from '@/vue/stores/forms.js';
+import { createMenu } from '@/ui/dropdown.js';
 import QuestionRow from '@/vue/components/QuestionRow.vue';
 
 export default {
@@ -117,10 +118,21 @@ export default {
     },
     setup() {
         const store = useBuilderStore();
+        const forms = useFormStore();
+        let menu = null;
 
         const methods = {
             exitContainer() {
                 store.exitContainer();
+            },
+            deleteForm() {
+                forms.deleteCurrentForm();
+            },
+            editFormName() {
+                forms.openFormNameModal(store.currentForm);
+            },
+            importForm() {
+                forms.importFormFile();
             },
             /*
              * Dragging selects the row immediately and shows its properties,
@@ -146,6 +158,53 @@ export default {
                 if (event.item) {
                     event.item.classList.remove('builder__question-placeholder');
                 }
+            },
+            /*
+             * The vanilla sortable locked the drag to the list (axis y +
+             * containment parent). SortableJS has no containment option, so
+             * any insertion while the pointer is outside the list box is
+             * refused here — the drop can only land within the list.
+             */
+            onMove(event) {
+                const pointer = event.originalEvent;
+
+                if (!pointer) {
+                    return true;
+                }
+
+                const list = document.querySelector('.builder__question-list');
+
+                if (!list) {
+                    return false;
+                }
+
+                const rect = list.getBoundingClientRect();
+
+                return pointer.clientY >= rect.top && pointer.clientY <= rect.bottom &&
+                    pointer.clientX >= rect.left && pointer.clientX <= rect.right;
+            },
+            /*
+             * The form actions menu: export and print wait for a valid form,
+             * delete-all is always offered. The menu carries disabled states,
+             * so it is rebuilt whenever the form's validity or identity
+             * changes (the vanilla rebuilt it on every render).
+             */
+            rebuildMenu() {
+                if (menu) {
+                    menu.remove();
+                    menu = null;
+                }
+
+                const form_valid = areFormInputsValid(store.currentForm);
+
+                menu = createMenu(document.querySelector('[data-role="form-actions-trigger"]'), [
+                    { label: 'Export form', action: () => { forms.exportForm(); }, disabled: !form_valid },
+                    { label: 'Print form', action: () => { forms.printCurrentForm(); }, disabled: !form_valid },
+                    { divider: true },
+                    { label: 'Delete all questions', action: () => { forms.deleteAllQuestions(); } }
+                ], (item) => {
+                    item.action();
+                });
             }
         };
 
@@ -189,7 +248,8 @@ export default {
                 });
             }),
             titleAttr: computed(() => {
-                const trail = [store.formName];
+                const form = store.currentForm;
+                const trail = [form && form.name ? form.name : 'Form'];
 
                 store.editingTrail.forEach((node) => {
                     trail.push(getQuestionLabel(node));
@@ -220,8 +280,33 @@ export default {
                 }
 
                 return container.type === 'branch' ? 'No title set for this branch yet' : 'No title set for this group yet';
-            })
+            }),
+            formDeletable: computed(() => {
+                return forms.formDeletable();
+            }),
+            cannotDeleteTitle: FORM_MESSAGES.FORM_CANNOT_BE_DELETED
         };
+
+        onMounted(() => {
+            methods.rebuildMenu();
+        });
+
+        onBeforeUnmount(() => {
+            if (menu) {
+                menu.remove();
+                menu = null;
+            }
+        });
+
+        // the menu carries the form's validity in its disabled states, so it
+        // is rebuilt whenever the form's validity or identity changes
+        watch([
+            () => areFormInputsValid(store.currentForm),
+            () => store.currentForm,
+            () => store.editing
+        ], () => {
+            methods.rebuildMenu();
+        });
 
         return {
             activeInputs,

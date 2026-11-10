@@ -21,6 +21,7 @@ import {
     getSession,
     insertInput,
     isEditing,
+    removeInput,
     reorderInputs,
     selectForm,
     selectInput,
@@ -37,7 +38,12 @@ import {
     PROPERTIES_TAB
 } from '@/services/validation.js';
 import { saveProject } from '@/services/save.js';
+import { duplicateInput } from '@/services/question-actions.js';
+import { getProject } from '@/models/project-definition.js';
 import { hideLoading, notifyError, notifySuccess, notifyWarning, showLoading } from '@/services/notifications.js';
+import { openModal } from '@/ui/modal.js';
+import { createView } from '@/ui/dom.js';
+import delete_question_modal_body_view from '@/views/delete-question-modal-body.html?raw';
 
 /*
  * The Vue builder's core store: the shared session wrapper, the selection and
@@ -214,6 +220,68 @@ export const useBuilderStore = defineStore('builder', () => {
             updateCurrentInput({ question });
             methods.recordChange({ throttle: true });
         },
+        /* Copies the selected question to the end of the active list. */
+        copyQuestion() {
+            const input = getCurrentInput();
+
+            if (!input) {
+                return;
+            }
+
+            // Legacy covers the copy and drops the overlay ANIMATION_SLOW later.
+            showLoading();
+
+            if (!duplicateInput(input)) {
+                hideLoading();
+                return;
+            }
+
+            methods.recordChange();
+            hideLoading(500);
+            setTimeout(() => {
+                notifySuccess(FORM_MESSAGES.INPUT_COPIED);
+            }, 500);
+        },
+        /*
+         * Deletes the selected question; with entries on the server, legacy
+         * warns before dropping their data.
+         */
+        requestDeleteQuestion() {
+            const input = getCurrentInput();
+
+            if (!input) {
+                return;
+            }
+
+            const project = getProject(state.session.project_definition);
+            const total_entries = Number((project && (project.total_entries || project.entries)) || 0);
+
+            if (total_entries === 0) {
+                methods.deleteQuestion(input);
+                return;
+            }
+
+            openModal({
+                title: 'Warning',
+                class_name: 'builder__delete-question-modal',
+                body: createView(delete_question_modal_body_view),
+                buttons: [{
+                    text: 'Confirm',
+                    on_click: (close) => {
+                        close();
+                        methods.deleteQuestion(input);
+                    }
+                }]
+            });
+        },
+        deleteQuestion(input) {
+            if (!removeInput(input.ref)) {
+                return;
+            }
+
+            methods.recordChange();
+            notifyWarning(FORM_MESSAGES.INPUT_DELETED);
+        },
         performUndo() {
             showLoading();
 
@@ -252,7 +320,9 @@ export const useBuilderStore = defineStore('builder', () => {
             const config = { dev: window.__FORMBUILDER_DEV__ === true };
 
             if (state.app_base_url) {
-                config.dev_url = new URL('project/project.json', state.app_base_url).href;
+                // the Ionic root is /ionic/: the project file lives one level
+                // above it, next to the legacy public/ tree
+                config.dev_url = new URL('../project/project.json', state.app_base_url).href;
             }
 
             try {

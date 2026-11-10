@@ -14,3 +14,12 @@
     background: var(--app-surface, #ffffff);
     --background: var(--app-surface, #ffffff);
 }
+
+/*
+ * The empty state reads as a notice well, inset from the card edges like the
+ * other wells.
+ */
+.builder__jumps-panel .builder__jumps-empty {
+    margin: 10px 10px 0;
+}
+

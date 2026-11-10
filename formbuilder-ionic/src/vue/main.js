@@ -29,6 +29,7 @@ import {
     IonToolbar
 } from '@ionic/vue';
 import { setAssetPath } from '@ionic/core/components';
+import { defineCustomElement as defineIonToast } from '@ionic/core/components/ion-toast.js';
 import { setAssetPath as setIoniconAssetPath } from 'ionicons/components';
 import '../ionic.css';
 import '../theme/ionic-formbuilder.scss';
@@ -68,6 +69,14 @@ const ION_COMPONENTS = {
     IonTitle,
     IonToolbar
 };
+
+/*
+ * The toast layer (services/notifications.js → ui/toast.js) creates ion-toast
+ * elements imperatively, outside any Vue template, so the custom element must
+ * be defined at boot — the IonicVue plugin only defines the components that
+ * actually render in templates.
+ */
+defineIonToast();
 
 /*
     Boot the Vue builder. IonicVue calls initialize() itself (its install runs

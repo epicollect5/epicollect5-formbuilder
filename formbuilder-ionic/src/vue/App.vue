@@ -60,8 +60,9 @@
                         <button type="button"
                                 class="builder__add-form"
                                 id="add-form"
-                                disabled
-                                title="Add form">
+                                :disabled="!addFormEnabled"
+                                :title="addFormTitle"
+                                @click="openFormNameModal()">
                             <ion-icon name="add-outline" aria-hidden="true"></ion-icon>
                             <span>Add Form</span>
                         </button>
@@ -105,6 +106,7 @@ import { getProject } from '@/models/project-definition.js';
 import { goBack } from '@/services/navigation.js';
 import { getProjectLogoUrl } from '@/services/project-media.js';
 import { useBuilderStore } from '@/vue/stores/builder.js';
+import { useFormStore } from '@/vue/stores/forms.js';
 import FormTabsStrip from '@/vue/components/FormTabsStrip.vue';
 import QuestionsList from '@/vue/components/QuestionsList.vue';
 import PropertiesPanel from '@/vue/components/PropertiesPanel.vue';
@@ -118,6 +120,7 @@ export default {
     },
     setup() {
         const store = useBuilderStore();
+        const forms = useFormStore();
 
         const methods = {
             goBack() {
@@ -128,6 +131,9 @@ export default {
             },
             performUndo() {
                 store.performUndo();
+            },
+            openFormNameModal() {
+                forms.openFormNameModal(null);
             },
             /* The vanilla palette blurs the clicked tool; keep the behaviour. */
             blurTool(event) {
@@ -162,6 +168,12 @@ export default {
         const computedScope = {
             builderTools,
             builderQuestions,
+            addFormEnabled: computed(() => {
+                return forms.addFormEnabled;
+            }),
+            addFormTitle: computed(() => {
+                return forms.addFormTitle;
+            }),
             projectName: computed(() => {
                 const project = getProject(store.state.session.project_definition);
 

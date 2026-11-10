@@ -1,7 +1,17 @@
 /*
- * Questions list — the shared builder classes in src/theme/_builder.scss
- * carry the look; this file holds only component-scoped additions.
+ * Question row — the shared builder classes in src/theme/_builder.scss carry
+ * the look; this file holds only component-scoped additions.
  */
+
+/*
+ * The notice wells sit inset from the card edges like the legacy
+ * .warning-well inside its panel body.
+ */
+.builder__title-warning {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
 
 /*
  * SortableJS keeps the dragged row itself in the list as the drop placeholder

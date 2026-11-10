@@ -14,7 +14,7 @@
             </button>
         </ion-toolbar>
 
-        <p class="input-properties__form__jumps__no-jumps-message builder__empty"
+        <p class="input-properties__form__jumps__no-jumps-message builder__empty builder__notice builder__notice--info builder__jumps-empty"
            data-role="no-jumps"
            v-if="!hasJumps">No jumps set yet</p>
 

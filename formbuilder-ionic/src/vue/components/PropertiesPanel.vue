@@ -11,14 +11,15 @@
                                 class="builder__answers-more-btn builder__form-action-btn"
                                 data-action="copy"
                                 aria-label="Copy question"
-                                :disabled="!copyEnabled">
+                                :disabled="!copyEnabled"
+                                @click="copyQuestion()">
                             <ion-icon name="copy-outline" aria-hidden="true"></ion-icon>
                         </button>
                         <button type="button"
                                 class="builder__answers-more-btn builder__form-action-btn builder__icon-btn--danger"
                                 data-action="delete"
                                 aria-label="Delete question"
-                                disabled>
+                                @click="requestDeleteQuestion()">
                             <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
                         </button>
                         <button type="button"
@@ -216,16 +217,23 @@ export default {
                     return;
                 }
 
-                // as in the vanilla tab binding, tabs a type cannot use stay closed
-                if (value === 'advanced' && !hasAdvancedTab(store.currentInput.type)) {
-                    return;
-                }
-
-                if (value === 'jumps' && !canUseJumpsTab(store.editingTrail)) {
+                // as in the vanilla tab binding, tabs a type cannot use stay
+                // closed: snap the segment back to the active tab, or the
+                // Ionic segment would visually sit on the blocked tab while
+                // the panel keeps showing the previous content
+                if ((value === 'advanced' && !hasAdvancedTab(store.currentInput.type)) ||
+                    (value === 'jumps' && !canUseJumpsTab(store.editingTrail))) {
+                    event.target.value = store.state.active_property_tab;
                     return;
                 }
 
                 store.setPropertyTab(value);
+            },
+            copyQuestion() {
+                store.copyQuestion();
+            },
+            requestDeleteQuestion() {
+                store.requestDeleteQuestion();
             },
             validateQuestion() {
                 if (!store.currentInput) {
