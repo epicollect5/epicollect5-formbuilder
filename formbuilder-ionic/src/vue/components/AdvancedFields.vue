@@ -167,49 +167,54 @@ import { computed } from 'vue';
 import { PARAMETERS } from '@/config/parameters.js';
 import { DATE_FORMATS, TIME_FORMATS } from '@/models/input-properties.js';
 import { useBuilderStore } from '@/vue/stores/builder.js';
+import { usePropertiesStore } from '@/vue/stores/properties.js';
+import { usePossibleAnswersStore } from '@/vue/stores/possibleAnswers.js';
 
 /*
-    The advanced panel fields, gated per question type by the store's
-    advancedFields list (services/properties.js). The radio-group, select and
-    checkbox bindings replace the vanilla bind* helpers; reactivity replaces
-    their refresh passes.
+    The advanced panel fields, gated per question type by the properties
+    store's advancedFields list (services/properties.js). The radio-group,
+    select and checkbox bindings replace the vanilla bind* helpers; reactivity
+    replaces their refresh passes. The initial-answer select comes from the
+    answers store.
  */
 export default {
     setup() {
-        const store = useBuilderStore();
+        const builder = useBuilderStore();
+        const properties = usePropertiesStore();
+        const answers = usePossibleAnswersStore();
 
         const methods = {
             hasField(name) {
-                return store.advancedFields.indexOf(name) !== -1;
+                return properties.advancedFields.indexOf(name) !== -1;
             },
             onFieldInput(property, event) {
-                store.editAdvancedField(property, event.detail.value || '');
+                properties.editAdvancedField(property, event.detail.value || '');
             },
             onVerifyChange(event) {
-                store.toggleVerify(event.detail.checked);
+                properties.toggleVerify(event.detail.checked);
             },
             onSetCurrentDatetimeChange(event) {
-                store.toggleSetToCurrentDatetime(event.detail.checked);
+                properties.toggleSetToCurrentDatetime(event.detail.checked);
             },
             onNumericTypeChange(event) {
-                store.setNumericType(event.detail.value);
+                properties.setNumericType(event.detail.value);
             },
             onSearchTypeChange(event) {
-                store.setSearchType(event.detail.value);
+                properties.setSearchType(event.detail.value);
             },
             onDatetimeFormatChange(event) {
-                store.setDatetimeFormat(event.detail.value);
+                properties.setDatetimeFormat(event.detail.value);
             },
             onUniquenessChange(event) {
-                store.setUniqueness(event.detail.value);
+                properties.setUniqueness(event.detail.value);
             },
             onDefaultChoiceChange(event) {
-                store.setDefaultChoice(event.detail.value);
+                answers.setDefaultChoice(event.detail.value);
             }
         };
 
         const currentInput = computed(() => {
-            return store.currentInput;
+            return builder.currentInput;
         });
 
         const currentType = computed(() => {
@@ -218,23 +223,23 @@ export default {
 
         const computedScope = {
             advancedFields: computed(() => {
-                return store.advancedFields;
+                return properties.advancedFields;
             }),
             currentType,
             numericType: computed(() => {
-                return store.numericType;
+                return properties.numericType;
             }),
             verifyLabel: computed(() => {
-                return store.verifyLabel;
+                return properties.verifyLabel;
             }),
             verifyValue: computed(() => {
                 return !!(currentInput.value && currentInput.value.verify === true);
             }),
             datetimeLabel: computed(() => {
-                return store.datetimeLabel;
+                return properties.datetimeLabel;
             }),
             currentDatetimeLabel: computed(() => {
-                return store.currentDatetimeLabel;
+                return properties.currentDatetimeLabel;
             }),
             setCurrentDatetimeValue: computed(() => {
                 return !!(currentInput.value && currentInput.value.set_to_current_datetime === true);
@@ -245,31 +250,31 @@ export default {
             dateFormats: DATE_FORMATS,
             timeFormats: TIME_FORMATS,
             defaultNumberValue: computed(() => {
-                return store.defaultNumberValue;
+                return properties.defaultNumberValue;
             }),
             minValue: computed(() => {
-                return store.minValue;
+                return properties.minValue;
             }),
             maxValue: computed(() => {
-                return store.maxValue;
+                return properties.maxValue;
             }),
             defaultTextValue: computed(() => {
-                return store.defaultTextValue;
+                return properties.defaultTextValue;
             }),
             regexValue: computed(() => {
-                return store.regexValue;
+                return properties.regexValue;
             }),
             uniquenessOptions: computed(() => {
-                return store.uniquenessOptions;
+                return properties.uniquenessOptions;
             }),
             uniquenessValue: computed(() => {
-                return store.uniquenessValue;
+                return properties.uniquenessValue;
             }),
             defaultChoiceOptions: computed(() => {
-                return store.defaultChoiceOptions;
+                return answers.defaultChoiceOptions;
             }),
             defaultChoiceValue: computed(() => {
-                return store.defaultChoiceValue;
+                return answers.defaultChoiceValue;
             }),
             questionMaxLength: PARAMETERS.QUESTION_MAX_LENGTH,
             minMaxLength: PARAMETERS.MIN_MAX_LENGTH,
@@ -283,7 +288,7 @@ export default {
     },
     mounted() {
         // the null-format repair runs when the panel builds, as in the vanilla
-        useBuilderStore().ensureDatetimeFormat();
+        usePropertiesStore().ensureDatetimeFormat();
     }
 };
 </script>

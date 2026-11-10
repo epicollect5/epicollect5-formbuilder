@@ -140,6 +140,7 @@ import { getQuestionLabelText, getQuestionLabel } from '@/models/question-text.j
 import { hideLoading, notifyError, notifySuccess, showLoading } from '@/services/notifications.js';
 import { isInputValid } from '@/services/validation.js';
 import { useBuilderStore } from '@/vue/stores/builder.js';
+import { usePossibleAnswersStore } from '@/vue/stores/possibleAnswers.js';
 import AdvancedFields from '@/vue/components/AdvancedFields.vue';
 import ReadmeEditor from '@/vue/components/ReadmeEditor.vue';
 import PossibleAnswers from '@/vue/components/PossibleAnswers.vue';
@@ -165,6 +166,7 @@ export default {
     },
     setup() {
         const store = useBuilderStore();
+        const answers = usePossibleAnswersStore();
 
         const state = reactive({
             // the vanilla refuses a fourth title and resets the checkbox (R-12);
@@ -257,7 +259,7 @@ export default {
                 return !!currentInput.value && currentInput.value.type === 'readme';
             }),
             showPossibleAnswers: computed(() => {
-                return store.showPossibleAnswers;
+                return answers.showPossibleAnswers;
             }),
             questionLabel: computed(() => {
                 return currentInput.value ? getQuestionLabelText(currentInput.value.type) : 'Question';

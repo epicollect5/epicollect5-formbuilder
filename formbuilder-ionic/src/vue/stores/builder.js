@@ -5,34 +5,10 @@ import { defineStore } from 'pinia';
 import { FORM_MESSAGES } from '@/config/strings.js';
 import { PARAMETERS } from '@/config/parameters.js';
 import { getForms, getInputs } from '@/models/project-definition.js';
-import {
-    POSSIBLE_ANSWERS_ORDER,
-    getAnswerLimit,
-    getAnswerPage,
-    getAnswerPageCount,
-    isMultipleAnswerType
-} from '@/models/possible-answers.js';
 import { isSearchType } from '@/models/possible-answers.js';
 import { countInputs, countProjectSearchInputs, countTitles } from '@/models/project-limits.js';
 import { sanitizeQuestion } from '@/models/question-text.js';
 import { QUESTION_TYPES } from '@/models/question-types.js';
-import { getDefaultDatetimeFormat } from '@/models/input-properties.js';
-import { getAdvancedFields } from '@/services/properties.js';
-import {
-    addPossibleAnswer,
-    deleteAllAnswers,
-    orderPossibleAnswers,
-    removePossibleAnswer,
-    renamePossibleAnswer,
-    reorderAnswerPage
-} from '@/services/possible-answers.js';
-import {
-    exportCsv,
-    getCsvColumns,
-    getCsvFilename,
-    importAnswers,
-    parseCsv
-} from '@/services/possible-answers-csv.js';
 import {
     addInput,
     canAddInput,
@@ -62,22 +38,14 @@ import {
 } from '@/services/validation.js';
 import { saveProject } from '@/services/save.js';
 import { hideLoading, notifyError, notifySuccess, notifyWarning, showLoading } from '@/services/notifications.js';
-import { downloadFile } from '@/ui/download.js';
-import { createDropdown, createMenu } from '@/ui/dropdown.js';
-import { openModal } from '@/ui/modal.js';
-import csv_import_modal_body_view from '@/views/csv-import-modal-body.html?raw';
-import { createView } from '@/ui/dom.js';
-import { VALIDATION_MESSAGES } from '@/config/strings.js';
-
-/* Vanilla parity: the double-entry label wording per question type. */
-const DOUBLE_ENTRY_VERIFICATION_TYPES = ['text', 'phone'];
 
 /*
- * The Vue builder's action and derived layer. The project definition itself
- * stays the single source of truth: it lives in the reactive session singleton
- * (services/session.js) and the services keep mutating it exactly as they do
- * for the vanilla app. The store holds the UI flags the vanilla app keeps in
- * ui/state.js and turns the old refresh passes into computeds.
+ * The Vue builder's core store: the shared session wrapper, the selection and
+ * editing actions, the mutation hub (recordChange) and the undo/save gates.
+ * Domain slices live in their own composed stores — the possible answers card
+ * in stores/possibleAnswers.js and the advanced properties panel in
+ * stores/properties.js — which call recordChange here so the undo push points
+ * and the save/undo gates stay in one place.
  */
 export const useBuilderStore = defineStore('builder', () => {
     const state = reactive({
@@ -93,9 +61,6 @@ export const useBuilderStore = defineStore('builder', () => {
         undo_revision: 0,
         active_property_tab: 'basic',
         unload_guard_bound: false,
-        // the visible answers page per input ref (ui/state.js parity); page
-        // state is not undoable, as in the vanilla app
-        answer_pages: new Map(),
         /*
          * The Ionic app root (/epicollect5-formbuilder/ionic/), set at boot:
          * the Vue entry sits one level deeper than the vanilla page, so the
@@ -127,8 +92,8 @@ export const useBuilderStore = defineStore('builder', () => {
             });
         },
         /*
-         * Mirrors ui/state.js recordChange for the Vue app: the undo push at
-         * the legacy push points, the revision bump guarding the save race
+         * The mutation hub, mirroring ui/state.js recordChange: the undo push
+         * at the legacy push points, the revision bump guarding the save race
          * (R-72) and the unsaved flag. No fan-out — reactivity replaces it.
          */
         recordChange(options) {
@@ -224,337 +189,6 @@ export const useBuilderStore = defineStore('builder', () => {
             updateCurrentInput({ question: sanitizeQuestion(getCurrentInput(), value) });
             methods.recordChange({ throttle: true });
         },
-        /* Advanced-panel text/number fields: an empty input stores null. */
-        editAdvancedField(property, value) {
-            const next = {};
-
-            next[property] = value === '' ? null : value;
-            updateCurrentInput(next);
-            methods.recordChange({ throttle: true });
-        },
-        toggleVerify(checked) {
-            updateCurrentInput({ verify: !!checked });
-            methods.recordChange();
-        },
-        toggleSetToCurrentDatetime(checked) {
-            updateCurrentInput({ set_to_current_datetime: !!checked });
-            methods.recordChange();
-        },
-        setNumericType(next_type) {
-            if (next_type !== 'integer' && next_type !== 'decimal') {
-                return;
-            }
-
-            updateCurrentInput({ type: next_type });
-            methods.recordChange();
-        },
-        setSearchType(next_type) {
-            if (next_type !== 'searchsingle' && next_type !== 'searchmultiple') {
-                return;
-            }
-
-            updateCurrentInput({ type: next_type });
-            methods.recordChange();
-        },
-        setDatetimeFormat(value) {
-            updateCurrentInput({ datetime_format: value });
-            methods.recordChange();
-        },
-        setUniqueness(value) {
-            updateCurrentInput({ uniqueness: value || 'none' });
-            methods.recordChange();
-        },
-        setDefaultChoice(value) {
-            updateCurrentInput({ default: value ? value : null });
-            methods.recordChange();
-        },
-        editReadme(question) {
-            updateCurrentInput({ question });
-            methods.recordChange({ throttle: true });
-        },
-        /*
-         * Possible answers. The services own the mutations; the store keeps
-         * the per-input page state and the overlay/toast orchestration.
-         */
-        addAnswer() {
-            const input = getCurrentInput();
-
-            if (!input || !addPossibleAnswer(input)) {
-                return;
-            }
-
-            // the new answer is on the last page
-            state.answer_pages.set(input.ref, getAnswerPageCount(input.possible_answers));
-            methods.recordChange();
-        },
-        renameAnswer(answer_ref, value) {
-            const input = getCurrentInput();
-
-            if (!input || !renamePossibleAnswer(input, answer_ref, value)) {
-                return;
-            }
-
-            methods.recordChange({ throttle: true });
-        },
-        removeAnswer(answer_ref) {
-            const input = getCurrentInput();
-
-            if (!input || !removePossibleAnswer(input, answer_ref)) {
-                return;
-            }
-
-            methods.recordChange();
-        },
-        /* The sortable reports the reordered page; commit it page-locally. */
-        commitAnswerReorder(refs) {
-            const input = getCurrentInput();
-
-            if (!input) {
-                return;
-            }
-
-            const page = methods.currentAnswersPage();
-
-            if (reorderAnswerPage(input, refs, page)) {
-                methods.recordChange();
-            }
-        },
-        currentAnswersPage() {
-            const input = getCurrentInput();
-
-            if (!input) {
-                return 1;
-            }
-
-            const page = state.answer_pages.get(input.ref) || 1;
-
-            return Math.min(Math.max(page, 1), getAnswerPageCount(input.possible_answers));
-        },
-        /* Paging is blocked while a visible answer is still empty. */
-        goToAnswersPage(target) {
-            const input = getCurrentInput();
-
-            if (!input) {
-                return false;
-            }
-
-            const page = methods.currentAnswersPage();
-            const page_answers = getAnswerPage(input.possible_answers, page);
-            const blocked = page_answers.some((answer) => {
-                return String(answer.answer || '').trim() === '';
-            });
-
-            if (blocked) {
-                return false;
-            }
-
-            state.answer_pages.set(input.ref, Math.min(Math.max(target, 1), getAnswerPageCount(input.possible_answers)));
-
-            return true;
-        },
-        orderAnswers(order) {
-            const input = getCurrentInput();
-
-            // Legacy reorders behind the overlay and hides it after ANIMATION_SUPER_SLOW.
-            showLoading();
-
-            if (!input || !orderPossibleAnswers(input, order)) {
-                hideLoading();
-                return;
-            }
-
-            state.answer_pages.set(input.ref, 1);
-            methods.recordChange();
-            hideLoading(1000);
-        },
-        deleteAllCurrentAnswers() {
-            const input = getCurrentInput();
-
-            showLoading();
-
-            if (!input || !deleteAllAnswers(input)) {
-                hideLoading();
-                return;
-            }
-
-            state.answer_pages.set(input.ref, 1);
-            methods.recordChange();
-
-            // Legacy keeps the overlay up for ANIMATION_SUPER_SLOW.
-            hideLoading(1000);
-        },
-        exportAnswersCsv() {
-            const input = getCurrentInput();
-
-            if (!input) {
-                return;
-            }
-
-            downloadFile(getCsvFilename(input), exportCsv(input), 'text/csv;charset=utf-8;');
-        },
-        pickAnswersCsv() {
-            const field = document.createElement('input');
-
-            field.type = 'file';
-            field.accept = '.csv,text/csv';
-            field.hidden = true;
-
-            field.addEventListener('change', () => {
-                const file = field.files && field.files[0];
-
-                if (!file) {
-                    field.remove();
-                    return;
-                }
-
-                if (!/\.csv$/i.test(file.name)) {
-                    field.remove();
-                    notifyError(VALIDATION_MESSAGES.CSV_FILE_INVALID);
-                    return;
-                }
-
-                // the same bound as the form import bounds the synchronous parse (R-51)
-                if (file.size > PARAMETERS.IMPORT_MAX_BYTES) {
-                    field.remove();
-                    notifyError(VALIDATION_MESSAGES.CSV_FILE_TOO_LARGE);
-                    return;
-                }
-
-                const reader = new FileReader();
-
-                reader.onload = () => {
-                    const parsed = parseCsv(reader.result);
-
-                    field.remove();
-
-                    if (!parsed.rows.length) {
-                        notifyError(VALIDATION_MESSAGES.CSV_FILE_INVALID);
-                        return;
-                    }
-
-                    methods.openAnswersCsvModal(parsed);
-                };
-
-                reader.onerror = () => {
-                    field.remove();
-                    notifyError(VALIDATION_MESSAGES.CSV_FILE_INVALID);
-                };
-
-                reader.readAsText(file);
-            });
-
-            document.body.append(field);
-            field.click();
-        },
-        openAnswersCsvModal(parsed) {
-            const input = getCurrentInput();
-
-            if (!input) {
-                return;
-            }
-
-            const body = createView(csv_import_modal_body_view);
-            const headers = body.querySelector('[data-role="csv-headers"]');
-            const mode = body.querySelector('[data-role="csv-mode"]');
-            const column_placeholder = body.querySelector('[data-role="csv-column"]');
-            let selected_column = '';
-            let import_button = null;
-
-            headers.checked = true;
-            mode.value = 'replace';
-
-            const column_dropdown = createDropdown({
-                class_name: 'builder__csv-column-select',
-                aria_label: 'Column to import',
-                placeholder: 'Pick column',
-                options: [...getCsvColumns(parsed, true)],
-                value: '',
-                on_change: (detail) => {
-                    selected_column = detail.value;
-
-                    if (import_button) {
-                        import_button.disabled = !selected_column;
-                    }
-                }
-            });
-
-            column_dropdown.setAttribute('data-role', 'csv-column');
-            column_placeholder.replaceWith(column_dropdown);
-
-            headers.addEventListener('ionChange', () => {
-                selected_column = '';
-                column_dropdown.setOptions(
-                    [...getCsvColumns(parsed, headers.checked === true)],
-                    ''
-                );
-
-                if (import_button) {
-                    import_button.disabled = true;
-                }
-            });
-
-            const modal = openModal({
-                title: 'Possible answers csv import options',
-                body,
-                buttons: [
-                    { text: 'Dismiss', align: 'start' },
-                    {
-                        text: 'Import',
-                        disabled: true,
-                        on_click: (close) => {
-                            if (!selected_column) {
-                                return;
-                            }
-
-                            // Legacy imports the answers behind the wait overlay.
-                            showLoading();
-
-                            const result = importAnswers(input, parsed, {
-                                column_index: Number(selected_column),
-                                has_headers: headers.checked === true,
-                                replace: mode.value !== 'append'
-                            });
-
-                            if (!result.ok) {
-                                hideLoading();
-                                notifyError(VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY);
-                                return;
-                            }
-
-                            close();
-                            state.answer_pages.set(input.ref, 1);
-                            methods.recordChange();
-
-                            // Legacy hides the overlay after ANIMATION_SUPER_SLOW.
-                            hideLoading(1000);
-                            setTimeout(() => {
-                                notifySuccess(VALIDATION_MESSAGES.POSSIBLE_ANSWERS_IMPORTED);
-                            }, 1000);
-                        }
-                    }
-                ]
-            });
-
-            // Footer actions are ion-button elements, not <button> tags.
-            import_button = modal.footer.querySelectorAll('ion-button')[1];
-        },
-        /*
-         * Imported date/time questions can arrive with a null format; legacy
-         * checks its default radio, so the definition must carry it too. The
-         * vanilla applies this when the advanced panel builds, unrecorded —
-         * the same timing and semantics apply here.
-         */
-        ensureDatetimeFormat() {
-            const input = getCurrentInput();
-
-            if (!input || (input.type !== 'date' && input.type !== 'time')) {
-                return;
-            }
-
-            if (!input.datetime_format) {
-                updateCurrentInput({ datetime_format: getDefaultDatetimeFormat(input.type) });
-            }
-        },
         toggleRequired(value) {
             updateCurrentInput({ is_required: !!value });
             methods.recordChange();
@@ -575,6 +209,10 @@ export const useBuilderStore = defineStore('builder', () => {
             methods.recordChange();
 
             return true;
+        },
+        editReadme(question) {
+            updateCurrentInput({ question });
+            methods.recordChange({ throttle: true });
         },
         performUndo() {
             showLoading();
@@ -640,51 +278,6 @@ export const useBuilderStore = defineStore('builder', () => {
             }
         }
     };
-
-    /*
-     * Shared computed sources: the dropdown options are referenced by their
-     * value computeds, so they are declared before the grouped scope.
-     */
-    const uniquenessOptions = computed(() => {
-        const form = getCurrentForm();
-        const form_name = form ? form.name : 'this form';
-        const project = state.session.project_definition && state.session.project_definition.data ?
-            state.session.project_definition.data.project : null;
-        const forms = project && project.forms ? project.forms : [];
-        const form_index = form ? forms.indexOf(form) : 0;
-        const branch_container = getEditingTrail().find((node) => {
-            return node.type === 'branch';
-        });
-        const branch_header = branch_container && branch_container.question ? branch_container.question : 'branch';
-        const options = [{ value: 'none', label: 'No uniqueness' }];
-
-        if (branch_container) {
-            options.push({
-                value: 'form',
-                label: `Make answer unique to all ${branch_header} entries of a ${form_name} entry`
-            });
-        } else if (form_index > 0) {
-            const parent_name = forms[form_index - 1] ? forms[form_index - 1].name : 'parent form';
-
-            options.push({ value: 'form', label: `All ${form_name} entries` });
-            options.push({ value: 'hierarchy', label: `Only ${form_name} children of a ${parent_name} parent entry` });
-        } else {
-            options.push({ value: 'form', label: `Make answer unique to all ${form_name} entries` });
-        }
-
-        return options;
-    });
-
-    const defaultChoiceOptions = computed(() => {
-        const input = getCurrentInput();
-
-        return [{ value: '', label: 'None' }, ...(input && input.possible_answers ? input.possible_answers : []).map((answer) => {
-            return {
-                value: answer.answer_ref,
-                label: answer.answer || 'Untitled answer'
-            };
-        })];
-    });
 
     const computedScope = {
         forms: computed(() => {
@@ -775,142 +368,10 @@ export const useBuilderStore = defineStore('builder', () => {
                 };
             });
         }),
-        /*
-         * The advanced panel: which fields the current question type shows
-         * (services/properties.js owns the per-type list).
-         */
-        advancedFields: computed(() => {
-            const input = getCurrentInput();
-
-            return input ? getAdvancedFields(input.type) : [];
-        }),
-        verifyLabel: computed(() => {
-            const input = getCurrentInput();
-
-            return input && DOUBLE_ENTRY_VERIFICATION_TYPES.indexOf(input.type) !== -1 ?
-                'Require double entry verification' : 'Require double entry';
-        }),
-        numericType: computed(() => {
-            const input = getCurrentInput();
-
-            return input && input.type === 'decimal' ? 'decimal' : 'integer';
-        }),
-        datetimeLabel: computed(() => {
-            const input = getCurrentInput();
-
-            return input && input.type === 'time' ? 'Time format' : 'Date format';
-        }),
-        currentDatetimeLabel: computed(() => {
-            const input = getCurrentInput();
-
-            return input && input.type === 'date' ?
-                'Set initial answer to current date' : 'Set initial answer to current time';
-        }),
-        defaultNumberValue: computed(() => {
-            const input = getCurrentInput();
-
-            return input && input.default !== null && input.default !== undefined ? String(input.default) : '';
-        }),
-        minValue: computed(() => {
-            const input = getCurrentInput();
-
-            return input && input.min !== null && input.min !== undefined ? String(input.min) : '';
-        }),
-        maxValue: computed(() => {
-            const input = getCurrentInput();
-
-            return input && input.max !== null && input.max !== undefined ? String(input.max) : '';
-        }),
-        defaultTextValue: computed(() => {
-            const input = getCurrentInput();
-
-            return input && input.default ? input.default : '';
-        }),
-        regexValue: computed(() => {
-            const input = getCurrentInput();
-
-            return input && input.regex ? input.regex : '';
-        }),
-        /*
-         * The uniqueness dropdown options, branch-scoped like the legacy
-         * builder: inside a branch, 'form' means unique to the branch entries.
-         */
-        uniquenessOptions: computed(() => {
-            return uniquenessOptions.value;
-        }),
-        uniquenessValue: computed(() => {
-            const input = getCurrentInput();
-            const current = input ? (input.uniqueness || 'none') : 'none';
-
-            return uniquenessOptions.value.some((option) => {
-                return option.value === current;
-            }) ? current : 'none';
-        }),
-        defaultChoiceOptions: computed(() => {
-            return defaultChoiceOptions.value;
-        }),
-        defaultChoiceValue: computed(() => {
-            const input = getCurrentInput();
-
-            if (!input) {
-                return '';
-            }
-
-            const has_default = (input.possible_answers || []).some((answer) => {
-                return String(answer.answer_ref) === String(input.default);
-            });
-
-            return has_default ? input.default : '';
-        }),
         readmeValue: computed(() => {
             const input = getCurrentInput();
 
             return input ? (input.question || '') : '';
-        }),
-        /*
-         * The possible answers card. The page slice is what the list shows
-         * and reorders; the default select lives in the advanced fields.
-         */
-        showPossibleAnswers: computed(() => {
-            const input = getCurrentInput();
-
-            return !!input && isMultipleAnswerType(input.type);
-        }),
-        answerCount: computed(() => {
-            const input = getCurrentInput();
-
-            return input && input.possible_answers ? input.possible_answers.length : 0;
-        }),
-        answerAtLimit: computed(() => {
-            const input = getCurrentInput();
-
-            return !!input && input.possible_answers.length >= getAnswerLimit(input.type);
-        }),
-        answerPageCount: computed(() => {
-            const input = getCurrentInput();
-
-            return getAnswerPageCount(input ? input.possible_answers : []);
-        }),
-        answerCurrentPage: computed(() => {
-            return methods.currentAnswersPage();
-        }),
-        answerRows: computed(() => {
-            const input = getCurrentInput();
-
-            if (!input) {
-                return [];
-            }
-
-            const page = methods.currentAnswersPage();
-            const offset = (page - 1) * PARAMETERS.ANSWERS_PER_PAGE;
-
-            return getAnswerPage(input.possible_answers, page).map((answer, index) => {
-                return {
-                    answer,
-                    ariaLabel: `Answer ${offset + index + 1}`,
-                    removeLabel: `Remove answer ${offset + index + 1}`
-                };
-            });
         })
     };
 

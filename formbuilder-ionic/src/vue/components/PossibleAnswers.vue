@@ -6,14 +6,14 @@
                     <ion-card-title class="builder__answers-title">Possible answers</ion-card-title>
 
                     <ion-badge class="builder__question-count-badge builder__answers-count-badge"
-                               title="Possible answers for this question">{{ answerCount }}</ion-badge>
+                               title="Possible answers for this question">{{ possibleAnswerCount }}</ion-badge>
                 </div>
 
                 <div class="builder__answers-btn-group">
                     <button type="button"
                             class="builder__add-answer builder__answers-add-btn"
-                            :disabled="answerAtLimit"
-                            @click="addAnswer()">
+                            :disabled="possibleAnswerAtLimit"
+                            @click="addPossibleAnswer()">
                         Add answer
                     </button>
 
@@ -38,7 +38,7 @@
                               filter="ion-input, input, textarea, button, a"
                               :prevent-on-filter="false"
                               @end="onDragEnd($event)">
-                <li v-for="row in answerRows"
+                <li v-for="row in possibleAnswerRows"
                     :key="row.answer.answer_ref"
                     class="builder__answer"
                     :data-answer-ref="row.answer.answer_ref">
@@ -55,7 +55,7 @@
                             class="builder__answer-remove"
                             :aria-label="row.removeLabel"
                             :disabled="isOnlyAnswer"
-                            @click="removeAnswer(row.answer.answer_ref)">
+                            @click="removePossibleAnswer(row.answer.answer_ref)">
                         <ion-icon name="close-circle-outline"></ion-icon>
                     </button>
                 </li>
@@ -69,22 +69,22 @@
 
             <div class="builder__answers-pager"
                  data-role="answers-pager"
-                 v-if="answerPageCount > 1">
+                 v-if="possibleAnswersPageCount > 1">
                 <button type="button"
                         class="builder__answers-pager-button"
                         data-action="page-prev"
                         aria-label="Previous answers page"
                         :disabled="!canGoPrevious"
-                        @click="onPageChange(answerCurrentPage - 1)">
+                        @click="onPageChange(possibleAnswersCurrentPage - 1)">
                     <ion-icon name="chevron-back-outline"
                               aria-hidden="true"></ion-icon>
                 </button>
 
                 <span class="builder__answers-pager-label">
                     Page
-                    <span data-role="answers-page">{{ answerCurrentPage }}</span>
+                    <span data-role="answers-page">{{ possibleAnswersCurrentPage }}</span>
                     of
-                    <span data-role="answers-pages">{{ answerPageCount }}</span>
+                    <span data-role="answers-pages">{{ possibleAnswersPageCount }}</span>
                 </span>
 
                 <button type="button"
@@ -92,7 +92,7 @@
                         data-action="page-next"
                         aria-label="Next answers page"
                         :disabled="!canGoNext"
-                        @click="onPageChange(answerCurrentPage + 1)">
+                        @click="onPageChange(possibleAnswersCurrentPage + 1)">
                     <ion-icon name="chevron-forward-outline"
                               aria-hidden="true"></ion-icon>
                 </button>
@@ -107,7 +107,7 @@ import { VueDraggable } from 'vue-draggable-plus';
 import { PARAMETERS } from '@/config/parameters.js';
 import { VALIDATION_MESSAGES } from '@/config/strings.js';
 import { POSSIBLE_ANSWERS_ORDER } from '@/models/possible-answers.js';
-import { useBuilderStore } from '@/vue/stores/builder.js';
+import { usePossibleAnswersStore } from '@/vue/stores/possibleAnswers.js';
 import { createMenu } from '@/ui/dropdown.js';
 
 /*
@@ -122,7 +122,7 @@ export default {
         VueDraggable
     },
     setup() {
-        const store = useBuilderStore();
+        const store = usePossibleAnswersStore();
         let menu = null;
 
         const note = reactive({
@@ -131,14 +131,14 @@ export default {
         });
 
         const methods = {
-            addAnswer() {
-                store.addAnswer();
+            addPossibleAnswer() {
+                store.addPossibleAnswer();
             },
-            removeAnswer(answer_ref) {
-                store.removeAnswer(answer_ref);
+            removePossibleAnswer(answer_ref) {
+                store.removePossibleAnswer(answer_ref);
             },
             onRenameInput(answer, event) {
-                store.renameAnswer(answer.answer_ref, event.detail.value || '');
+                store.renamePossibleAnswer(answer.answer_ref, event.detail.value || '');
             },
             /*
              * SortableJS does not always strip the ghost class from the
@@ -152,7 +152,7 @@ export default {
             },
             /* Paging is blocked while a visible answer is still empty. */
             onPageChange(target) {
-                if (!store.goToAnswersPage(target)) {
+                if (!store.goToPossibleAnswersPage(target)) {
                     note.message = VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY;
                     note.is_error = true;
                     return;
@@ -162,7 +162,7 @@ export default {
                 note.is_error = false;
             },
             onExportCsv() {
-                store.exportAnswersCsv();
+                store.exportPossibleAnswersCsv();
             }
         };
 
@@ -172,43 +172,43 @@ export default {
          */
         const pageAnswersModel = computed({
             get: () => {
-                return store.answerRows.map((row) => {
+                return store.possibleAnswerRows.map((row) => {
                     return row.answer;
                 });
             },
             set: (value) => {
-                store.commitAnswerReorder(value.map((answer) => {
+                store.commitPossibleAnswersReorder(value.map((answer) => {
                     return answer.answer_ref;
                 }));
             }
         });
 
         const computedScope = {
-            answerCount: computed(() => {
-                return store.answerCount;
+            possibleAnswerCount: computed(() => {
+                return store.possibleAnswerCount;
             }),
-            answerAtLimit: computed(() => {
-                return store.answerAtLimit;
+            possibleAnswerAtLimit: computed(() => {
+                return store.possibleAnswerAtLimit;
             }),
-            answerRows: computed(() => {
-                return store.answerRows;
+            possibleAnswerRows: computed(() => {
+                return store.possibleAnswerRows;
             }),
-            answerCurrentPage: computed(() => {
-                return store.answerCurrentPage;
+            possibleAnswersCurrentPage: computed(() => {
+                return store.possibleAnswersCurrentPage;
             }),
-            answerPageCount: computed(() => {
-                return store.answerPageCount;
+            possibleAnswersPageCount: computed(() => {
+                return store.possibleAnswersPageCount;
             }),
             pageAnswersModel,
             note,
             isOnlyAnswer: computed(() => {
-                return store.answerCount === 1;
+                return store.possibleAnswerCount === 1;
             }),
             canGoPrevious: computed(() => {
-                return store.answerCurrentPage > 1;
+                return store.possibleAnswersCurrentPage > 1;
             }),
             canGoNext: computed(() => {
-                return store.answerCurrentPage < store.answerPageCount;
+                return store.possibleAnswersCurrentPage < store.possibleAnswersPageCount;
             }),
             maxAnswerLength: PARAMETERS.MAX_ANSWER_LENGTH
         };
@@ -218,39 +218,39 @@ export default {
                 {
                     label: 'Import CSV',
                     action: () => {
-                        store.pickAnswersCsv();
+                        store.pickPossibleAnswersCsv();
                     }
                 },
                 {
                     label: 'Export CSV',
                     action: () => {
-                        store.exportAnswersCsv();
+                        store.exportPossibleAnswersCsv();
                     }
                 },
                 { divider: true },
                 {
                     label: 'Order ascending',
                     action: () => {
-                        store.orderAnswers(POSSIBLE_ANSWERS_ORDER.AZ);
+                        store.orderPossibleAnswers(POSSIBLE_ANSWERS_ORDER.AZ);
                     }
                 },
                 {
                     label: 'Order descending',
                     action: () => {
-                        store.orderAnswers(POSSIBLE_ANSWERS_ORDER.ZA);
+                        store.orderPossibleAnswers(POSSIBLE_ANSWERS_ORDER.ZA);
                     }
                 },
                 {
                     label: 'Shuffle',
                     action: () => {
-                        store.orderAnswers(POSSIBLE_ANSWERS_ORDER.SHUFFLE);
+                        store.orderPossibleAnswers(POSSIBLE_ANSWERS_ORDER.SHUFFLE);
                     }
                 },
                 { divider: true },
                 {
                     label: 'Delete all answers',
                     action: () => {
-                        store.deleteAllCurrentAnswers();
+                        store.deleteAllPossibleAnswers();
                     }
                 }
             ], (item) => {
