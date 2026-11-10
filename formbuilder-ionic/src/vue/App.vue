@@ -32,8 +32,14 @@
             </div>
 
             <div class="builder" id="builder">
-                <section class="builder__tools" id="tools" aria-label="Question types">
-                    <button v-for="tool in tools"
+                <VueDraggable tag="section"
+                              class="builder__tools"
+                              id="tools"
+                              aria-label="Question types"
+                              v-model="builderTools"
+                              :group="builderQuestions"
+                              :sort="false">
+                    <button v-for="tool in builderTools"
                             :key="tool.type"
                             type="button"
                             class="builder__tool"
@@ -45,7 +51,7 @@
                         <ion-icon :name="tool.icon" aria-hidden="true"></ion-icon>
                         <span class="builder__tool-label">{{ tool.label }}</span>
                     </button>
-                </section>
+                </VueDraggable>
 
                 <section class="builder__workspace">
                     <div class="builder__forms-row">
@@ -94,6 +100,7 @@
 
 <script>
 import { computed } from 'vue';
+import { VueDraggable } from 'vue-draggable-plus';
 import { getProject } from '@/models/project-definition.js';
 import { goBack } from '@/services/navigation.js';
 import { getProjectLogoUrl } from '@/services/project-media.js';
@@ -106,7 +113,8 @@ export default {
     components: {
         FormTabsStrip,
         QuestionsList,
-        PropertiesPanel
+        PropertiesPanel,
+        VueDraggable
     },
     setup() {
         const store = useBuilderStore();
@@ -129,7 +137,31 @@ export default {
             }
         };
 
+        /*
+         * The palette is a menu, not a list: its drag group is clone-only
+         * (pull: 'clone', put: false) and never mutates, so the v-model
+         * setter is a no-op.
+         */
+        const builderTools = computed({
+            get: () => {
+                return store.tools.map((tool) => {
+                    return Object.assign({}, tool, {
+                        ariaLabel: `Add a ${tool.label} question`
+                    });
+                });
+            },
+            set: () => {}
+        });
+
+        const builderQuestions = {
+            name: 'builder-questions',
+            pull: 'clone',
+            put: false
+        };
+
         const computedScope = {
+            builderTools,
+            builderQuestions,
             projectName: computed(() => {
                 const project = getProject(store.state.session.project_definition);
 
@@ -137,13 +169,6 @@ export default {
             }),
             logoUrl: computed(() => {
                 return getProjectLogoUrl(getProject(store.state.session.project_definition), store.state.app_base_url);
-            }),
-            tools: computed(() => {
-                return store.tools.map((tool) => {
-                    return Object.assign({}, tool, {
-                        ariaLabel: `Add a ${tool.label} question`
-                    });
-                });
             }),
             canUndo: computed(() => {
                 return store.canUndo;

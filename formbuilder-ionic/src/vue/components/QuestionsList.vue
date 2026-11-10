@@ -72,7 +72,13 @@
                        accept=".json,application/json"
                        hidden>
 
-                <ion-list class="builder__question-list">
+                <VueDraggable tag="ion-list"
+                              class="builder__question-list"
+                              v-model="activeInputs"
+                              :group="builderQuestions"
+                              ghost-class="builder__question-placeholder"
+                              filter=".builder__empty"
+                              @start="onDragStart($event)">
                     <div class="builder__empty builder__notice builder__notice--info ion-text-center"
                          v-if="!currentInputs.length">
                         <span>Drag and drop questions from the sidebar <br/> (or import an Epicollect5 form file)</span>
@@ -88,7 +94,7 @@
                                  :key="input.ref"
                                  :input="input"
                                  :inputs="currentInputs"></QuestionRow>
-                </ion-list>
+                </VueDraggable>
             </ion-card-content>
         </ion-card>
     </section>
@@ -96,6 +102,7 @@
 
 <script>
 import { computed } from 'vue';
+import { VueDraggable } from 'vue-draggable-plus';
 import { countTitles } from '@/models/project-limits.js';
 import { getQuestionLabel } from '@/models/question-text.js';
 import { isInputValid } from '@/services/validation.js';
@@ -104,7 +111,8 @@ import QuestionRow from '@/vue/components/QuestionRow.vue';
 
 export default {
     components: {
-        QuestionRow
+        QuestionRow,
+        VueDraggable
     },
     setup() {
         const store = useBuilderStore();
@@ -112,7 +120,33 @@ export default {
         const methods = {
             exitContainer() {
                 store.exitContainer();
+            },
+            /* Dragging selects the row immediately, as in the vanilla list. */
+            onDragStart(event) {
+                const input = store.currentInputs[event.oldIndex];
+
+                if (input) {
+                    store.chooseInput(input.ref);
+                }
             }
+        };
+
+        /*
+         * The draggable reports its list through v-model; the store routes
+         * reorder and palette drops through the session services.
+         */
+        const activeInputs = computed({
+            get: () => {
+                return store.currentInputs;
+            },
+            set: (value) => {
+                store.setActiveInputs(value);
+            }
+        });
+
+        const builderQuestions = {
+            name: 'builder-questions',
+            put: true
         };
 
         const computedScope = {
@@ -172,6 +206,8 @@ export default {
         };
 
         return {
+            activeInputs,
+            builderQuestions,
             ...methods,
             ...computedScope
         };

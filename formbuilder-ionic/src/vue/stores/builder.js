@@ -19,7 +19,9 @@ import {
     getCurrentInput,
     getCurrentInputs,
     getSession,
+    insertInput,
     isEditing,
+    reorderInputs,
     selectForm,
     selectInput,
     updateCurrentInput
@@ -57,6 +59,7 @@ export const useBuilderStore = defineStore('builder', () => {
          */
         undo_revision: 0,
         active_property_tab: 'basic',
+        unload_guard_bound: false,
         /*
          * The Ionic app root (/epicollect5-formbuilder/ionic/), set at boot:
          * the Vue entry sits one level deeper than the vanilla page, so the
@@ -70,6 +73,22 @@ export const useBuilderStore = defineStore('builder', () => {
         /* Boot wiring, called by vue/main.js before the first project load. */
         setAppBaseUrl(url) {
             state.app_base_url = url;
+        },
+        /* Mirrors ui/save.js installUnloadGuard for the Vue app. */
+        installUnloadGuard() {
+            if (state.unload_guard_bound) {
+                return;
+            }
+
+            state.unload_guard_bound = true;
+
+            window.addEventListener('beforeunload', (event) => {
+                if (!state.unsaved_changes) {
+                    return;
+                }
+
+                event.preventDefault();
+            });
         },
         /*
          * Mirrors ui/state.js recordChange for the Vue app: the undo push at
@@ -121,6 +140,48 @@ export const useBuilderStore = defineStore('builder', () => {
             // Legacy warns when the new question reaches the search cap.
             if (isSearchType(type) && countProjectSearchInputs(state.session.project_definition) >= PARAMETERS.SEARCH_INPUTS_MAX) {
                 notifyWarning(FORM_MESSAGES.SEARCH_INPUTS_LIMIT_REACHED);
+            }
+        },
+        /*
+         * A palette tool dropped into the question list: the draggable has
+         * already removed the cloned tool object from the list, so this
+         * inserts the real input at the drop index (the vanilla drop path).
+         */
+        insertQuestion(type, index) {
+            if (!insertInput(type, index)) {
+                return null;
+            }
+
+            state.active_property_tab = 'basic';
+            methods.recordChange();
+
+            return getCurrentInput();
+        },
+        /* The sortable already left the list in the new order; commit it. */
+        commitReorder() {
+            methods.recordChange();
+        },
+        /*
+         * The question-list draggable reports its new list through v-model:
+         * either the current inputs reordered, or the list with a cloned
+         * palette tool object inserted at the drop index. Both paths go
+         * through the session services, like the vanilla sortable callbacks.
+         */
+        setActiveInputs(newInputs) {
+            const dropped_tool = newInputs.find((item) => {
+                // inputs always carry a ref; palette tools never do
+                return item && !item.ref && !!item.type;
+            });
+
+            if (dropped_tool) {
+                methods.insertQuestion(dropped_tool.type, newInputs.indexOf(dropped_tool));
+                return;
+            }
+
+            if (reorderInputs(newInputs.map((input) => {
+                return input.ref;
+            }))) {
+                methods.recordChange();
             }
         },
         editQuestion(value) {

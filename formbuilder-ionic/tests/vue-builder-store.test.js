@@ -177,4 +177,59 @@ describe('vue builder store', () => {
         expect(store.state.change_revision).toBe(1);
         expect(store.state.unsaved_changes).toBe(true);
     });
+
+    it('applies a sortable reorder through the session service', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('text');
+
+        const refs = store.currentInputs.map((input) => {
+            return input.ref;
+        });
+        const reordered = [refs[1], refs[0]];
+
+        store.setActiveInputs([...store.currentInputs].sort((a, b) => {
+            return reordered.indexOf(a.ref) - reordered.indexOf(b.ref);
+        }));
+
+        expect(store.currentInputs.map((input) => {
+            return input.ref;
+        })).toEqual(reordered);
+        expect(store.state.unsaved_changes).toBe(true);
+    });
+
+    it('refuses a partial reorder without recording a change', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('text');
+
+        const partial = [store.currentInputs[0]];
+
+        store.setActiveInputs(partial);
+
+        expect(store.currentInputs).toHaveLength(2);
+        expect(store.state.change_revision).toBe(1);
+    });
+
+    it('inserts a dropped palette tool at the drop index', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('text');
+
+        const inputs = store.currentInputs;
+        // the draggable reports the list with the cloned tool object inserted
+        const with_tool = [
+            inputs[0],
+            { type: 'radio', label: 'Radio', icon: 'radio-button-on-outline' },
+            inputs[1]
+        ];
+
+        store.setActiveInputs(with_tool);
+
+        expect(store.currentInputs).toHaveLength(3);
+        expect(store.currentInputs[1].type).toBe('radio');
+        expect(store.currentInputs[1].ref).not.toBeUndefined();
+        expect(store.state.session.current_input_ref).toBe(store.currentInputs[1].ref);
+        expect(store.state.unsaved_changes).toBe(true);
+    });
 });

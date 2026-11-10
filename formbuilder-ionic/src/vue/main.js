@@ -97,7 +97,11 @@ export const bootVueFormbuilder = async (options) => {
     });
 
     setActivePinia(pinia);
-    useBuilderStore().setAppBaseUrl(app_base_url);
+
+    const store = useBuilderStore();
+
+    store.setAppBaseUrl(app_base_url);
+    store.installUnloadGuard();
 
     const project_definition = await loadProject(settings.base_url || app_base_url, settings.fetch_project);
 
