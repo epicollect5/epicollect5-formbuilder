@@ -106,6 +106,9 @@
                                     </a>
                                 </div>
                             </template>
+
+                            <PossibleAnswers v-if="showPossibleAnswers"
+                                             :key="currentInput.ref + '-answers'"></PossibleAnswers>
                         </section>
 
                         <AdvancedFields v-else-if="activeTab === 'advanced'"
@@ -139,6 +142,7 @@ import { isInputValid } from '@/services/validation.js';
 import { useBuilderStore } from '@/vue/stores/builder.js';
 import AdvancedFields from '@/vue/components/AdvancedFields.vue';
 import ReadmeEditor from '@/vue/components/ReadmeEditor.vue';
+import PossibleAnswers from '@/vue/components/PossibleAnswers.vue';
 
 /* Legacy disables Jumps for anything edited inside a group; branch and group
    parents keep the tab, so they can take an "always" jump. */
@@ -156,7 +160,8 @@ const canUseJumpsTab = (editingTrail) => {
 export default {
     components: {
         AdvancedFields,
-        ReadmeEditor
+        ReadmeEditor,
+        PossibleAnswers
     },
     setup() {
         const store = useBuilderStore();
@@ -250,6 +255,9 @@ export default {
             }),
             isReadme: computed(() => {
                 return !!currentInput.value && currentInput.value.type === 'readme';
+            }),
+            showPossibleAnswers: computed(() => {
+                return store.showPossibleAnswers;
             }),
             questionLabel: computed(() => {
                 return currentInput.value ? getQuestionLabelText(currentInput.value.type) : 'Question';

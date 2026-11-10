@@ -385,6 +385,10 @@ export const createMenu = (trigger, items, on_select) => {
     }
 
     trigger.parentNode.append(popover);
+    // Ionic adds overlay-hidden only to controller-created overlays; a
+    // directly appended popover would otherwise cover the page invisibly
+    // until its first present.
+    popover.classList.add('overlay-hidden');
     popover.trigger = id;
     popover.reference = 'trigger';
     popover.side = 'bottom';

@@ -295,4 +295,108 @@ describe('vue builder store', () => {
         })).toEqual(['none', 'form']);
         expect(store.uniquenessOptions[1].label).toContain('branch');
     });
+
+    it('adds an answer, lands on its page and records the change', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('radio');
+
+        expect(store.answerCount).toBe(1);
+
+        store.addAnswer();
+
+        expect(store.answerCount).toBe(2);
+        // the new answer is the last one, so the pager jumps to its page
+        expect(store.answerCurrentPage).toBe(1);
+        expect(store.state.unsaved_changes).toBe(true);
+    });
+
+    it('sanitises renamed answers through the model', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('radio');
+
+        const ref = store.currentInput.possible_answers[0].answer_ref;
+
+        store.renameAnswer(ref, 'A <b>bold</b> answer');
+
+        expect(store.currentInput.possible_answers[0].answer).not.toContain('<b>');
+        expect(store.currentInput.possible_answers[0].answer).toContain('bold');
+    });
+
+    it('refuses removing the last answer and clears a removed default', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('radio');
+
+        const answers = store.currentInput.possible_answers;
+        const first_ref = answers[0].answer_ref;
+
+        store.setDefaultChoice(first_ref);
+        expect(store.currentInput.default).toBe(first_ref);
+
+        store.addAnswer();
+        const second_ref = store.currentInput.possible_answers[1].answer_ref;
+
+        store.removeAnswer(first_ref);
+
+        expect(store.currentInput.possible_answers).toHaveLength(1);
+        expect(store.currentInput.default).toBeNull();
+
+        store.removeAnswer(second_ref);
+
+        expect(store.currentInput.possible_answers).toHaveLength(1);
+    });
+
+    it('blocks paging while a visible answer is empty', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('radio');
+
+        // build a second page: 101 answers (each add lands on the last page)
+        for (let i = 0; i < 100; i += 1) {
+            store.addAnswer();
+        }
+
+        expect(store.goToAnswersPage(1)).toBe(true);
+
+        // empty one answer on the visible page: paging is refused
+        store.currentInput.possible_answers[5].answer = '';
+
+        expect(store.goToAnswersPage(2)).toBe(false);
+        expect(store.answerCurrentPage).toBe(1);
+
+        store.currentInput.possible_answers[5].answer = 'Filled';
+
+        expect(store.goToAnswersPage(2)).toBe(true);
+        expect(store.answerCurrentPage).toBe(2);
+    });
+
+    it('orders answers ascending and resets to the first page', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('radio');
+        store.renameAnswer(store.currentInput.possible_answers[0].answer_ref, 'Zebra');
+        store.addAnswer();
+        store.renameAnswer(store.currentInput.possible_answers[1].answer_ref, 'Apple');
+
+        store.orderAnswers('az');
+
+        expect(store.currentInput.possible_answers[0].answer).toBe('Apple');
+        expect(store.answerCurrentPage).toBe(1);
+    });
+
+    it('delete-all leaves one placeholder and clears the default', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('radio');
+        store.setDefaultChoice(store.currentInput.possible_answers[0].answer_ref);
+        store.addAnswer();
+
+        store.deleteAllCurrentAnswers();
+
+        expect(store.currentInput.possible_answers).toHaveLength(1);
+        expect(store.currentInput.default).toBeNull();
+        expect(store.answerCurrentPage).toBe(1);
+    });
 });

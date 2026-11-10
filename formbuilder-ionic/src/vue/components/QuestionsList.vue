@@ -78,7 +78,8 @@
                               :group="builderQuestions"
                               ghost-class="builder__question-placeholder"
                               filter=".builder__empty"
-                              @start="onDragStart($event)">
+                              @start="onDragStart($event)"
+                              @end="onDragEnd($event)">
                     <div class="builder__empty builder__notice builder__notice--info ion-text-center"
                          v-if="!currentInputs.length">
                         <span>Drag and drop questions from the sidebar <br/> (or import an Epicollect5 form file)</span>
@@ -138,6 +139,12 @@ export default {
                 // image would carry that focus outline
                 if (document.activeElement && document.activeElement !== document.body && typeof document.activeElement.blur === 'function') {
                     document.activeElement.blur();
+                }
+            },
+            /* SortableJS does not always strip the ghost class at drop. */
+            onDragEnd(event) {
+                if (event.item) {
+                    event.item.classList.remove('builder__question-placeholder');
                 }
             }
         };

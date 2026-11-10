@@ -1,0 +1,14 @@
+/*
+ * Possible answers card — the shared builder classes in src/theme/_builder.scss
+ * carry the look; this file holds only component-scoped additions.
+ */
+
+/*
+ * SortableJS keeps the dragged answer itself in the list as the drop
+ * placeholder (jQuery UI had a separate empty element). Hiding the row's
+ * content under the placeholder class restores the vanilla empty drop
+ * preview; the input's own outline border disappears with it.
+ */
+.builder__answer-placeholder > * {
+    visibility: hidden;
+}
