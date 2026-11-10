@@ -4,6 +4,7 @@
               :data-input-ref="input.ref"
               :aria-current="ariaCurrent"
               :data-valid="dataValid"
+              @pointerdown="press()"
               @click="choose()">
         <span class="builder__question-type-icon">
             <ion-icon :name="typeIcon"></ion-icon>
@@ -52,6 +53,15 @@ export default {
 
         const methods = {
             choose() {
+                store.chooseInput(props.input.ref);
+            },
+            /*
+             * Selecting on pointer-down puts the selected style on the row
+             * before the browser captures the native drag image; a click
+             * select would land after the capture and the ghost would start
+             * unselected. Click keeps the keyboard/activation path.
+             */
+            press() {
                 store.chooseInput(props.input.ref);
             }
         };

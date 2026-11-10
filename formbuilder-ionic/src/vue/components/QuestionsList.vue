@@ -121,12 +121,23 @@ export default {
             exitContainer() {
                 store.exitContainer();
             },
-            /* Dragging selects the row immediately, as in the vanilla list. */
+            /*
+             * Dragging selects the row immediately and shows its properties,
+             * as in the vanilla list. The ref comes from the dragged element,
+             * not the index: the marker event does not always line up with
+             * the model order.
+             */
             onDragStart(event) {
-                const input = store.currentInputs[event.oldIndex];
+                const ref = event.item ? event.item.getAttribute('data-input-ref') : null;
 
-                if (input) {
-                    store.chooseInput(input.ref);
+                if (ref) {
+                    store.chooseInput(ref);
+                }
+
+                // a previous full click left the row focused; the native drag
+                // image would carry that focus outline
+                if (document.activeElement && document.activeElement !== document.body && typeof document.activeElement.blur === 'function') {
+                    document.activeElement.blur();
                 }
             }
         };

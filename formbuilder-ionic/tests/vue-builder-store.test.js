@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { useBuilderStore } from '@/vue/stores/builder.js';
-import { getSession, setProject } from '@/services/session.js';
+import { getSession, setProject, updateCurrentInput } from '@/services/session.js';
 
 function project_definition() {
     return {
@@ -231,5 +231,68 @@ describe('vue builder store', () => {
         expect(store.currentInputs[1].ref).not.toBeUndefined();
         expect(store.state.session.current_input_ref).toBe(store.currentInputs[1].ref);
         expect(store.state.unsaved_changes).toBe(true);
+    });
+
+    it('stores null for an emptied advanced field and keeps the typed value', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('text');
+        store.chooseInput(store.currentInputs[1].ref);
+
+        store.editAdvancedField('default', 'My default');
+
+        expect(store.currentInput.default).toBe('My default');
+
+        store.editAdvancedField('default', '');
+
+        expect(store.currentInput.default).toBeNull();
+    });
+
+    it('switches the numeric type and ignores unknown values', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('integer');
+        store.chooseInput(store.currentInputs[1].ref);
+
+        store.setNumericType('decimal');
+
+        expect(store.currentInput.type).toBe('decimal');
+        expect(store.numericType).toBe('decimal');
+
+        const revision = store.state.change_revision;
+
+        store.setNumericType('date');
+
+        expect(store.currentInput.type).toBe('decimal');
+        expect(store.state.change_revision).toBe(revision);
+    });
+
+    it('repairs a null datetime format when the advanced panel opens', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('date');
+        store.chooseInput(store.currentInputs[1].ref);
+
+        // imported questions can arrive with a null format (the factory fills
+        // new ones); the panel build repairs it like the vanilla build does
+        updateCurrentInput({ datetime_format: null });
+
+        expect(store.currentInput.datetime_format).toBeNull();
+
+        store.ensureDatetimeFormat();
+
+        expect(store.currentInput.datetime_format).toBe('dd/MM/YYYY');
+    });
+
+    it('lists the branch-scoped uniqueness options inside a branch', () => {
+        const store = useBuilderStore();
+
+        store.addQuestion('branch');
+        store.enterContainer(store.currentInputs[1].ref);
+
+        expect(store.uniquenessOptions.map((option) => {
+            return option.value;
+        })).toEqual(['none', 'form']);
+        expect(store.uniquenessOptions[1].label).toContain('branch');
     });
 });

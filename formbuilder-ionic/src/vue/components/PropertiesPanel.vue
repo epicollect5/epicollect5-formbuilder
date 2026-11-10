@@ -57,54 +57,63 @@
 
                     <div class="builder__properties-body">
                         <section class="builder__properties-panel" v-if="activeTab === 'basic'">
-                            <div class="builder__question-field-group">
-                                <label class="builder__field-label" data-role="question-label">{{ questionLabel }}</label>
+                            <ReadmeEditor v-if="isReadme"
+                                          :key="currentInput.ref"></ReadmeEditor>
 
-                                <ion-input class="builder__field builder__question-field"
-                                           aria-label="Question"
-                                           fill="outline"
-                                           :placeholder="questionPlaceholder"
-                                           :maxlength="questionMaxLength"
-                                           :value="questionValue"
-                                           @ionInput="onQuestionInput($event)"></ion-input>
+                            <template v-else>
+                                <div class="builder__question-field-group">
+                                    <label class="builder__field-label" data-role="question-label">{{ questionLabel }}</label>
 
-                                <p class="builder__property-error"
-                                   data-role="properties-error"
-                                   role="status"
-                                   v-if="basicErrorMessage">{{ basicErrorMessage }}</p>
-                            </div>
+                                    <ion-input class="builder__field builder__question-field"
+                                               aria-label="Question"
+                                               fill="outline"
+                                               :placeholder="questionPlaceholder"
+                                               :maxlength="questionMaxLength"
+                                               :value="questionValue"
+                                               @ionInput="onQuestionInput($event)"></ion-input>
 
-                            <ion-checkbox v-if="allowsRequired"
-                                          justify="start"
-                                          class="builder__checkbox"
-                                          label-placement="end"
-                                          data-field="required"
-                                          :checked="requiredValue"
-                                          @ionChange="onRequiredChange($event)">
-                                <span>Answer is required</span>
-                            </ion-checkbox>
+                                    <p class="builder__property-error"
+                                       data-role="properties-error"
+                                       role="status"
+                                       v-if="basicErrorMessage">{{ basicErrorMessage }}</p>
+                                </div>
 
-                            <div class="builder__title-row" v-if="allowsTitle" data-field="title">
-                                <ion-checkbox class="builder__checkbox builder__title-toggle"
+                                <ion-checkbox v-if="allowsRequired"
+                                              justify="start"
+                                              class="builder__checkbox"
                                               label-placement="end"
-                                              :key="titleToggleKey"
-                                              :checked="titleValue"
-                                              @ionChange="onTitleChange($event)">
-                                    <span class="builder__title-label">Use answer as title</span>
+                                              data-field="required"
+                                              :checked="requiredValue"
+                                              @ionChange="onRequiredChange($event)">
+                                    <span>Answer is required</span>
                                 </ion-checkbox>
-                                <a class="builder__info-button"
-                                   data-role="title-info"
-                                   aria-label="What is a title?"
-                                   href="https://docs.epicollect.net/formbuilder/title"
-                                   target="_blank"
-                                   rel="noopener noreferrer">
-                                    <ion-icon name="help-circle" aria-hidden="true"></ion-icon>
-                                </a>
-                            </div>
+
+                                <div class="builder__title-row" v-if="allowsTitle" data-field="title">
+                                    <ion-checkbox class="builder__checkbox builder__title-toggle"
+                                                  label-placement="end"
+                                                  :key="titleToggleKey"
+                                                  :checked="titleValue"
+                                                  @ionChange="onTitleChange($event)">
+                                        <span class="builder__title-label">Use answer as title</span>
+                                    </ion-checkbox>
+                                    <a class="builder__info-button"
+                                       data-role="title-info"
+                                       aria-label="What is a title?"
+                                       href="https://docs.epicollect.net/formbuilder/title"
+                                       target="_blank"
+                                       rel="noopener noreferrer">
+                                        <ion-icon name="help-circle" aria-hidden="true"></ion-icon>
+                                    </a>
+                                </div>
+                            </template>
                         </section>
 
-                        <section class="builder__properties-panel" v-else>
-                            <p class="builder__empty">The {{ tabLabel }} tab is ported in the next phase.</p>
+                        <AdvancedFields v-else-if="activeTab === 'advanced'"
+                                        :key="currentInput.ref + '-advanced'"></AdvancedFields>
+
+                        <section class="builder__properties-panel builder__jumps-panel" v-else>
+                            <p class="input-properties__form__jumps__no-jumps-message builder__empty"
+                               data-role="no-jumps">No jumps set yet</p>
                         </section>
                     </div>
                 </template>
@@ -128,6 +137,8 @@ import { getQuestionLabelText, getQuestionLabel } from '@/models/question-text.j
 import { hideLoading, notifyError, notifySuccess, showLoading } from '@/services/notifications.js';
 import { isInputValid } from '@/services/validation.js';
 import { useBuilderStore } from '@/vue/stores/builder.js';
+import AdvancedFields from '@/vue/components/AdvancedFields.vue';
+import ReadmeEditor from '@/vue/components/ReadmeEditor.vue';
 
 /* Legacy disables Jumps for anything edited inside a group; branch and group
    parents keep the tab, so they can take an "always" jump. */
@@ -138,12 +149,15 @@ const canUseJumpsTab = (editingTrail) => {
 };
 
 /*
-    The properties card. The spike ports the basic tab (question field,
-    required / title toggles, the basic-tab error message); the advanced and
-    jumps panes follow in phase B, where the per-type panels are grouped by
-    shape.
+    The properties card. The basic tab carries the question field (or the
+    Tiptap readme editor) with the required / title toggles; the advanced tab
+    renders the per-type fields; jumps lands in its own phase.
  */
 export default {
+    components: {
+        AdvancedFields,
+        ReadmeEditor
+    },
     setup() {
         const store = useBuilderStore();
 
@@ -234,8 +248,8 @@ export default {
             activeTab: computed(() => {
                 return store.state.active_property_tab;
             }),
-            tabLabel: computed(() => {
-                return store.state.active_property_tab === 'advanced' ? 'Advanced' : 'Jumps';
+            isReadme: computed(() => {
+                return !!currentInput.value && currentInput.value.type === 'readme';
             }),
             questionLabel: computed(() => {
                 return currentInput.value ? getQuestionLabelText(currentInput.value.type) : 'Question';

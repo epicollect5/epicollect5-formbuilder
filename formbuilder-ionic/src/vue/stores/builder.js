@@ -9,6 +9,8 @@ import { isSearchType } from '@/models/possible-answers.js';
 import { countInputs, countProjectSearchInputs, countTitles } from '@/models/project-limits.js';
 import { sanitizeQuestion } from '@/models/question-text.js';
 import { QUESTION_TYPES } from '@/models/question-types.js';
+import { getDefaultDatetimeFormat } from '@/models/input-properties.js';
+import { getAdvancedFields } from '@/services/properties.js';
 import {
     addInput,
     canAddInput,
@@ -38,6 +40,9 @@ import {
 } from '@/services/validation.js';
 import { saveProject } from '@/services/save.js';
 import { hideLoading, notifyError, notifySuccess, notifyWarning, showLoading } from '@/services/notifications.js';
+
+/* Vanilla parity: the double-entry label wording per question type. */
+const DOUBLE_ENTRY_VERIFICATION_TYPES = ['text', 'phone'];
 
 /*
  * The Vue builder's action and derived layer. The project definition itself
@@ -188,6 +193,71 @@ export const useBuilderStore = defineStore('builder', () => {
             updateCurrentInput({ question: sanitizeQuestion(getCurrentInput(), value) });
             methods.recordChange({ throttle: true });
         },
+        /* Advanced-panel text/number fields: an empty input stores null. */
+        editAdvancedField(property, value) {
+            const next = {};
+
+            next[property] = value === '' ? null : value;
+            updateCurrentInput(next);
+            methods.recordChange({ throttle: true });
+        },
+        toggleVerify(checked) {
+            updateCurrentInput({ verify: !!checked });
+            methods.recordChange();
+        },
+        toggleSetToCurrentDatetime(checked) {
+            updateCurrentInput({ set_to_current_datetime: !!checked });
+            methods.recordChange();
+        },
+        setNumericType(next_type) {
+            if (next_type !== 'integer' && next_type !== 'decimal') {
+                return;
+            }
+
+            updateCurrentInput({ type: next_type });
+            methods.recordChange();
+        },
+        setSearchType(next_type) {
+            if (next_type !== 'searchsingle' && next_type !== 'searchmultiple') {
+                return;
+            }
+
+            updateCurrentInput({ type: next_type });
+            methods.recordChange();
+        },
+        setDatetimeFormat(value) {
+            updateCurrentInput({ datetime_format: value });
+            methods.recordChange();
+        },
+        setUniqueness(value) {
+            updateCurrentInput({ uniqueness: value || 'none' });
+            methods.recordChange();
+        },
+        setDefaultChoice(value) {
+            updateCurrentInput({ default: value ? value : null });
+            methods.recordChange();
+        },
+        editReadme(question) {
+            updateCurrentInput({ question });
+            methods.recordChange({ throttle: true });
+        },
+        /*
+         * Imported date/time questions can arrive with a null format; legacy
+         * checks its default radio, so the definition must carry it too. The
+         * vanilla applies this when the advanced panel builds, unrecorded —
+         * the same timing and semantics apply here.
+         */
+        ensureDatetimeFormat() {
+            const input = getCurrentInput();
+
+            if (!input || (input.type !== 'date' && input.type !== 'time')) {
+                return;
+            }
+
+            if (!input.datetime_format) {
+                updateCurrentInput({ datetime_format: getDefaultDatetimeFormat(input.type) });
+            }
+        },
         toggleRequired(value) {
             updateCurrentInput({ is_required: !!value });
             methods.recordChange();
@@ -273,6 +343,51 @@ export const useBuilderStore = defineStore('builder', () => {
             }
         }
     };
+
+    /*
+     * Shared computed sources: the dropdown options are referenced by their
+     * value computeds, so they are declared before the grouped scope.
+     */
+    const uniquenessOptions = computed(() => {
+        const form = getCurrentForm();
+        const form_name = form ? form.name : 'this form';
+        const project = state.session.project_definition && state.session.project_definition.data ?
+            state.session.project_definition.data.project : null;
+        const forms = project && project.forms ? project.forms : [];
+        const form_index = form ? forms.indexOf(form) : 0;
+        const branch_container = getEditingTrail().find((node) => {
+            return node.type === 'branch';
+        });
+        const branch_header = branch_container && branch_container.question ? branch_container.question : 'branch';
+        const options = [{ value: 'none', label: 'No uniqueness' }];
+
+        if (branch_container) {
+            options.push({
+                value: 'form',
+                label: `Make answer unique to all ${branch_header} entries of a ${form_name} entry`
+            });
+        } else if (form_index > 0) {
+            const parent_name = forms[form_index - 1] ? forms[form_index - 1].name : 'parent form';
+
+            options.push({ value: 'form', label: `All ${form_name} entries` });
+            options.push({ value: 'hierarchy', label: `Only ${form_name} children of a ${parent_name} parent entry` });
+        } else {
+            options.push({ value: 'form', label: `Make answer unique to all ${form_name} entries` });
+        }
+
+        return options;
+    });
+
+    const defaultChoiceOptions = computed(() => {
+        const input = getCurrentInput();
+
+        return [{ value: '', label: 'None' }, ...(input && input.possible_answers ? input.possible_answers : []).map((answer) => {
+            return {
+                value: answer.answer_ref,
+                label: answer.answer || 'Untitled answer'
+            };
+        })];
+    });
 
     const computedScope = {
         forms: computed(() => {
@@ -362,6 +477,98 @@ export const useBuilderStore = defineStore('builder', () => {
                     valid: isInputValid(input, inputs)
                 };
             });
+        }),
+        /*
+         * The advanced panel: which fields the current question type shows
+         * (services/properties.js owns the per-type list).
+         */
+        advancedFields: computed(() => {
+            const input = getCurrentInput();
+
+            return input ? getAdvancedFields(input.type) : [];
+        }),
+        verifyLabel: computed(() => {
+            const input = getCurrentInput();
+
+            return input && DOUBLE_ENTRY_VERIFICATION_TYPES.indexOf(input.type) !== -1 ?
+                'Require double entry verification' : 'Require double entry';
+        }),
+        numericType: computed(() => {
+            const input = getCurrentInput();
+
+            return input && input.type === 'decimal' ? 'decimal' : 'integer';
+        }),
+        datetimeLabel: computed(() => {
+            const input = getCurrentInput();
+
+            return input && input.type === 'time' ? 'Time format' : 'Date format';
+        }),
+        currentDatetimeLabel: computed(() => {
+            const input = getCurrentInput();
+
+            return input && input.type === 'date' ?
+                'Set initial answer to current date' : 'Set initial answer to current time';
+        }),
+        defaultNumberValue: computed(() => {
+            const input = getCurrentInput();
+
+            return input && input.default !== null && input.default !== undefined ? String(input.default) : '';
+        }),
+        minValue: computed(() => {
+            const input = getCurrentInput();
+
+            return input && input.min !== null && input.min !== undefined ? String(input.min) : '';
+        }),
+        maxValue: computed(() => {
+            const input = getCurrentInput();
+
+            return input && input.max !== null && input.max !== undefined ? String(input.max) : '';
+        }),
+        defaultTextValue: computed(() => {
+            const input = getCurrentInput();
+
+            return input && input.default ? input.default : '';
+        }),
+        regexValue: computed(() => {
+            const input = getCurrentInput();
+
+            return input && input.regex ? input.regex : '';
+        }),
+        /*
+         * The uniqueness dropdown options, branch-scoped like the legacy
+         * builder: inside a branch, 'form' means unique to the branch entries.
+         */
+        uniquenessOptions: computed(() => {
+            return uniquenessOptions.value;
+        }),
+        uniquenessValue: computed(() => {
+            const input = getCurrentInput();
+            const current = input ? (input.uniqueness || 'none') : 'none';
+
+            return uniquenessOptions.value.some((option) => {
+                return option.value === current;
+            }) ? current : 'none';
+        }),
+        defaultChoiceOptions: computed(() => {
+            return defaultChoiceOptions.value;
+        }),
+        defaultChoiceValue: computed(() => {
+            const input = getCurrentInput();
+
+            if (!input) {
+                return '';
+            }
+
+            const has_default = (input.possible_answers || []).some((answer) => {
+                return String(answer.answer_ref) === String(input.default);
+            });
+
+            return has_default ? input.default : '';
+        }),
+        readmeValue: computed(() => {
+            const input = getCurrentInput();
+
+            return input ? (input.question || '') : '';
         })
     };
 

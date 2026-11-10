@@ -40,6 +40,16 @@ ion-item.builder__question.builder__question-placeholder::part(native) {
 }
 
 /*
+ * A row clicked before the drag keeps focus, and the native drag image
+ * captures its outline. SortableJS marks the dragged row as chosen before the
+ * image is captured, so suppressing the outline for that state removes it.
+ */
+ion-item.builder__question.sortable-chosen,
+ion-item.builder__question.sortable-chosen:focus-within {
+    outline: none;
+}
+
+/*
  * The tool's live drop marker keeps its source ghost class, so it would show
  * the tool's own white background instead of the placeholder tint. Give it
  * the exact question drop-target look: same dashed box, same tint, no content.

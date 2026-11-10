@@ -18,6 +18,10 @@ import {
     IonItem,
     IonLabel,
     IonList,
+    IonRadio,
+    IonRadioGroup,
+    IonSelect,
+    IonSelectOption,
     IonSegment,
     IonSegmentButton,
     IonTitle,
@@ -27,6 +31,7 @@ import FormTabsStrip from '@/vue/components/FormTabsStrip.vue';
 import QuestionsList from '@/vue/components/QuestionsList.vue';
 import QuestionRow from '@/vue/components/QuestionRow.vue';
 import PropertiesPanel from '@/vue/components/PropertiesPanel.vue';
+import AdvancedFields from '@/vue/components/AdvancedFields.vue';
 import { setProject, selectInput } from '@/services/session.js';
 
 /*
@@ -76,10 +81,10 @@ function project_definition() {
     };
 }
 
-const mountOptions = () => {
+const mountOptions = (pinia) => {
     return {
         global: {
-            plugins: [createPinia()],
+            plugins: [pinia || createPinia()],
             components: {
                 IonBadge,
                 IonButton,
@@ -96,6 +101,10 @@ const mountOptions = () => {
                 IonItem,
                 IonLabel,
                 IonList,
+                IonRadio,
+                IonRadioGroup,
+                IonSelect,
+                IonSelectOption,
                 IonSegment,
                 IonSegmentButton,
                 IonTitle,
@@ -278,5 +287,79 @@ describe('vue properties panel', () => {
         await fireIonEvent(wrapper, '[data-field="required"]', 'ionChange', { checked: true });
 
         expect(getCurrentInput().is_required).toBe(true);
+    });
+});
+
+describe('vue advanced fields', () => {
+    beforeEach(() => {
+        setProject(project_definition());
+    });
+
+    it('shows the empty message without a selection', () => {
+        const wrapper = mount(AdvancedFields, mountOptions());
+
+        expect(wrapper.find('.builder__empty').text()).toBe('No advanced properties for this question type.');
+    });
+
+    it('shows the text-like fields for a text question', () => {
+        selectInput('form_1_text');
+
+        const wrapper = mount(AdvancedFields, mountOptions());
+
+        expect(wrapper.find('.builder__empty').exists()).toBe(false);
+        expect(wrapper.find('.builder__regex-field').exists()).toBe(true);
+        expect(wrapper.find('[data-role="verify-label"]').text()).toBe('Require double entry verification');
+        // text has no numeric type radios and no search type
+        expect(wrapper.find('.builder__radio-group').exists()).toBe(false);
+    });
+
+    it('shows the numeric fields for an integer question', async () => {
+        const pinia = createPinia();
+        const { useBuilderStore } = await import('@/vue/stores/builder.js');
+        const store = useBuilderStore(pinia);
+        const wrapper = mount(AdvancedFields, mountOptions(pinia));
+
+        store.addQuestion('integer');
+
+        await nextTick();
+
+        expect(wrapper.find('.builder__regex-field').exists()).toBe(true);
+        expect(wrapper.find('.builder__radio-group').exists()).toBe(true);
+        expect(wrapper.findAll('.builder__radio-group').length).toBe(1);
+    });
+
+    it('renders the date format radios for a date question', async () => {
+        const pinia = createPinia();
+        const { useBuilderStore } = await import('@/vue/stores/builder.js');
+        const store = useBuilderStore(pinia);
+        const wrapper = mount(AdvancedFields, mountOptions(pinia));
+
+        store.addQuestion('date');
+
+        await nextTick();
+
+        const radios = wrapper.findAll('ion-radio');
+
+        // five date formats; the time-format group stays hidden
+        expect(radios.length).toBe(5);
+        expect(wrapper.text()).toContain('Day/Month/Year');
+        expect(wrapper.text()).not.toContain('Hours:Minutes:Seconds (24 hours)');
+    });
+
+    it('lists the possible answers in the default choice select', async () => {
+        const pinia = createPinia();
+        const { useBuilderStore } = await import('@/vue/stores/builder.js');
+        const store = useBuilderStore(pinia);
+        const wrapper = mount(AdvancedFields, mountOptions(pinia));
+
+        store.addQuestion('radio');
+
+        await nextTick();
+
+        const options = wrapper.findAll('ion-select-option');
+
+        // None + the new radio's starter answer
+        expect(options.length).toBe(2);
+        expect(options[0].text()).toBe('None');
     });
 });
