@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { toRaw } from 'vue';
 import { getInputs } from '@/models/project-definition.js';
 import {
     duplicateInput
@@ -94,9 +95,10 @@ describe('question duplication', () => {
         expect(copy).not.toBe(source);
         expect(copy.ref).not.toBe(source.ref);
         expect(copy.ref.startsWith('form_1_')).toBe(true);
+        // the session is a Vue reactive proxy: unwrap to assert object identity
         expect(inputs()).toHaveLength(4);
-        expect(inputs()[3]).toBe(copy);
-        expect(getCurrentInput()).toBe(copy);
+        expect(toRaw(inputs()[3])).toBe(copy);
+        expect(toRaw(getCurrentInput())).toBe(copy);
 
         expect(copy.is_title).toBe(false);
         expect(copy.question).toBe('Pick one');
@@ -148,7 +150,7 @@ describe('question duplication', () => {
         const copy = duplicateInput(getCurrentInput());
 
         expect(branch.branch).toHaveLength(4);
-        expect(branch.branch[3]).toBe(copy);
+        expect(toRaw(branch.branch[3])).toBe(copy);
         expect(copy.ref.startsWith(branch.ref + '_')).toBe(true);
         expect(inputs()).toHaveLength(3);
         expect(getCurrentInputs()).toBe(branch.branch);

@@ -1,5 +1,6 @@
 'use strict';
 
+import { reactive } from 'vue';
 import { findInput, getForm, getForms, getInputs, getProject } from '@/models/project-definition.js';
 import { createInput } from '@/factory/input-factory.js';
 import { canContainInput, getContainerList } from '@/services/nesting.js';
@@ -13,13 +14,16 @@ import { PARAMETERS } from '@/config/parameters.js';
  *
  * The editing stack is a list of container refs, not a list of objects, so the
  * definition stays the single source of truth: every read walks it again.
+ *
+ * The singleton is a Vue reactive proxy so the Vue app tracks the services'
+ * mutations; the vanilla app mutates the same proxy with no behaviour change.
  */
-const session = {
+const session = reactive({
     project_definition: null,
     current_form_index: 0,
     current_input_ref: null,
     editing: []
-};
+});
 
 export const getSession = () => {
     return session;

@@ -1,0 +1,312 @@
+'use strict';
+
+import { computed, reactive } from 'vue';
+import { defineStore } from 'pinia';
+import { FORM_MESSAGES } from '@/config/strings.js';
+import { PARAMETERS } from '@/config/parameters.js';
+import { getForms, getInputs } from '@/models/project-definition.js';
+import { isSearchType } from '@/models/possible-answers.js';
+import { countInputs, countProjectSearchInputs, countTitles } from '@/models/project-limits.js';
+import { sanitizeQuestion } from '@/models/question-text.js';
+import { QUESTION_TYPES } from '@/models/question-types.js';
+import {
+    addInput,
+    canAddInput,
+    enterInput,
+    exitEditing,
+    getEditingTrail,
+    getCurrentForm,
+    getCurrentInput,
+    getCurrentInputs,
+    getSession,
+    isEditing,
+    selectForm,
+    selectInput,
+    updateCurrentInput
+} from '@/services/session.js';
+import { canUndo, undo, pushUndoState } from '@/services/undo.js';
+import {
+    ADVANCED_TAB,
+    areAllInputsValid,
+    areFormInputsValid,
+    getInputErrors,
+    isInputValid,
+    JUMPS_TAB,
+    PROPERTIES_TAB
+} from '@/services/validation.js';
+import { saveProject } from '@/services/save.js';
+import { hideLoading, notifyError, notifySuccess, notifyWarning, showLoading } from '@/services/notifications.js';
+
+/*
+ * The Vue builder's action and derived layer. The project definition itself
+ * stays the single source of truth: it lives in the reactive session singleton
+ * (services/session.js) and the services keep mutating it exactly as they do
+ * for the vanilla app. The store holds the UI flags the vanilla app keeps in
+ * ui/state.js and turns the old refresh passes into computeds.
+ */
+export const useBuilderStore = defineStore('builder', () => {
+    const state = reactive({
+        session: getSession(),
+        unsaved_changes: false,
+        saving: false,
+        change_revision: 0,
+        /*
+         * The undo stack is a module-level structure in services/undo.js that
+         * reactivity cannot see; pushes (the throttled one included) report
+         * through pushUndoState's on_change, and undo bumps it directly.
+         */
+        undo_revision: 0,
+        active_property_tab: 'basic',
+        /*
+         * The Ionic app root (/epicollect5-formbuilder/ionic/), set at boot:
+         * the Vue entry sits one level deeper than the vanilla page, so the
+         * project load, the dev save endpoint and the logo fallback derive
+         * their URLs from it instead of the page location.
+         */
+        app_base_url: null
+    });
+
+    const methods = {
+        /* Boot wiring, called by vue/main.js before the first project load. */
+        setAppBaseUrl(url) {
+            state.app_base_url = url;
+        },
+        /*
+         * Mirrors ui/state.js recordChange for the Vue app: the undo push at
+         * the legacy push points, the revision bump guarding the save race
+         * (R-72) and the unsaved flag. No fan-out — reactivity replaces it.
+         */
+        recordChange(options) {
+            const config = Object.assign({}, options || {});
+
+            config.on_change = () => {
+                state.undo_revision += 1;
+            };
+
+            pushUndoState(config);
+            state.change_revision += 1;
+            state.unsaved_changes = true;
+        },
+        chooseForm(form_index) {
+            if (isEditing() || form_index === state.session.current_form_index) {
+                return;
+            }
+
+            selectForm(form_index);
+            state.active_property_tab = 'basic';
+        },
+        chooseInput(input_ref) {
+            selectInput(input_ref);
+            state.active_property_tab = 'basic';
+        },
+        setPropertyTab(value) {
+            state.active_property_tab = value;
+        },
+        enterContainer(input_ref) {
+            enterInput(input_ref);
+            state.active_property_tab = 'basic';
+        },
+        exitContainer() {
+            exitEditing();
+            state.active_property_tab = 'basic';
+        },
+        addQuestion(type) {
+            if (!addInput(type)) {
+                return;
+            }
+
+            state.active_property_tab = 'basic';
+            methods.recordChange();
+
+            // Legacy warns when the new question reaches the search cap.
+            if (isSearchType(type) && countProjectSearchInputs(state.session.project_definition) >= PARAMETERS.SEARCH_INPUTS_MAX) {
+                notifyWarning(FORM_MESSAGES.SEARCH_INPUTS_LIMIT_REACHED);
+            }
+        },
+        editQuestion(value) {
+            updateCurrentInput({ question: sanitizeQuestion(getCurrentInput(), value) });
+            methods.recordChange({ throttle: true });
+        },
+        toggleRequired(value) {
+            updateCurrentInput({ is_required: !!value });
+            methods.recordChange();
+        },
+        /* Legacy refuses a fourth title and resets the checkbox (R-12). */
+        toggleTitle(value) {
+            const input = getCurrentInput();
+
+            if (!input) {
+                return false;
+            }
+
+            if (value && !input.is_title && countTitles(getCurrentInputs()) >= PARAMETERS.TITLES_MAX) {
+                return false;
+            }
+
+            updateCurrentInput({ is_title: !!value });
+            methods.recordChange();
+
+            return true;
+        },
+        performUndo() {
+            showLoading();
+
+            if (!undo()) {
+                hideLoading();
+                state.undo_revision += 1;
+                return;
+            }
+
+            // Undoing an added form leaves the index past the end of the restored list.
+            if (state.session.current_form_index >= getForms(state.session.project_definition).length) {
+                selectForm(Math.max(getForms(state.session.project_definition).length - 1, 0));
+            }
+
+            // the data now differs from any save in flight, so a racing save
+            // must not clear the unsaved marker (R-72)
+            state.change_revision += 1;
+            state.undo_revision += 1;
+            state.active_property_tab = 'basic';
+
+            hideLoading(500);
+        },
+        async performSave() {
+            if (state.saving) {
+                return;
+            }
+
+            const project_definition = state.session.project_definition;
+            // the payload is copied synchronously inside saveProject, so this
+            // revision is the one the request carries
+            const revision_at_start = state.change_revision;
+
+            state.saving = true;
+            showLoading();
+
+            const config = { dev: window.__FORMBUILDER_DEV__ === true };
+
+            if (state.app_base_url) {
+                config.dev_url = new URL('project/project.json', state.app_base_url).href;
+            }
+
+            try {
+                await saveProject(project_definition, config);
+
+                // an edit or an undo made while the request was in flight is
+                // not in the saved payload, so it stays marked unsaved (R-72)
+                state.unsaved_changes = state.change_revision !== revision_at_start;
+
+                // Legacy keeps the overlay up for ANIMATION_SLOW after the
+                // response; the toast waits for the overlay to clear.
+                hideLoading(500);
+                setTimeout(() => {
+                    notifySuccess(FORM_MESSAGES.PROJECT_SAVED);
+                }, 500);
+            } catch (error) {
+                const message = error && error.message ? error.message : '';
+
+                hideLoading();
+                notifyError(`${FORM_MESSAGES.PROJECT_NOT_SAVED}${message ? ` ${message}` : ''}`);
+            } finally {
+                state.saving = false;
+            }
+        }
+    };
+
+    const computedScope = {
+        forms: computed(() => {
+            return getForms(state.session.project_definition);
+        }),
+        currentForm: computed(() => {
+            return getCurrentForm();
+        }),
+        currentInputs: computed(() => {
+            return getCurrentInputs();
+        }),
+        currentInput: computed(() => {
+            return getCurrentInput();
+        }),
+        editingTrail: computed(() => {
+            return getEditingTrail();
+        }),
+        editing: computed(() => {
+            return isEditing();
+        }),
+        canUndo: computed(() => {
+            state.undo_revision;
+            return canUndo();
+        }),
+        saveEnabled: computed(() => {
+            return !state.saving && areAllInputsValid(state.session.project_definition);
+        }),
+        saveTitle: computed(() => {
+            const valid = areAllInputsValid(state.session.project_definition);
+
+            return state.saving ? FORM_MESSAGES.PROJECT_SAVING : (valid ? 'Save project' : 'Fix the validation errors before saving');
+        }),
+        /*
+         * The tab strip: one entry per form with the live count and validity
+         * the vanilla refreshFormTabs used to patch into the labels.
+         */
+        formTabs: computed(() => {
+            return getForms(state.session.project_definition).map((form, form_index) => {
+                return {
+                    index: form_index,
+                    name: form.name,
+                    count: countInputs(getInputs(form)),
+                    valid: areFormInputsValid(form)
+                };
+            });
+        }),
+        /* The palette with the container gating the vanilla renderTools applies. */
+        tools: computed(() => {
+            return QUESTION_TYPES.map((question_type) => {
+                return Object.assign({}, question_type, {
+                    allowed: canAddInput(question_type.type)
+                });
+            });
+        }),
+        /* The basic-tab error under the question field: the first properties-tab error. */
+        basicErrorMessage: computed(() => {
+            const input = getCurrentInput();
+            const tab_errors = getInputErrors(input, getCurrentInputs()).filter((error) => {
+                return error.tab === PROPERTIES_TAB;
+            });
+
+            return tab_errors.length ? tab_errors[0].message : '';
+        }),
+        /* The properties tab badges: which tabs carry errors (R-32 aggregate). */
+        propertyTabErrors: computed(() => {
+            const input = getCurrentInput();
+            const errors = getInputErrors(input, getCurrentInputs());
+
+            return {
+                basic: errors.some((error) => {
+                    return error.tab === PROPERTIES_TAB;
+                }),
+                advanced: errors.some((error) => {
+                    return error.tab === ADVANCED_TAB;
+                }),
+                jumps: errors.some((error) => {
+                    return error.tab === JUMPS_TAB;
+                })
+            };
+        }),
+        rowValidity: computed(() => {
+            const inputs = getCurrentInputs();
+
+            return inputs.map((input) => {
+                return {
+                    ref: input.ref,
+                    valid: isInputValid(input, inputs)
+                };
+            });
+        })
+    };
+
+    return {
+        state,
+        ...methods,
+        ...computedScope
+    };
+});

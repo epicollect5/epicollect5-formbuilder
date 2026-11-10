@@ -1,7 +1,9 @@
 import { defineConfig } from 'vitest/config';
+import vue from '@vitejs/plugin-vue';
 import { resolveAliases } from './scripts/resolve-aliases.mjs';
 
 export default defineConfig({
+    plugins: [vue()],
     resolve: {
         alias: resolveAliases()
     },

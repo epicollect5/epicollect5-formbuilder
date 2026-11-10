@@ -3,6 +3,7 @@
 import {PARAMETERS} from '@/config/parameters.js';
 import {getForms, getProject} from '@/models/project-definition.js';
 import {goBack} from '@/services/navigation.js';
+import {getProjectLogoUrl} from '@/services/project-media.js';
 import {getSession} from '@/services/session.js';
 import {
     performSave,
@@ -27,25 +28,6 @@ export const renderProjectName = () => {
     if (logo) {
         logo.src = getProjectLogoUrl(project);
     }
-};
-
-/* Same source as the legacy navbar: the project logo, else the media endpoint. */
-const getProjectLogoUrl = (project) => {
-    if (!project) {
-        return '';
-    }
-
-    if (project.logo_url) {
-        return project.logo_url;
-    }
-
-    const protocol = window.location.protocol;
-    const parts = window.location.href.split('?')[0].split('#')[0].replace(protocol + '//', '').split('/');
-
-    parts.pop();
-
-    return `${protocol}//${parts.join('/')}/api/internal/media/${project.slug}` +
-        '?type=photo&name=logo.jpg&format=project_mobile_logo';
 };
 
 export const revealBuilder = () => {

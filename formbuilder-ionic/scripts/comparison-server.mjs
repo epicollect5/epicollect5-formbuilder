@@ -56,6 +56,7 @@ export function landingPage() {
     <p>Both entries read <code>project/project.json</code> from this origin and share the same session.</p>
     <ul>
         <li><a href="/epicollect5-formbuilder/ionic/">Ionic prototype</a></li>
+        <li><a href="/epicollect5-formbuilder/ionic/vue/">Ionic Vue prototype</a></li>
         <li><a href="/epicollect5-formbuilder/public/index.html">Legacy baseline</a></li>
     </ul>
 </main>

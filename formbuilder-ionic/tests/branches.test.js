@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { toRaw } from 'vue';
 import { getInputs } from '@/models/project-definition.js';
 import {
     addInput,
@@ -122,13 +123,14 @@ describe('branch and group model', () => {
 
         enterInput(branch.ref);
 
-        expect(enterInput(group.ref)).toBe(group);
+        // the session is a Vue reactive proxy: unwrap to assert object identity
+        expect(toRaw(enterInput(group.ref))).toBe(toRaw(group));
         expect(getEditingTrail().map((node) => node.ref)).toEqual([branch.ref, group.ref]);
 
         const child = insertInput('text', 0);
 
         expect(child.ref.split('_').length).toBe(group.ref.split('_').length + 1);
-        expect(group.group[0]).toBe(child);
+        expect(toRaw(group.group[0])).toBe(child);
     });
 
     it('refuses the nesting the legacy builder refuses', () => {

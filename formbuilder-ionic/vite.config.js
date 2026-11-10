@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 import { checkSchemaParameters } from './scripts/check-schema-parameters.mjs';
 import { IONIC_PREFIX, PROJECT_PREFIX, PUBLIC_PREFIX, landingMiddleware, projectSaveMiddleware, staticMiddleware } from './scripts/comparison-server.mjs';
 import { paths, resolveAliases } from './scripts/resolve-aliases.mjs';
@@ -71,7 +72,8 @@ export default defineConfig({
         cssCodeSplit: false,
         rollupOptions: {
             input: {
-                app: path.join(src_root, 'index.html')
+                app: path.join(src_root, 'index.html'),
+                vue: path.join(src_root, 'vue/index.html')
             },
             output: {
                 entryFileNames: 'js/[name].js',
@@ -110,5 +112,5 @@ export default defineConfig({
             allow: [repo_root]
         }
     },
-    plugins: [comparisonPlugin()]
+    plugins: [vue(), comparisonPlugin()]
 });

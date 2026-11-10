@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { toRaw } from 'vue';
 import { getInputs, getProject } from '@/models/project-definition.js';
 import {
     addForm,
@@ -42,11 +43,12 @@ describe('session', () => {
         selectInput('input_1');
         setProject(definition);
 
-        expect(getSession().project_definition).toBe(definition);
+        // the session is a Vue reactive proxy: unwrap to assert object identity
+        expect(toRaw(getSession().project_definition)).toBe(definition);
         expect(getCurrentForm().ref).toBe('form_1');
         expect(getSession().current_form_index).toBe(0);
         expect(getSession().current_input_ref).toBeNull();
-        expect(getProject(getSession().project_definition)).toBe(definition.data.project);
+        expect(toRaw(getProject(getSession().project_definition))).toBe(definition.data.project);
     });
 
     it('selects a form and clears the selected question', () => {
@@ -79,7 +81,7 @@ describe('session', () => {
         const input = addInput('radio');
 
         expect(getCurrentInputs()).toHaveLength(2);
-        expect(getCurrentInputs()[1]).toBe(input);
+        expect(toRaw(getCurrentInputs()[1])).toBe(input);
         expect(getSession().current_input_ref).toBe(input.ref);
         expect(input.possible_answers).toHaveLength(1);
     });
@@ -99,7 +101,7 @@ describe('session', () => {
 
         const inserted = insertInput('text', 0);
 
-        expect(getCurrentInputs()[0]).toBe(inserted);
+        expect(toRaw(getCurrentInputs()[0])).toBe(inserted);
         expect(getSession().current_input_ref).toBe(inserted.ref);
         expect(insertInput('text', 99)).not.toBeNull();
         expect(getCurrentInputs()).toHaveLength(3);

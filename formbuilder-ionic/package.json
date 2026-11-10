@@ -14,15 +14,22 @@
   },
   "dependencies": {
     "@ionic/core": "9.0.1",
+    "@ionic/vue": "9.0.1",
     "@tiptap/core": "^3.33.0",
     "@tiptap/pm": "^3.33.0",
     "@tiptap/starter-kit": "^3.33.0",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "compression-streams-polyfill": "^0.1.7",
-    "ionicons": "8.1.0"
+    "ionicons": "8.1.0",
+    "pinia": "^4.1.0",
+    "vue": "^3.5.45",
+    "vue-draggable-plus": "^0.6.1",
+    "vue-router": "^5.5.0"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.10",
+    "@vue/test-utils": "^2.5.1",
     "jquery": "4.0.0",
     "jquery-ui": "1.14.2",
     "jsdom": "29.1.1",

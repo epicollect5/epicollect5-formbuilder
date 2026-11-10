@@ -5,6 +5,11 @@ import {getForms} from '@/models/project-definition.js';
 import {getQuestionType} from '@/models/question-types.js';
 import {isBranchOrGroup, isMediaType} from '@/models/input-properties.js';
 import {countTitles} from '@/models/project-limits.js';
+import {
+    getQuestionLabel,
+    getQuestionLabelText,
+    sanitizeQuestion
+} from '@/models/question-text.js';
 import {isInputValid} from '@/services/validation.js';
 import {
     exitEditing,
@@ -308,18 +313,12 @@ export const updateCurrentQuestionStatus = () => {
     }
 };
 
-export const getQuestionLabelText = (type) => {
-    if (isBranchOrGroup(type)) {
-        return 'Header';
-    }
-
-    // Legacy labels the media text field differently from the other questions.
-    if (isMediaType(type)) {
-        return 'Question Text';
-    }
-
-    return 'Question';
-};
+/*
+    The question-text helpers moved to models/question-text.js so the Vue app
+    shares them without importing the vanilla render layer; re-exported here so
+    the shell's cross-area surface stays the same.
+ */
+export {getQuestionLabelText, sanitizeQuestion, getQuestionLabel} from '@/models/question-text.js';
 
 /* Legacy disables Edit while a branch/group header is empty. */
 export const updateEditButtonState = (input) => {
@@ -385,27 +384,4 @@ export const updateQuestionText = (question) => {
         row.textContent = label;
         row.setAttribute('title', label);
     }
-};
-
-export const sanitizeQuestion = (input, value) => {
-    const text = value === undefined || value === null ? '' : String(value);
-    const limit = input && input.type === 'readme' ? PARAMETERS.README_MAX_LENGTH : PARAMETERS.QUESTION_MAX_LENGTH;
-    // Legacy stores angle brackets as look-alike Unicode instead of markup.
-    const sanitized = input && input.type === 'readme' ? text : text.replace(/>/g, '\ufe65').replace(/</g, '\ufe64');
-
-    return sanitized.slice(0, limit);
-};
-
-export const getQuestionLabel = (input) => {
-    if (!input || !input.question) {
-        return input && input.type === 'readme' ? 'Readme' : 'Untitled question';
-    }
-
-    if (input.type !== 'readme') {
-        return input.question;
-    }
-
-    const parsed = new DOMParser().parseFromString(input.question, 'text/html');
-
-    return parsed.body.textContent.trim() || 'Readme';
 };

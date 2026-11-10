@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Formbuilder — Ionic Vue</title>
+    <meta name="description"
+          content="Ionic Vue formbuilder for the Epicollect5 project definition">
+
+    <!-- favicons live one level up: this page serves under /ionic/vue/. -->
+    <link rel="shortcut icon"
+          href="../favicons/favicon.ico">
+    <link rel="icon"
+          type="image/svg+xml"
+          href="../favicons/favicon.svg">
+    <link rel="apple-touch-icon"
+          sizes="96x96"
+          href="../favicons/favicon-96x96.png">
+</head>
+
+<body class="loader-background">
+<div class="loader" aria-label="Loading">
+    <ion-spinner name="crescent" color="secondary"></ion-spinner>
+</div>
+
+<!-- The Vue app owns the ion-app shell; main.js removes the loader on boot. -->
+<div id="app"></div>
+
+<script type="module"
+        src="./main.js"></script>
+
+</body>
+
+</html>
