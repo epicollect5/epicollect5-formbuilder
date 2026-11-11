@@ -358,18 +358,25 @@ to regress; **fixed** — the concrete case found during the port is handled.
 
 ### R-62 Every push deep-clones the whole project
 - **Where:** `capture` — `JSON.parse(JSON.stringify(project_definition))`, up to
-  ten states.
+  `MAX_UNDO_STATES` (5) states.
 - **Risk:** a 300-question project is cloned on every action (typing coalesced to
   one per pause), and undo itself clones again. Memory and CPU grow with project
   size; nothing is measured yet.
 - **Impact:** lag on large projects, especially while typing across many edits.
-- **Status:** measured (2026-11-07, worst case 5 x 300 questions, 25 MB
-  serialized): the JSON clone costs ~180 ms and `structuredClone` is *worse*
-  (~275 ms), so the clone stays JSON; ten states ≈ 250 MB of heap on the worst
-  case. The cost lands once per 500 ms of continuous typing (the throttle) and
-  once per discrete action — noticeable but bounded. A structural fix (string
-  snapshots, deltas or immutable state) is deferred until real use complains.
-- **Revisit when:** large projects feel slow; measure before optimising.
+- **Status:** measured twice. 2026-11-07 (5 x 300 questions, 25 MB serialized):
+  the JSON clone costs ~180 ms and `structuredClone` is *worse* (~275 ms), so
+  the clone stays JSON; ten states ≈ 250 MB of heap. 2026-11-11 at the schema
+  maximum (127.5 MB serialized, 453,500 answers): **1.2–2.2 s and +386–392 MB
+  per state**, because each state keeps a parsed clone *and* its stringified
+  dedupe key; ten states would be ~3.9 GB. `MAX_UNDO_STATES` was lowered to 5
+  (~1.95 GB) as a stop-gap. S-01/S-02 then replaced the clone + key with one
+  serialized string per state, a text comparison for dedupe and a
+  `MAX_UNDO_BYTES` ceiling (see `docs/performance-audit-limits.md`): no state
+  keeps a parsed copy, so a push is a single `JSON.stringify` and a restore a
+  single `JSON.parse`. Serializing the raw target rather than the reactive proxy
+  (S-09) then took a push at 130 MB from 1.15–2.19 s to 71–123 ms.
+- **Revisit when:** large projects feel slow; re-measure the per-state cost
+  against the string snapshots (A-05).
 
 ### R-63 The baseline follows project identity
 - **Where:** `ensureUndoBaseline` compares the `project_definition` object to the

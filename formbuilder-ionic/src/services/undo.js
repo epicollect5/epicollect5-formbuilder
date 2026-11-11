@@ -1,5 +1,7 @@
 'use strict';
 
+import { toRaw } from 'vue';
+
 import { getForms } from '@/models/project-definition.js';
 import { PARAMETERS } from '@/config/parameters.js';
 import { getSession, selectForm, setProject } from '@/services/session.js';
@@ -9,9 +11,21 @@ import { getSession, selectForm, setProject } from '@/services/session.js';
  *
  * The legacy stack keeps one snapshot per user action, taken *after* the
  * mutation, with the baseline at index 0: undo pops the top and renders the one
- * below it. States are deep JSON copies of the project definition; the port
- * also records the form index so undoing stays on the form being edited
- * (the legacy `execute` had a `//todo` to stop forcing form 0).
+ * below it. The port also records the form index so undoing stays on the form
+ * being edited (the legacy `execute` had a `//todo` to stop forcing form 0).
+ *
+ * A snapshot is the serialized project definition, not a parsed clone: one
+ * string per state instead of a clone plus a stringified dedupe key (R-62).
+ * `undo` re-parses that string, which is the single pass the clone used to cost
+ * on restore, and consecutive states are compared as text, so the history keeps
+ * no second copy of anything.
+ *
+ * History is bounded twice, by `MAX_UNDO_STATES` and by `MAX_UNDO_BYTES`, so a
+ * project near the schema limits keeps fewer steps instead of exhausting the
+ * tab. A state is accounted at two bytes per character, the UTF-16 upper bound,
+ * so the byte budget is never under-estimated. The newest state is always kept,
+ * even when it alone exceeds the budget, so the stack cannot lose its only
+ * entry.
  *
  * Typing pushes are throttled by 500ms, as in legacy `pushState(true)`, so a
  * burst of keystrokes is one undo step. An immediate push cancels a pending
@@ -23,20 +37,24 @@ import { getSession, selectForm, setProject } from '@/services/session.js';
  */
 
 let states = [];
-let keys = [];
+let state_bytes = 0;
 let pending = null;
 let baseline = null;
 
-const clone = (value) => {
-    return JSON.parse(JSON.stringify(value));
-};
-
+/*
+ * The definition sits behind `reactive()`, so serializing it directly pays a
+ * proxy trap on every property read: several times the cost of the same bytes
+ * read from the plain graph. `toRaw` returns the live target - writes through
+ * the proxy land on it - so the snapshot is identical, only cheaper (S-09).
+ */
 const capture = () => {
     const session = getSession();
+    const json = JSON.stringify(toRaw(session.project_definition));
 
     return {
-        project_definition: clone(session.project_definition),
-        current_form_index: session.current_form_index
+        json,
+        current_form_index: session.current_form_index,
+        bytes: json.length * 2
     };
 };
 
@@ -47,21 +65,24 @@ const clearPending = () => {
     }
 };
 
-/* Identical consecutive states would be an undo step that changes nothing. */
-const store = (state) => {
-    const key = JSON.stringify(state);
+/* Drops the oldest states until both ceilings hold; never drops the newest. */
+const trim = () => {
+    while (states.length > 1 && (states.length > PARAMETERS.MAX_UNDO_STATES || state_bytes > PARAMETERS.MAX_UNDO_BYTES)) {
+        state_bytes -= states.shift().bytes;
+    }
+};
 
-    if (keys.length && keys[keys.length - 1] === key) {
+const store = (state) => {
+    const previous = states[states.length - 1];
+
+    /* Identical consecutive states would be an undo step that changes nothing. */
+    if (previous && previous.json === state.json && previous.current_form_index === state.current_form_index) {
         return false;
     }
 
-    if (states.length >= PARAMETERS.MAX_UNDO_STATES) {
-        states.shift();
-        keys.shift();
-    }
-
     states.push(state);
-    keys.push(key);
+    state_bytes += state.bytes;
+    trim();
 
     return true;
 };
@@ -83,7 +104,7 @@ export const ensureUndoBaseline = () => {
     if (project !== baseline) {
         clearPending();
         states = [];
-        keys = [];
+        state_bytes = 0;
         baseline = project;
         store(capture());
     }
@@ -95,7 +116,7 @@ export const resetUndoHistory = () => {
     clearPending();
     baseline = null;
     states = [];
-    keys = [];
+    state_bytes = 0;
 
     return ensureUndoBaseline();
 };
@@ -144,11 +165,10 @@ export const undo = () => {
     }
 
     clearPending();
-    states.pop();
-    keys.pop();
+    state_bytes -= states.pop().bytes;
 
     const state = states[states.length - 1];
-    const project = clone(state.project_definition);
+    const project = JSON.parse(state.json);
 
     setProject(project);
     baseline = getSession().project_definition;

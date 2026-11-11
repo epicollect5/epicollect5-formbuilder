@@ -57,8 +57,9 @@ Ported today:
   Properties / Jumps tab badges and the Validate button.
 - Question copy: duplicate at the end of the active list with new refs and
   answer refs, remapped default and jumps that stay inside the copy.
-- Undo: ten snapshots of the project definition at the legacy push points, a
-  500ms throttled push for typing, and a data-only restore.
+- Undo: five serialized snapshots of the project definition at the legacy push
+  points, bounded by a byte budget, a 500ms throttled push for typing, and a
+  data-only restore.
 - Parent validity badges that reflect branch / group child validation.
 - Save / export / import: cleaning on a deep copy, the `base64(gzip(JSON))`
   POST, the plain-JSON form envelope, and an import that validates against the
@@ -251,7 +252,7 @@ constraints so it remains standalone; keep those declarations in sync with
 | Regex length | `REGEX_MAX_LENGTH` | 50 |
 | Min / max value length | `MIN_MAX_LENGTH` | 50 |
 | Question preview length | `QUESTION_PREVIEW_LENGTH` | 50 |
-| Undo states | `MAX_UNDO_STATES` | 10 |
+| Undo states | `MAX_UNDO_STATES` | 5 |
 | Undo typing throttle | `UNDO_THROTTLE_MS` | 500 ms |
 
 ## Browser support

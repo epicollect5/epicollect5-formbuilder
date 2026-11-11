@@ -25,7 +25,9 @@ export const PARAMETERS = {
     DATE_FORMATS_DEFAULT: 'dd/MM/YYYY',
     TIME_FORMATS_DEFAULT: 'HH:mm',
 
-    MAX_UNDO_STATES: 10,
+    MAX_UNDO_STATES: 5,
+    /* Ceiling for the serialized snapshots, the UTF-16 upper bound of the text. */
+    MAX_UNDO_BYTES: 1024 * 1024 * 1024,
     UNDO_THROTTLE_MS: 500,
 
     TOAST_DURATION_MS: 3200,

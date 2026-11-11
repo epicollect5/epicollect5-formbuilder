@@ -33,7 +33,6 @@ import {
     areAllInputsValid,
     areFormInputsValid,
     getInputErrors,
-    isInputValid,
     JUMPS_TAB,
     PROPERTIES_TAB
 } from '@/services/validation.js';
@@ -503,16 +502,6 @@ export const useBuilderStore = defineStore('builder', () => {
                     return error.tab === JUMPS_TAB;
                 })
             };
-        }),
-        rowValidity: computed(() => {
-            const inputs = getCurrentInputs();
-
-            return inputs.map((input) => {
-                return {
-                    ref: input.ref,
-                    valid: isInputValid(input, inputs)
-                };
-            });
         }),
         readmeValue: computed(() => {
             const input = getCurrentInput();

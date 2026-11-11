@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { PARAMETERS } from '@/config/parameters.js';
 import { useBuilderStore } from '@/vue/stores/builder.js';
 import { usePossibleAnswersStore } from '@/vue/stores/possibleAnswers.js';
 import { bootStoreTest } from './support/vue-store-fixture.js';
@@ -22,6 +23,41 @@ describe('vue possible answers store', () => {
         // the new answer is the last one, so the pager jumps to its page
         expect(store.possibleAnswersCurrentPage).toBe(1);
         expect(builder.state.unsaved_changes).toBe(true);
+    });
+
+    it('lists one page of initial answers, follows the default and keeps it listed', () => {
+        const builder = useBuilderStore();
+        const store = usePossibleAnswersStore();
+
+        builder.addQuestion('searchsingle');
+
+        const input = builder.currentInput;
+
+        while (input.possible_answers.length < 150) {
+            input.possible_answers.push({
+                answer: 'Answer ' + input.possible_answers.length,
+                answer_ref: 'a' + input.possible_answers.length
+            });
+        }
+
+        expect(store.defaultChoicePageCount).toBe(2);
+        expect(store.defaultChoiceOptions).toHaveLength(1 + PARAMETERS.ANSWERS_PER_PAGE);
+
+        const late_ref = input.possible_answers[140].answer_ref;
+
+        store.setDefaultChoice(late_ref);
+
+        // the select opens on the page holding the current default
+        expect(store.defaultChoiceCurrentPage).toBe(2);
+        expect(store.defaultChoiceOptions).toHaveLength(1 + (150 - PARAMETERS.ANSWERS_PER_PAGE));
+
+        store.goToDefaultChoicePage(1);
+
+        expect(store.defaultChoiceCurrentPage).toBe(1);
+        // the default stays selectable from the page it is not on
+        expect(store.defaultChoiceOptions.some((option) => {
+            return option.value === late_ref;
+        })).toBe(true);
     });
 
     it('sanitises renamed answers through the model', () => {

@@ -48,7 +48,9 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
     const state = reactive({
         // the visible answers page per input ref (ui/state.js parity); page
         // state is not undoable, as in the vanilla app
-        possible_answers_pages: new Map()
+        possible_answers_pages: new Map(),
+        // the advanced panel's initial-answer select page, per input ref
+        default_choice_pages: new Map()
     });
 
     const methods = {
@@ -166,6 +168,46 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
 
             updateCurrentInput({ default: value ? value : null });
             builder.recordChange();
+        },
+        /*
+         * The initial answer select lists one page of answers at a time: a
+         * search question can hold MAX_SEARCH_ANSWERS options, and a thousand
+         * option elements for one control is the single largest render in the
+         * panel (S-05). Until the user pages, the select follows the current
+         * default so the control opens on the answer it is showing.
+         */
+        currentDefaultChoicePage() {
+            const input = getCurrentInput();
+
+            if (!input) {
+                return 1;
+            }
+
+            const pages = getAnswerPageCount(input.possible_answers);
+            const stored = state.default_choice_pages.get(input.ref);
+
+            if (stored) {
+                return Math.min(Math.max(stored, 1), pages);
+            }
+
+            const index = (input.possible_answers || []).findIndex((answer) => {
+                return String(answer.answer_ref) === String(input.default);
+            });
+
+            return index === -1 ? 1 : Math.floor(index / PARAMETERS.ANSWERS_PER_PAGE) + 1;
+        },
+        goToDefaultChoicePage(target) {
+            const input = getCurrentInput();
+
+            if (!input) {
+                return false;
+            }
+
+            const pages = getAnswerPageCount(input.possible_answers);
+
+            state.default_choice_pages.set(input.ref, Math.min(Math.max(target, 1), pages));
+
+            return true;
         },
         exportPossibleAnswersCsv() {
             const input = getCurrentInput();
@@ -369,15 +411,42 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
                 };
             });
         }),
+        defaultChoicePageCount: computed(() => {
+            const input = getCurrentInput();
+
+            return getAnswerPageCount(input ? input.possible_answers : []);
+        }),
+        defaultChoiceCurrentPage: computed(() => {
+            return methods.currentDefaultChoicePage();
+        }),
         defaultChoiceOptions: computed(() => {
             const input = getCurrentInput();
 
-            return [{ value: '', label: 'None' }, ...(input && input.possible_answers ? input.possible_answers : []).map((answer) => {
-                return {
+            if (!input) {
+                return [{ value: '', label: 'None' }];
+            }
+
+            const answers = input.possible_answers || [];
+            const page = methods.currentDefaultChoicePage();
+            const page_answers = getAnswerPage(answers, page);
+            const selected = answers.find((answer) => {
+                return String(answer.answer_ref) === String(input.default);
+            });
+            const options = [{ value: '', label: 'None' }];
+
+            /* keep the current default selectable when the user pages away */
+            if (selected && page_answers.indexOf(selected) === -1) {
+                options.push({ value: selected.answer_ref, label: selected.answer || 'Untitled answer' });
+            }
+
+            page_answers.forEach((answer) => {
+                options.push({
                     value: answer.answer_ref,
                     label: answer.answer || 'Untitled answer'
-                };
-            })];
+                });
+            });
+
+            return options;
         }),
         defaultChoiceValue: computed(() => {
             const input = getCurrentInput();

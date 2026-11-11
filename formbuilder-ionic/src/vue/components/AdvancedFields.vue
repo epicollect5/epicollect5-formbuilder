@@ -143,6 +143,35 @@
                                        :key="option.value"
                                        :value="option.value">{{ option.label }}</ion-select-option>
                 </ion-select>
+
+                <div class="builder__answers-pager"
+                     data-role="default-choice-pager"
+                     v-if="defaultChoicePageCount > 1">
+                    <button type="button"
+                            class="builder__answers-pager-button"
+                            data-action="default-choice-page-prev"
+                            aria-label="Previous initial answers page"
+                            :disabled="defaultChoiceCurrentPage <= 1"
+                            @click="onDefaultChoicePageChange(defaultChoiceCurrentPage - 1)">
+                        <ion-icon name="chevron-back-outline" aria-hidden="true"></ion-icon>
+                    </button>
+
+                    <span class="builder__answers-pager-label">
+                        Page
+                        <span data-role="default-choice-page">{{ defaultChoiceCurrentPage }}</span>
+                        of
+                        <span data-role="default-choice-pages">{{ defaultChoicePageCount }}</span>
+                    </span>
+
+                    <button type="button"
+                            class="builder__answers-pager-button"
+                            data-action="default-choice-page-next"
+                            aria-label="Next initial answers page"
+                            :disabled="defaultChoiceCurrentPage >= defaultChoicePageCount"
+                            @click="onDefaultChoicePageChange(defaultChoiceCurrentPage + 1)">
+                        <ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+                    </button>
+                </div>
             </div>
 
             <div class="builder__field-group" v-if="hasField('search_type')">
@@ -210,6 +239,9 @@ export default {
             },
             onDefaultChoiceChange(event) {
                 answers.setDefaultChoice(event.detail.value);
+            },
+            onDefaultChoicePageChange(target) {
+                answers.goToDefaultChoicePage(target);
             }
         };
 
@@ -275,6 +307,12 @@ export default {
             }),
             defaultChoiceValue: computed(() => {
                 return answers.defaultChoiceValue;
+            }),
+            defaultChoicePageCount: computed(() => {
+                return answers.defaultChoicePageCount;
+            }),
+            defaultChoiceCurrentPage: computed(() => {
+                return answers.defaultChoiceCurrentPage;
             }),
             questionMaxLength: PARAMETERS.QUESTION_MAX_LENGTH,
             minMaxLength: PARAMETERS.MIN_MAX_LENGTH,

@@ -65,7 +65,7 @@ describe('undo history', () => {
         expect(canUndo()).toBe(false);
     });
 
-    it('keeps at most ten states', () => {
+    it('keeps at most five states', () => {
         for (let index = 0; index < PARAMETERS.MAX_UNDO_STATES + 4; index += 1) {
             first_question().question = 'Q' + index;
             pushUndoState();
@@ -79,6 +79,30 @@ describe('undo history', () => {
 
         expect(undos).toBe(PARAMETERS.MAX_UNDO_STATES - 1);
         expect(first_question().question).not.toBe('First');
+    });
+
+    it('drops the oldest states when the byte budget is reached', () => {
+        const budget = PARAMETERS.MAX_UNDO_BYTES;
+        const state_bytes = JSON.stringify(getSession().project_definition).length * 2;
+
+        PARAMETERS.MAX_UNDO_BYTES = state_bytes * 2 + 64;
+
+        try {
+            for (let index = 0; index < 6; index += 1) {
+                first_question().question = 'Q' + index;
+                pushUndoState();
+            }
+        } finally {
+            PARAMETERS.MAX_UNDO_BYTES = budget;
+        }
+
+        let undos = 0;
+
+        while (undo()) {
+            undos += 1;
+        }
+
+        expect(undos).toBe(1);
     });
 
     it('coalesces typing into one throttled state', () => {

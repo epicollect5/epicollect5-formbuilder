@@ -12,7 +12,8 @@ report — timings are wall-clock around a single interaction on a desktop
 browser, useful for magnitude, not for regression thresholds.
 
 Keystroke validation and undo snapshot costs are measured separately and tracked
-in `docs/risks.md` (R-41 and R-62).
+in `docs/risks.md` (R-41 and R-62). The at-limit benchmark — a project built to
+every `PARAMETERS` cap — is in `docs/performance-audit-limits.md`.
 
 ## What shipped
 
