@@ -45,6 +45,7 @@
                         <ion-segment-button v-for="tab in tabs"
                                             :key="tab.value"
                                             :value="tab.value"
+                                            :disabled="tab.disabled"
                                             :class="{ 'is-invalid': tab.invalid }"
                                             :aria-invalid="tab.invalid ? 'true' : null">
                             <ion-label>{{ tab.label }}
@@ -149,10 +150,9 @@ import {
     allowsRequired,
     allowsTitle,
     hasAdvancedTab,
-    isBranchOrGroup,
-    isMediaType
+    isBranchOrGroup
 } from '@/models/input-properties.js';
-import { getQuestionLabelText, getQuestionLabel } from '@/models/question-text.js';
+import { getQuestionLabel } from '@/models/question-text.js';
 import { hideLoading, notifyError, notifySuccess, showLoading } from '@/services/notifications.js';
 import { isInputValid } from '@/services/validation.js';
 import { useBuilderStore } from '@/vue/stores/builder.js';
@@ -271,13 +271,18 @@ export default {
                 // selection, as the vanilla render does
                 return currentInput.value ? {} : { visibility: 'hidden' };
             }),
+            /*
+             * Tabs a type cannot use are disabled, not just refused on
+             * change: the closed tab reads as unavailable in the strip.
+             */
             tabs: computed(() => {
                 const errors = store.propertyTabErrors;
+                const type = currentInput.value ? currentInput.value.type : null;
 
                 return [
-                    { value: 'basic', label: 'Properties', invalid: errors.basic },
-                    { value: 'advanced', label: 'Advanced', invalid: errors.advanced },
-                    { value: 'jumps', label: 'Jumps', invalid: errors.jumps }
+                    { value: 'basic', label: 'Properties', invalid: errors.basic, disabled: false },
+                    { value: 'advanced', label: 'Advanced', invalid: errors.advanced, disabled: !type || !hasAdvancedTab(type) },
+                    { value: 'jumps', label: 'Jumps', invalid: errors.jumps, disabled: !canUseJumpsTab(store.editingTrail) }
                 ];
             }),
             activeTab: computed(() => {
@@ -300,16 +305,22 @@ export default {
                 return possibleAnswers.showPossibleAnswers;
             }),
             questionLabel: computed(() => {
-                return currentInput.value ? getQuestionLabelText(currentInput.value.type) : 'Question';
+                if (!currentInput.value) {
+                    return 'Question';
+                }
+
+                return isBranchOrGroup(currentInput.value.type) ? 'Header' : 'Question';
             }),
             questionPlaceholder: computed(() => {
                 return currentInput.value && isBranchOrGroup(currentInput.value.type) ?
                     'Type header here...' : 'Type question here...';
             }),
-            questionMaxLength: computed(() => {
-                return currentInput.value && isMediaType(currentInput.value.type) ?
-                    null : PARAMETERS.QUESTION_MAX_LENGTH;
-            }),
+            /*
+             * Every type caps its text at QUESTION_MAX_LENGTH — the sanitizer
+             * stores nothing longer. Ionic turns a null maxlength into 0, which
+             * made the media fields refuse every keystroke.
+             */
+            questionMaxLength: PARAMETERS.QUESTION_MAX_LENGTH,
             questionValue: computed(() => {
                 return currentInput.value ? (currentInput.value.question || '') : '';
             }),

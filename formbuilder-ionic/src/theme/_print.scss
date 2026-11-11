@@ -9,6 +9,24 @@
 }
 
 @media print {
+    /*
+     * Ionic pins the page box: its bundle sets body to position: fixed with a
+     * 100% height and overflow: hidden, which clips the preview to a single
+     * printed page. Everything past the first page of questions (and every
+     * possible answer after the first page's worth) never reaches the paper.
+     * The build replaces the app shell with a normal, paginating document.
+     */
+    html,
+    body {
+        position: static !important;
+        width: auto;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        transform: none;
+        background: #ffffff;
+    }
+
     body > :not(.print-preview-wrapper) {
         display: none !important;
     }
@@ -30,8 +48,14 @@
             overflow-wrap: break-word;
         }
 
+        /*
+         * The legacy rule pulled the title up by 20px to cancel Bootstrap's
+         * heading margin. _reset.scss already zeroes the heading margins, so
+         * that offset would push the project name above the page box, where
+         * the printer clips it — the title reached the paper cut in half.
+         */
         h2 {
-            margin-top: -20px;
+            margin-top: 0;
             text-align: center;
             white-space: pre-wrap;
         }

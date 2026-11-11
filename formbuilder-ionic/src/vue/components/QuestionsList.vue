@@ -73,9 +73,11 @@
                               :group="builderQuestions"
                               ghost-class="builder__question-placeholder"
                               filter=".builder__empty"
-                              :move="onMove"
+                              :force-fallback="true"
+                              :fallback-on-body="true"
+                              :on-move="onMove"
                               @start="onDragStart($event)"
-                              @end="onDragEnd($event)">
+                              @end="onDragEnd()">
                     <div class="builder__empty builder__notice builder__notice--info ion-text-center"
                          v-if="!currentInputs.length">
                         <span>Drag and drop questions from the sidebar <br/> (or import an Epicollect5 form file)</span>
@@ -141,6 +143,8 @@ export default {
              * the model order.
              */
             onDragStart(event) {
+                store.beginDrag('.builder__question-list');
+
                 const ref = event.item ? event.item.getAttribute('data-input-ref') : null;
 
                 if (ref) {
@@ -153,20 +157,20 @@ export default {
                     document.activeElement.blur();
                 }
             },
-            /* SortableJS does not always strip the ghost class at drop. */
-            onDragEnd(event) {
-                if (event.item) {
-                    event.item.classList.remove('builder__question-placeholder');
-                }
+            onDragEnd() {
+                store.endDrag();
             },
             /*
              * The vanilla sortable locked the drag to the list (axis y +
              * containment parent). SortableJS has no containment option, so
              * any insertion while the pointer is outside the list box is
-             * refused here — the drop can only land within the list.
+             * refused here — the drop can only land within the list. The
+             * pointer event is the second argument (and mirrored on the first,
+             * the `move` event); bound as :on-move, which is the Sortable
+             * option it needs to be.
              */
-            onMove(event) {
-                const pointer = event.originalEvent;
+            onMove(event, original_event) {
+                const pointer = original_event || event.originalEvent;
 
                 if (!pointer) {
                     return true;
@@ -221,9 +225,14 @@ export default {
             }
         });
 
+        /*
+         * Only the palette's cloned tools may be dropped in: the name is the
+         * palette's group, and the explicit list keeps a row dragged out of
+         * another list from landing here.
+         */
         const builderQuestions = {
             name: 'builder-questions',
-            put: true
+            put: ['builder-questions']
         };
 
         const computedScope = {

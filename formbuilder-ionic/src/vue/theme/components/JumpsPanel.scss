@@ -17,9 +17,10 @@
 
 /*
  * The empty state reads as a notice well, inset from the card edges like the
- * other wells.
+ * other wells, with its message centered in the well.
  */
 .builder__jumps-panel .builder__jumps-empty {
     margin: 10px 10px 0;
+    text-align: center;
 }
 

@@ -38,7 +38,11 @@
                               aria-label="Question types"
                               v-model="builderTools"
                               :group="builderQuestions"
-                              :sort="false">
+                              :force-fallback="true"
+                              :fallback-on-body="true"
+                              :sort="false"
+                              @start="startDrag()"
+                              @end="endDrag()">
                     <button v-for="tool in builderTools"
                             :key="tool.type"
                             type="button"
@@ -134,6 +138,12 @@ export default {
             },
             openFormNameModal() {
                 forms.openFormNameModal(null);
+            },
+            startDrag() {
+                store.beginDrag();
+            },
+            endDrag() {
+                store.endDrag();
             },
             /* The vanilla palette blurs the clicked tool; keep the behaviour. */
             blurTool(event) {

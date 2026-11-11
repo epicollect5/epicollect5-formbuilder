@@ -37,7 +37,12 @@
                               ghost-class="builder__answer-placeholder"
                               filter="ion-input, input, textarea, button, a"
                               :prevent-on-filter="false"
-                              @end="onDragEnd($event)">
+                              :group="answersGroup"
+                              :force-fallback="true"
+                              :fallback-on-body="true"
+                              :on-move="onDragMove"
+                              @start="onDragStart($event)"
+                              @end="onDragEnd()">
                 <li v-for="row in possibleAnswerRows"
                     :key="row.answer.answer_ref"
                     class="builder__answer"
@@ -107,6 +112,7 @@ import { VueDraggable } from 'vue-draggable-plus';
 import { PARAMETERS } from '@/config/parameters.js';
 import { VALIDATION_MESSAGES } from '@/config/strings.js';
 import { POSSIBLE_ANSWERS_ORDER } from '@/models/possible-answers.js';
+import { useBuilderStore } from '@/vue/stores/builder.js';
 import { usePossibleAnswersStore } from '@/vue/stores/possibleAnswers.js';
 import { createMenu } from '@/ui/dropdown.js';
 
@@ -122,6 +128,7 @@ export default {
         VueDraggable
     },
     setup() {
+        const builder = useBuilderStore();
         const store = usePossibleAnswersStore();
         let menu = null;
 
@@ -129,6 +136,16 @@ export default {
             message: '',
             is_error: false
         });
+
+        /*
+         * The answers reorder inside their own list only: nothing is pulled
+         * out of the card and nothing is accepted into it.
+         */
+        const answersGroup = {
+            name: 'builder-answers',
+            pull: false,
+            put: false
+        };
 
         const methods = {
             addPossibleAnswer() {
@@ -140,16 +157,37 @@ export default {
             onRenameInput(answer, event) {
                 store.renamePossibleAnswer(answer.answer_ref, event.detail.value || '');
             },
-            /*
-             * SortableJS does not always strip the ghost class from the
-             * dropped row; a leftover would leave it visibility:hidden and
-             * uneditable, so the class is removed explicitly.
-             */
-            onDragEnd(event) {
-                if (event.item) {
-                    event.item.classList.remove('builder__answer-placeholder');
-                }
+            onDragStart() {
+                builder.beginDrag('.builder__answer-list');
             },
+            onDragEnd() {
+                builder.endDrag();
+            },
+            /*
+             * SortableJS has no containment option: the insertion is refused
+             * unless the pointer is vertically inside the answers list, so the
+             * rows can only be reordered along it (the horizontal position is
+             * irrelevant for a vertical list, hence Y only). The pointer event
+             * is the second argument (and mirrored on the first, `move` event).
+             */
+            onDragMove(event, original_event) {
+                const pointer = original_event || event.originalEvent;
+
+                if (!pointer) {
+                    return true;
+                }
+
+                const list = document.querySelector('.builder__answer-list');
+
+                if (!list) {
+                    return false;
+                }
+
+                const rect = list.getBoundingClientRect();
+
+                return pointer.clientY >= rect.top && pointer.clientY <= rect.bottom;
+            },
+
             /* Paging is blocked while a visible answer is still empty. */
             onPageChange(target) {
                 if (!store.goToPossibleAnswersPage(target)) {
@@ -200,6 +238,7 @@ export default {
                 return store.possibleAnswersPageCount;
             }),
             pageAnswersModel,
+            answersGroup,
             note,
             isOnlyAnswer: computed(() => {
                 return store.possibleAnswerCount === 1;

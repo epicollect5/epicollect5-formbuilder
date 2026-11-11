@@ -76,6 +76,11 @@ export const useBuilderStore = defineStore('builder', () => {
         app_base_url: null
     });
 
+    /* The drag the ghost clamp follows: the list box it is held inside, and
+       the pointer offset inside the ghost, captured on the first move. */
+    let drag_box = null;
+    let drag_anchor = null;
+
     const methods = {
         /* Boot wiring, called by vue/main.js before the first project load. */
         setAppBaseUrl(url) {
@@ -96,6 +101,77 @@ export const useBuilderStore = defineStore('builder', () => {
 
                 event.preventDefault();
             });
+        },
+        /*
+         * The held cursor. The lists sort in fallback mode, so the cursor is
+         * CSS-driven for the whole gesture — including the page gaps between
+         * the lists. A body class carries it, set on drag start and removed on
+         * drag end, so no list has to own the state and nothing is left behind
+         * if a sortable class lingers after the drop.
+         */
+        beginDrag(list_selector) {
+            document.body.classList.add('is-sortable-dragging');
+
+            drag_box = list_selector ? document.querySelector(list_selector) : null;
+            drag_anchor = null;
+            window.addEventListener('pointermove', methods.clampGhost);
+
+            // a release the sortable never sees (outside the window, a
+            // cancelled pointer) must not leave the builder in the held cursor
+            window.addEventListener('pointerup', methods.endDrag, { once: true });
+            window.addEventListener('pointercancel', methods.endDrag, { once: true });
+        },
+        /*
+         * The lists sort in fallback mode, so the ghost is a clone appended to
+         * the body: left alone it follows the pointer across the whole page.
+         * It is held inside the box of the list it was dragged from, on both
+         * axes, so the drag feedback stays in its container and on its own
+         * column. The drop guard still decides where an insertion is allowed.
+         */
+        clampGhost(event) {
+            const ghost = document.querySelector('.sortable-fallback');
+
+            if (!drag_box || !ghost) {
+                return;
+            }
+
+            const base_top = parseFloat(ghost.style.top);
+            const base_left = parseFloat(ghost.style.left);
+
+            if (!drag_anchor) {
+                drag_anchor = {x: event.clientX - base_left, y: event.clientY - base_top};
+            }
+
+            const box = drag_box.getBoundingClientRect();
+            const width = ghost.offsetWidth;
+            const height = ghost.offsetHeight;
+            const left = Math.min(Math.max(event.clientX - drag_anchor.x, box.left), box.right - width);
+            const top = Math.min(Math.max(event.clientY - drag_anchor.y, box.top), box.bottom - height);
+
+            ghost.style.transform = 'translate3d(' + Math.round(left - base_left) + 'px, ' +
+                Math.round(top - base_top) + 'px, 0)';
+        },
+        endDrag() {
+            window.removeEventListener('pointermove', methods.clampGhost);
+            drag_box = null;
+            drag_anchor = null;
+
+            document.body.classList.remove('is-sortable-dragging');
+
+            // SortableJS leaves its hidden fallback clone inside the list after
+            // a drop, and Vue does not own that node, so nothing else removes
+            // it — it would otherwise stack up once per drag.
+            document.querySelectorAll('.sortable-fallback').forEach((clone) => {
+                clone.remove();
+            });
+
+            // the ghost class is not always stripped either; a leftover would
+            // leave the dropped row as a placeholder with hidden content
+            document
+                .querySelectorAll('.builder__question-placeholder, .builder__answer-placeholder')
+                .forEach((node) => {
+                    node.classList.remove('builder__question-placeholder', 'builder__answer-placeholder');
+                });
         },
         /*
          * The mutation hub, mirroring ui/state.js recordChange: the undo push

@@ -36,7 +36,7 @@
     font: inherit;
     font-size: 15px;
     text-align: left;
-    cursor: grab;
+    cursor: pointer;
     box-sizing: border-box;
 }
 
@@ -44,6 +44,15 @@
    above would otherwise override the hidden attribute. */
 .builder__tool[hidden] {
     display: none;
+}
+
+/*
+ * SortableJS paints its fallback ghost at 0.8 opacity inline, which no rule of
+ * ours could outrank without !important. The held tool reads as the solid
+ * control it is, so the ghost is forced opaque.
+ */
+.builder__tool.sortable-fallback {
+    opacity: 1 !important;
 }
 
 .builder__tool:focus {
@@ -554,20 +563,15 @@ ion-item.builder__question {
     margin: 0 0 6px;
     min-width: 0;
     overflow: hidden;
-    cursor: grab;
+    cursor: pointer;
 }
 
 ion-item.builder__question::part(native) {
-    cursor: grab;
+    cursor: pointer;
 }
 
 ion-item.builder__question:last-child {
     margin-bottom: 0;
-}
-
-ion-item.builder__question:focus-within {
-    outline: 2px solid rgba(var(--ion-color-primary-rgb), 0.35);
-    outline-offset: 1px;
 }
 
 /* Drag image cloned from a tool button: it borrows the row shape but is a
@@ -644,18 +648,20 @@ ion-item.builder__question[aria-current='true'] {
     --background: #e6bce0;
 }
 
-ion-item.builder__question.ui-sortable-helper {
+ion-item.builder__question.ui-sortable-helper,
+ion-item.builder__question.sortable-fallback,
+ion-item.builder__question.sortable-drag {
     opacity: 1 !important;
     background: #ffffff !important;
     --background: #ffffff !important;
     box-shadow: 0 8px 24px rgba(28, 18, 40, 0.18);
     cursor: grabbing;
+}
 
-    &[aria-current='true'] {
-        opacity: 1 !important;
-        background: #e6bce0 !important;
-        --background: #e6bce0 !important;
-    }
+/* The row's own wrapper carries the cursor, so the drag state needs it too. */
+ion-item.builder__question.sortable-fallback::part(native),
+ion-item.builder__question.sortable-drag::part(native) {
+    cursor: grabbing;
 }
 
 .builder__question-text {
@@ -807,6 +813,35 @@ ion-item.builder__question.ui-sortable-helper {
     border-bottom-color: var(--ion-color-primary);
     color: var(--ion-color-primary);
     font-weight: 600;
+}
+
+/*
+ * Hovering a tab that can be switched to previews the selected underline, in
+ * the tab's own text colour: the primary accent stays the selected state's
+ * marker, so hover reads as "available", not as "current".
+ */
+.builder__property-tabs ion-segment-button:hover:not(.segment-button-checked):not(.segment-button-disabled) {
+    border-bottom-color: currentColor;
+}
+
+/*
+ * A tab the current type cannot use reads as unavailable: light grey and
+ * struck through. Ionic already drops the pointer events and the ripple on a
+ * disabled segment button; the fade is replaced by the grey so the label stays
+ * legible.
+ */
+.builder__property-tabs ion-segment-button.segment-button-disabled {
+    opacity: 1;
+    --color: var(--ion-color-medium-tint);
+    --color-disabled: var(--ion-color-medium-tint);
+    --ripple-color: transparent;
+    color: var(--ion-color-medium-tint);
+    cursor: default;
+    pointer-events: none;
+}
+
+.builder__property-tabs ion-segment-button.segment-button-disabled ion-label {
+    text-decoration: line-through;
 }
 
 /* A tab holding an error keeps the danger colour even while it is selected. */
@@ -1226,25 +1261,46 @@ ion-item.builder__question.ui-sortable-helper {
     gap: 6px;
     min-height: 44px;
     padding: 2px 4px;
-    cursor: grab;
+    cursor: pointer;
     background: var(--fb-surface, #fff);
     border-radius: 4px;
     box-sizing: border-box;
 }
 
+/*
+ * The drop preview matches the question list and palette markers exactly: the
+ * same dashed primary-tint box, tint and 42px height, so every list in the
+ * builder previews a drop the same way.
+ */
 .builder__answer-placeholder {
-    min-height: 40px;
-    border: 1px dashed var(--ion-color-primary);
+    height: 42px;
+    min-height: 42px;
+    border: 2px dashed var(--ion-color-primary-tint);
     border-radius: 4px;
-    background: #c76abb22;
+    background: rgba(var(--ion-color-primary-rgb), 0.08);
+    box-sizing: border-box;
     visibility: visible !important;
+}
+
+/*
+ * The lists sort in fallback mode (force-fallback), so SortableJS appends a
+ * clone of the dragged row that follows the pointer — that clone is the drag
+ * ghost — while the original row stays in the list as the dashed drop marker.
+ * The ghost is shown on purpose: it is the only thing that moves with the
+ * cursor. A drop outside the list is still refused by the list's own move
+ * guard, so showing it cannot move a row to stray ground. The dragging class
+ * is set by the builder store on drag start and cleared on drag end.
+ */
+body.is-sortable-dragging,
+body.is-sortable-dragging * {
+    cursor: grabbing !important;
 }
 
 .builder__answer > ion-icon {
     flex: none;
     color: var(--ion-color-medium-shade);
     font-size: 18px;
-    cursor: grab;
+    cursor: pointer;
 }
 
 .builder__answers-card ion-input.builder__answer-field {
@@ -1282,16 +1338,33 @@ ion-item.builder__question.ui-sortable-helper {
     opacity: 0.5;
 }
 
+/*
+ * The held answer. SortableJS gives the clone the row's 42px box, so it gets
+ * no extra padding: the 40px outline input inside is exactly that tall, and
+ * any padding pushed the input out of the ghost.
+ */
 .builder__answer.ui-sortable-helper,
-.builder__answer.ui-sortable-dragging {
+.builder__answer.ui-sortable-dragging,
+.builder__answer.sortable-fallback {
     opacity: 1 !important;
     background: var(--fb-surface, #fff);
     border: 1px solid var(--fb-border, #e0e0e0);
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    padding: 2px 4px;
     box-sizing: border-box;
     cursor: grabbing;
+}
+
+/*
+ * The clone is appended to the body, outside the answers card, so the field
+ * sizing scoped to the card no longer reaches it and Ionic's own input sizing
+ * (a 56px minimum, 124px tall) took over — the outline input spilled out of the
+ * 44px ghost. The row's sizing is restated for the held copy.
+ */
+.builder__answer.sortable-fallback .builder__answer-field {
+    min-height: 40px !important;
+    height: 40px;
+    --min-height: 40px;
 }
 
 .builder__answer--over {
