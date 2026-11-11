@@ -1,6 +1,5 @@
 <template>
-    <section class="builder__properties-panel builder__properties-panel--advanced">
-        <p class="builder__empty" v-if="!advancedFields.length">No advanced properties for this question type.</p>
+    <section class="builder__properties-panel builder__properties-panel--advanced">        <p class="builder__empty" v-if="!advancedFields.length">No advanced properties for this question type.</p>
 
         <template v-else>
             <div class="builder__field-group" v-if="hasField('numeric_type')">
@@ -87,7 +86,7 @@
             <div class="builder__field-group" v-if="hasField('datetime_format')">
                 <div class="builder__field-label">{{ datetimeLabel }}</div>
                 <ion-radio-group class="builder__radio-group"
-                                 v-if="currentType === 'date'"
+                                 v-if="currentType === QUESTION_TYPE.DATE"
                                  :value="datetimeValue"
                                  @ionChange="onDatetimeFormatChange($event)">
                     <ion-radio v-for="format in dateFormats"
@@ -99,7 +98,7 @@
                     </ion-radio>
                 </ion-radio-group>
                 <ion-radio-group class="builder__radio-group"
-                                 v-if="currentType === 'time'"
+                                 v-if="currentType === QUESTION_TYPE.TIME"
                                  :value="datetimeValue"
                                  @ionChange="onDatetimeFormatChange($event)">
                     <ion-radio v-for="format in timeFormats"
@@ -194,7 +193,7 @@
 <script>
 import { computed } from 'vue';
 import { PARAMETERS } from '@/config/parameters.js';
-import { DATE_FORMATS, TIME_FORMATS } from '@/models/input-properties.js';
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import { useRootStore } from '@/vue/stores/root-store.js';
 import { usePropertiesStore } from '@/vue/stores/properties-store.js';
 import { usePossibleAnswersStore } from '@/vue/stores/possible-answers-store.js';
@@ -279,8 +278,8 @@ export default {
             datetimeValue: computed(() => {
                 return currentInput.value ? (currentInput.value.datetime_format || '') : '';
             }),
-            dateFormats: DATE_FORMATS,
-            timeFormats: TIME_FORMATS,
+            dateFormats: PARAMETERS.DATE_FORMATS,
+            timeFormats: PARAMETERS.TIME_FORMATS,
             defaultNumberValue: computed(() => {
                 return properties.defaultNumberValue;
             }),
@@ -320,6 +319,7 @@ export default {
         };
 
         return {
+            QUESTION_TYPE,
             ...methods,
             ...computedScope
         };

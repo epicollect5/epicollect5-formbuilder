@@ -43,7 +43,7 @@ middleware development-only; never put generated output in the legacy app.
 | Responsibility | Legacy source | Port target | Status |
 |---|---|---|---|
 | Project definition contract | shapes in `project/project.json`, `schemas/project.schema.json` | `src/models/project-definition.js` | ported |
-| Question catalogue (types, labels, icons) | `config/consts.js`, `helpers/utils.getInputToolIcon` | `src/models/question-types.js` | ported |
+| Question catalogue (types, labels, icons) | `config/consts.js`, `helpers/utils.getInputToolIcon` | `src/config/question-types.js`, `src/models/question-types.js` | ported |
 | Project loading (JSON + gzip/base64) | `loaders/load-project.js`, `helpers/utils.setProjectURL` | `src/services/project-source.js` | ported |
 | Current form / current question / edits | `config/formbuilder.js` singleton | `src/services/session.js` | ported |
 | Shell chrome (back, exit, add form, undo, save) | `ui-handlers/event-handler-callbacks/*`, `config/init.js`, `helpers/utils.goBack` | `src/ui/shell.js`, `src/services/navigation.js`, `src/services/session.js` | ported (phase 7) |

@@ -3,7 +3,8 @@
 import { computed, reactive } from 'vue';
 import { defineStore } from 'pinia';
 import { PARAMETERS } from '@/config/parameters.js';
-import { JUMP_CONDITIONS, jumpNeedsAnswer, usesAlwaysJump } from '@/models/jumps.js';
+import { JUMPS_MESSAGES, PANEL_MESSAGES } from '@/config/strings.js';
+import { jumpNeedsAnswer, usesAlwaysJump } from '@/models/jumps.js';
 import {
     addJump,
     canAddJump,
@@ -112,7 +113,7 @@ export const useJumpsStore = defineStore('jumps', () => {
                 // When: the always variant is a fixed unconditional jump
                 const whenOptions = always ?
                     [{ value: 'ALL', label: 'always' }] :
-                    JUMP_CONDITIONS.map((condition) => {
+                    PARAMETERS.JUMP_CONDITIONS.map((condition) => {
                         return { value: condition.key, label: condition.label };
                     });
 
@@ -126,7 +127,7 @@ export const useJumpsStore = defineStore('jumps', () => {
                     const options = (input.possible_answers || []).map((answer) => {
                         return {
                             value: answer.answer_ref,
-                            label: answer.answer || 'Untitled answer'
+                            label: answer.answer || PANEL_MESSAGES.UNTITLED_ANSWER
                         };
                     });
                     const has_value = options.some((option) => {
@@ -136,7 +137,7 @@ export const useJumpsStore = defineStore('jumps', () => {
                     if (needs_answer && jump.answer_ref && !has_value) {
                         options.unshift({
                             value: jump.answer_ref,
-                            label: 'Unavailable answer'
+                            label: JUMPS_MESSAGES.UNAVAILABLE_ANSWER
                         });
                     }
 
@@ -160,7 +161,7 @@ export const useJumpsStore = defineStore('jumps', () => {
                 if (jump.to && !has_destination) {
                     destinationOptions.unshift({
                         value: jump.to,
-                        label: jump.to === PARAMETERS.JUMP_TO_END_OF_FORM_REF ? 'End of form' : 'Unavailable destination'
+                        label: jump.to === PARAMETERS.JUMP_TO_END_OF_FORM_REF ? PARAMETERS.JUMP_TO_END_OF_FORM_LABEL : JUMPS_MESSAGES.UNAVAILABLE_DESTINATION
                     });
                 }
 

@@ -1,6 +1,11 @@
 'use strict';
 
-/* Shared limits and tuning parameters, named to match the mobile app. */
+/*
+ * Shared constants: limits and tuning named to match the mobile app, plus the
+ * option lists, default strings and contract vocabularies the models and
+ * panels read. Domain-sized taxonomies (the question types) have their own
+ * config module, `question-types.js`.
+ */
 export const PARAMETERS = {
     MAX_FORMS: 5,
     FORM_NAME_MAX_LENGTH: 50,
@@ -24,6 +29,51 @@ export const PARAMETERS = {
 
     DATE_FORMATS_DEFAULT: 'dd/MM/YYYY',
     TIME_FORMATS_DEFAULT: 'HH:mm',
+    /* The advanced-tab format options, first date / third time value being the defaults above. */
+    DATE_FORMATS: [
+        { value: 'dd/MM/YYYY', label: 'Day/Month/Year' },
+        { value: 'MM/dd/YYYY', label: 'Month/Day/Year' },
+        { value: 'YYYY/MM/dd', label: 'Year/Month/Day' },
+        { value: 'MM/YYYY', label: 'Month/Year' },
+        { value: 'dd/MM', label: 'Day/Month' }
+    ],
+    TIME_FORMATS: [
+        { value: 'HH:mm:ss', label: 'Hours:Minutes:Seconds (24 hours)' },
+        { value: 'hh:mm:ss', label: 'Hours:Minutes:Seconds (12 hours)' },
+        { value: 'HH:mm', label: 'Hours:Minutes (24 hours)' },
+        { value: 'hh:mm', label: 'Hours:Minutes (12 hours)' },
+        { value: 'mm:ss', label: 'Minutes:Seconds' }
+    ],
+
+    /* One placeholder answer is the minimum the contract allows. */
+    PLACEHOLDER_ANSWER: 'I am a placeholder answer',
+
+    /* Possible-answers ordering menu values. */
+    POSSIBLE_ANSWERS_ORDER: {
+        AZ: 'az',
+        ZA: 'za',
+        SHUFFLE: 'shuffle'
+    },
+
+    /* Jump condition vocabulary; the contract keys are frozen. */
+    JUMP_CONDITIONS: [
+        { key: 'NO_ANSWER_GIVEN', label: 'no answer given' },
+        { key: 'IS', label: 'answer is' },
+        { key: 'IS_NOT', label: 'answer is NOT' },
+        { key: 'ALL', label: 'always' }
+    ],
+    JUMP_WHEN: {
+        NO_ANSWER_GIVEN: 'NO_ANSWER_GIVEN',
+        IS: 'IS',
+        IS_NOT: 'IS_NOT',
+        ALL: 'ALL'
+    },
+    JUMP_TO_END_OF_FORM_LABEL: 'End of form',
+
+    /* Property-panel tab ids; validation errors carry the tab they belong to. */
+    PROPERTIES_TAB: 'properties',
+    ADVANCED_TAB: 'advanced',
+    JUMPS_TAB: 'jumps',
 
     MAX_UNDO_STATES: 5,
     /* Ceiling for the serialized snapshots, the UTF-16 upper bound of the text. */

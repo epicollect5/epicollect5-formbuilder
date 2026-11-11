@@ -153,6 +153,7 @@
 <script>
 import { computed, reactive } from 'vue';
 import { PARAMETERS } from '@/config/parameters.js';
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import { VALIDATION_MESSAGES } from '@/config/strings.js';
 import {
     allowsRequired,
@@ -160,7 +161,8 @@ import {
     hasAdvancedTab,
     isBranchOrGroup
 } from '@/models/input-properties.js';
-import { getQuestionLabel } from '@/models/question-text.js';
+import { getQuestionLabel, getQuestionLabelText } from '@/models/question-text.js';
+import { PANEL_MESSAGES } from '@/config/strings.js';
 import { hideLoading, notifyError, notifySuccess, showLoading } from '@/services/notifications.js';
 import { isInputValid } from '@/services/validation.js';
 import { useRootStore } from '@/vue/stores/root-store.js';
@@ -174,7 +176,7 @@ import JumpsPanel from '@/vue/components/JumpsPanel.vue';
    parents keep the tab, so they can take an "always" jump. */
 const canUseJumpsTab = (editingTrail) => {
     return !editingTrail.some((node) => {
-        return node.type === 'group';
+        return node.type === QUESTION_TYPE.GROUP;
     });
 };
 
@@ -276,7 +278,7 @@ export default {
                 return currentInput.value ? currentInput.value.ref : 'none';
             }),
             panelTitle: computed(() => {
-                return currentInput.value ? getQuestionLabel(currentInput.value) : 'Question properties';
+                return currentInput.value ? getQuestionLabel(currentInput.value) : PANEL_MESSAGES.PANEL_TITLE;
             }),
             actionsVisibility: computed(() => {
                 // keep the actions group in layout but invisible without a
@@ -301,13 +303,13 @@ export default {
                 return store.state.active_property_tab;
             }),
             isReadme: computed(() => {
-                return !!currentInput.value && currentInput.value.type === 'readme';
+                return !!currentInput.value && currentInput.value.type === QUESTION_TYPE.README;
             }),
             isBranchOrGroupType: computed(() => {
                 return !!currentInput.value && isBranchOrGroup(currentInput.value.type);
             }),
             editContainerLabel: computed(() => {
-                return currentInput.value && currentInput.value.type === 'branch' ? 'Edit Branch' : 'Edit Group';
+                return currentInput.value && currentInput.value.type === QUESTION_TYPE.BRANCH ? PANEL_MESSAGES.EDIT_BRANCH : PANEL_MESSAGES.EDIT_GROUP;
             }),
             /* Legacy disables Edit while a branch/group header is empty. */
             editContainerDisabled: computed(() => {
@@ -318,14 +320,14 @@ export default {
             }),
             questionLabel: computed(() => {
                 if (!currentInput.value) {
-                    return 'Question';
+                    return PANEL_MESSAGES.QUESTION_LABEL;
                 }
 
-                return isBranchOrGroup(currentInput.value.type) ? 'Header' : 'Question';
+                return getQuestionLabelText(currentInput.value.type);
             }),
             questionPlaceholder: computed(() => {
                 return currentInput.value && isBranchOrGroup(currentInput.value.type) ?
-                    'Type header here...' : 'Type question here...';
+                    PANEL_MESSAGES.HEADER_PLACEHOLDER : PANEL_MESSAGES.QUESTION_PLACEHOLDER;
             }),
             /*
              * Every type caps its text at QUESTION_MAX_LENGTH — the sanitizer

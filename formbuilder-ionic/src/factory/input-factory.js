@@ -1,14 +1,15 @@
 'use strict';
 
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import { createAnswer, isMultipleAnswerType } from '@/models/possible-answers.js';
 import { generateInputRef } from '@/factory/refs-factory.js';
 
 const getDefaultDatetimeFormat = (type) => {
-    if (type === 'date') {
+    if (type === QUESTION_TYPE.DATE) {
         return 'dd/MM/YYYY';
     }
 
-    if (type === 'time') {
+    if (type === QUESTION_TYPE.TIME) {
         return 'HH:mm';
     }
 

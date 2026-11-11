@@ -4,30 +4,20 @@ import { markRaw } from 'vue';
 
 import { generateUniqID } from '@/factory/refs-factory.js';
 import { PARAMETERS } from '@/config/parameters.js';
+import { MULTIPLE_ANSWER_TYPES, QUESTION_TYPE } from '@/config/question-types.js';
 import { getContainerList } from '@/services/nesting.js';
 
-export const PLACEHOLDER_ANSWER = 'I am a placeholder answer';
-
-export const POSSIBLE_ANSWERS_ORDER = {
-    AZ: 'az',
-    ZA: 'za',
-    SHUFFLE: 'shuffle'
-};
-
-const MULTIPLE_ANSWER_TYPES = [
-    'radio',
-    'checkbox',
-    'dropdown',
-    'searchsingle',
-    'searchmultiple'
-];
+/*
+ * Answer behaviour over the shared constants in config/ (the placeholder
+ * string, the ordering values, the multiple-answer type list).
+ */
 
 export const isMultipleAnswerType = (type) => {
     return MULTIPLE_ANSWER_TYPES.indexOf(type) !== -1;
 };
 
 export const isSearchType = (type) => {
-    return type === 'searchsingle' || type === 'searchmultiple';
+    return type === QUESTION_TYPE.SEARCH_SINGLE || type === QUESTION_TYPE.SEARCH_MULTIPLE;
 };
 
 export const getAnswerLimit = (type) => {
@@ -44,7 +34,7 @@ export const getAnswerLimit = (type) => {
  */
 export const createAnswer = (answer) => {
     return markRaw({
-        answer: answer === undefined ? PLACEHOLDER_ANSWER : answer,
+        answer: answer === undefined ? PARAMETERS.PLACEHOLDER_ANSWER : answer,
         answer_ref: generateUniqID()
     });
 };
@@ -60,7 +50,7 @@ export const markAnswersRaw = (inputs) => {
             });
         }
 
-        if (input.type === 'branch' || input.type === 'group') {
+        if (input.type === QUESTION_TYPE.BRANCH || input.type === QUESTION_TYPE.GROUP) {
             markAnswersRaw(getContainerList(input));
         }
     });
@@ -113,17 +103,17 @@ const compareAnswers = (a, b) => {
 export const sortAnswers = (answers, order) => {
     const ordered = (answers || []).slice();
 
-    if (order === POSSIBLE_ANSWERS_ORDER.AZ) {
+    if (order === PARAMETERS.POSSIBLE_ANSWERS_ORDER.AZ) {
         return ordered.sort(compareAnswers);
     }
 
-    if (order === POSSIBLE_ANSWERS_ORDER.ZA) {
+    if (order === PARAMETERS.POSSIBLE_ANSWERS_ORDER.ZA) {
         return ordered.sort((a, b) => {
             return compareAnswers(b, a);
         });
     }
 
-    if (order === POSSIBLE_ANSWERS_ORDER.SHUFFLE) {
+    if (order === PARAMETERS.POSSIBLE_ANSWERS_ORDER.SHUFFLE) {
         for (let i = ordered.length - 1; i > 0; i -= 1) {
             const j = Math.floor(Math.random() * (i + 1));
             const swap = ordered[i];

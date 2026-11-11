@@ -1,76 +1,31 @@
 'use strict';
 
 import { PARAMETERS } from '@/config/parameters.js';
+import {
+    BRANCH_GROUP_TYPES,
+    MEDIA_TYPES,
+    REQUIRED_ALLOWED_TYPES,
+    UNIQUENESS_ALLOWED_TYPES,
+    VERIFY_ALLOWED_TYPES,
+    QUESTION_TYPE,
+} from '@/config/question-types.js';
 
-export const REQUIRED_ALLOWED_TYPES = [
-    'text',
-    'textarea',
-    'date',
-    'time',
-    'integer',
-    'decimal',
-    'barcode',
-    'phone',
-    'radio',
-    'checkbox',
-    'dropdown',
-    'searchmultiple',
-    'searchsingle'
-];
-
-export const UNIQUENESS_ALLOWED_TYPES = [
-    'text',
-    'textarea',
-    'date',
-    'time',
-    'integer',
-    'decimal',
-    'barcode',
-    'phone'
-];
-
-export const VERIFY_ALLOWED_TYPES = [
-    'text',
-    'textarea',
-    'integer',
-    'decimal',
-    'barcode',
-    'phone'
-];
-
-export const MEDIA_TYPES = ['photo', 'audio', 'video', 'location'];
-export const BRANCH_GROUP_TYPES = ['branch', 'group'];
-
-export const DATE_FORMATS = [
-    { value: 'dd/MM/YYYY', label: 'Day/Month/Year' },
-    { value: 'MM/dd/YYYY', label: 'Month/Day/Year' },
-    { value: 'YYYY/MM/dd', label: 'Year/Month/Day' },
-    { value: 'MM/YYYY', label: 'Month/Year' },
-    { value: 'dd/MM', label: 'Day/Month' }
-];
-
-export const TIME_FORMATS = [
-    { value: 'HH:mm:ss', label: 'Hours:Minutes:Seconds (24 hours)' },
-    { value: 'hh:mm:ss', label: 'Hours:Minutes:Seconds (12 hours)' },
-    { value: 'HH:mm', label: 'Hours:Minutes (24 hours)' },
-    { value: 'hh:mm', label: 'Hours:Minutes (12 hours)' },
-    { value: 'mm:ss', label: 'Minutes:Seconds' }
-];
+/*
+ * Per-type property gating over the shared taxonomy in
+ * config/question-types.js: which capabilities each question type allows and
+ * which default datetime format it starts with.
+ */
 
 export const allowsRequired = (type) => {
     return REQUIRED_ALLOWED_TYPES.indexOf(type) !== -1;
 };
 
 export const allowsTitle = (type) => {
-    return !isMediaType(type) && !isBranchOrGroup(type) && type !== 'readme';
+    return !isMediaType(type) && !isBranchOrGroup(type) && type !== QUESTION_TYPE.README;
 };
 
 export const allowsUniqueness = (type) => {
     return UNIQUENESS_ALLOWED_TYPES.indexOf(type) !== -1;
-};
-
-export const allowsVerify = (type) => {
-    return VERIFY_ALLOWED_TYPES.indexOf(type) !== -1;
 };
 
 export const isMediaType = (type) => {
@@ -82,10 +37,11 @@ export const isBranchOrGroup = (type) => {
 };
 
 export const hasAdvancedTab = (type) => {
-    if (type === 'readme') {
+    if (type === QUESTION_TYPE.README) {
         return false;
     }
 
+    // noinspection RedundantIfStatementJS
     if (isMediaType(type) || isBranchOrGroup(type)) {
         return false;
     }
@@ -94,11 +50,11 @@ export const hasAdvancedTab = (type) => {
 };
 
 export const getDefaultDatetimeFormat = (type) => {
-    if (type === 'date') {
+    if (type === QUESTION_TYPE.DATE) {
         return PARAMETERS.DATE_FORMATS_DEFAULT;
     }
 
-    if (type === 'time') {
+    if (type === QUESTION_TYPE.TIME) {
         return PARAMETERS.TIME_FORMATS_DEFAULT;
     }
 

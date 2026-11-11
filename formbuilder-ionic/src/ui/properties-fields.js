@@ -1,5 +1,6 @@
 'use strict';
 
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import {PARAMETERS} from '@/config/parameters.js';
 import {
     allowsRequired,
@@ -39,7 +40,7 @@ import {
 } from '@/ui/shell.js';
 import {buildPossibleAnswers} from '@/ui/possible-answers.js';
 
-const DOUBLE_ENTRY_VERIFICATION_TYPES = ['text', 'phone'];
+const DOUBLE_ENTRY_VERIFICATION_TYPES = [QUESTION_TYPE.TEXT, QUESTION_TYPE.PHONE];
 
 export const buildBasicPanel = (input, pane) => {
     const panel = pane.querySelector('.builder__properties-panel');
@@ -51,7 +52,7 @@ export const buildBasicPanel = (input, pane) => {
     const edit_container_grid = panel.querySelector('[data-role="edit-container-grid"]');
     const edit_container = panel.querySelector('[data-role="edit-container"]');
 
-    if (input.type === 'readme') {
+    if (input.type === QUESTION_TYPE.README) {
         question_group.remove();
         required_toggle.remove();
         title_row.remove();
@@ -93,7 +94,7 @@ export const buildBasicPanel = (input, pane) => {
     if (isBranchOrGroup(input.type)) {
         edit_container.hidden = false;
         edit_container.querySelector('[data-role="edit-container-label"]').textContent =
-            input.type === 'branch' ? 'Edit Branch' : 'Edit Group';
+            input.type === QUESTION_TYPE.BRANCH ? 'Edit Branch' : 'Edit Group';
         edit_container.disabled = String(input.question || '').trim() === '';
         edit_container.onclick = () => {
             enterInput(input.ref);
@@ -230,7 +231,7 @@ export const refreshTitleWarning = () => {
 
     const trail = getEditingTrail();
     const active_container = trail.length ? trail[trail.length - 1] : null;
-    const branch_active = active_container && active_container.type === 'branch';
+    const branch_active = active_container && active_container.type === QUESTION_TYPE.BRANCH;
     const inputs = getCurrentInputs();
     const show = inputs.length > 0 && countTitles(inputs) === 0;
 
@@ -326,14 +327,14 @@ export const bindRegexField = (wrapper, input) => {
 };
 
 export const bindNumericTypeControl = (field_group, input) => {
-    const current = input.type === 'decimal' ? 'decimal' : 'integer';
+    const current = input.type === QUESTION_TYPE.DECIMAL ? QUESTION_TYPE.DECIMAL : QUESTION_TYPE.INTEGER;
     const group = field_group.querySelector('ion-radio-group');
 
     group.value = current;
     group.addEventListener('ionChange', (event) => {
         const next_type = event.detail.value;
 
-        if (next_type !== 'integer' && next_type !== 'decimal') {
+        if (next_type !== QUESTION_TYPE.INTEGER && next_type !== QUESTION_TYPE.DECIMAL) {
             return;
         }
 
@@ -351,7 +352,7 @@ export const bindSearchTypeControl = (field_group, input) => {
     group.addEventListener('ionChange', (event) => {
         const next_type = event.detail.value;
 
-        if (next_type !== 'searchsingle' && next_type !== 'searchmultiple') {
+        if (next_type !== QUESTION_TYPE.SEARCH_SINGLE && next_type !== QUESTION_TYPE.SEARCH_MULTIPLE) {
             return;
         }
 
@@ -365,7 +366,7 @@ export const bindSearchTypeControl = (field_group, input) => {
 export const bindDatetimeFormatControl = (field_group, input) => {
     const label = field_group.querySelector('.builder__field-label');
 
-    label.textContent = input.type === 'time' ? 'Time format' : 'Date format';
+    label.textContent = input.type === QUESTION_TYPE.TIME ? 'Time format' : 'Date format';
 
     field_group.querySelectorAll('ion-radio-group').forEach((group) => {
         if (group.getAttribute('data-datetime-type') !== input.type) {
@@ -384,7 +385,7 @@ export const bindDatetimeFormatControl = (field_group, input) => {
 export const bindCurrentDatetimeToggle = (toggle, input) => {
     const label = toggle.querySelector('[data-role="datetime-label"]');
 
-    label.textContent = input.type === 'date' ?
+    label.textContent = input.type === QUESTION_TYPE.DATE ?
         'Set initial answer to current date' :
         'Set initial answer to current time';
 
@@ -444,7 +445,7 @@ export const bindUniquenessControl = (control, input) => {
     const forms = project && project.forms ? project.forms : [];
     const form_index = form ? forms.indexOf(form) : 0;
     const branch_container = getEditingTrail().find((node) => {
-        return node.type === 'branch';
+        return node.type === QUESTION_TYPE.BRANCH;
     });
     const is_editing_branch = !!branch_container;
     const branch_header = branch_container && branch_container.question ? branch_container.question : 'branch';

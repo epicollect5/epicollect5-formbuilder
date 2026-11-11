@@ -1,6 +1,7 @@
 'use strict';
 
 import { hasDuplicateAnswerRefs, isMultipleAnswerType } from '@/models/possible-answers.js';
+import { NUMERIC_TYPES, QUESTION_TYPE } from '@/config/question-types.js';
 import { getContainerList } from '@/services/nesting.js';
 import { isBranchOrGroup } from '@/models/input-properties.js';
 import { VALIDATION_MESSAGES as M } from '@/config/strings.js';
@@ -17,15 +18,13 @@ import { PARAMETERS } from '@/config/parameters.js';
  * - a malformed regex is reported instead of throwing inside the panel.
  */
 
-const NUMERIC_TYPES = ['integer', 'decimal'];
+
 
 /*
  * Error destinations, as in legacy: question text, possible answers and
  * container errors flag the basic tab; min / max / default / regex errors
  * flag the advanced tab (legacy's showSingleAdvancedPropertyError).
  */
-export const PROPERTIES_TAB = 'properties';
-export const ADVANCED_TAB = 'advanced';
 
 const withTab = (tab, messages) => {
     return messages.map((message) => {
@@ -62,7 +61,7 @@ export const getQuestionTextErrors = (input) => {
         return [M.QUESTION_TEXT_EMPTY];
     }
 
-    if (input.type === 'readme') {
+    if (input.type === QUESTION_TYPE.README) {
         return plainTextLength(question) > PARAMETERS.README_MAX_LENGTH ? [M.QUESTION_LENGTH_LIMIT_EXCEEDED] : [];
     }
 
@@ -99,7 +98,7 @@ const getNumericErrors = (input) => {
     }
 
     const errors = [];
-    const integer = input.type === 'integer';
+    const integer = input.type === QUESTION_TYPE.INTEGER;
     const min_value = numberOrNull(input.min);
     const max_value = numberOrNull(input.max);
 
@@ -158,7 +157,7 @@ const getChildrenErrors = (input) => {
     }
 
     if (getContainerList(input).length === 0) {
-        return [input.type === 'branch' ? M.NO_BRANCH_INPUTS_FOUND : M.NO_GROUP_INPUTS_FOUND];
+        return [input.type === QUESTION_TYPE.BRANCH ? M.NO_BRANCH_INPUTS_FOUND : M.NO_GROUP_INPUTS_FOUND];
     }
 
     return [];
@@ -167,14 +166,14 @@ const getChildrenErrors = (input) => {
 /* Object-level rules only; jump and child-validity checks need the list. */
 export const getInputObjectErrors = (input) => {
     if (!input) {
-        return withTab(PROPERTIES_TAB, [M.QUESTION_TEXT_EMPTY]);
+        return withTab(PARAMETERS.PROPERTIES_TAB, [M.QUESTION_TEXT_EMPTY]);
     }
 
     return [
-        ...withTab(PROPERTIES_TAB, getQuestionTextErrors(input)),
-        ...withTab(PROPERTIES_TAB, getChildrenErrors(input)),
-        ...withTab(PROPERTIES_TAB, getPossibleAnswerErrors(input)),
-        ...withTab(ADVANCED_TAB, getNumericErrors(input)),
-        ...withTab(ADVANCED_TAB, getDefaultErrors(input))
+        ...withTab(PARAMETERS.PROPERTIES_TAB, getQuestionTextErrors(input)),
+        ...withTab(PARAMETERS.PROPERTIES_TAB, getChildrenErrors(input)),
+        ...withTab(PARAMETERS.PROPERTIES_TAB, getPossibleAnswerErrors(input)),
+        ...withTab(PARAMETERS.ADVANCED_TAB, getNumericErrors(input)),
+        ...withTab(PARAMETERS.ADVANCED_TAB, getDefaultErrors(input))
     ];
 };

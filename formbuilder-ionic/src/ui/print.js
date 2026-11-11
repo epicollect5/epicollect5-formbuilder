@@ -1,5 +1,6 @@
 'use strict';
 
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import { isMultipleAnswerType } from '@/models/possible-answers.js';
 import { getForms, getProject } from '@/models/project-definition.js';
 import { areFormInputsValid } from '@/services/validation.js';
@@ -34,11 +35,11 @@ const renderAnswers = (input) => {
     return (input.possible_answers || []).map((answer) => {
         const label = escapeHtml(answer.answer);
 
-        if (input.type === 'searchsingle' || input.type === 'searchmultiple') {
+        if (input.type === QUESTION_TYPE.SEARCH_SINGLE || input.type === QUESTION_TYPE.SEARCH_MULTIPLE) {
             return `<li><h5>${label}</h5></li>`;
         }
 
-        const kind = input.type === 'checkbox' ? 'checkbox' : 'radio';
+        const kind = input.type === QUESTION_TYPE.CHECKBOX ? QUESTION_TYPE.CHECKBOX : QUESTION_TYPE.RADIO;
 
         return `<div class="${kind}-type"><h5>` +
             `<input type="${kind}" value="${label}">` +
@@ -50,11 +51,11 @@ const renderAnswers = (input) => {
 const renderQuestion = (input) => {
     const question = escapeHtml(input.question);
 
-    if (input.type === 'readme') {
+    if (input.type === QUESTION_TYPE.README) {
         return `<hr/><h4 class="question">${escapeHtml(readmeText(input.question))}</h4><hr/>`;
     }
 
-    if (input.type === 'textarea') {
+    if (input.type === QUESTION_TYPE.TEXTAREA) {
         return `<h4 class="question">${question}</h4>` +
             '<table border="1" width="100%">' +
             '<tr><td></td></tr><tr><td></td></tr><tr><td></td></tr><tr><td></td></tr>' +
@@ -66,7 +67,7 @@ const renderQuestion = (input) => {
 };
 
 const renderContainer = (input) => {
-    const children = (input.type === 'branch' ? input.branch : input.group) || [];
+    const children = (input.type === QUESTION_TYPE.BRANCH ? input.branch : input.group) || [];
 
     return `<h4 class="${input.type}-header">${escapeHtml(input.question)}</h4>` +
         '<table border="1" cellpadding="10" cellspacing="10"><tr><td>' +
@@ -75,12 +76,12 @@ const renderContainer = (input) => {
 };
 
 const renderInput = (input) => {
-    if (input.type === 'branch' || input.type === 'group') {
+    if (input.type === QUESTION_TYPE.BRANCH || input.type === QUESTION_TYPE.GROUP) {
         return renderContainer(input);
     }
 
     if (isMultipleAnswerType(input.type)) {
-        const list = input.type === 'searchsingle' || input.type === 'searchmultiple'
+        const list = input.type === QUESTION_TYPE.SEARCH_SINGLE || input.type === QUESTION_TYPE.SEARCH_MULTIPLE
             ? `<ul class="possible-answers-list">${renderAnswers(input)}</ul>`
             : renderAnswers(input);
 

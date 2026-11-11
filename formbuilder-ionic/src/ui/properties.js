@@ -1,5 +1,6 @@
 'use strict';
 
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import {FORM_MESSAGES, VALIDATION_MESSAGES} from '@/config/strings.js';
 import {
     hasAdvancedTab,
@@ -12,11 +13,11 @@ import {
     getEditingTrail,
     removeInput
 } from '@/services/session.js';
+import {PARAMETERS} from '@/config/parameters.js';
 import {duplicateInput} from '@/services/question-actions.js';
 import {
     getInputErrors,
     isInputValid,
-    PROPERTIES_TAB
 } from '@/services/validation.js';
 import {createReadmeEditor} from '@/ui/readme-editor.js';
 import {createView, element} from '@/ui/dom.js';
@@ -54,7 +55,7 @@ const canUseJumpsTab = () => {
 
 const isEditingInsideGroup = () => {
     return getEditingTrail().some((node) => {
-        return node.type === 'group';
+        return node.type === QUESTION_TYPE.GROUP;
     });
 };
 
@@ -203,7 +204,7 @@ export const updatePropertyError = (card, input) => {
     }
 
     const tab_errors = getInputErrors(input, getCurrentInputs()).filter((error) => {
-        return error.tab === PROPERTIES_TAB;
+        return error.tab === PARAMETERS.PROPERTIES_TAB;
     });
 
     if (!tab_errors.length) {

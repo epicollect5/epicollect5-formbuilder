@@ -1,7 +1,7 @@
 'use strict';
 
 import {PARAMETERS} from '@/config/parameters.js';
-import {JUMP_CONDITIONS, jumpNeedsAnswer, usesAlwaysJump} from '@/models/jumps.js';
+import {jumpNeedsAnswer, usesAlwaysJump} from '@/models/jumps.js';
 import {
     addJump,
     canAddJump,
@@ -134,7 +134,7 @@ export const buildJumpRow = (input, jump, index, destinations, jump_error) => {
     if (always) {
         initDropdown(when_placeholder, [{value: 'ALL', label: 'always'}], 'ALL', null, true);
     } else {
-        initDropdown(when_placeholder, JUMP_CONDITIONS.map((condition) => {
+        initDropdown(when_placeholder, PARAMETERS.JUMP_CONDITIONS.map((condition) => {
             return {value: condition.key, label: condition.label};
         }), jump.when || 'IS', (detail) => {
             updateJump(input, index, {when: detail.value});

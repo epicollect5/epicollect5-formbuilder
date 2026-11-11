@@ -1,5 +1,6 @@
 'use strict';
 
+import { QUESTION_TYPE } from '@/config/question-types.js';
 /*
  * Nesting rules from the legacy builder: a branch cannot hold another branch,
  * and a group cannot hold a branch or another group. The form holds anything.
@@ -10,12 +11,12 @@ export const canContainInput = (container, type) => {
         return true;
     }
 
-    if (container.type === 'branch') {
-        return type !== 'branch';
+    if (container.type === QUESTION_TYPE.BRANCH) {
+        return type !== QUESTION_TYPE.BRANCH;
     }
 
-    if (container.type === 'group') {
-        return type !== 'branch' && type !== 'group';
+    if (container.type === QUESTION_TYPE.GROUP) {
+        return type !== QUESTION_TYPE.BRANCH && type !== QUESTION_TYPE.GROUP;
     }
 
     return true;

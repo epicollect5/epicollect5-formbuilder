@@ -1,5 +1,6 @@
 'use strict';
 
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import { FORM_MESSAGES } from '@/config/strings.js';
 import { getContainerList } from '@/services/nesting.js';
 import { areFormInputsValid } from '@/services/validation.js';
@@ -103,7 +104,7 @@ export const prepareImportedForm = (text, project_definition, form_index) => {
     }
 
     const branch_titles_exceeded = imported.some((input) => {
-        return input.type === 'branch' && countTitles(getContainerList(input)) > PARAMETERS.TITLES_MAX;
+        return input.type === QUESTION_TYPE.BRANCH && countTitles(getContainerList(input)) > PARAMETERS.TITLES_MAX;
     });
 
     if (branch_titles_exceeded) {

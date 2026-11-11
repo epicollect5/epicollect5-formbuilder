@@ -34,7 +34,76 @@ export const FORM_MESSAGES = {
     TOO_MANY_QUESTIONS: `Too many questions, only ${PARAMETERS.INPUTS_MAX_ALLOWED} per project are allowed!`,
     TOO_MANY_TITLES: 'Too many titles',
     SEARCH_INPUTS_LIMIT_REACHED: `Search questions limit reached!(${PARAMETERS.SEARCH_INPUTS_MAX})`,
-    TOO_MANY_SEARCH_QUESTIONS: `Too many search questions, only ${PARAMETERS.SEARCH_INPUTS_MAX} per project are allowed!`
+    TOO_MANY_SEARCH_QUESTIONS: `Too many search questions, only ${PARAMETERS.SEARCH_INPUTS_MAX} per project are allowed!`,
+
+    /* The save gate, the save flow and the shared modal buttons. */
+    SAVE_TITLE: 'Save project',
+    FIX_ERRORS_TITLE: 'Fix the validation errors before saving',
+    WARNING_TITLE: 'Warning',
+    CONFIRM_BUTTON: 'Confirm',
+    DISMISS_BUTTON: 'Dismiss',
+    PROJECT_PAYLOAD_EMPTY: 'The project payload is empty',
+    PROJECT_COMPRESS_UNSUPPORTED: 'This browser cannot compress the project definition',
+    PROJECT_DECODE_UNSUPPORTED: 'This browser cannot decode a gzipped project definition',
+    PROJECT_SAVE_INVALID: 'The project is invalid',
+    STREAMS_UNSUPPORTED: 'This browser supports neither CompressionStream nor TransformStream'
+};
+
+/*
+ * Field labels, placeholders and panel copy for the properties side: the
+ * question field, the advanced fields and the question-row badges. Shared by
+ * the models that derive them and the panels that render them.
+ */
+export const PANEL_MESSAGES = {
+    QUESTION_LABEL: 'Question',
+    HEADER_LABEL: 'Header',
+    README_LABEL: 'Readme',
+    UNTITLED_QUESTION: 'Untitled question',
+    UNTITLED_ANSWER: 'Untitled answer',
+    QUESTION_PLACEHOLDER: 'Type question here...',
+    HEADER_PLACEHOLDER: 'Type header here...',
+    PANEL_TITLE: 'Question properties',
+    SELECT_QUESTION_EMPTY: 'Select a question to edit it.',
+    EDIT_BRANCH: 'Edit Branch',
+    EDIT_GROUP: 'Edit Group',
+    REQUIRED_LABEL: 'Answer is required',
+    TITLE_LABEL: 'Use answer as title',
+    TITLE_INFO_LABEL: 'What is a title?',
+    NO_UNIQUENESS: 'No uniqueness',
+    VERIFY_LABEL: 'Require double entry',
+    VERIFY_DOUBLE_LABEL: 'Require double entry verification',
+    TIME_FORMAT_LABEL: 'Time format',
+    DATE_FORMAT_LABEL: 'Date format',
+    SET_CURRENT_DATE_LABEL: 'Set initial answer to current date',
+    SET_CURRENT_TIME_LABEL: 'Set initial answer to current time',
+    VALID_QUESTION: 'Valid question',
+    INVALID_QUESTION: 'Question has errors'
+};
+
+/* The possible-answers card and its CSV options modal. */
+export const ANSWERS_MESSAGES = {
+    NONE_OPTION: 'None',
+    CSV_MODAL_TITLE: 'Possible answers csv import options',
+    CSV_COLUMN_LABEL: 'Column to import',
+    CSV_PICK_COLUMN: 'Pick column',
+    IMPORT_BUTTON: 'Import'
+};
+
+/* Copy the jumps panel derives: previews and unavailable selections. */
+export const JUMPS_MESSAGES = {
+    PREVIEW_NO_BRANCH_HEADER: 'No branch header yet',
+    PREVIEW_NO_QUESTION_TEXT: 'No question text yet',
+    UNAVAILABLE_ANSWER: 'Unavailable answer',
+    UNAVAILABLE_DESTINATION: 'Unavailable destination'
+};
+
+/* Form strip, form menu and form-name modal copy. */
+export const FORMS_MESSAGES = {
+    NEW_FORM_DEFAULT: 'New form',
+    FORM_NAME_MODAL: 'Form name',
+    SAVE_CHANGES: 'Save changes',
+    ADD_FORM: 'Add form',
+    ADD_FORM_LIMIT: `A project can have at most ${PARAMETERS.MAX_FORMS} forms`
 };
 
 export const VALIDATION_MESSAGES = {

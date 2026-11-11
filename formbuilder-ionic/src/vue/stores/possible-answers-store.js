@@ -3,10 +3,9 @@
 import { computed, reactive } from 'vue';
 import { defineStore } from 'pinia';
 import { PARAMETERS } from '@/config/parameters.js';
-import { VALIDATION_MESSAGES } from '@/config/strings.js';
+import { ANSWERS_MESSAGES, FORM_MESSAGES, PANEL_MESSAGES, VALIDATION_MESSAGES } from '@/config/strings.js';
 import { getForms } from '@/models/project-definition.js';
 import {
-    POSSIBLE_ANSWERS_ORDER,
     getAnswerLimit,
     getAnswerPage,
     getAnswerPageCount,
@@ -291,8 +290,8 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
 
             const column_dropdown = createDropdown({
                 class_name: 'builder__csv-column-select',
-                aria_label: 'Column to import',
-                placeholder: 'Pick column',
+                aria_label: ANSWERS_MESSAGES.CSV_COLUMN_LABEL,
+                placeholder: ANSWERS_MESSAGES.CSV_PICK_COLUMN,
                 options: [...getCsvColumns(parsed, true)],
                 value: '',
                 on_change: (detail) => {
@@ -320,12 +319,12 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
             });
 
             const modal = openModal({
-                title: 'Possible answers csv import options',
+                title: ANSWERS_MESSAGES.CSV_MODAL_TITLE,
                 body,
                 buttons: [
-                    { text: 'Dismiss', align: 'start' },
+                    { text: FORM_MESSAGES.DISMISS_BUTTON, align: 'start' },
                     {
-                        text: 'Import',
+                        text: ANSWERS_MESSAGES.IMPORT_BUTTON,
                         disabled: true,
                         on_click: (close) => {
                             if (!selected_column) {
@@ -423,7 +422,7 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
             const input = getCurrentInput();
 
             if (!input) {
-                return [{ value: '', label: 'None' }];
+                return [{ value: '', label: ANSWERS_MESSAGES.NONE_OPTION }];
             }
 
             const answers = input.possible_answers || [];
@@ -432,7 +431,7 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
             const selected = answers.find((answer) => {
                 return String(answer.answer_ref) === String(input.default);
             });
-            const options = [{ value: '', label: 'None' }];
+            const options = [{ value: '', label: ANSWERS_MESSAGES.NONE_OPTION }];
 
             /* keep the current default selectable when the user pages away */
             if (selected && page_answers.indexOf(selected) === -1) {
@@ -442,7 +441,7 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
             page_answers.forEach((answer) => {
                 options.push({
                     value: answer.answer_ref,
-                    label: answer.answer || 'Untitled answer'
+                    label: answer.answer || PANEL_MESSAGES.UNTITLED_ANSWER
                 });
             });
 

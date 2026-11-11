@@ -3,7 +3,7 @@
 import { computed } from 'vue';
 import { defineStore } from 'pinia';
 import { PARAMETERS } from '@/config/parameters.js';
-import { FORM_MESSAGES } from '@/config/strings.js';
+import { FORM_MESSAGES, FORMS_MESSAGES } from '@/config/strings.js';
 import { getForms } from '@/models/project-definition.js';
 import { countProjectSearchInputs } from '@/models/project-limits.js';
 import { getFormNameError } from '@/services/form-management.js';
@@ -64,12 +64,12 @@ export const useFormsStore = defineStore('forms', () => {
             });
 
             openModal({
-                title: 'Form name',
+                title: FORMS_MESSAGES.FORM_NAME_MODAL,
                 body,
                 buttons: [
-                    { text: 'Dismiss', align: 'start' },
+                    { text: FORM_MESSAGES.DISMISS_BUTTON, align: 'start' },
                     {
-                        text: 'Save changes',
+                        text: FORMS_MESSAGES.SAVE_CHANGES,
                         on_click: (close) => {
                             const forms = getForms(session.project_definition);
                             const form_index = session.current_form_index;
@@ -247,7 +247,7 @@ export const useFormsStore = defineStore('forms', () => {
             const session = builder.state.session;
             const forms = getForms(session.project_definition);
 
-            return forms.length >= PARAMETERS.MAX_FORMS ? `A project can have at most ${PARAMETERS.MAX_FORMS} forms` : 'Add form';
+            return forms.length >= PARAMETERS.MAX_FORMS ? FORMS_MESSAGES.ADD_FORM_LIMIT : FORMS_MESSAGES.ADD_FORM;
         })
     };
 

@@ -1,12 +1,13 @@
 'use strict';
 
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import Ajv2020 from 'ajv/dist/2020';
 import addFormats from 'ajv-formats';
 import project_schema from '../../schemas/project.schema.json';
 import { PARAMETERS } from '@/config/parameters.js';
 
-const CHOICE_TYPES = ['dropdown', 'radio', 'checkbox', 'searchsingle', 'searchmultiple'];
-const SEARCH_TYPES = ['searchsingle', 'searchmultiple'];
+const CHOICE_TYPES = [QUESTION_TYPE.DROPDOWN, QUESTION_TYPE.RADIO, QUESTION_TYPE.CHECKBOX, QUESTION_TYPE.SEARCH_SINGLE, QUESTION_TYPE.SEARCH_MULTIPLE];
+const SEARCH_TYPES = [QUESTION_TYPE.SEARCH_SINGLE, QUESTION_TYPE.SEARCH_MULTIPLE];
 
 const ajv = new Ajv2020({
     allErrors: true,
@@ -66,7 +67,7 @@ const defaultMatchesPossibleAnswer = (input) => {
 };
 
 const numericRangeIsValid = (input) => {
-    if (input.type !== 'integer' && input.type !== 'decimal') {
+    if (input.type !== QUESTION_TYPE.INTEGER && input.type !== QUESTION_TYPE.DECIMAL) {
         return true;
     }
 

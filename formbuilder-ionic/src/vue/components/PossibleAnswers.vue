@@ -111,7 +111,7 @@ import { computed, onBeforeUnmount, onMounted, reactive } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus';
 import { PARAMETERS } from '@/config/parameters.js';
 import { VALIDATION_MESSAGES } from '@/config/strings.js';
-import { POSSIBLE_ANSWERS_ORDER } from '@/models/possible-answers.js';
+
 import { useRootStore } from '@/vue/stores/root-store.js';
 import { usePossibleAnswersStore } from '@/vue/stores/possible-answers-store.js';
 import { createMenu } from '@/ui/dropdown.js';
@@ -270,19 +270,19 @@ export default {
                 {
                     label: 'Order ascending',
                     action: () => {
-                        store.orderPossibleAnswers(POSSIBLE_ANSWERS_ORDER.AZ);
+                        store.orderPossibleAnswers(PARAMETERS.POSSIBLE_ANSWERS_ORDER.AZ);
                     }
                 },
                 {
                     label: 'Order descending',
                     action: () => {
-                        store.orderPossibleAnswers(POSSIBLE_ANSWERS_ORDER.ZA);
+                        store.orderPossibleAnswers(PARAMETERS.POSSIBLE_ANSWERS_ORDER.ZA);
                     }
                 },
                 {
                     label: 'Shuffle',
                     action: () => {
-                        store.orderPossibleAnswers(POSSIBLE_ANSWERS_ORDER.SHUFFLE);
+                        store.orderPossibleAnswers(PARAMETERS.POSSIBLE_ANSWERS_ORDER.SHUFFLE);
                     }
                 },
                 { divider: true },

@@ -2,6 +2,7 @@
 
 import {PARAMETERS} from '@/config/parameters.js';
 import {getForms} from '@/models/project-definition.js';
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import {getQuestionType} from '@/models/question-types.js';
 import {isBranchOrGroup, isMediaType} from '@/models/input-properties.js';
 import {countTitles} from '@/models/project-limits.js';
@@ -80,7 +81,7 @@ export const renderQuestions = () => {
         empty.textContent = `No questions in this ${active_container.type} yet.`;
     }
 
-    const branch_active = active_container && active_container.type === 'branch';
+    const branch_active = active_container && active_container.type === QUESTION_TYPE.BRANCH;
     // a list without questions has nothing to title: the warning waits for the
     // first question, and groups warn like branches do
     const show_title_warning = inputs.length > 0 && countTitles(inputs) === 0;
@@ -374,7 +375,7 @@ export const updateQuestionText = (question) => {
     const input = getCurrentInput();
     const title = document.querySelector('#properties .builder__panel-title');
     const row = document.querySelector('.builder__question[aria-current="true"] .builder__question-text');
-    const label = question || (input && input.type === 'readme' ? 'Readme' : 'Untitled question');
+    const label = question || (input && input.type === QUESTION_TYPE.README ? 'Readme' : 'Untitled question');
 
     if (title) {
         title.textContent = label;

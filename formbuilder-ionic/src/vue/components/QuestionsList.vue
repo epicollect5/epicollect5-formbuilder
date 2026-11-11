@@ -1,6 +1,5 @@
 <template>
-    <section class="builder__questions" id="questions" aria-label="Questions">
-        <ion-card class="builder__questions-card">
+    <section class="builder__questions" id="questions" aria-label="Questions">        <ion-card class="builder__questions-card">
             <ion-card-header class="builder__panel-heading builder__questions-header">
                 <div class="builder__questions-heading">
                     <ion-card-title class="builder__panel-title builder__questions-title" :title="titleAttr">
@@ -104,6 +103,7 @@
 <script>
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus';
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import { FORM_MESSAGES } from '@/config/strings.js';
 import { countTitles } from '@/models/project-limits.js';
 import { getQuestionLabel } from '@/models/question-text.js';
@@ -288,7 +288,7 @@ export default {
                     return 'No title set for this form yet';
                 }
 
-                return container.type === 'branch' ? 'No title set for this branch yet' : 'No title set for this group yet';
+                return container.type === QUESTION_TYPE.BRANCH ? 'No title set for this branch yet' : 'No title set for this group yet';
             }),
             formDeletable: computed(() => {
                 return forms.formDeletable();

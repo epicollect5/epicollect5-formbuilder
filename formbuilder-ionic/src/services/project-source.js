@@ -1,6 +1,7 @@
 'use strict';
 
 import { PARAMETERS } from '@/config/parameters.js';
+import { FORM_MESSAGES } from '@/config/strings.js';
 import { ensureCompressionStreams } from '@/services/streams-support.js';
 
 export const getProjectUrl = (base_url) => {
@@ -17,7 +18,7 @@ export const decodeProjectPayload = async (payload) => {
     const trimmed = String(payload || '').trim();
 
     if (!trimmed) {
-        throw new Error('The project payload is empty');
+        throw new Error(FORM_MESSAGES.PROJECT_PAYLOAD_EMPTY);
     }
 
     if (trimmed.charAt(0) === '{') {
@@ -25,7 +26,7 @@ export const decodeProjectPayload = async (payload) => {
     }
 
     if (typeof DecompressionStream === 'undefined') {
-        throw new Error('This browser cannot decode a gzipped project definition');
+        throw new Error(FORM_MESSAGES.PROJECT_DECODE_UNSUPPORTED);
     }
 
     const bytes = Uint8Array.from(atob(trimmed), (character) => {

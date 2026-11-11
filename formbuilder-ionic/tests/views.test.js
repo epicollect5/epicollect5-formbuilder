@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
-import { QUESTION_TYPES } from '@/models/question-types.js';
-import { DATE_FORMATS, TIME_FORMATS } from '@/models/input-properties.js';
+import { QUESTION_TYPES } from '@/config/question-types.js';
+import { PARAMETERS } from '@/config/parameters.js';
 import { getAdvancedFields } from '@/services/properties.js';
 
 function datetime_values(html, type) {
@@ -110,8 +110,8 @@ describe('fixed markup views', () => {
     it('keeps the date and time format choices in the properties view', async () => {
         const html = await read('src/views/properties-card.html');
 
-        expect(datetime_values(html, 'date')).toEqual(DATE_FORMATS.map((format) => format.value));
-        expect(datetime_values(html, 'time')).toEqual(TIME_FORMATS.map((format) => format.value));
+        expect(datetime_values(html, 'date')).toEqual(PARAMETERS.DATE_FORMATS.map((format) => format.value));
+        expect(datetime_values(html, 'time')).toEqual(PARAMETERS.TIME_FORMATS.map((format) => format.value));
     });
 
     it('keeps the readme toolbar buttons in the view', async () => {

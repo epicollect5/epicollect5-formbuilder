@@ -1,5 +1,6 @@
 'use strict';
 
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import { FORM_MESSAGES } from '@/config/strings.js';
 import { getContainerList } from '@/services/nesting.js';
 import { isSearchType } from '@/models/possible-answers.js';
@@ -15,7 +16,7 @@ export const eachInput = (inputs, visit) => {
     (inputs || []).forEach((input) => {
         visit(input);
 
-        if (input.type === 'branch' || input.type === 'group') {
+        if (input.type === QUESTION_TYPE.BRANCH || input.type === QUESTION_TYPE.GROUP) {
             eachInput(getContainerList(input), visit);
         }
     });
@@ -35,7 +36,7 @@ export const countInputs = (inputs) => {
 export const countTitles = (inputs) => {
     return (inputs || []).reduce((total, input) => {
         const own = input.is_title === true ? 1 : 0;
-        const nested = input.type === 'group' ? countTitles(getContainerList(input)) : 0;
+        const nested = input.type === QUESTION_TYPE.GROUP ? countTitles(getContainerList(input)) : 0;
 
         return total + own + nested;
     }, 0);
@@ -62,7 +63,7 @@ export const countProjectSearchInputs = (project_definition) => {
 
 const branchTitlesExceeded = (inputs) => {
     return (inputs || []).some((input) => {
-        if (input.type !== 'branch') {
+        if (input.type !== QUESTION_TYPE.BRANCH) {
             return false;
         }
 

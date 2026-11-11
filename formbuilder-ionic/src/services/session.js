@@ -1,5 +1,6 @@
 'use strict';
 
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import { reactive } from 'vue';
 import { findInput, getForm, getForms, getInputs, getProject } from '@/models/project-definition.js';
 import { markAnswersRaw } from '@/models/possible-answers.js';
@@ -7,6 +8,7 @@ import { createInput } from '@/factory/input-factory.js';
 import { canContainInput, getContainerList } from '@/services/nesting.js';
 import { generateFormRef } from '@/factory/refs-factory.js';
 import { PARAMETERS } from '@/config/parameters.js';
+import { FORMS_MESSAGES } from '@/config/strings.js';
 
 /*
  * The project definition is the state. This module only holds the reference to
@@ -128,7 +130,7 @@ export const selectInput = (input_ref) => {
 export const enterInput = (input_ref) => {
     const input = findInList(getActiveInputs(), input_ref);
 
-    if (!input || (input.type !== 'branch' && input.type !== 'group')) {
+    if (!input || (input.type !== QUESTION_TYPE.BRANCH && input.type !== QUESTION_TYPE.GROUP)) {
         return null;
     }
 
@@ -235,7 +237,7 @@ export const addForm = (name) => {
         return null;
     }
 
-    const form_name = String(name === undefined || name === null || String(name).trim() === '' ? 'New form' : name)
+    const form_name = String(name === undefined || name === null || String(name).trim() === '' ? FORMS_MESSAGES.NEW_FORM_DEFAULT : name)
         .trim()
         .slice(0, PARAMETERS.FORM_NAME_MAX_LENGTH);
     const form = {

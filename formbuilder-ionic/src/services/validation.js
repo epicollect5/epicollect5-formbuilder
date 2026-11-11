@@ -1,10 +1,12 @@
 'use strict';
 
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import { getForms, getInputs } from '@/models/project-definition.js';
 import { getContainerList } from '@/services/nesting.js';
 import { isBranchOrGroup } from '@/models/input-properties.js';
 import { isMultipleAnswerType } from '@/models/possible-answers.js';
-import { jumpNeedsAnswer, JUMP_WHEN } from '@/models/jumps.js';
+import { PARAMETERS } from '@/config/parameters.js';
+import { jumpNeedsAnswer } from '@/models/jumps.js';
 import { getInputObjectErrors } from '@/models/validation.js';
 import { VALIDATION_MESSAGES as M } from '@/config/strings.js';
 import { getJumpAvailableDestinations } from '@/services/jumps.js';
@@ -17,9 +19,6 @@ import { getJumpAvailableDestinations } from '@/services/jumps.js';
  * Errors carry the panel tab they belong to, which drives the tab badges.
  */
 
-export const PROPERTIES_TAB = 'properties';
-export const ADVANCED_TAB = 'advanced';
-export const JUMPS_TAB = 'jumps';
 
 const destinationRefs = (input, inputs) => {
     return getJumpAvailableDestinations(input, inputs).map((destination) => {
@@ -42,12 +41,12 @@ export const getJumpErrors = (input, inputs) => {
 
     jumps.forEach((jump, index) => {
         if (!jump || !jump.to) {
-            errors.push({ index, field: 'to', message: M.JUMP_DESTINATION_NOT_SELECTED, tab: JUMPS_TAB });
+            errors.push({ index, field: 'to', message: M.JUMP_DESTINATION_NOT_SELECTED, tab: PARAMETERS.JUMPS_TAB });
             return;
         }
 
         if (destinations.indexOf(String(jump.to)) === -1) {
-            errors.push({ index, field: 'to', message: M.JUMP_DESTINATION_INVALID, tab: JUMPS_TAB });
+            errors.push({ index, field: 'to', message: M.JUMP_DESTINATION_INVALID, tab: PARAMETERS.JUMPS_TAB });
             return;
         }
 
@@ -55,13 +54,13 @@ export const getJumpErrors = (input, inputs) => {
             return;
         }
 
-        if (!JUMP_WHEN[jump.when]) {
-            errors.push({ index, field: 'when', message: M.JUMP_CONDITION_NOT_SELECTED, tab: JUMPS_TAB });
+        if (!PARAMETERS.JUMP_WHEN[jump.when]) {
+            errors.push({ index, field: 'when', message: M.JUMP_CONDITION_NOT_SELECTED, tab: PARAMETERS.JUMPS_TAB });
             return;
         }
 
         if (jumpNeedsAnswer(jump.when) && answers.indexOf(String(jump.answer_ref)) === -1) {
-            errors.push({ index, field: 'answer', message: M.JUMP_ANSWER_NOT_SELECTED, tab: JUMPS_TAB });
+            errors.push({ index, field: 'answer', message: M.JUMP_ANSWER_NOT_SELECTED, tab: PARAMETERS.JUMPS_TAB });
         }
     });
 
@@ -70,7 +69,7 @@ export const getJumpErrors = (input, inputs) => {
 
 export const getInputErrors = (input, inputs) => {
     if (!input) {
-        return [{ message: M.QUESTION_TEXT_EMPTY, tab: PROPERTIES_TAB }];
+        return [{ message: M.QUESTION_TEXT_EMPTY, tab: PARAMETERS.PROPERTIES_TAB }];
     }
 
     const list = Array.isArray(inputs) ? inputs : [];
@@ -88,20 +87,20 @@ export const getInputErrors = (input, inputs) => {
 
         if (child_errors.length) {
             errors.push({
-                message: input.type === 'branch' ? M.INVALID_BRANCH_INPUTS : M.INVALID_GROUP_INPUTS,
-                tab: PROPERTIES_TAB
+                message: input.type === QUESTION_TYPE.BRANCH ? M.INVALID_BRANCH_INPUTS : M.INVALID_GROUP_INPUTS,
+                tab: PARAMETERS.PROPERTIES_TAB
             });
 
             // a child's broken jump lights the container's Jumps tab too,
             // instead of hiding behind the generic Properties error (R-32)
             const child_jump_error = child_errors.some((child_error) => {
-                return child_error.tab === JUMPS_TAB;
+                return child_error.tab === PARAMETERS.JUMPS_TAB;
             });
 
             if (child_jump_error) {
                 errors.push({
-                    message: input.type === 'branch' ? M.INVALID_BRANCH_INPUTS : M.INVALID_GROUP_INPUTS,
-                    tab: JUMPS_TAB
+                    message: input.type === QUESTION_TYPE.BRANCH ? M.INVALID_BRANCH_INPUTS : M.INVALID_GROUP_INPUTS,
+                    tab: PARAMETERS.JUMPS_TAB
                 });
             }
         }

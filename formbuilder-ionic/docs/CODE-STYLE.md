@@ -88,18 +88,47 @@ Rules:
 
 ## Constants
 
+- All shared constants — scalar limits, strings and objects (option lists,
+  vocabularies, catalogues) — live under `config/`, never in `models/` or
+  services. Models and services hold behaviour only and import their
+  constants from `config/`.
 - `config/parameters.js` (`PARAMETERS`) is the single source for shared
-  values: numeric limits and caps, paths, endpoint fragments, schema ids and
-  other tuning knobs. Import `PARAMETERS` where the value is used.
-- Do not re-export a `PARAMETERS` value under a bare name from another module
-  (`export const MAX_FORMS = PARAMETERS.MAX_FORMS`). Re-exports force every
-  importer to discover which module owns which alias; a direct
-  `PARAMETERS.MAX_FORMS` read always resolves to the same place.
-- Domain catalogues stay in their domain models: question types in
-  `models/question-types.js`, jump conditions in `models/jumps.js`, datetime
-  formats and type-gating lists in `models/input-properties.js`, messages in
-  `config/strings.js`. These are shapes, not tuning knobs, so they are not
-  `PARAMETERS` entries.
+  values: numeric limits and caps, paths, endpoint fragments, schema ids,
+  default strings, option lists (datetime formats, possible-answer ordering)
+  and contract vocabularies (`JUMP_WHEN`, `JUMP_CONDITIONS`, the
+  property-tab ids). Import `PARAMETERS` where the value is used.
+- A dedicated config module is acceptable when a domain's constants are too
+  large for `parameters.js`: the question-type taxonomy lives in
+  `config/question-types.js` (`QUESTION_TYPES`, `TYPE_ALIASES` and the
+  per-capability type lists). Messages stay in `config/strings.js`.
+- Question-type values are never written as bare literals in logic
+  (`input.type === 'readme'`): comparisons, assignments and type lists read
+  `QUESTION_TYPE` from `config/question-types.js`
+  (`QUESTION_TYPE.README`, `QUESTION_TYPE.BRANCH`, ...). CSS class names and
+  DOM tag names (`createElement('textarea')`) are not type values and stay
+  literal.
+- Do not re-export a config constant under a bare name from another module
+  (`export const QUESTION_TYPES = ...` from a model). Re-exports force every
+  importer to discover which module owns which alias; a read from the config
+  module that owns the constant always resolves to the same place.
+
+## Strings
+
+- User-facing copy — labels, placeholders, titles, button texts, statuses and
+  error messages — lives in `config/strings.js` under a dedicated key in the
+  matching group: `FORM_MESSAGES` (save gate, project errors, shared modal
+  buttons), `VALIDATION_MESSAGES`, `PANEL_MESSAGES` (properties-panel labels
+  and placeholders), `ANSWERS_MESSAGES`, `JUMPS_MESSAGES`, `FORMS_MESSAGES`.
+- Models, services and stores never hardcode copy: a string shown to the user
+  is read from `strings.js` (`PANEL_MESSAGES.HEADER_LABEL`), even when it is
+  a single word like `return 'Header';`. When a component computes copy a
+  model already derives, it calls the model helper instead of duplicating the
+  literal (the properties panel uses `getQuestionLabelText`).
+- Interpolated copy (numbered rows, name-fragment labels such as
+  `` `All ${form_name} entries` ``) stays at the call site; extracting it
+  would split one sentence across config and consumer.
+- Template markup literals (headings, aria attributes in `.vue` templates)
+  are presentation and stay in the template.
 
 ## DOM Rules
 

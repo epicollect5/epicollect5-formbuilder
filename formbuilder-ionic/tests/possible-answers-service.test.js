@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { computed, isReactive, reactive } from 'vue';
 import { PARAMETERS } from '@/config/parameters.js';
-import { createAnswer, markAnswersRaw, POSSIBLE_ANSWERS_ORDER } from '@/models/possible-answers.js';
+import { createAnswer, markAnswersRaw } from '@/models/possible-answers.js';
 import {
     addPossibleAnswer,
     deleteAllAnswers,
@@ -123,11 +123,11 @@ describe('possible answers', () => {
             ]
         });
 
-        expect(orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.AZ)).toBe(true);
+        expect(orderPossibleAnswers(input, PARAMETERS.POSSIBLE_ANSWERS_ORDER.AZ)).toBe(true);
         expect(input.possible_answers.map((answer) => answer.answer)).toEqual(['apple', 'banana', 'cherry']);
         expect(input.possible_answers[0].answer_ref).toBe('answer_2');
 
-        orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.ZA);
+        orderPossibleAnswers(input, PARAMETERS.POSSIBLE_ANSWERS_ORDER.ZA);
 
         expect(input.possible_answers.map((answer) => answer.answer)).toEqual(['cherry', 'banana', 'apple']);
     });
@@ -135,7 +135,7 @@ describe('possible answers', () => {
     it('shuffles without losing or duplicating an answer', () => {
         const input = create_input();
 
-        expect(orderPossibleAnswers(input, POSSIBLE_ANSWERS_ORDER.SHUFFLE)).toBe(true);
+        expect(orderPossibleAnswers(input, PARAMETERS.POSSIBLE_ANSWERS_ORDER.SHUFFLE)).toBe(true);
         expect(input.possible_answers.map((answer) => answer.answer_ref).sort()).toEqual(['answer_1', 'answer_2']);
         expect(orderPossibleAnswers(create_input({ type: 'text', possible_answers: [] }), 'az')).toBe(false);
     });

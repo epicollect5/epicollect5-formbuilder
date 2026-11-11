@@ -216,7 +216,7 @@ describe('properties panel', () => {
         expect(getCurrentInput().default).toBe('b1');
     });
 
-    it('labels media text as Question Text and leaves it uncapped like legacy', () => {
+    it('labels media text like any question and leaves it uncapped', () => {
         setProject(project_definition([base_input({ type: 'photo', question: 'Photo' })]));
         renderApp();
         select_first_question();
@@ -224,7 +224,7 @@ describe('properties panel', () => {
         const label = document.querySelector('#properties [data-role="question-label"]');
         const field = document.querySelector('#properties .builder__question-field');
 
-        expect(label.textContent).toBe('Question Text');
+        expect(label.textContent).toBe('Question');
         expect(field.hasAttribute('maxlength')).toBe(false);
         expect(field.getAttribute('placeholder')).toBe('Type question here...');
     });

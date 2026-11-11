@@ -1,7 +1,9 @@
 'use strict';
 
+import { QUESTION_TYPE } from '@/config/question-types.js';
 import { getForms, getProject } from '@/models/project-definition.js';
 import { PARAMETERS } from '@/config/parameters.js';
+import { FORM_MESSAGES } from '@/config/strings.js';
 import { areAllInputsValid } from '@/services/validation.js';
 import { getJumpAvailableDestinations } from '@/services/jumps.js';
 import { getProjectLimitsError } from '@/models/project-limits.js';
@@ -63,17 +65,17 @@ const cleanInput = (input, inputs, state) => {
     input.jumps = cleanJumpList(input.jumps, input, inputs, state);
 
     // The legacy contract has no group[] on a branch, even if one was loaded.
-    if (input.type === 'branch') {
+    if (input.type === QUESTION_TYPE.BRANCH) {
         input.group = [];
     }
 
-    if (input.type === 'branch') {
+    if (input.type === QUESTION_TYPE.BRANCH) {
         (input.branch || []).forEach((child) => {
             cleanInput(child, input.branch, state);
         });
     }
 
-    if (input.type === 'group') {
+    if (input.type === QUESTION_TYPE.GROUP) {
         (input.group || []).forEach((child) => {
             cleanInput(child, input.group, state);
         });
@@ -131,7 +133,7 @@ export const encodeProject = async (project_definition) => {
     await ensureCompressionStreams();
 
     if (typeof CompressionStream === 'undefined') {
-        throw new Error('This browser cannot compress the project definition');
+        throw new Error(FORM_MESSAGES.PROJECT_COMPRESS_UNSUPPORTED);
     }
 
     const stream = new CompressionStream('gzip');
@@ -172,7 +174,7 @@ export const saveProject = async (project_definition, options) => {
     const config = options || {};
 
     if (!areAllInputsValid(project_definition)) {
-        throw new Error('The project is invalid');
+        throw new Error(FORM_MESSAGES.PROJECT_SAVE_INVALID);
     }
 
     const limits_error = getProjectLimitsError(project_definition);

@@ -7,6 +7,8 @@
  * browsers never download it (R-66). Browsers without TransformStream either
  * keep the hard failure.
  */
+import { FORM_MESSAGES } from '@/config/strings.js';
+
 let installed = false;
 
 export const ensureCompressionStreams = async () => {
@@ -16,7 +18,7 @@ export const ensureCompressionStreams = async () => {
     }
 
     if (typeof TransformStream === 'undefined') {
-        throw new Error('This browser supports neither CompressionStream nor TransformStream');
+        throw new Error(FORM_MESSAGES.STREAMS_UNSUPPORTED);
     }
 
     const { makeCompressionStream, makeDecompressionStream } = await import('compression-streams-polyfill/ponyfill');

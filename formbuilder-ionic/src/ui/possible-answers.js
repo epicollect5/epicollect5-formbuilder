@@ -2,7 +2,7 @@
 
 import {PARAMETERS} from '@/config/parameters.js';
 import {FORM_MESSAGES, VALIDATION_MESSAGES} from '@/config/strings.js';
-import {POSSIBLE_ANSWERS_ORDER, getAnswerLimit, getAnswerPage, getAnswerPageCount, sanitizeAnswer} from '@/models/possible-answers.js';
+import {getAnswerLimit, getAnswerPage, getAnswerPageCount, sanitizeAnswer} from '@/models/possible-answers.js';
 import {
     addPossibleAnswer,
     deleteAllAnswers,
@@ -175,17 +175,17 @@ export const installAnswersMenu = (card, input) => {
         {divider: true},
         {
             label: 'Order ascending', data_action: 'order-az', action: () => {
-                orderAnswers(input, POSSIBLE_ANSWERS_ORDER.AZ);
+                orderAnswers(input, PARAMETERS.POSSIBLE_ANSWERS_ORDER.AZ);
             }
         },
         {
             label: 'Order descending', data_action: 'order-za', action: () => {
-                orderAnswers(input, POSSIBLE_ANSWERS_ORDER.ZA);
+                orderAnswers(input, PARAMETERS.POSSIBLE_ANSWERS_ORDER.ZA);
             }
         },
         {
             label: 'Shuffle', data_action: 'shuffle', action: () => {
-                orderAnswers(input, POSSIBLE_ANSWERS_ORDER.SHUFFLE);
+                orderAnswers(input, PARAMETERS.POSSIBLE_ANSWERS_ORDER.SHUFFLE);
             }
         },
         {divider: true},

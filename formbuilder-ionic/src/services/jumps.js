@@ -1,8 +1,10 @@
 'use strict';
 
-import { createJump, jumpNeedsAnswer, JUMP_TO_END_OF_FORM_LABEL, JUMP_WHEN, usesAlwaysJump } from '@/models/jumps.js';
+import { QUESTION_TYPE } from '@/config/question-types.js';
+import { createJump, jumpNeedsAnswer, usesAlwaysJump } from '@/models/jumps.js';
 import { isMultipleAnswerType } from '@/models/possible-answers.js';
 import { PARAMETERS } from '@/config/parameters.js';
+import { PANEL_MESSAGES, JUMPS_MESSAGES } from '@/config/strings.js';
 
 /*
  * Phase 3 scope: top-level form inputs. `inputs` is the active list so Phase 2
@@ -40,15 +42,15 @@ const destinationLabel = (input) => {
     }
 
     if (!input.question) {
-        if (input.type === 'branch') {
-            return 'No branch header yet';
+        if (input.type === QUESTION_TYPE.BRANCH) {
+            return JUMPS_MESSAGES.PREVIEW_NO_BRANCH_HEADER;
         }
 
-        return 'No question text yet';
+        return JUMPS_MESSAGES.PREVIEW_NO_QUESTION_TEXT;
     }
 
-    if (input.type === 'readme') {
-        return trunc(stripTags(decodeHtml(input.question)).trim(), PARAMETERS.QUESTION_PREVIEW_LENGTH) || 'Readme';
+    if (input.type === QUESTION_TYPE.README) {
+        return trunc(stripTags(decodeHtml(input.question)).trim(), PARAMETERS.QUESTION_PREVIEW_LENGTH) || PANEL_MESSAGES.README_LABEL;
     }
 
     return trunc(input.question, PARAMETERS.QUESTION_PREVIEW_LENGTH);
@@ -75,7 +77,7 @@ export const getJumpAvailableDestinations = (input, inputs) => {
     if (current_input_index < list.length - 1) {
         destinations.push({
             ref: PARAMETERS.JUMP_TO_END_OF_FORM_REF,
-            question: JUMP_TO_END_OF_FORM_LABEL,
+            question: PARAMETERS.JUMP_TO_END_OF_FORM_LABEL,
             type: null
         });
     }
@@ -86,12 +88,12 @@ export const getJumpAvailableDestinations = (input, inputs) => {
 const normalizeJump = (jump, input) => {
     const next = {
         to: jump && jump.to !== undefined && jump.to !== null ? String(jump.to) : '',
-        when: jump && JUMP_WHEN[jump.when] ? jump.when : (jump && jump.when === '' ? '' : JUMP_WHEN.IS),
+        when: jump && PARAMETERS.JUMP_WHEN[jump.when] ? jump.when : (jump && jump.when === '' ? '' : PARAMETERS.JUMP_WHEN.IS),
         answer_ref: jump && jump.answer_ref !== undefined ? jump.answer_ref : null
     };
 
     if (usesAlwaysJump(input && input.type)) {
-        next.when = JUMP_WHEN.ALL;
+        next.when = PARAMETERS.JUMP_WHEN.ALL;
         next.answer_ref = null;
         return next;
     }
@@ -109,8 +111,8 @@ const normalizeJump = (jump, input) => {
         return next;
     }
 
-    if (next.when !== JUMP_WHEN.IS && next.when !== JUMP_WHEN.IS_NOT) {
-        next.when = JUMP_WHEN.IS;
+    if (next.when !== PARAMETERS.JUMP_WHEN.IS && next.when !== PARAMETERS.JUMP_WHEN.IS_NOT) {
+        next.when = PARAMETERS.JUMP_WHEN.IS;
     }
 
     const possible_answers = input && Array.isArray(input.possible_answers) ? input.possible_answers : [];

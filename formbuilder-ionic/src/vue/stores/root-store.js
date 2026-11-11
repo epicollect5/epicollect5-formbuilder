@@ -8,7 +8,7 @@ import { getForms, getInputs } from '@/models/project-definition.js';
 import { isSearchType } from '@/models/possible-answers.js';
 import { countInputs, countProjectSearchInputs, countTitles } from '@/models/project-limits.js';
 import { sanitizeQuestion } from '@/models/question-text.js';
-import { QUESTION_TYPES } from '@/models/question-types.js';
+import { QUESTION_TYPES } from '@/config/question-types.js';
 import {
     addInput,
     canAddInput,
@@ -29,11 +29,8 @@ import {
 } from '@/services/session.js';
 import { canUndo, undo, pushUndoState } from '@/services/undo.js';
 import {
-    ADVANCED_TAB,
     areFormInputsValid,
     getInputErrors,
-    JUMPS_TAB,
-    PROPERTIES_TAB
 } from '@/services/validation.js';
 import { saveProject } from '@/services/save.js';
 import { duplicateInput } from '@/services/question-actions.js';
@@ -348,11 +345,11 @@ export const useRootStore = defineStore('rootStore', () => {
             }
 
             openModal({
-                title: 'Warning',
+                title: FORM_MESSAGES.WARNING_TITLE,
                 class_name: 'builder__delete-question-modal',
                 body: createView(delete_question_modal_body_view),
                 buttons: [{
-                    text: 'Confirm',
+                    text: FORM_MESSAGES.CONFIRM_BUTTON,
                     on_click: (close) => {
                         close();
                         methods.deleteQuestion(input);
@@ -484,7 +481,7 @@ export const useRootStore = defineStore('rootStore', () => {
             return !state.saving && projectValid.value;
         }),
         saveTitle: computed(() => {
-            return state.saving ? FORM_MESSAGES.PROJECT_SAVING : (projectValid.value ? 'Save project' : 'Fix the validation errors before saving');
+            return state.saving ? FORM_MESSAGES.PROJECT_SAVING : (projectValid.value ? FORM_MESSAGES.SAVE_TITLE : FORM_MESSAGES.FIX_ERRORS_TITLE);
         }),
         /*
          * The tab strip: one entry per form with the live count and validity
@@ -514,7 +511,7 @@ export const useRootStore = defineStore('rootStore', () => {
         basicErrorMessage: computed(() => {
             const input = getCurrentInput();
             const tab_errors = getInputErrors(input, getCurrentInputs()).filter((error) => {
-                return error.tab === PROPERTIES_TAB;
+                return error.tab === PARAMETERS.PROPERTIES_TAB;
             });
 
             return tab_errors.length ? tab_errors[0].message : '';
@@ -526,13 +523,13 @@ export const useRootStore = defineStore('rootStore', () => {
 
             return {
                 basic: errors.some((error) => {
-                    return error.tab === PROPERTIES_TAB;
+                    return error.tab === PARAMETERS.PROPERTIES_TAB;
                 }),
                 advanced: errors.some((error) => {
-                    return error.tab === ADVANCED_TAB;
+                    return error.tab === PARAMETERS.ADVANCED_TAB;
                 }),
                 jumps: errors.some((error) => {
-                    return error.tab === JUMPS_TAB;
+                    return error.tab === PARAMETERS.JUMPS_TAB;
                 })
             };
         }),
