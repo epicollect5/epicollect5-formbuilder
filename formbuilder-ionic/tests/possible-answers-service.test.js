@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { computed, isReactive, reactive } from 'vue';
 import { PARAMETERS } from '@/config/parameters.js';
-import { POSSIBLE_ANSWERS_ORDER } from '@/models/possible-answers.js';
+import { createAnswer, markAnswersRaw, POSSIBLE_ANSWERS_ORDER } from '@/models/possible-answers.js';
 import {
     addPossibleAnswer,
     deleteAllAnswers,
@@ -161,5 +162,60 @@ describe('possible answers', () => {
         expect(input.possible_answers[100].answer_ref).toBe('answer_149');
         expect(input.possible_answers[0].answer_ref).toBe('answer_0');
         expect(input.possible_answers).toHaveLength(150);
+    });
+
+    it('creates answers that never join the reactive graph', () => {
+        const answer = createAnswer('A');
+
+        expect(isReactive(answer)).toBe(false);
+        expect(isReactive(reactive({ possible_answers: [answer] }).possible_answers[0])).toBe(false);
+    });
+
+    it('marks the answers of an imported list, containers included, raw', () => {
+        const input = reactive(create_input({
+            type: 'branch',
+            branch: [create_input({ ref: 'form_1_input_1_branch_1' })]
+        }));
+
+        expect(isReactive(input.branch[0].possible_answers[0])).toBe(true);
+
+        markAnswersRaw([input]);
+
+        expect(isReactive(input.possible_answers[0])).toBe(false);
+        expect(isReactive(input.branch[0].possible_answers[0])).toBe(false);
+    });
+
+    it('leaves the serialized answer shape untouched by raw marking', () => {
+        const answer = JSON.parse(JSON.stringify(createAnswer('A')));
+
+        expect(Object.keys(answer)).toEqual(['answer', 'answer_ref']);
+        expect(answer.answer).toBe('A');
+        expect(answer.answer_ref).toMatch(/^[0-9a-f]{13}$/);
+    });
+
+    it('renames by replacing the answer wholesale, keeping ref and position', () => {
+        const input = create_input();
+        const original = input.possible_answers[1];
+
+        expect(renamePossibleAnswer(input, 'answer_2', 'Nope')).toBe(true);
+        expect(input.possible_answers[1]).not.toBe(original);
+        expect(input.possible_answers[1].answer_ref).toBe('answer_2');
+        expect(input.possible_answers[1].answer).toBe('Nope');
+        expect(input.possible_answers[0].answer).toBe('Yes');
+        // the old object is abandoned, not mutated
+        expect(original.answer).toBe('No');
+    });
+
+    it('keeps renamed answers observable through the reactive list', () => {
+        const input = reactive(create_input());
+        const renamed = computed(() => {
+            return input.possible_answers[1].answer;
+        });
+
+        expect(renamed.value).toBe('No');
+
+        renamePossibleAnswer(input, 'answer_2', 'Maybe');
+
+        expect(renamed.value).toBe('Maybe');
     });
 });

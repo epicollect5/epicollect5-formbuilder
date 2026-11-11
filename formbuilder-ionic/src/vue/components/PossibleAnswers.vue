@@ -112,8 +112,8 @@ import { VueDraggable } from 'vue-draggable-plus';
 import { PARAMETERS } from '@/config/parameters.js';
 import { VALIDATION_MESSAGES } from '@/config/strings.js';
 import { POSSIBLE_ANSWERS_ORDER } from '@/models/possible-answers.js';
-import { useBuilderStore } from '@/vue/stores/builder.js';
-import { usePossibleAnswersStore } from '@/vue/stores/possibleAnswers.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
+import { usePossibleAnswersStore } from '@/vue/stores/possible-answers-store.js';
 import { createMenu } from '@/ui/dropdown.js';
 
 /*
@@ -128,7 +128,7 @@ export default {
         VueDraggable
     },
     setup() {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePossibleAnswersStore();
         let menu = null;
 

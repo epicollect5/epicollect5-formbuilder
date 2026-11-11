@@ -2,6 +2,7 @@
 
 import { reactive } from 'vue';
 import { findInput, getForm, getForms, getInputs, getProject } from '@/models/project-definition.js';
+import { markAnswersRaw } from '@/models/possible-answers.js';
 import { createInput } from '@/factory/input-factory.js';
 import { canContainInput, getContainerList } from '@/services/nesting.js';
 import { generateFormRef } from '@/factory/refs-factory.js';
@@ -30,6 +31,15 @@ export const getSession = () => {
 };
 
 export const setProject = (project_definition) => {
+    /*
+     * The definition arrives parsed and plain (load, undo restore): marking the
+     * answers raw here, before the session proxy wraps the tree, keeps every
+     * ingestion point covered by one call (S-07).
+     */
+    getForms(project_definition).forEach((form) => {
+        markAnswersRaw(getInputs(form));
+    });
+
     session.project_definition = project_definition;
     session.current_form_index = 0;
     session.current_input_ref = null;

@@ -1,7 +1,10 @@
 'use strict';
 
+import { markRaw } from 'vue';
+
 import { generateUniqID } from '@/factory/refs-factory.js';
 import { PARAMETERS } from '@/config/parameters.js';
+import { getContainerList } from '@/services/nesting.js';
 
 export const PLACEHOLDER_ANSWER = 'I am a placeholder answer';
 
@@ -31,11 +34,38 @@ export const getAnswerLimit = (type) => {
     return isSearchType(type) ? PARAMETERS.MAX_SEARCH_ANSWERS : PARAMETERS.MAX_ANSWERS;
 };
 
+/*
+ * Answer objects never join the Vue reactive graph: a search question can hold
+ * MAX_SEARCH_ANSWERS of them and deep-proxifying that subtree row by row is the
+ * dominant proxy cost on a project near the caps (F-05/F-07, S-07). The
+ * `__v_skip` flag markRaw defines is non-enumerable, so the serialized
+ * definition is byte-identical. The arrays themselves stay reactive, so array
+ * operations (push, splice, wholesale replacement) remain observable.
+ */
 export const createAnswer = (answer) => {
-    return {
+    return markRaw({
         answer: answer === undefined ? PLACEHOLDER_ANSWER : answer,
         answer_ref: generateUniqID()
-    };
+    });
+};
+
+/* Marks the answers of an input list, containers included, as non-reactive. */
+export const markAnswersRaw = (inputs) => {
+    (inputs || []).forEach((input) => {
+        if (Array.isArray(input.possible_answers)) {
+            input.possible_answers.forEach((answer) => {
+                if (answer && typeof answer === 'object') {
+                    markRaw(answer);
+                }
+            });
+        }
+
+        if (input.type === 'branch' || input.type === 'group') {
+            markAnswersRaw(getContainerList(input));
+        }
+    });
+
+    return inputs;
 };
 
 /*

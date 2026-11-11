@@ -58,15 +58,23 @@ export const renamePossibleAnswer = (input, answer_ref, value) => {
         return false;
     }
 
-    const answer = input.possible_answers.find((possible_answer) => {
+    const index = input.possible_answers.findIndex((possible_answer) => {
         return possible_answer.answer_ref === answer_ref;
     });
 
-    if (!answer) {
+    if (index === -1) {
         return false;
     }
 
-    answer.answer = sanitizeAnswer(value);
+    /*
+     * Answers are raw objects (S-07), so a property write would bypass
+     * reactivity; the answer is replaced wholesale and the array mutation is
+     * what the panel observes. The ref stays, the position stays.
+     */
+    const next = createAnswer(sanitizeAnswer(value));
+
+    next.answer_ref = input.possible_answers[index].answer_ref;
+    input.possible_answers.splice(index, 1, next);
 
     return true;
 };

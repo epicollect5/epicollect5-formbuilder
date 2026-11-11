@@ -43,7 +43,7 @@ import '../theme/ionic-formbuilder.scss';
 import { loadProject } from '@/services/project-source.js';
 import { setProject } from '@/services/session.js';
 import { ensureUndoBaseline } from '@/services/undo.js';
-import { useBuilderStore } from '@/vue/stores/builder.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
 import App from '@/vue/App.vue';
 
 /*
@@ -121,7 +121,7 @@ export const bootVueFormbuilder = async (options) => {
 
     setActivePinia(pinia);
 
-    const store = useBuilderStore();
+    const store = useRootStore();
 
     store.setAppBaseUrl(app_base_url);
     store.installUnloadGuard();

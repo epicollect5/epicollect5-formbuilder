@@ -181,7 +181,7 @@ delete it (`doCleaningBeforeSaving`, `export_form_click_callback`).
   property-panel hooks. There are 18 modules: text, textarea, integer, date, time,
   radio, checkbox, dropdown, barcode, location, audio, video, photo, phone,
   readme, branch, group, search.
-- The palette in `public/views/containers/inputs-tools.html` offers 19 types:
+- The builder tools in `public/views/containers/inputs-tools.html` offer 19 types:
   the 18 above plus `searchsingle`; `search.js` implements both `searchsingle`
   and `searchmultiple`, and `integer.js` implements both `integer` and
   `decimal` (the numeric type is a property of the input, not a separate
@@ -510,7 +510,7 @@ wires it together and the only place area modules meet.
   the unload guard.
 - `ui/form-actions.js` — the form menu (export/print/delete all), the form
   name modal, delete question, the import file picker.
-- `ui/input-tools.js` — the palette and `addQuestion`.
+- `ui/input-tools.js` — the builder tools and `addQuestion`.
 - `ui/forms-tabs.js` — the tab strip, its labels and validity gates.
 - `ui/questions-list.js` — the rows, selection, live text updates.
 - `ui/properties.js` — the properties card, tabs, badges and validation
@@ -614,7 +614,7 @@ sequenceDiagram
 ## Drag and drop
 
 - `ui/sortable.js` is the only jQuery consumer (jQuery 4 + jQuery UI 1.14.2):
-  `installToolDrag` (palette buttons drop into the question list; the drop
+  `installToolDrag` (builder tool buttons drop into the question list; the drop
   index is resolved from the pointer because jQuery UI's
   `connectToSortable` never transfers the helper), `installQuestionSortable`
   (the question list, contained to the strip) and `installAnswerSortable`

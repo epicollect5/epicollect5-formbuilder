@@ -111,17 +111,18 @@ Rules:
 - **Use only Ionicons (`<ion-icon name="...">`) for icons.** Do not add
   Font Awesome markup, classes, dependencies, or an FA-to-Ionicons upgrade
   layer. Render icons as `<ion-icon>` (directly in views or via the `icon()`
-  helper) and style them with Ionic/palette tokens.
+  helper) and style them with Ionic/theme tokens.
 - Bootstrap JavaScript is not loaded. `src/ui/` adapters provide the
   replacement behaviour on top of Ionic `ion-modal`, ARIA tabs, accessible menus
   and accessible labels.
 
 ## Theme Rules
 
-- The palette (`theme/_palette.scss`: `--ion-color-*`, `--app-*`) is the single
-  source of truth for color. Use palette variables directly in stylesheets; do
-  not introduce alias tokens that rename them (no `fb-*` layer). Derived washes
-  use `color-mix()` from the palette at the point of use.
+- The variables file (`theme/_variables.scss`: `--ion-color-*`, `--app-*`) is
+  the single source of truth for color. Use the variables directly in
+  stylesheets; do not introduce alias tokens that rename them (no `fb-*`
+  layer). Derived washes use `color-mix()` from the variables at the point of
+  use.
 - Ionic tokens first (`--ion-color-*`, `--ion-background-color`, spacing scale),
   custom properties second, hard-coded values last.
 - Per-component partials live in `theme/components/` and mirror `components/`.

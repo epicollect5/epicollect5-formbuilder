@@ -156,7 +156,7 @@ describe('fixed markup views', () => {
         expect(styles).toMatch(/@container \(max-width: 68px\)[\s\S]*?\.builder__form-tab-state\s*\{[^}]*display:\s*none;/);
     });
 
-    it('lets the hidden attribute override the tool palette flex layout', async () => {
+    it('lets the hidden attribute override the builder tools flex layout', async () => {
         const styles = await read('src/theme/_builder.scss');
 
         expect(styles).toMatch(/\.builder__tool\[hidden\]\s*\{[^}]*display:\s*none;[^}]*\}/s);

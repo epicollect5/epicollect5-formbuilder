@@ -26,11 +26,11 @@
 
 <script>
 import { computed } from 'vue';
-import { useBuilderStore } from '@/vue/stores/builder.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
 
 export default {
     setup() {
-        const store = useBuilderStore();
+        const store = useRootStore();
 
         const methods = {
             onSegmentChange(event) {

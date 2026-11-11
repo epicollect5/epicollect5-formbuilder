@@ -39,7 +39,7 @@ ion-item.builder__question.builder__question-placeholder::part(native) {
 }
 
 /*
- * SortableJS inserts the dropped palette tool's element into the list for one
+ * SortableJS inserts the dropped builder tool's element into the list for one
  * tick before the reactive render replaces it; hiding it removes that flash.
  * A tool inside the question list is never legitimate content — but the same
  * element acts as the live drop marker while the drag is in flight, so only

@@ -108,8 +108,8 @@ import { FORM_MESSAGES } from '@/config/strings.js';
 import { countTitles } from '@/models/project-limits.js';
 import { getQuestionLabel } from '@/models/question-text.js';
 import { areFormInputsValid, isInputValid } from '@/services/validation.js';
-import { useBuilderStore } from '@/vue/stores/builder.js';
-import { useFormStore } from '@/vue/stores/forms.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
+import { useFormsStore } from '@/vue/stores/forms-store.js';
 import { createMenu } from '@/ui/dropdown.js';
 import QuestionRow from '@/vue/components/QuestionRow.vue';
 
@@ -119,8 +119,8 @@ export default {
         VueDraggable
     },
     setup() {
-        const store = useBuilderStore();
-        const forms = useFormStore();
+        const store = useRootStore();
+        const forms = useFormsStore();
         let menu = null;
 
         const methods = {
@@ -214,7 +214,7 @@ export default {
 
         /*
          * The draggable reports its list through v-model; the store routes
-         * reorder and palette drops through the session services.
+         * reorder and builder tool drops through the session services.
          */
         const activeInputs = computed({
             get: () => {
@@ -226,8 +226,8 @@ export default {
         });
 
         /*
-         * Only the palette's cloned tools may be dropped in: the name is the
-         * palette's group, and the explicit list keeps a row dragged out of
+         * Only the builder tools' clones may be dropped in: the name is the
+         * tools' drag group, and the explicit list keeps a row dragged out of
          * another list from landing here.
          */
         const builderQuestions = {

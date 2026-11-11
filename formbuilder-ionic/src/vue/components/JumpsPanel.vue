@@ -60,7 +60,7 @@
 
 <script>
 import { computed } from 'vue';
-import { useJumpsStore } from '@/vue/stores/jumps.js';
+import { useJumpsStore } from '@/vue/stores/jumps-store.js';
 import JumpRow from '@/vue/components/JumpRow.vue';
 
 /*

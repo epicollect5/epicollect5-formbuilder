@@ -2,3 +2,22 @@
  * Properties panel — the shared builder classes in src/theme/_builder.scss
  * carry the look; this file holds only component-scoped additions.
  */
+
+/*
+ * The selection fade on the properties card: the legacy builder hid the
+ * previous form and faded the new one in over ANIMATION_NORMAL (150ms) while
+ * its buttons ran ANIMATION_FAST (100ms), so the port fades the whole card
+ * out-in at the same speeds.
+ */
+.builder-properties-fade-enter-active {
+    transition: opacity 150ms ease-out;
+}
+
+.builder-properties-fade-leave-active {
+    transition: opacity 100ms ease-in;
+}
+
+.builder-properties-fade-enter-from,
+.builder-properties-fade-leave-to {
+    opacity: 0;
+}

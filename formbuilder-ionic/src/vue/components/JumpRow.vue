@@ -61,7 +61,7 @@
 <script>
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { initDropdown } from '@/ui/dropdown.js';
-import { useJumpsStore } from '@/vue/stores/jumps.js';
+import { useJumpsStore } from '@/vue/stores/jumps-store.js';
 
 /*
     One jump row, using the vanilla custom dropdown component (ui/dropdown.js)

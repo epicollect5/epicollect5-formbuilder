@@ -188,7 +188,7 @@ describe('question sortable', () => {
         placeholder.remove();
     });
 
-    it('drags the palette tools into the list with compact helper', () => {
+    it('drags the builder tools into the list with compact helper', () => {
         const tools = jQuery('#tools .builder__tool');
 
         expect(tools).toHaveLength(18);

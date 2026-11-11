@@ -2,7 +2,7 @@
 
 import { isBranchOrGroup } from '@/models/input-properties.js';
 import { getContainerList } from '@/services/nesting.js';
-import { isMultipleAnswerType } from '@/models/possible-answers.js';
+import { createAnswer, isMultipleAnswerType } from '@/models/possible-answers.js';
 import { generateUniqID } from '@/factory/refs-factory.js';
 import { addInputObject, getCurrentForm, getEditingContainer } from '@/services/session.js';
 import { PARAMETERS } from '@/config/parameters.js';
@@ -33,7 +33,11 @@ const regenerateAnswers = (input, answer_refs) => {
 
         answer_refs.set(String(answer.answer_ref), answer_ref);
 
-        return { answer: answer.answer, answer_ref };
+        const next = createAnswer(answer.answer);
+
+        next.answer_ref = answer_ref;
+
+        return next;
     });
 
     if (!input.default) {

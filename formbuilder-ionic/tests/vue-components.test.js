@@ -146,8 +146,8 @@ describe('vue form tab strip', () => {
 
         selectInput('form_1_text');
 
-        const { useBuilderStore } = await import('@/vue/stores/builder.js');
-        const store = useBuilderStore(wrapper.vm.$.appContext.config.globalProperties.$pinia);
+        const { useRootStore } = await import('@/vue/stores/root-store.js');
+        const store = useRootStore(wrapper.vm.$.appContext.config.globalProperties.$pinia);
 
         store.editQuestion('');
 
@@ -315,8 +315,8 @@ describe('vue advanced fields', () => {
 
     it('shows the numeric fields for an integer question', async () => {
         const pinia = createPinia();
-        const { useBuilderStore } = await import('@/vue/stores/builder.js');
-        const store = useBuilderStore(pinia);
+        const { useRootStore } = await import('@/vue/stores/root-store.js');
+        const store = useRootStore(pinia);
         const wrapper = mount(AdvancedFields, mountOptions(pinia));
 
         store.addQuestion('integer');
@@ -330,8 +330,8 @@ describe('vue advanced fields', () => {
 
     it('renders the date format radios for a date question', async () => {
         const pinia = createPinia();
-        const { useBuilderStore } = await import('@/vue/stores/builder.js');
-        const store = useBuilderStore(pinia);
+        const { useRootStore } = await import('@/vue/stores/root-store.js');
+        const store = useRootStore(pinia);
         const wrapper = mount(AdvancedFields, mountOptions(pinia));
 
         store.addQuestion('date');
@@ -348,8 +348,8 @@ describe('vue advanced fields', () => {
 
     it('lists the possible answers in the default choice select', async () => {
         const pinia = createPinia();
-        const { useBuilderStore } = await import('@/vue/stores/builder.js');
-        const store = useBuilderStore(pinia);
+        const { useRootStore } = await import('@/vue/stores/root-store.js');
+        const store = useRootStore(pinia);
         const wrapper = mount(AdvancedFields, mountOptions(pinia));
 
         store.addQuestion('radio');

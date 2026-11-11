@@ -5,7 +5,7 @@
 <script>
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { createReadmeEditor } from '@/ui/readme-editor.js';
-import { useBuilderStore } from '@/vue/stores/builder.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
 
 /*
     The Tiptap readme editor. The vanilla editor factory (ui/readme-editor.js)
@@ -16,7 +16,7 @@ import { useBuilderStore } from '@/vue/stores/builder.js';
  */
 export default {
     setup() {
-        const store = useBuilderStore();
+        const store = useRootStore();
         const editorHost = ref(null);
         let editor = null;
 

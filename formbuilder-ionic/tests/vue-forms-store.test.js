@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { useBuilderStore } from '@/vue/stores/builder.js';
-import { useFormStore } from '@/vue/stores/forms.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
+import { useFormsStore } from '@/vue/stores/forms-store.js';
 import { bootStoreTest } from './support/vue-store-fixture.js';
 
 describe('vue forms store', () => {
@@ -9,8 +9,8 @@ describe('vue forms store', () => {
     });
 
     it('marks only the last child form as deletable', () => {
-        const builder = useBuilderStore();
-        const store = useFormStore();
+        const builder = useRootStore();
+        const store = useFormsStore();
 
         // the root form (index 0) can never be deleted
         expect(store.formDeletable()).toBe(false);
@@ -27,7 +27,7 @@ describe('vue forms store', () => {
     });
 
     it('copies the selected question to the end with a new ref', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
 
         builder.chooseInput('form_1_text');
         builder.editQuestion('Original');
@@ -41,7 +41,7 @@ describe('vue forms store', () => {
     });
 
     it('deletes the selected question and records the change', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
 
         builder.chooseInput('form_1_text');
 
@@ -52,8 +52,8 @@ describe('vue forms store', () => {
     });
 
     it('delete-all clears the active list', () => {
-        const builder = useBuilderStore();
-        const store = useFormStore();
+        const builder = useRootStore();
+        const store = useFormsStore();
 
         builder.addQuestion('text');
         builder.addQuestion('text');

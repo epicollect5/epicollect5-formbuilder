@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { useBuilderStore } from '@/vue/stores/builder.js';
-import { usePropertiesStore } from '@/vue/stores/properties.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
+import { usePropertiesStore } from '@/vue/stores/properties-store.js';
 import { updateCurrentInput } from '@/services/session.js';
 import { bootStoreTest } from './support/vue-store-fixture.js';
 
@@ -10,7 +10,7 @@ describe('vue properties store', () => {
     });
 
     it('stores null for an emptied advanced field and keeps the typed value', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePropertiesStore();
 
         builder.addQuestion('text');
@@ -26,7 +26,7 @@ describe('vue properties store', () => {
     });
 
     it('switches the numeric type and ignores unknown values', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePropertiesStore();
 
         builder.addQuestion('integer');
@@ -46,7 +46,7 @@ describe('vue properties store', () => {
     });
 
     it('repairs a null datetime format when the advanced panel opens', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePropertiesStore();
 
         builder.addQuestion('date');
@@ -64,7 +64,7 @@ describe('vue properties store', () => {
     });
 
     it('lists the branch-scoped uniqueness options inside a branch', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePropertiesStore();
 
         builder.addQuestion('branch');

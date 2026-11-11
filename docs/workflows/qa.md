@@ -74,8 +74,8 @@ same applies to the Vue port's equivalents under `formbuilder-vue/**`.
 
 ### B1. Add a question
 
-- **Test Description:** Confirm every question type can be added from the tools palette to the form canvas.
-- **Expected Result:** Each palette type — text, textarea, integer, date, time, radio, checkbox, dropdown, barcode, location, audio, video, photo, phone, readme, branch, group, searchsingle — is draggable onto the canvas; the input registry resolves the type; an integer question offers the decimal numeric type; a branch/group shows a header and an empty container; default properties appear in the panel; the question count increments; the undo state is pushed.
+- **Test Description:** Confirm every question type can be added from the builder tools to the form canvas.
+- **Expected Result:** Each builder tool type — text, textarea, integer, date, time, radio, checkbox, dropdown, barcode, location, audio, video, photo, phone, readme, branch, group, searchsingle — is draggable onto the canvas; the input registry resolves the type; an integer question offers the decimal numeric type; a branch/group shows a header and an empty container; default properties appear in the panel; the question count increments; the undo state is pushed.
 - **Manual Action:** On staging, open a project; drag each type from the tools list onto the canvas; confirm each renders its default markup and properties; delete each one; repeat for branch and group.
 
 ### B2. Reorder, nest and delete

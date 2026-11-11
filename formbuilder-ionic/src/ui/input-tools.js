@@ -26,7 +26,7 @@ export const renderTools = () => {
         const type = tool.getAttribute('data-type');
         const allowed = canAddInput(type);
 
-        // The legacy palette hides the tools a container cannot hold.
+        // The legacy builder hides the tools a container cannot hold.
         tool.hidden = !allowed;
         tool.disabled = !allowed;
 

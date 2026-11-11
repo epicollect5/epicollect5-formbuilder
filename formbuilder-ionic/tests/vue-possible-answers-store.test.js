@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { isReactive } from 'vue';
 import { PARAMETERS } from '@/config/parameters.js';
-import { useBuilderStore } from '@/vue/stores/builder.js';
-import { usePossibleAnswersStore } from '@/vue/stores/possibleAnswers.js';
+import { undo } from '@/services/undo.js';
+import { selectInput } from '@/services/session.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
+import { usePossibleAnswersStore } from '@/vue/stores/possible-answers-store.js';
 import { bootStoreTest } from './support/vue-store-fixture.js';
 
 describe('vue possible answers store', () => {
@@ -10,7 +13,7 @@ describe('vue possible answers store', () => {
     });
 
     it('adds an answer, lands on its page and records the change', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePossibleAnswersStore();
 
         builder.addQuestion('radio');
@@ -26,7 +29,7 @@ describe('vue possible answers store', () => {
     });
 
     it('lists one page of initial answers, follows the default and keeps it listed', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePossibleAnswersStore();
 
         builder.addQuestion('searchsingle');
@@ -61,7 +64,7 @@ describe('vue possible answers store', () => {
     });
 
     it('sanitises renamed answers through the model', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePossibleAnswersStore();
 
         builder.addQuestion('radio');
@@ -75,7 +78,7 @@ describe('vue possible answers store', () => {
     });
 
     it('refuses removing the last answer and clears a removed default', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePossibleAnswersStore();
 
         builder.addQuestion('radio');
@@ -100,7 +103,7 @@ describe('vue possible answers store', () => {
     });
 
     it('blocks paging while a visible answer is empty', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePossibleAnswersStore();
 
         builder.addQuestion('radio');
@@ -125,7 +128,7 @@ describe('vue possible answers store', () => {
     });
 
     it('orders answers ascending and resets to the first page', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePossibleAnswersStore();
 
         builder.addQuestion('radio');
@@ -140,7 +143,7 @@ describe('vue possible answers store', () => {
     });
 
     it('delete-all leaves one placeholder and clears the default', () => {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const store = usePossibleAnswersStore();
 
         builder.addQuestion('radio');
@@ -152,5 +155,61 @@ describe('vue possible answers store', () => {
         expect(builder.currentInput.possible_answers).toHaveLength(1);
         expect(builder.currentInput.default).toBeNull();
         expect(store.possibleAnswersCurrentPage).toBe(1);
+    });
+
+    it('keeps stored answers out of the reactive graph and the save payload unchanged', () => {
+        const builder = useRootStore();
+
+        builder.addQuestion('radio');
+
+        const answers = builder.currentInput.possible_answers;
+
+        // created raw by the factory and never proxified through the session
+        expect(isReactive(answers[0])).toBe(false);
+
+        const serialized = JSON.parse(JSON.stringify(answers[0]));
+
+        expect(Object.keys(serialized)).toEqual(['answer', 'answer_ref']);
+    });
+
+    it('keeps the default select reactive when a listed answer is renamed', () => {
+        const builder = useRootStore();
+        const store = usePossibleAnswersStore();
+
+        builder.addQuestion('radio');
+
+        const ref = builder.currentInput.possible_answers[0].answer_ref;
+
+        store.setDefaultChoice(ref);
+
+        expect(store.defaultChoiceOptions[1].label).toBe('I am a placeholder answer');
+
+        store.renamePossibleAnswer(ref, 'Renamed');
+
+        // the label reads a raw answer object; the wholesale replacement is
+        // what keeps this computed live
+        expect(store.defaultChoiceOptions[1].label).toBe('Renamed');
+    });
+
+    it('restores answers raw after undo', () => {
+        const builder = useRootStore();
+        const store = usePossibleAnswersStore();
+
+        builder.addQuestion('radio');
+
+        const input_ref = builder.currentInput.ref;
+        const ref = builder.currentInput.possible_answers[0].answer_ref;
+
+        // the rename push is throttled; a discrete change captures it, so
+        // undo has a state to restore
+        store.renamePossibleAnswer(ref, 'Changed');
+        store.addPossibleAnswer();
+        undo();
+        selectInput(input_ref);
+
+        const answers = builder.currentInput.possible_answers;
+
+        expect(answers[0].answer).toBe('I am a placeholder answer');
+        expect(isReactive(answers[0])).toBe(false);
     });
 });

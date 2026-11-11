@@ -40,7 +40,7 @@ Ported today:
 
 - Project load (plain JSON and gzip/base64), project name and logo.
 - Back / exit navigation, form tabs, form switching, add form.
-- Tool palette (click to add and drag to drop).
+- Builder tools (click to add and drag to drop).
 - Question list: add, reorder, delete, select.
 - Basic properties: question text, required toggle, title toggle.
 - Readme editor (Tiptap, replacing Summernote), 1000-char cap.
@@ -291,7 +291,7 @@ the pre-split source plus the full suite):
 | `ui/primary-toolbar.js` | the top bar: project name, logo, reveal, banner bindings, the Add Form button, hosting the tab strip |
 | `ui/save.js` | `performSave`, `performUndo`, the undo/save button updates, the debounced save gate, the unload guard |
 | `ui/form-actions.js` | `installFormActions`, the form name modal, delete question, import file picker |
-| `ui/input-tools.js` | the palette and `addQuestion` |
+| `ui/input-tools.js` | the builder tools and `addQuestion` |
 | `ui/forms-tabs.js` | `renderForms`, `buildFormTabLabel`, `bindFormSegment`, `refreshFormTabs`, `refreshFormMenuGates` |
 | `ui/questions-list.js` | `renderQuestions`, the row builders, badges, selection, `bindQuestionField` |
 | `ui/properties.js` | `renderProperties`, the tab badges and gating, `performInputValidation`, `refreshCurrentProperties` |
@@ -334,9 +334,9 @@ legacy runtime dependency.
 
 ### Cons and gotchas
 
-1. **The palette tool drag is not a 1:1 concept.** SortableJS assumes the
+1. **The builder tool drag is not a 1:1 concept.** SortableJS assumes the
    dragged elements live in a list container. Dragging an independent
-   palette button into the sortable list needs a shared `group` with
+   builder tool button into the sortable list needs a shared `group` with
    `pull: 'clone', put: false`, or the tool drag stays on native pointer
    events — `resolveDrop()` is already pure DOM math.
 2. **Test harness changes.** `tests/sortable.test.js` and

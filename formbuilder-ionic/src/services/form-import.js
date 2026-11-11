@@ -4,6 +4,7 @@ import { FORM_MESSAGES } from '@/config/strings.js';
 import { getContainerList } from '@/services/nesting.js';
 import { areFormInputsValid } from '@/services/validation.js';
 import { getForms } from '@/models/project-definition.js';
+import { markAnswersRaw } from '@/models/possible-answers.js';
 import {
     countInputs,
     countTitles,
@@ -75,7 +76,7 @@ export const prepareImportedForm = (text, project_definition, form_index) => {
         return { ok: false, error: FORM_MESSAGES.FORM_FILE_INVALID };
     }
 
-    const imported = remapRefs(JSON.parse(JSON.stringify(inputs)), payload.data.form.ref, form.ref);
+    const imported = markAnswersRaw(remapRefs(JSON.parse(JSON.stringify(inputs)), payload.data.form.ref, form.ref));
 
     if (imported.some((input) => {
         return !isValidInput(form.ref, input, false, false);

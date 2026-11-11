@@ -31,7 +31,7 @@ import { computed } from 'vue';
 import { getQuestionType } from '@/models/question-types.js';
 import { getQuestionLabel } from '@/models/question-text.js';
 import { isInputValid } from '@/services/validation.js';
-import { useBuilderStore } from '@/vue/stores/builder.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
 
 /*
     One row of the questions list. The row reads its validity straight from the
@@ -49,7 +49,7 @@ export default {
         }
     },
     setup(props) {
-        const store = useBuilderStore();
+        const store = useRootStore();
 
         const methods = {
             choose() {

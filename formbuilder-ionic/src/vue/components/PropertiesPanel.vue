@@ -1,144 +1,152 @@
 <template>
     <section class="builder__properties" id="properties" aria-label="Question properties">
-        <ion-card class="builder__properties-card">
-            <ion-card-header class="builder__panel-heading builder__properties-header">
-                <div class="builder__properties-heading">
-                    <span class="builder__panel-title builder__properties-title" :title="panelTitle">{{ panelTitle }}</span>
+        <!--
+            The card fades on selection, as the legacy builder did: the previous
+            form was hidden and the new one faded in (ANIMATION_NORMAL = 150ms,
+            its buttons ANIMATION_FAST = 100ms). The key is the selection, so
+            tab switches inside one question do not re-trigger the fade.
+        -->
+        <Transition name="builder-properties-fade" mode="out-in">
+            <ion-card class="builder__properties-card" :key="panelKey">
+                <ion-card-header class="builder__panel-heading builder__properties-header">
+                    <div class="builder__properties-heading">
+                        <span class="builder__panel-title builder__properties-title" :title="panelTitle">{{ panelTitle }}</span>
 
-                    <div class="builder__heading-actions builder__answers-btn-group builder__form-actions-group builder__properties-actions-group"
-                         :style="actionsVisibility">
-                        <button type="button"
-                                class="builder__answers-more-btn builder__form-action-btn"
-                                data-action="copy"
-                                aria-label="Copy question"
-                                :disabled="!copyEnabled"
-                                @click="copyQuestion()">
-                            <ion-icon name="copy-outline" aria-hidden="true"></ion-icon>
-                        </button>
-                        <button type="button"
-                                class="builder__answers-more-btn builder__form-action-btn builder__icon-btn--danger"
-                                data-action="delete"
-                                aria-label="Delete question"
-                                @click="requestDeleteQuestion()">
-                            <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
-                        </button>
-                        <button type="button"
-                                class="builder__answers-more-btn builder__form-action-btn"
-                                data-action="validate"
-                                aria-label="Validate question"
-                                @click="validateQuestion()">
-                            <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
-                        </button>
+                        <div class="builder__heading-actions builder__answers-btn-group builder__form-actions-group builder__properties-actions-group"
+                             :style="actionsVisibility">
+                            <button type="button"
+                                    class="builder__answers-more-btn builder__form-action-btn"
+                                    data-action="copy"
+                                    aria-label="Copy question"
+                                    :disabled="!copyEnabled"
+                                    @click="copyQuestion()">
+                                <ion-icon name="copy-outline" aria-hidden="true"></ion-icon>
+                            </button>
+                            <button type="button"
+                                    class="builder__answers-more-btn builder__form-action-btn builder__icon-btn--danger"
+                                    data-action="delete"
+                                    aria-label="Delete question"
+                                    @click="requestDeleteQuestion()">
+                                <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+                            </button>
+                            <button type="button"
+                                    class="builder__answers-more-btn builder__form-action-btn"
+                                    data-action="validate"
+                                    aria-label="Validate question"
+                                    @click="validateQuestion()">
+                                <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </ion-card-header>
+                </ion-card-header>
 
-            <ion-card-content class="builder__properties-content">
-                <div class="builder__empty builder__notice builder__notice--info ion-text-center"
-                     v-if="!currentInput"
-                     data-role="properties-empty">Select a question to edit it.</div>
+                <ion-card-content class="builder__properties-content">
+                    <div class="builder__empty builder__notice builder__notice--info ion-text-center"
+                         v-if="!currentInput"
+                         data-role="properties-empty">Select a question to edit it.</div>
 
-                <template v-else>
-                    <ion-segment class="builder__property-tabs"
-                                 :value="activeTab"
-                                 @ionChange="onTabChange($event)">
-                        <ion-segment-button v-for="tab in tabs"
-                                            :key="tab.value"
-                                            :value="tab.value"
-                                            :disabled="tab.disabled"
-                                            :class="{ 'is-invalid': tab.invalid }"
-                                            :aria-invalid="tab.invalid ? 'true' : null">
-                            <ion-label>{{ tab.label }}
-                                <ion-icon v-if="tab.invalid"
-                                          class="builder__property-tab-state"
-                                          name="alert"
-                                          aria-label="Tab has validation errors"></ion-icon>
-                            </ion-label>
-                        </ion-segment-button>
-                    </ion-segment>
+                    <template v-else>
+                        <ion-segment class="builder__property-tabs"
+                                     :value="activeTab"
+                                     @ionChange="onTabChange($event)">
+                            <ion-segment-button v-for="tab in tabs"
+                                                :key="tab.value"
+                                                :value="tab.value"
+                                                :disabled="tab.disabled"
+                                                :class="{ 'is-invalid': tab.invalid }"
+                                                :aria-invalid="tab.invalid ? 'true' : null">
+                                <ion-label>{{ tab.label }}
+                                    <ion-icon v-if="tab.invalid"
+                                              class="builder__property-tab-state"
+                                              name="alert"
+                                              aria-label="Tab has validation errors"></ion-icon>
+                                </ion-label>
+                            </ion-segment-button>
+                        </ion-segment>
 
-                    <div class="builder__properties-body">
-                        <section class="builder__properties-panel" v-if="activeTab === 'basic'">
-                            <ReadmeEditor v-if="isReadme"
-                                          :key="currentInput.ref"></ReadmeEditor>
+                        <div class="builder__properties-body">
+                            <section class="builder__properties-panel" v-if="activeTab === 'basic'">
+                                <ReadmeEditor v-if="isReadme"
+                                              :key="currentInput.ref"></ReadmeEditor>
 
-                            <template v-else>
-                                <div class="builder__question-field-group">
-                                    <label class="builder__field-label" data-role="question-label">{{ questionLabel }}</label>
+                                <template v-else>
+                                    <div class="builder__question-field-group">
+                                        <label class="builder__field-label" data-role="question-label">{{ questionLabel }}</label>
 
-                                    <ion-input class="builder__field builder__question-field"
-                                               aria-label="Question"
-                                               fill="outline"
-                                               :placeholder="questionPlaceholder"
-                                               :maxlength="questionMaxLength"
-                                               :value="questionValue"
-                                               @ionInput="onQuestionInput($event)"></ion-input>
+                                        <ion-input class="builder__field builder__question-field"
+                                                   aria-label="Question"
+                                                   fill="outline"
+                                                   :placeholder="questionPlaceholder"
+                                                   :maxlength="questionMaxLength"
+                                                   :value="questionValue"
+                                                   @ionInput="onQuestionInput($event)"></ion-input>
 
-                                    <p class="builder__property-error"
-                                       data-role="properties-error"
-                                       role="status"
-                                       v-if="basicErrorMessage">{{ basicErrorMessage }}</p>
-                                </div>
+                                        <p class="builder__property-error"
+                                           data-role="properties-error"
+                                           role="status"
+                                           v-if="basicErrorMessage">{{ basicErrorMessage }}</p>
+                                    </div>
 
-                                <ion-checkbox v-if="allowsRequired"
-                                              justify="start"
-                                              class="builder__checkbox"
-                                              label-placement="end"
-                                              data-field="required"
-                                              :checked="requiredValue"
-                                              @ionChange="onRequiredChange($event)">
-                                    <span>Answer is required</span>
-                                </ion-checkbox>
-
-                                <div class="builder__title-row" v-if="allowsTitle" data-field="title">
-                                    <ion-checkbox class="builder__checkbox builder__title-toggle"
+                                    <ion-checkbox v-if="allowsRequired"
+                                                  justify="start"
+                                                  class="builder__checkbox"
                                                   label-placement="end"
-                                                  :key="titleToggleKey"
-                                                  :checked="titleValue"
-                                                  @ionChange="onTitleChange($event)">
-                                        <span class="builder__title-label">Use answer as title</span>
+                                                  data-field="required"
+                                                  :checked="requiredValue"
+                                                  @ionChange="onRequiredChange($event)">
+                                        <span>Answer is required</span>
                                     </ion-checkbox>
-                                    <a class="builder__info-button"
-                                       data-role="title-info"
-                                       aria-label="What is a title?"
-                                       href="https://docs.epicollect.net/formbuilder/title"
-                                       target="_blank"
-                                       rel="noopener noreferrer">
-                                        <ion-icon name="help-circle" aria-hidden="true"></ion-icon>
-                                    </a>
-                                </div>
 
-                                <ion-grid class="builder__edit-container-grid"
-                                          data-role="edit-container-grid"
-                                          v-if="isBranchOrGroupType">
-                                    <ion-row class="ion-no-padding">
-                                        <ion-col size="4" class="ion-no-padding">
-                                            <button type="button"
-                                                    class="builder__form-button builder__edit-container"
-                                                    data-role="edit-container"
-                                                    :disabled="editContainerDisabled"
-                                                    @click="enterContainer()">
-                                                <ion-icon name="create" aria-hidden="true"></ion-icon>
-                                                <span data-role="edit-container-label">{{ editContainerLabel }}</span>
-                                            </button>
-                                        </ion-col>
-                                    </ion-row>
-                                </ion-grid>
-                            </template>
+                                    <div class="builder__title-row" v-if="allowsTitle" data-field="title">
+                                        <ion-checkbox class="builder__checkbox builder__title-toggle"
+                                                      label-placement="end"
+                                                      :key="titleToggleKey"
+                                                      :checked="titleValue"
+                                                      @ionChange="onTitleChange($event)">
+                                            <span class="builder__title-label">Use answer as title</span>
+                                        </ion-checkbox>
+                                        <a class="builder__info-button"
+                                           data-role="title-info"
+                                           aria-label="What is a title?"
+                                           href="https://docs.epicollect.net/formbuilder/title"
+                                           target="_blank"
+                                           rel="noopener noreferrer">
+                                            <ion-icon name="help-circle" aria-hidden="true"></ion-icon>
+                                        </a>
+                                    </div>
 
-                            <PossibleAnswers v-if="showPossibleAnswers"
-                                             :key="currentInput.ref + '-answers'"></PossibleAnswers>
-                        </section>
+                                    <ion-grid class="builder__edit-container-grid"
+                                              data-role="edit-container-grid"
+                                              v-if="isBranchOrGroupType">
+                                        <ion-row class="ion-no-padding">
+                                            <ion-col size="4" class="ion-no-padding">
+                                                <button type="button"
+                                                        class="builder__form-button builder__edit-container"
+                                                        data-role="edit-container"
+                                                        :disabled="editContainerDisabled"
+                                                        @click="enterContainer()">
+                                                    <ion-icon name="create" aria-hidden="true"></ion-icon>
+                                                    <span data-role="edit-container-label">{{ editContainerLabel }}</span>
+                                                </button>
+                                            </ion-col>
+                                        </ion-row>
+                                    </ion-grid>
+                                </template>
 
-                        <AdvancedFields v-else-if="activeTab === 'advanced'"
-                                        :key="currentInput.ref + '-advanced'"></AdvancedFields>
+                                <PossibleAnswers v-if="showPossibleAnswers"
+                                                 :key="currentInput.ref + '-answers'"></PossibleAnswers>
+                            </section>
 
-                        <JumpsPanel v-else
-                                    :key="currentInput.ref + '-jumps'"></JumpsPanel>
-                    </div>
-                </template>
-            </ion-card-content>
-        </ion-card>
+                            <AdvancedFields v-else-if="activeTab === 'advanced'"
+                                            :key="currentInput.ref + '-advanced'"></AdvancedFields>
+
+                            <JumpsPanel v-else
+                                        :key="currentInput.ref + '-jumps'"></JumpsPanel>
+                        </div>
+                    </template>
+                </ion-card-content>
+            </ion-card>
+        </Transition>
     </section>
 </template>
 
@@ -155,8 +163,8 @@ import {
 import { getQuestionLabel } from '@/models/question-text.js';
 import { hideLoading, notifyError, notifySuccess, showLoading } from '@/services/notifications.js';
 import { isInputValid } from '@/services/validation.js';
-import { useBuilderStore } from '@/vue/stores/builder.js';
-import { usePossibleAnswersStore } from '@/vue/stores/possibleAnswers.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
+import { usePossibleAnswersStore } from '@/vue/stores/possible-answers-store.js';
 import AdvancedFields from '@/vue/components/AdvancedFields.vue';
 import ReadmeEditor from '@/vue/components/ReadmeEditor.vue';
 import PossibleAnswers from '@/vue/components/PossibleAnswers.vue';
@@ -183,7 +191,7 @@ export default {
         JumpsPanel
     },
     setup() {
-        const store = useBuilderStore();
+        const store = useRootStore();
         const possibleAnswers = usePossibleAnswersStore();
 
         const state = reactive({
@@ -263,6 +271,10 @@ export default {
 
         const computedScope = {
             currentInput,
+            /* The fade re-triggers per selection; the ref (or the empty state) is its key. */
+            panelKey: computed(() => {
+                return currentInput.value ? currentInput.value.ref : 'none';
+            }),
             panelTitle: computed(() => {
                 return currentInput.value ? getQuestionLabel(currentInput.value) : 'Question properties';
             }),

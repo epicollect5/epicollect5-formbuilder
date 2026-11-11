@@ -109,8 +109,8 @@ import { VueDraggable } from 'vue-draggable-plus';
 import { getProject } from '@/models/project-definition.js';
 import { goBack } from '@/services/navigation.js';
 import { getProjectLogoUrl } from '@/services/project-media.js';
-import { useBuilderStore } from '@/vue/stores/builder.js';
-import { useFormStore } from '@/vue/stores/forms.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
+import { useFormsStore } from '@/vue/stores/forms-store.js';
 import FormTabsStrip from '@/vue/components/FormTabsStrip.vue';
 import QuestionsList from '@/vue/components/QuestionsList.vue';
 import PropertiesPanel from '@/vue/components/PropertiesPanel.vue';
@@ -123,8 +123,8 @@ export default {
         VueDraggable
     },
     setup() {
-        const store = useBuilderStore();
-        const forms = useFormStore();
+        const store = useRootStore();
+        const forms = useFormsStore();
 
         const methods = {
             goBack() {
@@ -145,7 +145,7 @@ export default {
             endDrag() {
                 store.endDrag();
             },
-            /* The vanilla palette blurs the clicked tool; keep the behaviour. */
+            /* The vanilla builder tools blur the clicked tool; keep the behaviour. */
             blurTool(event) {
                 if (event.currentTarget && typeof event.currentTarget.blur === 'function') {
                     event.currentTarget.blur();
@@ -154,7 +154,7 @@ export default {
         };
 
         /*
-         * The palette is a menu, not a list: its drag group is clone-only
+         * The builder tools are a menu, not a list: their drag group is clone-only
          * (pull: 'clone', put: false) and never mutates, so the v-model
          * setter is a no-op.
          */

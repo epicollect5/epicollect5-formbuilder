@@ -195,9 +195,9 @@
 import { computed } from 'vue';
 import { PARAMETERS } from '@/config/parameters.js';
 import { DATE_FORMATS, TIME_FORMATS } from '@/models/input-properties.js';
-import { useBuilderStore } from '@/vue/stores/builder.js';
-import { usePropertiesStore } from '@/vue/stores/properties.js';
-import { usePossibleAnswersStore } from '@/vue/stores/possibleAnswers.js';
+import { useRootStore } from '@/vue/stores/root-store.js';
+import { usePropertiesStore } from '@/vue/stores/properties-store.js';
+import { usePossibleAnswersStore } from '@/vue/stores/possible-answers-store.js';
 
 /*
     The advanced panel fields, gated per question type by the properties
@@ -208,7 +208,7 @@ import { usePossibleAnswersStore } from '@/vue/stores/possibleAnswers.js';
  */
 export default {
     setup() {
-        const builder = useBuilderStore();
+        const builder = useRootStore();
         const properties = usePropertiesStore();
         const answers = usePossibleAnswersStore();
 

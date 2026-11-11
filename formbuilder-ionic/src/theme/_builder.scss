@@ -40,7 +40,7 @@
     box-sizing: border-box;
 }
 
-/* The palette hides tools the active container cannot hold; the display rule
+/* The builder tools hide the ones the active container cannot hold; the display rule
    above would otherwise override the hidden attribute. */
 .builder__tool[hidden] {
     display: none;
@@ -1268,7 +1268,7 @@ ion-item.builder__question.sortable-drag::part(native) {
 }
 
 /*
- * The drop preview matches the question list and palette markers exactly: the
+ * The drop preview matches the question list and builder tool markers exactly: the
  * same dashed primary-tint box, tint and 42px height, so every list in the
  * builder previews a drop the same way.
  */
@@ -1294,6 +1294,11 @@ ion-item.builder__question.sortable-drag::part(native) {
 body.is-sortable-dragging,
 body.is-sortable-dragging * {
     cursor: grabbing !important;
+    /* the fallback drag is a mouse gesture over native inputs: without this,
+       the browser selects the text of every answer row the ghost passes over
+       (css/sass/_mixins.scss is the legacy equivalent) */
+    -webkit-user-select: none !important;
+    user-select: none !important;
 }
 
 .builder__answer > ion-icon {

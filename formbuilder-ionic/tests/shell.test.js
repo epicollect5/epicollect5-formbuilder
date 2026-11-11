@@ -442,7 +442,7 @@ describe('builder shell', () => {
         expect(document.querySelector('.builder__question[data-input-ref="input_1"]').getAttribute('data-valid')).toBe('false');
     });
 
-    it('does not add a question on clicking tool palette buttons, but adding a question selects it', () => {
+    it('does not add a question on clicking the builder tool buttons, but adding a question selects it', () => {
         const tools = [...document.querySelectorAll('#tools .builder__tool')];
 
         tools.find((tool) => tool.getAttribute('data-type') === 'radio').click();
