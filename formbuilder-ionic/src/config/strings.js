@@ -68,6 +68,7 @@ export const PANEL_MESSAGES = {
     EDIT_GROUP: 'Edit Group',
     REQUIRED_LABEL: 'Answer is required',
     TITLE_LABEL: 'Use answer as title',
+    TITLE_LIMIT_REACHED: `Limit of ${PARAMETERS.TITLES_MAX} titles reached`,
     TITLE_INFO_LABEL: 'What is a title?',
     NO_UNIQUENESS: 'No uniqueness',
     VERIFY_LABEL: 'Require double entry',

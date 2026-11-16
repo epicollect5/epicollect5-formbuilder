@@ -81,6 +81,21 @@ function project_definition() {
     };
 }
 
+/* Three titles are already checked, so a fourth question is at the cap. */
+function title_limit_definition() {
+    const definition = project_definition();
+    const base = definition.data.project.forms[0].inputs[0];
+
+    definition.data.project.forms[0].inputs = [
+        Object.assign({}, base, { ref: 'form_1_title_1', question: 'Title one', is_title: true }),
+        Object.assign({}, base, { ref: 'form_1_title_2', question: 'Title two', is_title: true }),
+        Object.assign({}, base, { ref: 'form_1_title_3', question: 'Title three', is_title: true }),
+        Object.assign({}, base, { ref: 'form_1_plain', question: 'Plain question', is_title: false })
+    ];
+
+    return definition;
+}
+
 const mountOptions = (pinia) => {
     return {
         global: {
@@ -291,6 +306,30 @@ describe('vue properties panel', () => {
         await fireIonEvent(wrapper, '[data-field="required"]', 'ionChange', { checked: true });
 
         expect(getCurrentInput().is_required).toBe(true);
+    });
+
+    it('disables the title toggle with the limit label once three titles are set', () => {
+        setProject(title_limit_definition());
+        selectInput('form_1_plain');
+
+        const wrapper = mount(PropertiesPanel, mountOptions());
+
+        const toggle = wrapper.find('.builder__title-toggle');
+
+        expect(toggle.element.disabled).toBe(true);
+        expect(wrapper.find('.builder__title-label').text()).toBe('Limit of 3 titles reached');
+    });
+
+    it('keeps the title toggle enabled and labelled while under the limit', () => {
+        setProject(title_limit_definition());
+        selectInput('form_1_title_1');
+
+        const wrapper = mount(PropertiesPanel, mountOptions());
+
+        const toggle = wrapper.find('.builder__title-toggle');
+
+        expect(toggle.element.disabled).toBe(false);
+        expect(wrapper.find('.builder__title-label').text()).toBe('Use answer as title');
     });
 });
 

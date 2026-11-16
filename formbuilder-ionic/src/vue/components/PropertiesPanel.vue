@@ -102,8 +102,9 @@
                                                       label-placement="end"
                                                       :key="titleToggleKey"
                                                       :checked="titleValue"
+                                                      :disabled="titleLimitReached"
                                                       @ionChange="onTitleChange($event)">
-                                            <span class="builder__title-label">Use answer as title</span>
+                                            <span class="builder__title-label">{{ titleToggleLabel }}</span>
                                         </ion-checkbox>
                                         <a class="builder__info-button"
                                            data-role="title-info"
@@ -162,6 +163,7 @@ import {
     isBranchOrGroup
 } from '@/models/input-properties.js';
 import { getQuestionLabel, getQuestionLabelText } from '@/models/question-text.js';
+import { countTitles } from '@/models/project-limits.js';
 import { PANEL_MESSAGES } from '@/config/strings.js';
 import { hideLoading, notifyError, notifySuccess, showLoading } from '@/services/notifications.js';
 import { isInputValid } from '@/services/validation.js';
@@ -271,6 +273,15 @@ export default {
             return store.currentInput;
         });
 
+        /*
+         * Legacy disables the title checkbox and swaps its label once three
+         * titles are checked and the edited question is not one of them.
+         */
+        const titleLimitReached = computed(() => {
+            return !!(currentInput.value && !currentInput.value.is_title &&
+                countTitles(store.currentInputs) >= PARAMETERS.TITLES_MAX);
+        });
+
         const computedScope = {
             currentInput,
             /* The fade re-triggers per selection; the ref (or the empty state) is its key. */
@@ -352,6 +363,10 @@ export default {
             }),
             titleValue: computed(() => {
                 return !!(currentInput.value && currentInput.value.is_title);
+            }),
+            titleLimitReached,
+            titleToggleLabel: computed(() => {
+                return titleLimitReached.value ? PANEL_MESSAGES.TITLE_LIMIT_REACHED : PANEL_MESSAGES.TITLE_LABEL;
             }),
             titleToggleKey: computed(() => {
                 return `${currentInput.value ? currentInput.value.ref : 'none'}-${state.title_toggle_nonce}`;
