@@ -21,3 +21,4 @@ public/js/vendor-formbuilder.js
 formbuilder-ionic/src/.env
 formbuilder-ionic/src/.env.*
 !formbuilder-ionic/src/.env.production.example
+formbuilder-ionic/.vitest/
