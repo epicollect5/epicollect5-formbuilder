@@ -645,7 +645,8 @@ ion-item.builder__question:last-child {
 
 ion-item.builder__question[aria-current='true'] {
     --border-color: var(--ion-color-primary);
-    --background: #e6bce0;
+    /* legacy selected-question tint: css/sass/_variables.scss $very-light-purple */
+    --background: rgba(155, 80, 136, 0.30);
 }
 
 ion-item.builder__question.ui-sortable-helper,
@@ -1434,7 +1435,7 @@ body.is-sortable-dragging * {
 /* The properties empty state sits below the column header, like the
    title warning in the questions column. */
 .builder__empty[data-role="properties-empty"] {
-    margin: 10px 0 0 0;
+    margin: 10px 12px 0 12px;
 }
 
 /* The questions empty state is an info well: centered text with the import
