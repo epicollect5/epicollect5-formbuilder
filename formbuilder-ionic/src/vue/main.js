@@ -41,6 +41,7 @@ import { setAssetPath as setIoniconAssetPath } from 'ionicons/components';
 import '../ionic.css';
 import '../theme/ionic-formbuilder.scss';
 import { loadProject } from '@/services/project-source.js';
+import { rollbar } from '@/services/error-reporting.js';
 import { setProject } from '@/services/session.js';
 import { ensureUndoBaseline } from '@/services/undo.js';
 import { useRootStore } from '@/vue/stores/root-store.js';
@@ -115,6 +116,19 @@ export const bootVueFormbuilder = async (options) => {
         .use(pinia)
         .use(IonicVue, { mode: 'md' });
 
+    /*
+        Vue swallows errors raised in render and lifecycle hooks: without this
+        handler they never reach window.onerror, so captureUncaught cannot see
+        them either. Dev keeps the console output Vue's default handler had.
+     */
+    app.config.errorHandler = (error, _instance, info) => {
+        rollbar.error(error, { info });
+
+        if (import.meta.env.DEV) {
+            console.error(error);
+        }
+    };
+
     Object.keys(ION_COMPONENTS).forEach((name) => {
         app.component(name, ION_COMPONENTS[name]);
     });
@@ -149,6 +163,8 @@ export const bootVueFormbuilder = async (options) => {
  */
 if (document.querySelector('.loader')) {
     bootVueFormbuilder().catch((error) => {
+        // the boot promise is caught, so captureUncaught never sees it
+        rollbar.error(error, { context: 'vue boot' });
         console.error('[formbuilder-ionic] vue boot failed', error);
 
         const loader = document.querySelector('.loader');

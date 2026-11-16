@@ -23,6 +23,7 @@
     "compression-streams-polyfill": "^0.1.7",
     "ionicons": "8.1.0",
     "pinia": "^4.1.0",
+    "rollbar": "^4.2.1",
     "vue": "^3.5.45",
     "vue-draggable-plus": "^0.6.1",
     "vue-router": "^5.5.0"

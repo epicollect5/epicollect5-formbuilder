@@ -16,3 +16,8 @@ public/js/vendor-formbuilder.js
 /formbuilder-ionic/legacy_projects.csv
 /formbuilder-ionic/legacy-projects-audit.jsonl
 /formbuilder-ionic/legacy-projects-audit.log
+
+# rollbar env files for the ionic vue builder (the example stays tracked)
+formbuilder-ionic/src/.env
+formbuilder-ionic/src/.env.*
+!formbuilder-ionic/src/.env.production.example
