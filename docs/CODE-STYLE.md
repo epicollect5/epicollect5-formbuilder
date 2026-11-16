@@ -218,6 +218,17 @@ return {
 - Reference the style in the component like `<style src="@/theme/media/Component.scss" lang="scss"></style>`
 - theme folder structure mirrors component folder structure 1:1
 
+## AI Slop Rules
+
+Do **NOT** generate:
+
+- **Narration comments** (`// set the value`, `// loop through items`). Comments only where they explain a non-obvious *why*; match the comment density of surrounding code.
+- **Defensive guards, fallbacks or try/catch on trusted internal paths** (props from parent components, store state, model factories). Guards need a concrete failure mode at a real boundary (user input, network, imported JSON), same rule as the legacy refactoring rules.
+- **Deeply nested code** — prefer early returns over `if` pyramids.
+- **Unnecessary reactivity** — do not wrap constants or static config in `reactive()`; do not store derived values as state when they belong in `computedScope`.
+
+---
+
 ## Anti-Patterns (STRICT)
 
 Do **NOT**:
@@ -227,6 +238,7 @@ Do **NOT**:
 - Move logic into components that belongs in services.
 - Introduce TypeScript.
 - Rewrite architecture to “modern Vue” patterns.
+- Add redundant comments, defensive checks, redundant reactivity or try/catch blocks on trusted code paths.
 
 ---
 
