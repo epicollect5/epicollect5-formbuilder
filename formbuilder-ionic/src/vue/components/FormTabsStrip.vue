@@ -18,6 +18,10 @@
                               class="builder__form-tab-state"
                               name="warning"
                               aria-label="Form has validation errors"></ion-icon>
+                    <ion-icon v-else
+                              class="builder__form-tab-state is-valid"
+                              name="checkmark"
+                              aria-label="Form is valid"></ion-icon>
                 </ion-label>
             </ion-segment-button>
         </ion-segment>

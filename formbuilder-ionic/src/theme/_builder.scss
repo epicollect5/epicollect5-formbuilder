@@ -1623,13 +1623,18 @@ body.is-sortable-dragging * {
     text-decoration: underline;
 }
 
-/* The form tab warning is the same filled icon and size as the question row. */
+/* The form tab warning is the same filled icon and size as the question row.
+   The valid state is the legacy green check (css/sass/_main.scss). */
 .builder__form-tab-state {
     flex: none;
     margin-left: 6px;
     color: var(--ion-color-warning);
     font-size: 20px;
     vertical-align: middle;
+}
+
+.builder__form-tab-state.is-valid {
+    color: var(--ion-color-success);
 }
 
 .builder__form-tab ion-label {

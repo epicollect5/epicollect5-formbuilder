@@ -137,8 +137,12 @@ describe('vue form tab strip', () => {
         expect(tabs[0].element.value).toBe('0');
         expect(tabs[0].attributes('aria-selected')).toBe('true');
         expect(tabs[0].find('.builder__question-count-badge').text()).toBe('1');
-        // a valid form shows no warning icon
-        expect(tabs[0].find('.builder__form-tab-state').exists()).toBe(false);
+        // a valid form shows the green check, as the legacy tab did
+        const valid_icon = tabs[0].find('.builder__form-tab-state');
+
+        expect(valid_icon.exists()).toBe(true);
+        expect(valid_icon.classes()).toContain('is-valid');
+        expect(valid_icon.attributes('aria-label')).toBe('Form is valid');
     });
 
     it('shows the warning icon once the form is invalid', async () => {
