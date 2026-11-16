@@ -31,7 +31,11 @@
         </ion-card-header>
 
         <ion-card-content class="builder__answers-content">
+            <Transition name="builder-answers-page-fade"
+                        mode="out-in"
+                        @enter="onPageShown">
                 <VueDraggable tag="ul"
+                              :key="possibleAnswersCurrentPage"
                               class="builder__answer-list"
                               v-model="pageAnswersModel"
                               ghost-class="builder__answer-placeholder"
@@ -43,28 +47,29 @@
                               :on-move="onDragMove"
                               @start="onDragStart($event)"
                               @end="onDragEnd()">
-                <li v-for="row in possibleAnswerRows"
-                    :key="row.answer.answer_ref"
-                    class="builder__answer"
-                    :data-answer-ref="row.answer.answer_ref">
-                    <ion-icon name="swap-vertical-outline" aria-hidden="true"></ion-icon>
+                    <li v-for="row in possibleAnswerRows"
+                        :key="row.answer.answer_ref"
+                        class="builder__answer"
+                        :data-answer-ref="row.answer.answer_ref">
+                        <ion-icon name="swap-vertical-outline" aria-hidden="true"></ion-icon>
 
-                    <ion-input class="builder__answer-field"
-                               :aria-label="row.ariaLabel"
-                               fill="outline"
-                               :maxlength="maxAnswerLength"
-                               :value="row.answer.answer"
-                               @ionInput="onRenameInput(row.answer, $event)"></ion-input>
+                        <ion-input class="builder__answer-field"
+                                   :aria-label="row.ariaLabel"
+                                   fill="outline"
+                                   :maxlength="maxAnswerLength"
+                                   :value="row.answer.answer"
+                                   @ionInput="onRenameInput(row.answer, $event)"></ion-input>
 
-                    <button type="button"
-                            class="builder__answer-remove"
-                            :aria-label="row.removeLabel"
-                            :disabled="isOnlyAnswer"
-                            @click="removePossibleAnswer(row.answer.answer_ref)">
-                        <ion-icon name="close-circle-outline"></ion-icon>
-                    </button>
-                </li>
-            </VueDraggable>
+                        <button type="button"
+                                class="builder__answer-remove"
+                                :aria-label="row.removeLabel"
+                                :disabled="isOnlyAnswer"
+                                @click="removePossibleAnswer(row.answer.answer_ref)">
+                            <ion-icon name="close-circle-outline"></ion-icon>
+                        </button>
+                    </li>
+                </VueDraggable>
+            </Transition>
 
             <p class="builder__answers-note"
                data-role="answers-note"
@@ -131,6 +136,9 @@ export default {
         const builder = useRootStore();
         const store = usePossibleAnswersStore();
         let menu = null;
+        // the panel scroll anchor captured at the pager click, restored when
+        // the incoming page enters (see onPageChange and onPageShown)
+        let scroll_anchor = 0;
 
         const note = reactive({
             message: '',
@@ -188,8 +196,23 @@ export default {
                 return pointer.clientY >= rect.top && pointer.clientY <= rect.bottom;
             },
 
-            /* Paging is blocked while a visible answer is still empty. */
+            /*
+             * Paging is blocked while a visible answer is still empty. The
+             * pages differ in height (the last one holds the remainder), so
+             * the pixel scroll the panel keeps across a page change lands at
+             * a different place in the new page and the pager drops out of
+             * view — the list appears to scroll away from the user. Capture
+             * the scroll relative to the panel's bottom: the out-in page fade
+             * holds the outgoing page's height until it is gone, and the
+             * anchor is restored in onPageShown, between the fades.
+             */
             onPageChange(target) {
+                const scroller = document.querySelector('.builder__properties-body');
+
+                scroll_anchor = scroller ?
+                    scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight :
+                    0;
+
                 if (!store.goToPossibleAnswersPage(target)) {
                     note.message = VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY;
                     note.is_error = true;
@@ -198,6 +221,22 @@ export default {
 
                 note.message = '';
                 note.is_error = false;
+            },
+
+            /*
+             * The incoming page is in the DOM and still transparent: Vue
+             * calls this hook after the insertion, before the fade-in
+             * paints. Restore the bottom-anchored scroll here, so the pager
+             * never moves: pages of equal height keep their scroll position
+             * untouched. (@before-enter would be too early — the old page is
+             * already gone and the new one is not inserted yet.)
+             */
+            onPageShown() {
+                const scroller = document.querySelector('.builder__properties-body');
+
+                if (scroller) {
+                    scroller.scrollTop = scroller.scrollHeight - scroller.clientHeight - scroll_anchor;
+                }
             },
             onExportCsv() {
                 store.exportPossibleAnswersCsv();

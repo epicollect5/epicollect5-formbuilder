@@ -406,3 +406,156 @@ describe('vue advanced fields', () => {
         expect(options[0].text()).toBe('None');
     });
 });
+
+/* Enough answers for three pages of 100, all named so paging is not blocked. */
+function pager_definition() {
+    const definition = project_definition();
+    const possible_answers = [];
+
+    for (let i = 1; i <= 250; i++) {
+        possible_answers.push({ answer: 'Answer ' + i, answer_ref: 'answer_ref_' + i });
+    }
+
+    definition.data.project.forms[0].inputs[0] = Object.assign({}, definition.data.project.forms[0].inputs[0], {
+        type: 'radio',
+        question: 'Pick one',
+        possible_answers
+    });
+
+    return definition;
+}
+
+describe('vue possible answers pager', () => {
+    beforeEach(() => {
+        setProject(pager_definition());
+    });
+
+    /*
+     * The panel is attached to the document so the pager finds the scroll
+     * container it restores. The attached tree hydrates the Ionic wrappers,
+     * and ion-icon's asset loader cannot resolve SVG URLs in jsdom, so the
+     * icon renders as a stub. VTU stubs <Transition> by default, which would
+     * skip the page fade and its scroll restore, so the real one renders.
+     */
+    const pagerMountOptions = () => {
+        const options = mountOptions();
+
+        options.global.components.IonIcon = { render: () => null };
+        options.global.stubs = { transition: false };
+
+        return options;
+    };
+
+    /*
+     * jsdom has no layout, so the panel scroll geometry is stubbed. The
+     * scrollHeight follows the current page like the rendered list does: a
+     * full page of 100 answers is taller than the 50-answer last page.
+     */
+    const stubPanelScroll = (wrapper, store) => {
+        const scroller = wrapper.find('.builder__properties-body').element;
+        const page_heights = { 1: 5290, 2: 5290, 3: 2640 };
+        const panel = { scroll_top: 0 };
+
+        Object.defineProperty(scroller, 'scrollHeight', {
+            get: () => page_heights[store.possibleAnswersCurrentPage],
+            configurable: true
+        });
+        Object.defineProperty(scroller, 'clientHeight', {
+            get: () => 454,
+            configurable: true
+        });
+        Object.defineProperty(scroller, 'scrollTop', {
+            get: () => panel.scroll_top,
+            set: (value) => {
+                panel.scroll_top = value;
+            },
+            configurable: true
+        });
+
+        return panel;
+    };
+
+    const pageButton = (wrapper, action) => {
+        return wrapper.find(`[data-action="page-${action}"]`);
+    };
+
+    /* The out-in swap completes a frame or two after the click in jsdom. */
+    const flushPageSwap = async () => {
+        await nextTick();
+        await new Promise((resolve) => {
+            setTimeout(resolve, 60);
+        });
+        await nextTick();
+    };
+
+    it('keeps the pager in view when navigating back from the last page', async () => {
+        selectInput('form_1_text');
+
+        const wrapper = mount(PropertiesPanel, Object.assign({}, pagerMountOptions(), {
+            attachTo: document.body
+        }));
+
+        const { usePossibleAnswersStore } = await import('@/vue/stores/possible-answers-store.js');
+        const store = usePossibleAnswersStore(wrapper.vm.$.appContext.config.globalProperties.$pinia);
+        const panel = stubPanelScroll(wrapper, store);
+
+        store.goToPossibleAnswersPage(3);
+
+        await nextTick();
+
+        // the user scrolled to the pager at the bottom of the short last page
+        panel.scroll_top = 2640 - 454;
+
+        await pageButton(wrapper, 'prev').trigger('click');
+        await flushPageSwap();
+
+        // the pager stays in view: the scroll follows the taller page 2,
+        // instead of keeping the pixel offset into its middle
+        expect(panel.scroll_top).toBe(5290 - 454);
+        expect(store.possibleAnswersCurrentPage).toBe(2);
+
+        wrapper.unmount();
+    });
+
+    it('keeps the scroll anchored while paging back and forth', async () => {
+        selectInput('form_1_text');
+
+        const wrapper = mount(PropertiesPanel, Object.assign({}, pagerMountOptions(), {
+            attachTo: document.body
+        }));
+
+        const { usePossibleAnswersStore } = await import('@/vue/stores/possible-answers-store.js');
+        const store = usePossibleAnswersStore(wrapper.vm.$.appContext.config.globalProperties.$pinia);
+        const panel = stubPanelScroll(wrapper, store);
+
+        // pages 1 and 2 are the same height: the scroll position is untouched
+        panel.scroll_top = 5290 - 454;
+
+        await pageButton(wrapper, 'next').trigger('click');
+        await flushPageSwap();
+
+        expect(panel.scroll_top).toBe(5290 - 454);
+        expect(store.possibleAnswersCurrentPage).toBe(2);
+
+        await pageButton(wrapper, 'next').trigger('click');
+        await flushPageSwap();
+
+        // the short last page clamps the scroll at its own bottom
+        expect(panel.scroll_top).toBe(2640 - 454);
+        expect(store.possibleAnswersCurrentPage).toBe(3);
+
+        await pageButton(wrapper, 'prev').trigger('click');
+        await flushPageSwap();
+
+        expect(panel.scroll_top).toBe(5290 - 454);
+        expect(store.possibleAnswersCurrentPage).toBe(2);
+
+        await pageButton(wrapper, 'prev').trigger('click');
+        await flushPageSwap();
+
+        expect(panel.scroll_top).toBe(5290 - 454);
+        expect(store.possibleAnswersCurrentPage).toBe(1);
+
+        wrapper.unmount();
+    });
+});

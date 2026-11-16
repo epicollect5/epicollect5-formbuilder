@@ -12,3 +12,24 @@
 .builder__answer-placeholder > * {
     visibility: hidden;
 }
+
+/*
+ * The page-change fade mirrors the properties card selection fade: out-in at
+ * the legacy ANIMATION_NORMAL 150ms fade-in over ANIMATION_FAST 100ms
+ * fade-out. The outgoing page stays in the flow while it fades, so the panel
+ * keeps its height until the swap and the pager holds still; the height
+ * change and the pager scroll restore land between the fades, in the same
+ * layout pass the incoming page is inserted (see onPageShown).
+ */
+.builder-answers-page-fade-enter-active {
+    transition: opacity 150ms ease-out;
+}
+
+.builder-answers-page-fade-leave-active {
+    transition: opacity 100ms ease-in;
+}
+
+.builder-answers-page-fade-enter-from,
+.builder-answers-page-fade-leave-to {
+    opacity: 0;
+}
