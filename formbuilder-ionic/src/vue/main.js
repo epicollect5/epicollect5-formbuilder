@@ -163,8 +163,6 @@ export const bootVueFormbuilder = async (options) => {
  */
 if (document.querySelector('.loader')) {
     bootVueFormbuilder().catch((error) => {
-        // the boot promise is caught, so captureUncaught never sees it
-        rollbar.error(error, { context: 'vue boot' });
         console.error('[formbuilder-ionic] vue boot failed', error);
 
         const loader = document.querySelector('.loader');
@@ -175,5 +173,10 @@ if (document.querySelector('.loader')) {
             message.textContent = 'The formbuilder could not be loaded.';
             loader.append(message);
         }
+
+        // reported last: the fallback message above must not depend on the
+        // reporting layer being healthy (the boot promise is caught, so
+        // captureUncaught never sees this failure)
+        rollbar.error(error, { context: 'vue boot' });
     });
 }
