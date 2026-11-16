@@ -3,8 +3,6 @@ description: Drive a change to a clean greptile review — implement, commit, ru
 agent: build
 ---
 
-Execute the `greptile-loop` skill defined in `.agents/skills/greptile-loop/SKILL.md` exactly as written.
-
-Forward the arguments below verbatim to the skill as-is, without parsing, restructuring, or interpreting them:
+Run the `greptile-loop` skill exactly as written. Load it with the `skill` tool using id `greptile-loop`; its instructions are in `.agents/skills/greptile-loop/SKILL.md`. The skill works from the repository state, so no arguments are needed — anything the user adds is appended at the end.
 
 $ARGUMENTS
