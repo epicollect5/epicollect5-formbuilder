@@ -108,6 +108,9 @@ export default defineConfig({
         host: '127.0.0.1',
         port: 5183,
         strictPort: true,
+        // resolved against the base URL, so this opens the Vue builder page
+        // instead of the comparison landing
+        open: 'vue/',
         fs: {
             allow: [repo_root]
         }
