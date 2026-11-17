@@ -36,9 +36,7 @@ import { saveProject } from '@/services/save.js';
 import { duplicateInput } from '@/services/question-actions.js';
 import { getProject } from '@/models/project-definition.js';
 import { hideLoading, notifyError, notifySuccess, notifyWarning, showLoading } from '@/services/notifications.js';
-import { openModal } from '@/ui/modal.js';
-import { createView } from '@/ui/dom.js';
-import delete_question_modal_body_view from '@/views/delete-question-modal-body.html?raw';
+import { useModalStore } from '@/vue/stores/modal-store.js';
 
 /*
  * The Vue builder's core store: the shared session wrapper, the selection and
@@ -49,6 +47,8 @@ import delete_question_modal_body_view from '@/views/delete-question-modal-body.
  * and the save/undo gates stay in one place.
  */
 export const useRootStore = defineStore('rootStore', () => {
+    const modal = useModalStore();
+
     const state = reactive({
         session: getSession(),
         unsaved_changes: false,
@@ -102,12 +102,14 @@ export const useRootStore = defineStore('rootStore', () => {
          * CSS-driven for the whole gesture — including the page gaps between
          * the lists. A body class carries it, set on drag start and removed on
          * drag end, so no list has to own the state and nothing is left behind
-         * if a sortable class lingers after the drop.
+         * if a sortable class lingers after the drop. The list element comes
+         * from the caller's template ref; only the builder tools pass nothing
+         * (a clone dragged from the tools column is not clamped to a box).
          */
-        beginDrag(list_selector) {
+        beginDrag(list_element) {
             document.body.classList.add('is-sortable-dragging');
 
-            drag_box = list_selector ? document.querySelector(list_selector) : null;
+            drag_box = list_element || null;
             drag_anchor = null;
             window.addEventListener('pointermove', methods.clampGhost);
 
@@ -344,14 +346,14 @@ export const useRootStore = defineStore('rootStore', () => {
                 return;
             }
 
-            openModal({
+            modal.openModal({
                 title: FORM_MESSAGES.WARNING_TITLE,
                 class_name: 'builder__delete-question-modal',
-                body: createView(delete_question_modal_body_view),
+                kind: 'delete-question',
                 buttons: [{
                     text: FORM_MESSAGES.CONFIRM_BUTTON,
-                    on_click: (close) => {
-                        close();
+                    action: () => {
+                        modal.closeModal();
                         methods.deleteQuestion(input);
                     }
                 }]

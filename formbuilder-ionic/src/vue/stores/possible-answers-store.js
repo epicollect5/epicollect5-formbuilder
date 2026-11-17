@@ -27,13 +27,11 @@ import {
     parseCsv
 } from '@/services/possible-answers-csv.js';
 import { getCurrentInput, updateCurrentInput } from '@/services/session.js';
+import { pickTextFile } from '@/services/file-picker.js';
 import { hideLoading, notifyError, notifySuccess, showLoading } from '@/services/notifications.js';
 import { downloadFile } from '@/ui/download.js';
-import { createDropdown } from '@/ui/dropdown.js';
-import { openModal } from '@/ui/modal.js';
-import { createView } from '@/ui/dom.js';
-import csv_import_modal_body_view from '@/views/csv-import-modal-body.html?raw';
 import { useRootStore } from '@/vue/stores/root-store.js';
+import { useModalStore } from '@/vue/stores/modal-store.js';
 
 /*
  * The possible answers card's state and actions: the page slice, the drag
@@ -43,13 +41,25 @@ import { useRootStore } from '@/vue/stores/root-store.js';
  */
 export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
     const builder = useRootStore();
+    const modal = useModalStore();
 
     const state = reactive({
         // the visible answers page per input ref (ui/state.js parity); page
         // state is not undoable, as in the vanilla app
         possible_answers_pages: new Map(),
         // the advanced panel's initial-answer select page, per input ref
-        default_choice_pages: new Map()
+        default_choice_pages: new Map(),
+        /*
+         * The CSV import modal body: the parsed file, the dataset column,
+         * the headers toggle and the replace / append mode. Toggling the
+         * headers resets the selected column, like the vanilla binding.
+         */
+        csv_import: {
+            parsed: null,
+            selected_column: '',
+            headers: true,
+            mode: 'replace'
+        }
     });
 
     const methods = {
@@ -218,58 +228,31 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
             downloadFile(getCsvFilename(input), exportCsv(input), 'text/csv;charset=utf-8;');
         },
         pickPossibleAnswersCsv() {
-            const field = document.createElement('input');
-
-            field.type = 'file';
-            field.accept = '.csv,text/csv';
-            field.hidden = true;
-
-            field.addEventListener('change', () => {
-                const file = field.files && field.files[0];
-
-                if (!file) {
-                    field.remove();
-                    return;
-                }
-
-                if (!/\.csv$/i.test(file.name)) {
-                    field.remove();
-                    notifyError(VALIDATION_MESSAGES.CSV_FILE_INVALID);
-                    return;
-                }
-
-                // the same bound as the form import bounds the synchronous parse (R-51)
-                if (file.size > PARAMETERS.IMPORT_MAX_BYTES) {
-                    field.remove();
-                    notifyError(VALIDATION_MESSAGES.CSV_FILE_TOO_LARGE);
-                    return;
-                }
-
-                const reader = new FileReader();
-
-                reader.onload = () => {
-                    const parsed = parseCsv(reader.result);
-
-                    field.remove();
-
-                    if (!parsed.rows.length) {
+            pickTextFile({
+                accept: '.csv,text/csv',
+                extension_pattern: /\.csv$/i,
+                max_bytes: PARAMETERS.IMPORT_MAX_BYTES
+            }).then((result) => {
+                if (!result.ok) {
+                    if (result.reason === 'invalid') {
                         notifyError(VALIDATION_MESSAGES.CSV_FILE_INVALID);
-                        return;
+                    } else if (result.reason === 'too_large') {
+                        notifyError(VALIDATION_MESSAGES.CSV_FILE_TOO_LARGE);
+                    } else if (result.reason === 'read_error') {
+                        notifyError(VALIDATION_MESSAGES.CSV_FILE_INVALID);
                     }
+                    return;
+                }
 
-                    methods.openPossibleAnswersCsvModal(parsed);
-                };
+                const parsed = parseCsv(result.text);
 
-                reader.onerror = () => {
-                    field.remove();
+                if (!parsed.rows.length) {
                     notifyError(VALIDATION_MESSAGES.CSV_FILE_INVALID);
-                };
+                    return;
+                }
 
-                reader.readAsText(file);
+                methods.openPossibleAnswersCsvModal(parsed);
             });
-
-            document.body.append(field);
-            field.click();
         },
         openPossibleAnswersCsvModal(parsed) {
             const input = getCurrentInput();
@@ -278,90 +261,70 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
                 return;
             }
 
-            const body = createView(csv_import_modal_body_view);
-            const headers = body.querySelector('[data-role="csv-headers"]');
-            const mode = body.querySelector('[data-role="csv-mode"]');
-            const column_placeholder = body.querySelector('[data-role="csv-column"]');
-            let selected_column = '';
-            let import_button = null;
+            state.csv_import.parsed = parsed;
+            state.csv_import.selected_column = '';
+            state.csv_import.headers = true;
+            state.csv_import.mode = 'replace';
 
-            headers.checked = true;
-            mode.value = 'replace';
-
-            const column_dropdown = createDropdown({
-                class_name: 'builder__csv-column-select',
-                aria_label: ANSWERS_MESSAGES.CSV_COLUMN_LABEL,
-                placeholder: ANSWERS_MESSAGES.CSV_PICK_COLUMN,
-                options: [...getCsvColumns(parsed, true)],
-                value: '',
-                on_change: (detail) => {
-                    selected_column = detail.value;
-
-                    if (import_button) {
-                        import_button.disabled = !selected_column;
-                    }
-                }
-            });
-
-            column_dropdown.setAttribute('data-role', 'csv-column');
-            column_placeholder.replaceWith(column_dropdown);
-
-            headers.addEventListener('ionChange', () => {
-                selected_column = '';
-                column_dropdown.setOptions(
-                    [...getCsvColumns(parsed, headers.checked === true)],
-                    ''
-                );
-
-                if (import_button) {
-                    import_button.disabled = true;
-                }
-            });
-
-            const modal = openModal({
+            modal.openModal({
                 title: ANSWERS_MESSAGES.CSV_MODAL_TITLE,
-                body,
+                kind: 'csv-import',
                 buttons: [
                     { text: FORM_MESSAGES.DISMISS_BUTTON, align: 'start' },
                     {
                         text: ANSWERS_MESSAGES.IMPORT_BUTTON,
-                        disabled: true,
-                        on_click: (close) => {
-                            if (!selected_column) {
-                                return;
-                            }
-
-                            // Legacy imports the answers behind the wait overlay.
-                            showLoading();
-
-                            const result = importAnswers(input, parsed, {
-                                column_index: Number(selected_column),
-                                has_headers: headers.checked === true,
-                                replace: mode.value !== 'append'
-                            });
-
-                            if (!result.ok) {
-                                hideLoading();
-                                notifyError(VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY);
-                                return;
-                            }
-
-                            close();
-                            state.possible_answers_pages.set(input.ref, 1);
-                            builder.recordChange();
-
-                            // Legacy hides the overlay after ANIMATION_SUPER_SLOW.
-                            hideLoading(1000);
-                            setTimeout(() => {
-                                notifySuccess(VALIDATION_MESSAGES.POSSIBLE_ANSWERS_IMPORTED);
-                            }, 1000);
+                        // live gate: Import waits for a selected column
+                        disabled: () => {
+                            return !state.csv_import.selected_column;
+                        },
+                        action: () => {
+                            methods.importCsv(input);
                         }
                     }
                 ]
             });
+        },
+        setCsvColumn(value) {
+            state.csv_import.selected_column = value === undefined || value === null ? '' : value;
+        },
+        setCsvHeaders(checked) {
+            state.csv_import.headers = checked === true;
 
-            // Footer actions are ion-button elements, not <button> tags.
-            import_button = modal.footer.querySelectorAll('ion-button')[1];
+            // the column meanings change with the headers toggle
+            state.csv_import.selected_column = '';
+        },
+        setCsvMode(value) {
+            state.csv_import.mode = value === 'append' ? 'append' : 'replace';
+        },
+        importCsv(input) {
+            if (!state.csv_import.selected_column) {
+                return;
+            }
+
+            // Legacy imports the answers behind the wait overlay.
+            showLoading();
+
+            const result = importAnswers(input, state.csv_import.parsed, {
+                column_index: Number(state.csv_import.selected_column),
+                has_headers: state.csv_import.headers === true,
+                replace: state.csv_import.mode !== 'append'
+            });
+
+            if (!result.ok) {
+                hideLoading();
+                notifyError(VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY);
+                return;
+            }
+
+            modal.closeModal();
+            state.possible_answers_pages.set(input.ref, 1);
+            builder.recordChange();
+
+            // Legacy hides the overlay after ANIMATION_SUPER_SLOW.
+            hideLoading(1000);
+            setTimeout(() => {
+                notifySuccess(VALIDATION_MESSAGES.POSSIBLE_ANSWERS_IMPORTED);
+            }, 1000);
         }
     };
 
@@ -374,6 +337,14 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
             const input = getCurrentInput();
 
             return !!input && isMultipleAnswerType(input.type);
+        }),
+        /*
+         * The CSV modal's dataset columns: headers on shows the first row as
+         * labels, headers off falls back to Column N. Empty until a file is
+         * parsed into the csv_import state.
+         */
+        csvColumnOptions: computed(() => {
+            return [...getCsvColumns(state.csv_import.parsed, state.csv_import.headers)];
         }),
         possibleAnswerCount: computed(() => {
             const input = getCurrentInput();
