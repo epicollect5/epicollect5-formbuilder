@@ -17,14 +17,13 @@
                  no-router
                  tabindex="-1"
                  :is-open="state.open"
-                 :keep-contents-mounted="true"
                  :trigger="triggerId"
                  reference="trigger"
                  side="bottom"
                  alignment="end"
                  :show-backdrop="true"
                  @ionPopoverDidDismiss="onDismiss">
-        <div class="dropdown__list" role="menu" v-if="state.everOpened">
+        <div class="dropdown__list" role="menu">
             <template v-for="(item, index) in items" :key="index">
                 <div class="builder__answers-dropdown-divider" v-if="item.divider"></div>
                 <button type="button"
@@ -90,10 +89,7 @@ export default {
         const triggerId = `fb-menu-${menu_id += 1}`;
 
         const state = reactive({
-            // the menu list renders at first open and clears on dismiss,
-            // matching the Dropdown's deferred option rendering
-            open: false,
-            everOpened: false
+            open: false
         });
 
         const methods = {
@@ -110,7 +106,6 @@ export default {
                     popover.style.setProperty('--width', Math.max(trigger.offsetWidth || 0, 200) + 'px');
                 }
 
-                state.everOpened = true;
                 state.open = true;
             },
             onSelect(item) {
@@ -126,7 +121,6 @@ export default {
             },
             onDismiss() {
                 state.open = false;
-                state.everOpened = false;
             }
         };
 
@@ -138,13 +132,20 @@ export default {
 
         onBeforeUnmount(() => {
             // the inline @ionic/vue overlay wrapper never dismisses on
-            // unmount; an open menu whose host unmounts would otherwise
-            // orphan the presented popover on the app root
+            // unmount, and a presented popover is reparented to the app
+            // root: dismiss it and detach the element, which Vue cannot
+            // remove from the position it rendered it in
             const popover = resolvePopover(popoverRef);
 
-            if (popover && typeof popover.dismiss === 'function' && popover.presented) {
-                popover.dismiss();
+            if (!popover || typeof popover.dismiss !== 'function') {
+                return;
             }
+
+            if (popover.presented) {
+                Promise.resolve(popover.dismiss()).then(() => { popover.remove(); }, () => { popover.remove(); });
+            }
+
+            popover.remove();
         });
 
         return {

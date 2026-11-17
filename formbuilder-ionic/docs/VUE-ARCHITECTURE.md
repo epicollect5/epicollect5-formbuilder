@@ -61,18 +61,22 @@ inside `Modal.vue` per the modal store's `kind`.
 
 - The popover is inline `ion-popover` driven by `:is-open`; the trigger
   element is addressed by a module-counter id (the factory's `dropdown_id`
-  pattern). `keep-contents-mounted` keeps the (empty) popover shell in the
-  DOM; the option list itself renders from first open (`state.everOpened`)
-  and clears on dismiss — the vanilla `ensure_options`/`reset_options`
-  lifecycle, so a closed jump Answer dropdown costs no option DOM.
+  pattern). Content mounting is left to the overlay wrapper — it mounts the
+  option list when the popover presents and unmounts it on dismiss, so a
+  closed jump Answer dropdown costs no option DOM. **`keep-contents-mounted`
+  must stay off**: Ionic reparents a presented popover to the app root, and
+  slot content that survives that reparenting gets duplicated on the next
+  open (the stale stencil-held copy plus the fresh Vue-rendered one).
 - `display_only` options label the current selection (a stored answer that no
   longer exists) but are never offered as choices.
-- **`onBeforeUnmount` must dismiss a presented popover.** The inline
-  `@ionic/vue` overlay wrapper has no unmount dismissal, and Ionic reparents
-  a presented popover to the app root — a host that unmounts while open (a
-  jump row's `signature` key changes on every edit) would otherwise orphan
-  the popover on screen. Both components dismiss in `onBeforeUnmount` when
-  the element reports `presented`. The JumpRow remount itself is a
+- **`onBeforeUnmount` must dismiss a presented popover and detach the
+  element.** The inline `@ionic/vue` overlay wrapper has no unmount
+  dismissal, and Ionic reparents a presented popover to the app root — a
+  host that unmounts while open (a jump row's `signature` key changes on
+  every edit) would otherwise orphan the popover on screen, and Vue cannot
+  remove a node from the position it no longer occupies. Both components
+  dismiss and `remove()` the element in `onBeforeUnmount`. The JumpRow
+  remount itself is a
   rebuild-on-mutation carry-over the `formbuilder-vue` port should
   reconsider dropping (see `docs/ROADMAP.md`, Jumps → Remaining).
 

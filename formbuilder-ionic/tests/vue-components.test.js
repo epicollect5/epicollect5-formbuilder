@@ -395,6 +395,19 @@ describe('vue advanced fields', () => {
         expect(wrapper.text()).not.toContain('Hours:Minutes:Seconds (24 hours)');
     });
 
+    /* A closed dropdown carries no option DOM; the option list mounts when
+       the overlay wrapper sees the presentation start, which jsdom never
+       completes — simulate the ionMount signal Ionic fires at present. */
+    const openDropdown = async (wrapper, field) => {
+        await wrapper.find(`[data-field="${field}"] .dropdown__trigger`).trigger('click');
+        await nextTick();
+
+        const popover = wrapper.find(`[data-field="${field}"] ion-popover`);
+        popover.element.dispatchEvent(new CustomEvent('ionMount'));
+        await nextTick();
+        await nextTick();
+    };
+
     it('lists the possible answers in the default choice dropdown', async () => {
         const pinia = createPinia();
         const { useRootStore } = await import('@/vue/stores/root-store.js');
@@ -405,9 +418,10 @@ describe('vue advanced fields', () => {
 
         await nextTick();
 
-        // a closed dropdown carries no option DOM; opening mounts the list
-        await wrapper.find('[data-field="default_choice"] .dropdown__trigger').trigger('click');
-        await nextTick();
+        // closed: the popover carries no option DOM
+        expect(wrapper.findAll('[data-field="default_choice"] .dropdown__option').length).toBe(0);
+
+        await openDropdown(wrapper, 'default_choice');
 
         const options = wrapper.findAll('[data-field="default_choice"] .dropdown__option');
 
@@ -419,6 +433,8 @@ describe('vue advanced fields', () => {
         await options[1].trigger('click');
 
         expect(store.currentInput.default).toBe(options[1].attributes('data-value'));
+
+        wrapper.unmount();
     });
 
     it('labels the uniqueness dropdown with the branch-scoped wording', async () => {
@@ -431,8 +447,7 @@ describe('vue advanced fields', () => {
 
         await nextTick();
 
-        await wrapper.find('[data-field="uniqueness"] .dropdown__trigger').trigger('click');
-        await nextTick();
+        await openDropdown(wrapper, 'uniqueness');
 
         const options = wrapper.findAll('[data-field="uniqueness"] .dropdown__option');
 
@@ -443,6 +458,8 @@ describe('vue advanced fields', () => {
         await options[1].trigger('click');
 
         expect(store.currentInput.uniqueness).toBe('form');
+
+        wrapper.unmount();
     });
 });
 

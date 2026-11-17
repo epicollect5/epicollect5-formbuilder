@@ -21,7 +21,6 @@
                      no-router
                      tabindex="-1"
                      :is-open="state.open"
-                     :keep-contents-mounted="true"
                      :trigger="triggerId"
                      reference="trigger"
                      side="bottom"
@@ -29,33 +28,31 @@
                      size="cover"
                      :show-backdrop="true"
                      @ionPopoverDidDismiss="onDismiss">
-            <template v-if="state.everOpened">
-                <div class="dropdown__search" role="search" v-if="hasSearch">
-                    <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
-                    <input type="search"
-                           class="dropdown__search-input"
-                           placeholder="Search"
-                           aria-label="Search options"
-                           autocomplete="off"
-                           spellcheck="false"
-                           :value="state.query"
-                           @input="onSearch">
-                </div>
+            <div class="dropdown__search" role="search" v-if="hasSearch">
+                <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+                <input type="search"
+                       class="dropdown__search-input"
+                       placeholder="Search"
+                       aria-label="Search options"
+                       autocomplete="off"
+                       spellcheck="false"
+                       :value="state.query"
+                       @input="onSearch">
+            </div>
 
-                <div class="dropdown__list" role="listbox">
-                    <button type="button"
-                            class="dropdown__option"
-                            :class="{ 'dropdown__option--selected': option.selected }"
-                            role="option"
-                            v-for="option in visibleOptions"
-                            :key="option.value"
-                            :aria-selected="option.ariaSelected"
-                            :data-value="option.value"
-                            @click="onSelect(option)">{{ option.label }}</button>
-                </div>
+            <div class="dropdown__list" role="listbox">
+                <button type="button"
+                        class="dropdown__option"
+                        :class="{ 'dropdown__option--selected': option.selected }"
+                        role="option"
+                        v-for="option in visibleOptions"
+                        :key="option.value"
+                        :aria-selected="option.ariaSelected"
+                        :data-value="option.value"
+                        @click="onSelect(option)">{{ option.label }}</button>
+            </div>
 
-                <p class="dropdown__list-empty" v-if="showEmpty">No matching options</p>
-            </template>
+            <p class="dropdown__list-empty" v-if="showEmpty">No matching options</p>
         </ion-popover>
     </div>
 </template>
@@ -85,9 +82,12 @@ const resolvePopover = (component_ref) => {
     the vanilla bindings and the store actions already consume. display_only
     options label the current selection but are never offered as choices.
     Store-driven option and value changes flow through the props, so no
-    rebuild passes are needed. The option list renders at first open and
-    clears on dismiss (state.everOpened), the vanilla ensure/reset_options
-    lifecycle: a closed jump Answer dropdown costs no option DOM.
+    rebuild passes are needed. The option list is mounted by the overlay
+    wrapper when the popover presents and unmounted on dismiss — Ionic's
+    lazy overlay content, matching the vanilla ensure/reset_options
+    lifecycle. Keep-contents-mounted must stay off: the presented popover
+    is reparented to the app root, and slot content that survives that
+    boundary gets duplicated on the next open.
  */
 export default {
     props: {
@@ -119,13 +119,6 @@ export default {
 
         const state = reactive({
             open: false,
-            /*
-             * The option list mounts at first open and clears on dismiss —
-             * the vanilla ensure_options/reset_options lifecycle. A closed
-             * dropdown (e.g. every jump row's Answer select) carries no
-             * option DOM; the empty popover shell costs nothing.
-             */
-            everOpened: false,
             query: ''
         });
 
@@ -144,7 +137,6 @@ export default {
                     popover.style.setProperty('--width', (trigger.offsetWidth || 0) + 'px');
                 }
 
-                state.everOpened = true;
                 state.open = true;
             },
             onSearch(event) {
@@ -156,7 +148,6 @@ export default {
             },
             onDismiss() {
                 state.open = false;
-                state.everOpened = false;
                 state.query = '';
             }
         };
@@ -218,14 +209,23 @@ export default {
 
         onBeforeUnmount(() => {
             // The inline @ionic/vue overlay wrapper never dismisses on unmount,
-            // and Ionic reparents a presented popover: an option pick that
-            // remounts the host (a jump row's signature changes on every edit)
-            // would otherwise orphan the open popover on the app root.
+            // and Ionic reparents a presented popover to the app root: an
+            // option pick that remounts the host (a jump row's signature
+            // changes on every edit) would otherwise orphan the open popover
+            // there. Dismiss it, then detach the element — Vue only removes
+            // nodes from the position it rendered them in, which the
+            // reparented popover has left.
             const popover = resolvePopover(popoverRef);
 
-            if (popover && typeof popover.dismiss === 'function' && popover.presented) {
-                popover.dismiss();
+            if (!popover || typeof popover.dismiss !== 'function') {
+                return;
             }
+
+            if (popover.presented) {
+                Promise.resolve(popover.dismiss()).then(() => { popover.remove(); }, () => { popover.remove(); });
+            }
+
+            popover.remove();
         });
 
         return {
