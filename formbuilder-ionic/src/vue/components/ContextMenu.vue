@@ -39,9 +39,20 @@
 </template>
 
 <script>
-import { computed, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref } from 'vue';
 
 let menu_id = 0;
+
+/* A template ref on a Vue component returns the instance; $el is its root node. */
+const resolvePopover = (component_ref) => {
+    const value = component_ref && component_ref.value;
+
+    if (!value) {
+        return null;
+    }
+
+    return value.$el || value;
+};
 
 /*
     The shared action menu: a trigger button plus an ion-popover list, the
@@ -124,6 +135,17 @@ export default {
                 return state.open ? 'true' : 'false';
             })
         };
+
+        onBeforeUnmount(() => {
+            // the inline @ionic/vue overlay wrapper never dismisses on
+            // unmount; an open menu whose host unmounts would otherwise
+            // orphan the presented popover on the app root
+            const popover = resolvePopover(popoverRef);
+
+            if (popover && typeof popover.dismiss === 'function' && popover.presented) {
+                popover.dismiss();
+            }
+        });
 
         return {
             triggerRef,

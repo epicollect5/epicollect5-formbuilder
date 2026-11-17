@@ -60,6 +60,10 @@ export default {
         const modal = useModalStore();
 
         const methods = {
+            onDismiss() {
+                // backdrop click, Escape or swipe: the store state follows
+                modal.closeModal();
+            },
             onButtonClick(button) {
                 const disabled = methods.isButtonDisabled(button);
 

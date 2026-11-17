@@ -61,10 +61,21 @@
 </template>
 
 <script>
-import { computed, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref } from 'vue';
 
 const SEARCH_THRESHOLD = 50;
 let dropdown_id = 0;
+
+/* A template ref on a Vue component returns the instance; $el is its root node. */
+const resolvePopover = (component_ref) => {
+    const value = component_ref && component_ref.value;
+
+    if (!value) {
+        return null;
+    }
+
+    return value.$el || value;
+};
 
 /*
     The shared value select: a trigger button plus an ion-popover listbox,
@@ -204,6 +215,18 @@ export default {
                 return String(option.value) === String(value);
             }) || null;
         }
+
+        onBeforeUnmount(() => {
+            // The inline @ionic/vue overlay wrapper never dismisses on unmount,
+            // and Ionic reparents a presented popover: an option pick that
+            // remounts the host (a jump row's signature changes on every edit)
+            // would otherwise orphan the open popover on the app root.
+            const popover = resolvePopover(popoverRef);
+
+            if (popover && typeof popover.dismiss === 'function' && popover.presented) {
+                popover.dismiss();
+            }
+        });
 
         return {
             triggerRef,
