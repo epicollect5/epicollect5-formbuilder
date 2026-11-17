@@ -696,6 +696,9 @@ a reference.
 - The port is the final app: the legacy formbuilder and the Ionic prototype are
   reference during the migration and are deleted once `formbuilder-vue/`
   reaches parity.
+- The prototype's Vue tree (`formbuilder-ionic/src/vue/**`) carries the shared
+  component contracts and DOM rules forward; they are recorded in
+  `formbuilder-ionic/docs/VUE-ARCHITECTURE.md`.
 - `docs/CODE-STYLE.md` is the target style and applies only there.
 - The legacy app remains the behavioural reference for the project-definition
   contract; it is not a structural template.

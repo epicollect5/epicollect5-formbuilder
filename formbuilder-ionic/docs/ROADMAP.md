@@ -11,7 +11,8 @@ the prototype exists to carry the ported behaviour into reusable Vue
 components — and both are deleted once `formbuilder-vue/` reaches parity
 (repo-wide decision recorded in `docs/ARCHITECTURE.md` at the repository
 root). New UI work therefore lands as Vue components under `src/vue/**`, not
-as additions to the vanilla render layer.
+as additions to the vanilla render layer; the component contracts and DOM
+rules are documented in `docs/VUE-ARCHITECTURE.md`.
 
 ## Tooling decision
 
@@ -132,6 +133,14 @@ Remaining:
 
 - Highlighting the offending jump row itself (the row already shows its
   field-level error message; there is no row-level red outline yet).
+- Drop the per-edit row remount. `JumpRow` is keyed by the row's `signature`
+  (`jumps-store.js`), a rebuild-on-mutation carry-over from the vanilla
+  `buildJumpRow` that was needed while the selects were imperative
+  placeholders. Since the Dropdown migration the row is fully reactive, so
+  the remount is the only remaining path that can unmount a row with a
+  popover mid-flight (every option pick changes the signature). The
+  `formbuilder-vue` port should reconsider dropping the remount entirely
+  instead of carrying it over.
 
 ### Possible answers
 
