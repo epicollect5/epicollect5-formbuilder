@@ -46,15 +46,20 @@
                     <li v-for="row in possibleAnswerRows"
                         :key="row.answer.answer_ref"
                         class="builder__answer"
+                        :class="{ 'builder__answer--error': row.error }"
                         :data-answer-ref="row.answer.answer_ref">
                         <ion-icon name="swap-vertical-outline" aria-hidden="true"></ion-icon>
 
-                        <ion-input class="builder__answer-field"
-                                   :aria-label="row.ariaLabel"
-                                   fill="outline"
-                                   :maxlength="maxAnswerLength"
-                                   :value="row.answer.answer"
-                                   @ionInput="onRenameInput(row.answer, $event)"></ion-input>
+                        <div class="builder__answer-field-group">
+                            <ion-input class="builder__answer-field"
+                                       :aria-label="row.ariaLabel"
+                                       fill="outline"
+                                       :maxlength="maxAnswerLength"
+                                       :value="row.answer.answer"
+                                       @ionInput="onRenameInput(row.answer, $event)"></ion-input>
+
+                            <p class="builder__answer-error" role="status" v-if="row.error">{{ row.error }}</p>
+                        </div>
 
                         <button type="button"
                                 class="builder__answer-remove"

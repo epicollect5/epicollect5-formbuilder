@@ -4,6 +4,35 @@
  */
 
 /*
+ * The field group takes the input's place in the row so the inline validation
+ * message (the vanilla `.input-properties__form__error` parity) can sit under
+ * the input without breaking the drag row's flex layout.
+ */
+.builder__answer-field-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+/*
+ * The vanilla flagged a bad answer row with `has-error has-feedback`: a red
+ * outline on the input plus the message text under it.
+ */
+.builder__answer--error .builder__answer-field {
+    --border-color: var(--ion-color-danger);
+    --highlight-color-focused: var(--ion-color-danger);
+    --highlight-color-valid: var(--ion-color-danger);
+}
+
+.builder__answer-error {
+    margin: 2px 0 0;
+    color: var(--ion-color-danger);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+/*
  * SortableJS keeps the dragged answer itself in the list as the drop
  * placeholder (jQuery UI had a separate empty element). Hiding the row's
  * content under the placeholder class restores the vanilla empty drop

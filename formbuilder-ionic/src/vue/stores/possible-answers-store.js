@@ -5,6 +5,7 @@ import { defineStore } from 'pinia';
 import { PARAMETERS } from '@/config/parameters.js';
 import { ANSWERS_MESSAGES, FORM_MESSAGES, PANEL_MESSAGES, VALIDATION_MESSAGES } from '@/config/strings.js';
 import { getForms } from '@/models/project-definition.js';
+import { isBlank } from '@/models/validation.js';
 import {
     getAnswerLimit,
     getAnswerPage,
@@ -328,16 +329,59 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
         }
     };
 
-    const computedScope = {
+        /*
+         * Per-row validation messages for the visible page — the vanilla
+         * savePossibleAnswers parity: it validated the DOM rows (the current
+         * page) and highlighted empty and duplicate-ref answers inline.
+         * Derived reactively, so the highlight appears while typing and
+         * clears the moment the text is fixed, like the vanilla keyup path;
+         * the aggregate input validation (badges, save gate) still covers
+         * every page. A ref duplicated within the page marks every row
+         * sharing it — the vanilla highlighted the second occurrence only.
+         */
+        const possibleAnswerErrors = computed(() => {
+            const input = getCurrentInput();
+            const errors = {};
+
+            if (!input || !isMultipleAnswerType(input.type)) {
+                return errors;
+            }
+
+            const page_answers = getAnswerPage(input.possible_answers, methods.currentPossibleAnswersPage());
+            const seen_refs = new Set();
+
+            page_answers.forEach((answer) => {
+                if (!answer) {
+                    return;
+                }
+
+                const ref = String(answer.answer_ref);
+
+                if (seen_refs.has(ref)) {
+                    errors[ref] = VALIDATION_MESSAGES.POSSIBLE_ANSWER_DUPLICATED_IDENTIFIER;
+                    return;
+                }
+
+                seen_refs.add(ref);
+
+                if (isBlank(answer.answer)) {
+                    errors[ref] = VALIDATION_MESSAGES.POSSIBLE_ANSWER_EMPTY;
+                }
+            });
+
+            return errors;
+        });
+
         /*
          * The possible answers card. The page slice is what the list shows
          * and reorders; the default select lives in the advanced fields.
          */
-        showPossibleAnswers: computed(() => {
-            const input = getCurrentInput();
+        const computedScope = {
+            showPossibleAnswers: computed(() => {
+                const input = getCurrentInput();
 
-            return !!input && isMultipleAnswerType(input.type);
-        }),
+                return !!input && isMultipleAnswerType(input.type);
+            }),
         /*
          * The CSV modal's dataset columns: headers on shows the first row as
          * labels, headers off falls back to Column N. Empty until a file is
@@ -377,7 +421,8 @@ export const usePossibleAnswersStore = defineStore("possibleAnswers", () => {
                 return {
                     answer,
                     ariaLabel: `Answer ${offset + index + 1}`,
-                    removeLabel: `Remove answer ${offset + index + 1}`
+                    removeLabel: `Remove answer ${offset + index + 1}`,
+                    error: possibleAnswerErrors.value[String(answer.answer_ref)] || null
                 };
             });
         }),

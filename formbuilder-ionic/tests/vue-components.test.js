@@ -33,6 +33,7 @@ import FormTabsStrip from '@/vue/components/FormTabsStrip.vue';
 import QuestionsList from '@/vue/components/QuestionsList.vue';
 import QuestionRow from '@/vue/components/QuestionRow.vue';
 import PropertiesPanel from '@/vue/components/PropertiesPanel.vue';
+import PossibleAnswers from '@/vue/components/PossibleAnswers.vue';
 import AdvancedFields from '@/vue/components/AdvancedFields.vue';
 import ReadmeEditor from '@/vue/components/ReadmeEditor.vue';
 import { setProject, selectInput } from '@/services/session.js';
@@ -546,10 +547,68 @@ function pager_definition() {
     return definition;
 }
 
+/* A radio whose visible page holds an empty answer and a duplicated ref. */
+function answer_error_definition() {
+    const definition = project_definition();
+
+    definition.data.project.forms[0].inputs[0] = Object.assign({}, definition.data.project.forms[0].inputs[0], {
+        type: 'radio',
+        question: 'Pick one',
+        possible_answers: [
+            { answer: '', answer_ref: 'answer_ref_empty' },
+            { answer: 'Filled', answer_ref: 'answer_ref_dup' },
+            { answer: 'Also filled', answer_ref: 'answer_ref_dup' }
+        ]
+    });
+
+    return definition;
+}
+
+describe('vue possible answer row errors', () => {
+    beforeEach(() => {
+        setProject(answer_error_definition());
+        selectInput('form_1_text');
+    });
+
+    it('flags the empty and duplicated rows with the inline messages', async () => {
+        const wrapper = mount(PossibleAnswers, mountOptions());
+
+        const rows = wrapper.findAll('.builder__answer');
+        const emptyRow = rows[0];
+        const duplicatedRows = [rows[1], rows[2]];
+
+        expect(emptyRow.classes()).toContain('builder__answer--error');
+        expect(emptyRow.find('.builder__answer-error').text()).toBe('Answer text cannot be empty');
+
+        // both rows sharing the duplicated ref are flagged
+        duplicatedRows.forEach((row) => {
+            expect(row.classes()).toContain('builder__answer--error');
+            expect(row.find('.builder__answer-error').text()).toBe('Duplicated identifier, please remove');
+        });
+
+        wrapper.unmount();
+    });
+
+    it('clears the flag as soon as the answer gets text', async () => {
+        const wrapper = mount(PossibleAnswers, mountOptions());
+
+        const emptyInput = wrapper.findAll('.builder__answer-field')[0];
+
+        await emptyInput.trigger('ionInput', { detail: { value: 'Now filled' } });
+        await nextTick();
+
+        const emptyRow = wrapper.findAll('.builder__answer')[0];
+
+        expect(emptyRow.classes()).not.toContain('builder__answer--error');
+        expect(emptyRow.find('.builder__answer-error').exists()).toBe(false);
+
+        wrapper.unmount();
+    });
+});
+
 describe('vue possible answers pager', () => {
     beforeEach(() => {
-        setProject(pager_definition());
-    });
+        setProject(pager_definition());    });
 
     /*
      * The panel is attached to the document so the pager finds the scroll
