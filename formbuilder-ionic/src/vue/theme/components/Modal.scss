@@ -1,0 +1,9 @@
+/*
+ * Modal — the shell classes come from src/theme/_modals.scss (`.builder__modal*`,
+ * shared with the vanilla host); this file holds only component-scoped
+ * additions, currently the footer button casing the vanilla host applied
+ * inline.
+ */
+.builder__modal-footer .builder__modal-btn {
+    text-transform: uppercase;
+}
