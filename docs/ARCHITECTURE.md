@@ -7,6 +7,12 @@ This repository holds the **legacy formbuilder**, an **isolated Ionic UI
 prototype**, and, eventually, a **Vue port**. They are independent: different
 stacks, different architectures, different style rules. Never mix them.
 
+**The Vue port (`formbuilder-vue/`) is the destination: it will be the main
+app.** The legacy formbuilder and the Ionic prototype exist only as reference
+during the migration — the legacy app as the behavioural reference, the
+prototype as the ported-behaviour stepping stone — and both are deleted once
+`formbuilder-vue/` reaches parity.
+
 | | Legacy formbuilder | Vue port |
 |---|---|---|
 | Path | `js/`, `css/`, `public/` | `formbuilder-vue/` |
@@ -18,10 +24,13 @@ stacks, different architectures, different style rules. Never mix them.
 
 ## Ionic prototype (`formbuilder-ionic/`)
 
-The active codebase: a full re-implementation of the formbuilder services and
-UI over Ionic components. The legacy app is the behavioural reference and runs
-side-by-side in development, but none of its modules are bundled — the only
-inherited runtime dependency is jQuery UI for drag-and-drop:
+The active codebase today, and the migration stepping stone to the Vue port: a
+full re-implementation of the formbuilder services and UI over Ionic
+components. The legacy app is the behavioural reference and runs side-by-side
+in development, but none of its modules are bundled — the only inherited
+runtime dependency is jQuery UI for drag-and-drop. The prototype is reference
+for `formbuilder-vue/`, not a permanent app; it is deleted together with the
+legacy tree once the port is final:
 
 - `src/services/**` and `src/models/**` re-implement validation, jumps, limits,
   undo, save, import and export against the same project-definition contract.
@@ -675,7 +684,7 @@ sequenceDiagram
 
 ---
 
-# Part 3 — Vue port (`formbuilder-vue/`) — target
+# Part 3 — Vue port (`formbuilder-vue/`) — destination
 
 A Vue 3 rewrite of the same formbuilder. **Greenfield: there is no port source on
 `master`.** The existing `formbuilder-vue` branch content is disposable and is not
@@ -684,6 +693,9 @@ a reference.
 ## Status
 
 - The port will be written from scratch under `formbuilder-vue/`.
+- The port is the final app: the legacy formbuilder and the Ionic prototype are
+  reference during the migration and are deleted once `formbuilder-vue/`
+  reaches parity.
 - `docs/CODE-STYLE.md` is the target style and applies only there.
 - The legacy app remains the behavioural reference for the project-definition
   contract; it is not a structural template.

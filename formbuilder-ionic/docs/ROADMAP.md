@@ -5,6 +5,14 @@ close the gap. The legacy app under `js/`, `css/` and `public/` is the reference
 and is never edited (see `PORTING.md`); the project-definition JSON contract is
 frozen.
 
+**Destination: the Vue port (`formbuilder-vue/`) is the final app.** The legacy
+formbuilder and this prototype are reference material during the migration —
+the prototype exists to carry the ported behaviour into reusable Vue
+components — and both are deleted once `formbuilder-vue/` reaches parity
+(repo-wide decision recorded in `docs/ARCHITECTURE.md` at the repository
+root). New UI work therefore lands as Vue components under `src/vue/**`, not
+as additions to the vanilla render layer.
+
 ## Tooling decision
 
 Use Vite for both development and production builds. Bundle Ionic Core and all
