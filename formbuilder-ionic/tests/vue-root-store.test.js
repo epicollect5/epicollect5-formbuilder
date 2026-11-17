@@ -37,6 +37,41 @@ describe('vue builder store', () => {
         expect(store.formTabs[1].valid).toBe(false);
     });
 
+    it('surfaces only question text errors under the question field', () => {
+        const store = useRootStore();
+
+        store.chooseInput('form_1_text');
+
+        // an empty question text is the field's own error
+        expect(store.basicErrorMessage).toBe('This field cannot be empty');
+
+        store.editQuestion('What is your name?');
+
+        expect(store.basicErrorMessage).toBe('');
+    });
+
+    it('never leaks possible answer errors into the question field', () => {
+        const store = useRootStore();
+
+        store.chooseInput('form_1_text');
+        store.editQuestion('What is your name?');
+
+        // the current input becomes a radio with an empty answer: the basic
+        // tab badge stays lit, but the question field is filled in and must
+        // not show the answers error
+        const input = store.currentInput;
+        input.type = 'radio';
+        input.possible_answers = [
+            { answer: 'Answer', answer_ref: 'answer_ref_1' },
+            { answer: '', answer_ref: 'answer_ref_2' }
+        ];
+
+        // the badge still flags the basic tab for the answers
+        expect(store.propertyTabErrors.basic).toBe(true);
+        // the question field shows nothing: it is the question text's channel
+        expect(store.basicErrorMessage).toBe('');
+    });
+
     it('keeps the save gate closed for an invalid project and opens it after a valid edit', () => {
         const store = useRootStore();
 
@@ -71,8 +106,7 @@ describe('vue builder store', () => {
         // typing coalesces through the throttle; a discrete action pushes one step
         store.toggleRequired(true);
 
-        expect(store.state.unsaved_changes).toBe(true);
-        expect(store.currentInput.is_required).toBe(true);
+        expect(store.state.unsaved_changes).toBe(true);        expect(store.currentInput.is_required).toBe(true);
         expect(store.canUndo).toBe(true);
     });
 

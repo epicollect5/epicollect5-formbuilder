@@ -2,10 +2,11 @@
 
 import { computed, reactive } from 'vue';
 import { defineStore } from 'pinia';
-import { FORM_MESSAGES } from '@/config/strings.js';
+import { FORM_MESSAGES, VALIDATION_MESSAGES } from '@/config/strings.js';
 import { PARAMETERS } from '@/config/parameters.js';
 import { getForms, getInputs } from '@/models/project-definition.js';
 import { isSearchType } from '@/models/possible-answers.js';
+import { getQuestionTextErrors } from '@/models/validation.js';
 import { countInputs, countProjectSearchInputs, countTitles } from '@/models/project-limits.js';
 import { sanitizeQuestion } from '@/models/question-text.js';
 import { QUESTION_TYPES } from '@/config/question-types.js';
@@ -509,14 +510,20 @@ export const useRootStore = defineStore('rootStore', () => {
                 });
             });
         }),
-        /* The basic-tab error under the question field: the first properties-tab error. */
+        /*
+         * The basic-tab error under the question field: the question text
+         * errors only (legacy showQuestionTextErrors). Possible answers and
+         * container errors flag the same tab, but they surface in the
+         * answers card and the badges — never under the question field.
+         */
         basicErrorMessage: computed(() => {
             const input = getCurrentInput();
-            const tab_errors = getInputErrors(input, getCurrentInputs()).filter((error) => {
-                return error.tab === PARAMETERS.PROPERTIES_TAB;
-            });
 
-            return tab_errors.length ? tab_errors[0].message : '';
+            if (!input) {
+                return VALIDATION_MESSAGES.QUESTION_TEXT_EMPTY;
+            }
+
+            return getQuestionTextErrors(input)[0] || '';
         }),
         /* The properties tab badges: which tabs carry errors (R-32 aggregate). */
         propertyTabErrors: computed(() => {
