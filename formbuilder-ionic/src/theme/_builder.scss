@@ -914,8 +914,7 @@ ion-item.builder__question.sortable-drag::part(native) {
     margin: 0;
 }
 
-.builder__properties-body ion-input.builder__field,
-.builder__properties-body ion-select.builder__select {
+.builder__properties-body ion-input.builder__field {
     width: 100%;
     margin: 0;
     font-size: 15px;
@@ -971,55 +970,6 @@ ion-item.builder__question.sortable-drag::part(native) {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.builder__properties-body ion-select.builder__select {
-    min-height: 42px;
-    border: 1px solid var(--app-border);
-    border-radius: 4px;
-    background: var(--app-surface);
-    --padding-start: 10px;
-    --padding-end: 10px;
-    --padding-top: 4px;
-    --padding-bottom: 4px;
-    --highlight-color-focused: var(--ion-color-primary);
-    --highlight-color-valid: var(--ion-color-primary);
-    --placeholder-color: var(--ion-color-medium-shade);
-}
-
-.builder__properties-body ion-select.builder__select::part(label) {
-    color: var(--app-text);
-    font-size: 12px;
-    font-weight: 500;
-    margin-bottom: 0;
-    transform: none;
-}
-
-.builder__properties-body ion-select.builder__select::part(container) {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    min-width: 0;
-}
-
-.builder__properties-body ion-select.builder__select::part(text),
-.builder__properties-body ion-select.builder__select::part(placeholder) {
-    flex: 1 1 auto;
-    min-width: 0;
-    margin-inline-end: 8px;
-    overflow: hidden;
-    font-size: 15px;
-    line-height: 1.3;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.builder__properties-body ion-select.builder__select::part(icon) {
-    flex: 0 0 auto;
-    margin-inline-start: auto;
-    color: var(--ion-color-medium-shade);
-    opacity: 1;
 }
 
 .builder__checkbox {
