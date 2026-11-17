@@ -26,10 +26,10 @@
         </ion-header>
 
         <ion-content class="formbuilder-content">
-            <div class="builder__notice builder__notice--warning screen-resolution">
+            <BuilderNotice variant="warning" class="screen-resolution">
                 <p>The formbuilder does not support the current screen resolution</p>
                 <p>Please use a screen with a resolution of at least 1024x768</p>
-            </div>
+            </BuilderNotice>
 
             <div class="builder" id="builder">
                 <VueDraggable tag="section"
@@ -100,6 +100,8 @@
                 </section>
             </div>
         </ion-content>
+
+        <Modal></Modal>
     </ion-app>
 </template>
 
@@ -114,12 +116,16 @@ import { useFormsStore } from '@/vue/stores/forms-store.js';
 import FormTabsStrip from '@/vue/components/FormTabsStrip.vue';
 import QuestionsList from '@/vue/components/QuestionsList.vue';
 import PropertiesPanel from '@/vue/components/PropertiesPanel.vue';
+import Modal from '@/vue/components/Modal.vue';
+import BuilderNotice from '@/vue/components/BuilderNotice.vue';
 
 export default {
     components: {
         FormTabsStrip,
         QuestionsList,
         PropertiesPanel,
+        Modal,
+        BuilderNotice,
         VueDraggable
     },
     setup() {

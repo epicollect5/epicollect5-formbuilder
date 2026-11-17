@@ -18,13 +18,8 @@
                     </button>
 
                     <div class="builder__answers-menu">
-                        <button type="button"
-                                class="builder__answers-more-btn"
-                                data-role="answers-actions-trigger"
-                                aria-label="More possible answer actions">
-                            <ion-icon name="chevron-down-outline"
-                                      aria-hidden="true"></ion-icon>
-                        </button>
+                        <ContextMenu :items="menuItems"
+                                     aria-label="More possible answer actions"></ContextMenu>
                     </div>
                 </div>
             </div>
@@ -35,6 +30,7 @@
                         mode="out-in"
                         @enter="onPageShown">
                 <VueDraggable tag="ul"
+                              ref="listRef"
                               :key="possibleAnswersCurrentPage"
                               class="builder__answer-list"
                               v-model="pageAnswersModel"
@@ -112,30 +108,43 @@
 </template>
 
 <script>
-import { computed, onBeforeUnmount, onMounted, reactive } from 'vue';
+import { computed, inject, reactive, ref } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus';
 import { PARAMETERS } from '@/config/parameters.js';
 import { VALIDATION_MESSAGES } from '@/config/strings.js';
 
 import { useRootStore } from '@/vue/stores/root-store.js';
 import { usePossibleAnswersStore } from '@/vue/stores/possible-answers-store.js';
-import { createMenu } from '@/ui/dropdown.js';
+import ContextMenu from '@/vue/components/ContextMenu.vue';
+
+/* A template ref on a Vue component returns the instance; $el is its root node. */
+const resolveElement = (component_ref) => {
+    const value = component_ref && component_ref.value;
+
+    if (!value) {
+        return null;
+    }
+
+    return value.$el || value;
+};
 
 /*
     The possible answers card. The list shows one page at a time; the drag
     reorder commits through the store's page-local service call. Import,
-    export, ordering and delete-all live in the answers menu; the CSV options
-    modal is the vanilla one (ui/modal.js + ui/dropdown.js), driven by the
-    store actions.
+    export, ordering and delete-all live in the shared ContextMenu; the CSV
+    options modal is the shared Modal component driven by the store actions.
  */
 export default {
     components: {
-        VueDraggable
+        VueDraggable,
+        ContextMenu
     },
     setup() {
         const builder = useRootStore();
         const store = usePossibleAnswersStore();
-        let menu = null;
+        const listRef = ref(null);
+        // the panel scroller, provided by PropertiesPanel as a template ref
+        const scrollerRef = inject('propertiesScroller', null);
         // the panel scroll anchor captured at the pager click, restored when
         // the incoming page enters (see onPageChange and onPageShown)
         let scroll_anchor = 0;
@@ -144,6 +153,51 @@ export default {
             message: '',
             is_error: false
         });
+
+        /*
+         * The answers actions menu: static items whose closures call the
+         * store actions, the ContextMenu's contract.
+         */
+        const menuItems = [
+            {
+                label: 'Import CSV',
+                action: () => {
+                    store.pickPossibleAnswersCsv();
+                }
+            },
+            {
+                label: 'Export CSV',
+                action: () => {
+                    store.exportPossibleAnswersCsv();
+                }
+            },
+            { divider: true },
+            {
+                label: 'Order ascending',
+                action: () => {
+                    store.orderPossibleAnswers(PARAMETERS.POSSIBLE_ANSWERS_ORDER.AZ);
+                }
+            },
+            {
+                label: 'Order descending',
+                action: () => {
+                    store.orderPossibleAnswers(PARAMETERS.POSSIBLE_ANSWERS_ORDER.ZA);
+                }
+            },
+            {
+                label: 'Shuffle',
+                action: () => {
+                    store.orderPossibleAnswers(PARAMETERS.POSSIBLE_ANSWERS_ORDER.SHUFFLE);
+                }
+            },
+            { divider: true },
+            {
+                label: 'Delete all answers',
+                action: () => {
+                    store.deleteAllPossibleAnswers();
+                }
+            }
+        ];
 
         /*
          * The answers reorder inside their own list only: nothing is pulled
@@ -166,7 +220,7 @@ export default {
                 store.renamePossibleAnswer(answer.answer_ref, event.detail.value || '');
             },
             onDragStart() {
-                builder.beginDrag('.builder__answer-list');
+                builder.beginDrag(resolveElement(listRef));
             },
             onDragEnd() {
                 builder.endDrag();
@@ -185,7 +239,7 @@ export default {
                     return true;
                 }
 
-                const list = document.querySelector('.builder__answer-list');
+                const list = resolveElement(listRef);
 
                 if (!list) {
                     return false;
@@ -207,7 +261,7 @@ export default {
              * anchor is restored in onPageShown, between the fades.
              */
             onPageChange(target) {
-                const scroller = document.querySelector('.builder__properties-body');
+                const scroller = resolveElement(scrollerRef);
 
                 scroll_anchor = scroller ?
                     scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight :
@@ -232,7 +286,7 @@ export default {
              * already gone and the new one is not inserted yet.)
              */
             onPageShown() {
-                const scroller = document.querySelector('.builder__properties-body');
+                const scroller = resolveElement(scrollerRef);
 
                 if (scroller) {
                     scroller.scrollTop = scroller.scrollHeight - scroller.clientHeight - scroll_anchor;
@@ -291,59 +345,9 @@ export default {
             maxAnswerLength: PARAMETERS.MAX_ANSWER_LENGTH
         };
 
-        onMounted(() => {
-            menu = createMenu(document.querySelector('[data-role="answers-actions-trigger"]'), [
-                {
-                    label: 'Import CSV',
-                    action: () => {
-                        store.pickPossibleAnswersCsv();
-                    }
-                },
-                {
-                    label: 'Export CSV',
-                    action: () => {
-                        store.exportPossibleAnswersCsv();
-                    }
-                },
-                { divider: true },
-                {
-                    label: 'Order ascending',
-                    action: () => {
-                        store.orderPossibleAnswers(PARAMETERS.POSSIBLE_ANSWERS_ORDER.AZ);
-                    }
-                },
-                {
-                    label: 'Order descending',
-                    action: () => {
-                        store.orderPossibleAnswers(PARAMETERS.POSSIBLE_ANSWERS_ORDER.ZA);
-                    }
-                },
-                {
-                    label: 'Shuffle',
-                    action: () => {
-                        store.orderPossibleAnswers(PARAMETERS.POSSIBLE_ANSWERS_ORDER.SHUFFLE);
-                    }
-                },
-                { divider: true },
-                {
-                    label: 'Delete all answers',
-                    action: () => {
-                        store.deleteAllPossibleAnswers();
-                    }
-                }
-            ], (item) => {
-                item.action();
-            });
-        });
-
-        onBeforeUnmount(() => {
-            if (menu) {
-                menu.remove();
-                menu = null;
-            }
-        });
-
         return {
+            listRef,
+            menuItems,
             ...methods,
             ...computedScope
         };

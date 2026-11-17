@@ -7,11 +7,12 @@
                     <div class="builder__jump-logic">
                         <div class="builder__jump-field">
                             <label class="builder__jump-label">When</label>
-                            <div class="dropdown builder__jump-select builder__jump-when"
-                                 data-dropdown
-                                 data-dropdown-placeholder="Select"
-                                 aria-label="When"
-                                 ref="whenRef"></div>
+                            <Dropdown :options="whenOptions"
+                                      :value="whenValue"
+                                      :disabled="whenDisabled"
+                                      aria-label="When"
+                                      placeholder="Select"
+                                      @change="onWhenChange($event)"></Dropdown>
                             <p class="builder__jump-row-error"
                                data-error-for="when"
                                v-if="row.error && row.error.field === 'when'">{{ row.error.message }}</p>
@@ -20,11 +21,12 @@
                         <div class="builder__jump-field builder__jump-answer-field"
                              v-if="!row.always">
                             <label class="builder__jump-label">Answer</label>
-                            <div class="dropdown builder__jump-select builder__jump-answer"
-                                 data-dropdown
-                                 data-dropdown-placeholder=""
-                                 aria-label="Answer"
-                                 ref="answerRef"></div>
+                            <Dropdown :options="row.answerOptions"
+                                      :value="row.answerValue"
+                                      :disabled="!row.needsAnswer"
+                                      aria-label="Answer"
+                                      placeholder=""
+                                      @change="onAnswerChange($event)"></Dropdown>
                             <p class="builder__jump-row-error"
                                data-error-for="answer"
                                v-if="row.error && row.error.field === 'answer'">{{ row.error.message }}</p>
@@ -32,11 +34,11 @@
 
                         <div class="builder__jump-field">
                             <label class="builder__jump-label">Go to</label>
-                            <div class="dropdown builder__jump-select builder__jump-goto"
-                                 data-dropdown
-                                 data-dropdown-placeholder="Select destination"
-                                 aria-label="Go to"
-                                 ref="gotoRef"></div>
+                            <Dropdown :options="row.destinationOptions"
+                                      :value="row.destinationValue"
+                                      aria-label="Go to"
+                                      placeholder="Select destination"
+                                      @change="onGotoChange($event)"></Dropdown>
                             <p class="builder__jump-row-error"
                                data-error-for="to"
                                v-if="row.error && row.error.field === 'to'">{{ row.error.message }}</p>
@@ -59,19 +61,20 @@
 </template>
 
 <script>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { initDropdown } from '@/ui/dropdown.js';
+import { computed } from 'vue';
 import { useJumpsStore } from '@/vue/stores/jumps-store.js';
+import Dropdown from '@/vue/components/Dropdown.vue';
 
 /*
-    One jump row, using the vanilla custom dropdown component (ui/dropdown.js)
-    exactly like the vanilla buildJumpRow: the placeholders are replaced by
-    the built dropdowns on mount, the always variant locks When to "always",
-    and a stored ref/destination that no longer exists shows as a
-    display-only "Unavailable" entry (R-30 / R-31). The parent remounts the
-    row when its option set changes (the row's signature), which is the
-    vanilla's rebuild-on-mutation behaviour scoped to one row.
+    One jump row, using the shared Dropdown component: the When / Answer /
+    destination selects are reactive props on the row, replacing the vanilla
+    buildJumpRow's placeholder-and-initDropdown choreography. The always
+    variant locks When to "always", and a stored ref/destination that no
+    longer exists shows as a display-only "Unavailable" entry (R-30 / R-31)
+    carried by the row's option lists.
  */
+const ALWAYS_WHEN_OPTIONS = [{ value: 'ALL', label: 'always' }];
+
 export default {
     props: {
         row: {
@@ -79,57 +82,42 @@ export default {
             required: true
         }
     },
+    components: {
+        Dropdown
+    },
     setup(props) {
         const store = useJumpsStore();
-        const whenRef = ref(null);
-        const answerRef = ref(null);
-        const gotoRef = ref(null);
-        const built = [];
 
         const methods = {
             remove() {
                 store.removeJumpFromCurrentInput(props.row.index);
+            },
+            onWhenChange(detail) {
+                store.updateCurrentInputJump(props.row.index, { when: detail.value });
+            },
+            onAnswerChange(detail) {
+                store.updateCurrentInputJump(props.row.index, { answer_ref: detail.value || '' });
+            },
+            onGotoChange(detail) {
+                store.updateCurrentInputJump(props.row.index, { to: detail.value || '' });
             }
         };
 
-        onMounted(() => {
-            const row = props.row;
-
-            if (row.always) {
-                built.push(initDropdown(whenRef.value, [{ value: 'ALL', label: 'always' }], 'ALL', null, true));
-            } else {
-                built.push(initDropdown(whenRef.value, row.whenOptions, row.whenValue, (detail) => {
-                    store.updateCurrentInputJump(row.index, { when: detail.value });
-                }, false));
-
-                if (answerRef.value) {
-                    built.push(initDropdown(answerRef.value, row.answerOptions, row.answerValue, row.needsAnswer ? (detail) => {
-                        store.updateCurrentInputJump(row.index, { answer_ref: detail.value || '' });
-                    } : null, !row.needsAnswer));
-                }
-            }
-
-            built.push(initDropdown(gotoRef.value, row.destinationOptions, row.destinationValue, (detail) => {
-                store.updateCurrentInputJump(row.index, { to: detail.value || '' });
-            }, false));
-        });
-
-        onBeforeUnmount(() => {
-            // the built dropdowns replaced the placeholders inside the row;
-            // Vue only removes its own nodes, so the replacements go too
-            built.forEach((dropdown) => {
-                if (dropdown && dropdown.parentNode) {
-                    dropdown.parentNode.removeChild(dropdown);
-                }
-            });
-            built.length = 0;
-        });
+        const computedScope = {
+            whenOptions: computed(() => {
+                return props.row.always ? ALWAYS_WHEN_OPTIONS : props.row.whenOptions;
+            }),
+            whenValue: computed(() => {
+                return props.row.always ? 'ALL' : props.row.whenValue;
+            }),
+            whenDisabled: computed(() => {
+                return props.row.always;
+            })
+        };
 
         return {
-            whenRef,
-            answerRef,
-            gotoRef,
-            ...methods
+            ...methods,
+            ...computedScope
         };
     }
 };

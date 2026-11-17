@@ -41,9 +41,10 @@
                 </ion-card-header>
 
                 <ion-card-content class="builder__properties-content">
-                    <div class="builder__empty builder__notice builder__notice--info ion-text-center"
-                         v-if="!currentInput"
-                         data-role="properties-empty">Select a question to edit it.</div>
+                    <BuilderNotice variant="info"
+                                   class="builder__empty ion-text-center"
+                                   v-if="!currentInput"
+                                   data-role="properties-empty">Select a question to edit it.</BuilderNotice>
 
                     <template v-else>
                         <ion-segment class="builder__property-tabs"
@@ -64,7 +65,7 @@
                             </ion-segment-button>
                         </ion-segment>
 
-                        <div class="builder__properties-body">
+                        <div class="builder__properties-body" ref="scrollerRef">
                             <section class="builder__properties-panel" v-if="activeTab === 'basic'">
                                 <ReadmeEditor v-if="isReadme"
                                               :key="currentInput.ref"></ReadmeEditor>
@@ -152,7 +153,7 @@
 </template>
 
 <script>
-import { computed, reactive } from 'vue';
+import { computed, provide, reactive, ref } from 'vue';
 import { PARAMETERS } from '@/config/parameters.js';
 import { QUESTION_TYPE } from '@/config/question-types.js';
 import { VALIDATION_MESSAGES } from '@/config/strings.js';
@@ -173,6 +174,7 @@ import AdvancedFields from '@/vue/components/AdvancedFields.vue';
 import ReadmeEditor from '@/vue/components/ReadmeEditor.vue';
 import PossibleAnswers from '@/vue/components/PossibleAnswers.vue';
 import JumpsPanel from '@/vue/components/JumpsPanel.vue';
+import BuilderNotice from '@/vue/components/BuilderNotice.vue';
 
 /* Legacy disables Jumps for anything edited inside a group; branch and group
    parents keep the tab, so they can take an "always" jump. */
@@ -192,11 +194,22 @@ export default {
         AdvancedFields,
         ReadmeEditor,
         PossibleAnswers,
-        JumpsPanel
+        JumpsPanel,
+        BuilderNotice
     },
     setup() {
         const store = useRootStore();
         const possibleAnswers = usePossibleAnswersStore();
+
+        /*
+         * The panel owns the scroll container; the answers card pages inside
+         * it and anchors its pager scroll there. The scroller element is
+         * provided as a ref, the declared contract between the two
+         * components, instead of a class-name lookup from below.
+         */
+        const scrollerRef = ref(null);
+
+        provide('propertiesScroller', scrollerRef);
 
         const state = reactive({
             // the vanilla refuses a fourth title and resets the checkbox (R-12);
@@ -377,6 +390,7 @@ export default {
         };
 
         return {
+            scrollerRef,
             ...methods,
             ...computedScope
         };

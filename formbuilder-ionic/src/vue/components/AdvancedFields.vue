@@ -120,28 +120,22 @@
                 <span data-role="datetime-label">{{ currentDatetimeLabel }}</span>
             </ion-checkbox>
 
-            <div class="builder__field-group builder__select-group" v-if="hasField('uniqueness')">
+            <div class="builder__field-group builder__select-group" data-field="uniqueness" v-if="hasField('uniqueness')">
                 <label class="builder__field-label">Uniqueness</label>
-                <ion-select class="builder__select"
-                            aria-label="Uniqueness"
-                            :value="uniquenessValue"
-                            @ionChange="onUniquenessChange($event)">
-                    <ion-select-option v-for="option in uniquenessOptions"
-                                       :key="option.value"
-                                       :value="option.value">{{ option.label }}</ion-select-option>
-                </ion-select>
+                <Dropdown :options="uniquenessOptions"
+                          :value="uniquenessValue"
+                          placeholder="No uniqueness"
+                          aria-label="Uniqueness"
+                          @change="onUniquenessChange($event)"></Dropdown>
             </div>
 
-            <div class="builder__field-group builder__select-group" v-if="hasField('default_choice')">
+            <div class="builder__field-group builder__select-group" data-field="default_choice" v-if="hasField('default_choice')">
                 <label class="builder__field-label">Initial answer</label>
-                <ion-select class="builder__select"
-                            aria-label="Initial answer"
-                            :value="defaultChoiceValue"
-                            @ionChange="onDefaultChoiceChange($event)">
-                    <ion-select-option v-for="option in defaultChoiceOptions"
-                                       :key="option.value"
-                                       :value="option.value">{{ option.label }}</ion-select-option>
-                </ion-select>
+                <Dropdown :options="defaultChoiceOptions"
+                          :value="defaultChoiceValue"
+                          placeholder="None"
+                          aria-label="Initial answer"
+                          @change="onDefaultChoiceChange($event)"></Dropdown>
 
                 <div class="builder__answers-pager"
                      data-role="default-choice-pager"
@@ -197,15 +191,19 @@ import { QUESTION_TYPE } from '@/config/question-types.js';
 import { useRootStore } from '@/vue/stores/root-store.js';
 import { usePropertiesStore } from '@/vue/stores/properties-store.js';
 import { usePossibleAnswersStore } from '@/vue/stores/possible-answers-store.js';
+import Dropdown from '@/vue/components/Dropdown.vue';
 
 /*
     The advanced panel fields, gated per question type by the properties
     store's advancedFields list (services/properties.js). The radio-group,
-    select and checkbox bindings replace the vanilla bind* helpers; reactivity
-    replaces their refresh passes. The initial-answer select comes from the
-    answers store.
+    Dropdown and checkbox bindings replace the vanilla bind* helpers;
+    reactivity replaces their refresh passes. The initial-answer select comes
+    from the answers store.
  */
 export default {
+    components: {
+        Dropdown
+    },
     setup() {
         const builder = useRootStore();
         const properties = usePropertiesStore();
@@ -233,11 +231,11 @@ export default {
             onDatetimeFormatChange(event) {
                 properties.setDatetimeFormat(event.detail.value);
             },
-            onUniquenessChange(event) {
-                properties.setUniqueness(event.detail.value);
+            onUniquenessChange(detail) {
+                properties.setUniqueness(detail.value);
             },
-            onDefaultChoiceChange(event) {
-                answers.setDefaultChoice(event.detail.value);
+            onDefaultChoiceChange(detail) {
+                answers.setDefaultChoice(detail.value);
             },
             onDefaultChoicePageChange(target) {
                 answers.goToDefaultChoicePage(target);

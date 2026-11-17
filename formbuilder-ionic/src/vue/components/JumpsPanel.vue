@@ -14,9 +14,11 @@
             </button>
         </ion-toolbar>
 
-        <p class="input-properties__form__jumps__no-jumps-message builder__empty builder__notice builder__notice--info builder__jumps-empty"
-           data-role="no-jumps"
-           v-if="!hasJumps">No jumps set yet</p>
+        <BuilderNotice variant="info"
+                       tag="p"
+                       class="input-properties__form__jumps__no-jumps-message builder__empty builder__jumps-empty"
+                       data-role="no-jumps"
+                       v-if="!hasJumps">No jumps set yet</BuilderNotice>
 
         <ul class="input-properties__form__jumps__list builder__jumps-list"
             v-else>
@@ -62,16 +64,18 @@
 import { computed } from 'vue';
 import { useJumpsStore } from '@/vue/stores/jumps-store.js';
 import JumpRow from '@/vue/components/JumpRow.vue';
+import BuilderNotice from '@/vue/components/BuilderNotice.vue';
 
 /*
-    The jumps tab: rows with the When / Answer / Go to custom dropdowns, the
-    single-answer "always" variant, the per-row error messages and the pager.
-    The rows come precomputed from the jumps store (the vanilla buildJumpRow
-    parity); every change routes through the jumps services.
+    The jumps tab: rows with the shared Dropdown selects, the single-answer
+    "always" variant, the per-row error messages and the pager. The rows come
+    precomputed from the jumps store (the vanilla buildJumpRow parity); every
+    change routes through the jumps services.
  */
 export default {
     components: {
-        JumpRow
+        JumpRow,
+        BuilderNotice
     },
     setup() {
         const store = useJumpsStore();

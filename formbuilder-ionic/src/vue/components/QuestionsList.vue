@@ -22,13 +22,10 @@
                                 @click="editFormName()">
                             <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
                         </button>
-                        <button type="button"
-                                class="builder__answers-more-btn builder__form-action-btn builder__form-action-btn--more"
-                                data-role="form-actions-trigger"
-                                aria-label="Form actions"
-                                title="Form actions">
-                            <ion-icon name="chevron-down-outline" aria-hidden="true"></ion-icon>
-                        </button>
+                        <ContextMenu trigger-class="builder__form-action-btn builder__form-action-btn--more"
+                                     :items="menuItems"
+                                     aria-label="Form actions"
+                                     title="Form actions"></ContextMenu>
                     </div>
                 </div>
             </ion-card-header>
@@ -52,9 +49,10 @@
             </ion-toolbar>
 
             <ion-card-content class="builder__questions-content">
-                <div class="builder__notice builder__notice--warning builder__title-warning"
-                     v-if="showTitleWarning"
-                     data-role="title-warning">
+                <BuilderNotice variant="warning"
+                               class="builder__title-warning"
+                               v-if="showTitleWarning"
+                               data-role="title-warning">
                     <span data-role="title-warning-text">{{ titleWarningText }}</span>
                     <a class="builder__info-button"
                        data-role="title-info"
@@ -64,9 +62,10 @@
                        rel="noopener noreferrer">
                         <ion-icon name="help-circle" aria-hidden="true"></ion-icon>
                     </a>
-                </div>
+                </BuilderNotice>
 
                 <VueDraggable tag="ion-list"
+                              ref="listRef"
                               class="builder__question-list"
                               v-model="activeInputs"
                               :group="builderQuestions"
@@ -77,8 +76,9 @@
                               :on-move="onMove"
                               @start="onDragStart($event)"
                               @end="onDragEnd()">
-                    <div class="builder__empty builder__notice builder__notice--info ion-text-center"
-                         v-if="!currentInputs.length">
+                    <BuilderNotice variant="info"
+                                   class="builder__empty ion-text-center"
+                                   v-if="!currentInputs.length">
                         <span>Drag and drop questions from the sidebar <br/> (or import an Epicollect5 form file)</span>
                         <button type="button"
                                 class="builder__import-btn builder__import-form"
@@ -88,7 +88,7 @@
                             <ion-icon name="cloud-upload" aria-hidden="true"></ion-icon>
                             Import
                         </button>
-                    </div>
+                    </BuilderNotice>
 
                     <QuestionRow v-for="input in currentInputs"
                                  :key="input.ref"
@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus';
 import { QUESTION_TYPE } from '@/config/question-types.js';
 import { FORM_MESSAGES } from '@/config/strings.js';
@@ -110,18 +110,32 @@ import { getQuestionLabel } from '@/models/question-text.js';
 import { areFormInputsValid, isInputValid } from '@/services/validation.js';
 import { useRootStore } from '@/vue/stores/root-store.js';
 import { useFormsStore } from '@/vue/stores/forms-store.js';
-import { createMenu } from '@/ui/dropdown.js';
+import ContextMenu from '@/vue/components/ContextMenu.vue';
+import BuilderNotice from '@/vue/components/BuilderNotice.vue';
 import QuestionRow from '@/vue/components/QuestionRow.vue';
+
+/* A template ref on a Vue component returns the instance; $el is its root node. */
+const resolveElement = (component_ref) => {
+    const value = component_ref && component_ref.value;
+
+    if (!value) {
+        return null;
+    }
+
+    return value.$el || value;
+};
 
 export default {
     components: {
         QuestionRow,
-        VueDraggable
+        VueDraggable,
+        ContextMenu,
+        BuilderNotice
     },
     setup() {
         const store = useRootStore();
         const forms = useFormsStore();
-        let menu = null;
+        const listRef = ref(null);
 
         const methods = {
             exitContainer() {
@@ -143,7 +157,7 @@ export default {
              * the model order.
              */
             onDragStart(event) {
-                store.beginDrag('.builder__question-list');
+                store.beginDrag(resolveElement(listRef));
 
                 const ref = event.item ? event.item.getAttribute('data-input-ref') : null;
 
@@ -176,7 +190,7 @@ export default {
                     return true;
                 }
 
-                const list = document.querySelector('.builder__question-list');
+                const list = resolveElement(listRef);
 
                 if (!list) {
                     return false;
@@ -186,29 +200,6 @@ export default {
 
                 return pointer.clientY >= rect.top && pointer.clientY <= rect.bottom &&
                     pointer.clientX >= rect.left && pointer.clientX <= rect.right;
-            },
-            /*
-             * The form actions menu: export and print wait for a valid form,
-             * delete-all is always offered. The menu carries disabled states,
-             * so it is rebuilt whenever the form's validity or identity
-             * changes (the vanilla rebuilt it on every render).
-             */
-            rebuildMenu() {
-                if (menu) {
-                    menu.remove();
-                    menu = null;
-                }
-
-                const form_valid = areFormInputsValid(store.currentForm);
-
-                menu = createMenu(document.querySelector('[data-role="form-actions-trigger"]'), [
-                    { label: 'Export form', action: () => { forms.exportForm(); }, disabled: !form_valid },
-                    { label: 'Print form', action: () => { forms.printCurrentForm(); }, disabled: !form_valid },
-                    { divider: true },
-                    { label: 'Delete all questions', action: () => { forms.deleteAllQuestions(); } }
-                ], (item) => {
-                    item.action();
-                });
             }
         };
 
@@ -223,6 +214,23 @@ export default {
             set: (value) => {
                 store.setActiveInputs(value);
             }
+        });
+
+        /*
+         * The form actions menu: export and print wait for a valid form,
+         * delete-all is always offered. The disabled states re-derive from
+         * the form's validity, so the menu follows it reactively (the
+         * vanilla rebuilt it on every render).
+         */
+        const menuItems = computed(() => {
+            const form_valid = areFormInputsValid(store.currentForm);
+
+            return [
+                { label: 'Export form', action: () => { forms.exportForm(); }, disabled: !form_valid },
+                { label: 'Print form', action: () => { forms.printCurrentForm(); }, disabled: !form_valid },
+                { divider: true },
+                { label: 'Delete all questions', action: () => { forms.deleteAllQuestions(); } }
+            ];
         });
 
         /*
@@ -293,31 +301,12 @@ export default {
             formDeletable: computed(() => {
                 return forms.formDeletable();
             }),
-            cannotDeleteTitle: FORM_MESSAGES.FORM_CANNOT_BE_DELETED
+            cannotDeleteTitle: FORM_MESSAGES.FORM_CANNOT_BE_DELETED,
+            menuItems
         };
 
-        onMounted(() => {
-            methods.rebuildMenu();
-        });
-
-        onBeforeUnmount(() => {
-            if (menu) {
-                menu.remove();
-                menu = null;
-            }
-        });
-
-        // the menu carries the form's validity in its disabled states, so it
-        // is rebuilt whenever the form's validity or identity changes
-        watch([
-            () => areFormInputsValid(store.currentForm),
-            () => store.currentForm,
-            () => store.editing
-        ], () => {
-            methods.rebuildMenu();
-        });
-
         return {
+            listRef,
             activeInputs,
             builderQuestions,
             ...methods,
