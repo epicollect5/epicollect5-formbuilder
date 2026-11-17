@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { nextTick } from 'vue';
 import { createPinia } from 'pinia';
 import { mount } from '@vue/test-utils';
@@ -18,6 +18,8 @@ import {
     IonItem,
     IonLabel,
     IonList,
+    IonModal,
+    IonPopover,
     IonRadio,
     IonRadioGroup,
     IonSelect,
@@ -32,6 +34,7 @@ import QuestionsList from '@/vue/components/QuestionsList.vue';
 import QuestionRow from '@/vue/components/QuestionRow.vue';
 import PropertiesPanel from '@/vue/components/PropertiesPanel.vue';
 import AdvancedFields from '@/vue/components/AdvancedFields.vue';
+import ReadmeEditor from '@/vue/components/ReadmeEditor.vue';
 import { setProject, selectInput } from '@/services/session.js';
 
 /*
@@ -116,6 +119,8 @@ const mountOptions = (pinia) => {
                 IonItem,
                 IonLabel,
                 IonList,
+                IonModal,
+                IonPopover,
                 IonRadio,
                 IonRadioGroup,
                 IonSelect,
@@ -389,7 +394,7 @@ describe('vue advanced fields', () => {
         expect(wrapper.text()).not.toContain('Hours:Minutes:Seconds (24 hours)');
     });
 
-    it('lists the possible answers in the default choice select', async () => {
+    it('lists the possible answers in the default choice dropdown', async () => {
         const pinia = createPinia();
         const { useRootStore } = await import('@/vue/stores/root-store.js');
         const store = useRootStore(pinia);
@@ -399,11 +404,127 @@ describe('vue advanced fields', () => {
 
         await nextTick();
 
-        const options = wrapper.findAll('ion-select-option');
+        // a closed dropdown carries no option DOM; opening mounts the list
+        await wrapper.find('[data-field="default_choice"] .dropdown__trigger').trigger('click');
+        await nextTick();
+
+        const options = wrapper.findAll('[data-field="default_choice"] .dropdown__option');
 
         // None + the new radio's starter answer
         expect(options.length).toBe(2);
         expect(options[0].text()).toBe('None');
+
+        // selecting an option emits through to the store
+        await options[1].trigger('click');
+
+        expect(store.currentInput.default).toBe(options[1].attributes('data-value'));
+    });
+
+    it('labels the uniqueness dropdown with the branch-scoped wording', async () => {
+        const pinia = createPinia();
+        const { useRootStore } = await import('@/vue/stores/root-store.js');
+        const store = useRootStore(pinia);
+        const wrapper = mount(AdvancedFields, mountOptions(pinia));
+
+        store.addQuestion('text');
+
+        await nextTick();
+
+        await wrapper.find('[data-field="uniqueness"] .dropdown__trigger').trigger('click');
+        await nextTick();
+
+        const options = wrapper.findAll('[data-field="uniqueness"] .dropdown__option');
+
+        expect(options.length).toBe(2);
+        expect(options[0].text()).toBe('No uniqueness');
+        expect(options[1].text()).toBe('Make answer unique to all Form 1 entries');
+
+        await options[1].trigger('click');
+
+        expect(store.currentInput.uniqueness).toBe('form');
+    });
+});
+
+describe('vue readme editor', () => {
+    afterEach(() => {
+        document.body.innerHTML = '';
+    });
+
+    /* A readme question mounted into the document, like the panel does.
+       The readme content lives in `question` (the contract shape). */
+    const mountReadme = async (readme_html) => {
+        const definition = project_definition();
+
+        definition.data.project.forms[0].inputs = [{
+            ref: 'form_1_readme',
+            type: 'readme',
+            question: readme_html || '',
+            is_title: false,
+            is_required: false,
+            possible_answers: [],
+            jumps: [],
+            branch: [],
+            group: []
+        }];
+
+        setProject(definition);
+        selectInput('form_1_readme');
+
+        const pinia = createPinia();
+        const options = mountOptions(pinia);
+
+        options.attachTo = document.body;
+
+        const wrapper = mount(ReadmeEditor, options);
+
+        await nextTick();
+        await nextTick();
+
+        return wrapper;
+    };
+
+    it('renders the toolbar into the component markup and wires the editor', async () => {
+        const wrapper = await mountReadme('<p>Hello</p>');
+
+        const buttons = wrapper.findAll('.builder__readme-toolbar-button');
+
+        expect(buttons.length).toBe(3);
+        expect(buttons[0].text()).toBe('B');
+        expect(buttons[0].attributes('aria-pressed')).toBe('false');
+
+        // the editable content mounts inside the component's own element
+        const content = wrapper.find('.builder__readme-content');
+        expect(content.exists()).toBe(true);
+        expect(content.element.querySelector('.ProseMirror')).not.toBeNull();
+
+        // a prefilled editor is not in the empty placeholder state
+        expect(content.classes()).not.toContain('is-empty');
+
+        wrapper.unmount();
+    });
+
+    it('keeps the toolbar pressed state reactive', async () => {
+        const wrapper = await mountReadme('');
+
+        const bold = wrapper.find('[data-format="bold"]');
+        const italic = wrapper.find('[data-format="italic"]');
+
+        // an empty editor shows the empty placeholder state
+        expect(wrapper.find('.builder__readme-content').classes()).toContain('is-empty');
+
+        await bold.trigger('click');
+        await nextTick();
+
+        expect(bold.attributes('aria-pressed')).toBe('true');
+        expect(italic.attributes('aria-pressed')).toBe('false');
+
+        await italic.trigger('click');
+        await nextTick();
+
+        expect(bold.attributes('aria-pressed')).toBe('true');
+        expect(italic.attributes('aria-pressed')).toBe('true');
+
+        wrapper.unmount();
     });
 });
 
